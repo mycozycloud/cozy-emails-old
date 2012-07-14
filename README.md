@@ -1,6 +1,15 @@
-# Cozy Template
+# Cozy Mail
 
-Cozy Template is a template project to start quickly Cozy application
+One of the first bunch of applications available on the platform - email client and aggregator.
+
+
+# So, what it does ?
+
+Cozy Mail will let You configure all your mailboxes via smtp+imap, 
+synchronise the content, and use all of them as one via a cozy web interface.
+
+Future versions will allow a purchase of your own domain and remote backup
+in the background.
 
 
 # About Cozy
