@@ -1,1 +1,5 @@
 require 'jugglingdb'
+require 'nodemailer'
+require 'imap'
+require 'mailparser'
+require 'kue'

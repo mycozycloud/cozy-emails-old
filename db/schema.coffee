@@ -20,7 +20,7 @@ User = define 'User', ->
     
     
 Mail = define 'Mail', ->
-    property 'id', index: true
+    #property 'id', index: true
     property 'mailbox'
     property 'id_remote_mailbox', index: true
     property 'id_agent_sent', index: true

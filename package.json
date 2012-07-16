@@ -23,6 +23,10 @@
   , "passport":         ">= 0"
   , "async":            ">= 0"
   , "request":          ">= 0"
+  , "nodemailer":       ">= 0"
+  , "imap":        ">= 0"
+  , "mailparser":       ">= 0"
+  , "kue":              ">= 0"
   }
 , "devDependencies": 
   { "should":           ">= 0"
