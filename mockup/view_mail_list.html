@@ -73,7 +73,7 @@
 
     <div class="container-fluid">
       <div class="row-fluid">
-        <div class="span3" id="sidebar">
+        <div class="span2" id="sidebar">
           <div class="well sidebar-nav">
             <ul class="nav nav-list">
               <li class="nav-header">All your mail</li>
@@ -113,7 +113,7 @@
           
           
         </div><!--/span-->
-        <div class="span9" id="content-box">
+        <div class="span10" id="content-box">
 
           <div class="row-fluid">
             <div class="span12" id="mail-list-toolbar">
@@ -156,6 +156,7 @@
           <tr><td><input type="checkbox"></td><td>mikolaj@pawlikowski.pl</td><td>Hey, wassup ?</td><td>11:25</td></tr>
           <tr><td><input type="checkbox"></td><td>mikolaj@pawlikowski.pl</td><td>Hey, wassup ?</td><td>11:25</td></tr>
           <tr>
+          <!-- mail_view START -->
           
           <td><input type="checkbox"></td>
           <td colspan="3">
@@ -163,18 +164,56 @@
 	  
           <div class="well">
           
-          Hey, wassup ?<br />
+          <h4>Hey, wassup ?</h4><br />
 
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
           </div>        
           
-          <div class="btn-group pull-right">
-		  <a class="btn btn-primary" href="">Answer</a> 
-		  <a class="btn" href="">Answer to all</a> 
-		  <a class="btn" href="">Forward</a> 
+          <div class="btn-toolbar">
+          <div class="btn-group">
+		  <a class="btn btn-primary" href=""><i class="icon-share-alt"></i> Answer</a> 
+		  <a class="btn" href=""><i class="icon-share-alt"></i> Answer to all</a> 
+		  <a class="btn" href=""><i class="icon-arrow-up"></i> Forward</a>
+	  </div>	  
+          <div class="btn-group">
+		  <a class="btn btn-warning" href="#"><i class="icon-star"></i> Important</a>
+		  <a class="btn" href="#"><i class="icon-ban-circle"></i> Spam</a>
+		  <a class="btn btn-danger" href="#"><i class="icon-remove"></i> Delete</a>
+          </div> 
+          </div>
+          
+          </td>
+          
+          <!-- mail_view END -->
+          </tr>
+          
+          
+          <tr>
+          <!-- mail_view START -->
+          
+          <td><input type="checkbox"></td>
+          <td colspan="3">
+	  <p>mikolaj@pawlikowski.pl, on tuesday 12/02/2012, says: </p>
+	  
+          <div class="well">
+          
+          <h4>Hey, wassup ? I clicked on answer button</h4><br />
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+          </div>
+          
+          <p>Replying to <em>mikolaj@pawlikowski.pl</em> <a class="btn-mini btn-primary" href="">change</a></p>
+          
+          <textarea class="input-xlarge" id="textarea" rows="3" style="width: 90%"></textarea>    
+          
+          <div class="btn-group">
+		  <a class="btn btn-primary" href="">Send</a> 
+		  <a class="btn" href="">Discard</a> 
           </div> 
           </td>
-          </tr>
+          
+          <!-- mail_view END -->
+          </tr>          
           <tr><td><input type="checkbox"></td><td>mikolaj@pawlikowski.pl</td><td>Hey, wassup ?</td><td>11:25</td></tr>
           <tr><td><input type="checkbox"></td><td>mikolaj@pawlikowski.pl</td><td>Hey, wassup ?</td><td>11:25</td></tr>
           <tr><td><input type="checkbox"></td><td>mikolaj@pawlikowski.pl</td><td>Hey, wassup ?</td><td>11:25</td></tr>
@@ -210,7 +249,7 @@ Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem
       </table>
       
                 <div class="btn-group pull-left">
-		  <a class="btn btn-primary" href="">Load 25 more messages</a> 
+		  <a class="btn btn-primary" href=""><i class="icon-plus"></i> Load 25 older messages</a> 
           	</div>
               
             </div><!--/span-->
