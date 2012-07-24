@@ -95,16 +95,7 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
       MailboxCollection.prototype.url = 'mailboxes/';
 
       MailboxCollection.prototype.initialize = function() {
-        this.fetch;
-        return this.add([
-          {
-            "name": "miko",
-            server: "s1"
-          }, {
-            "name": "miko2",
-            server: "s2"
-          }
-        ]);
+        return this.fetch;
       };
 
       MailboxCollection.prototype.removeOne = function(mailbox, view) {
@@ -270,7 +261,8 @@ window.require.define({"routers/main_router": function(exports, require, module)
       };
 
       MainRouter.prototype.home = function() {
-        return app.appView.render();
+        app.appView.render();
+        return app.appView.set_layout_cols();
       };
 
       MainRouter.prototype.configMailboxes = function() {
@@ -328,6 +320,10 @@ window.require.define({"views/app_view": function(exports, require, module) {
         this.container_content.html(require('./templates/layout_mailboxes'));
         window.app.view_mailboxes = new MailboxesList($("#content"), window.app.mailboxes);
         return window.app.view_mailboxes.render();
+      };
+
+      AppView.prototype.set_layout_cols = function() {
+        return this.container_content.html(require('./templates/mails_view'));
       };
 
       AppView.prototype.add_mailbox = function(event) {
@@ -432,6 +428,7 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
 
       MailboxView.prototype.buttonDelete = function(event) {
         console.log(this);
+        $(".delete_mailbox").addClass("disabled");
         return this.collection.removeOne(this.model, this);
       };
 
@@ -475,9 +472,10 @@ window.require.define({"views/mailboxes_menu_view": function(exports, require, m
         this.collection = collection;
         MailboxesMenuList.__super__.constructor.call(this);
         this.element = this.el;
-        window.app.mailboxes.on('change', this.render, this);
+        window.app.mailboxes.on('reset', this.render, this);
         window.app.mailboxes.on('add', this.render, this);
         window.app.mailboxes.on('remove', this.render, this);
+        window.app.mailboxes.on('change', this.render, this);
       }
 
       MailboxesMenuList.prototype.render = function() {
@@ -524,6 +522,10 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
         this.el = el;
         this.collection = collection;
         MailboxesList.__super__.constructor.call(this);
+        window.app.mailboxes.on('reset', this.render, this);
+        window.app.mailboxes.on('add', this.render, this);
+        window.app.mailboxes.on('remove', this.render, this);
+        window.app.mailboxes.on('change', this.render, this);
       }
 
       MailboxesList.prototype.events = {
@@ -712,6 +714,142 @@ window.require.define({"views/templates/mailbox_menu": function(exports, require
   };
 }});
 
+window.require.define({"views/templates/mails_view": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div');
+  buf.push(attrs({ "class": ('row-fluid') }));
+  buf.push('><div');
+  buf.push(attrs({ 'id':('column-list'), "class": ('span4') + ' ' + ('column') }));
+  buf.push('><table');
+  buf.push(attrs({ "class": ('table') + ' ' + ('table-striped') }));
+  buf.push('><tbody><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr><tr><td><p>dude@gmail.com\n<i');
+  buf.push(attrs({ 'style':('color: lightgray;') }));
+  buf.push('>on monday 15/07</i></p><p>Hey man, wassssssup ? Seen those pics ?</p></td><td><a');
+  buf.push(attrs({ 'href':('view_mail_list_vertical_mail.html'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('></a></td></tr></tbody></table><div');
+  buf.push(attrs({ "class": ('btn-group') + ' ' + ('pull-left') }));
+  buf.push('><a');
+  buf.push(attrs({ 'href':(''), "class": ('btn') + ' ' + ('btn-primary') }));
+  buf.push('><i');
+  buf.push(attrs({ "class": ('icon-plus') }));
+  buf.push('></i>Load 25 older messages\n</a></div></div><!--/span\n--><div');
+  buf.push(attrs({ 'id':('column-mails'), "class": ('span8') + ' ' + ('column') }));
+  buf.push('><p');
+  buf.push(attrs({ "class": ('well') }));
+  buf.push('>yoyoyy</p></div></div>');
+  }
+  return buf.join("");
+  };
+}});
+
 window.require.define({"views/templates/menu": function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
@@ -726,9 +864,7 @@ window.require.define({"views/templates/menu": function(exports, require, module
   buf.push(attrs({ "class": ('active') }));
   buf.push('><a');
   buf.push(attrs({ 'href':('#') }));
-  buf.push('>Inbox\n<span');
-  buf.push(attrs({ "class": ('badge') + ' ' + ('badge-warning') }));
-  buf.push('>8</span></a></li><li><a');
+  buf.push('>Inbox\n</a></li><li><a');
   buf.push(attrs({ 'href':('#') }));
   buf.push('>Sent</a></li><li><a');
   buf.push(attrs({ 'href':('#') }));

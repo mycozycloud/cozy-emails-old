@@ -7,7 +7,11 @@ class exports.MailboxesList extends Backbone.View
     
   constructor: (@el, @collection) ->
     super()
-
+    window.app.mailboxes.on('reset', @render, @)
+    window.app.mailboxes.on('add', @render, @)
+    window.app.mailboxes.on('remove', @render, @)
+    window.app.mailboxes.on('change', @render, @)
+    
   events: {
      "click #add_mailbox" : 'addMailbox',
   }

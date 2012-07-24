@@ -7,9 +7,10 @@ class exports.MailboxesMenuList extends Backbone.View
   constructor: (@el, @collection) ->
     super() 
     @element = @el
-    window.app.mailboxes.on('change', @render, @)
+    window.app.mailboxes.on('reset', @render, @)
     window.app.mailboxes.on('add', @render, @)
     window.app.mailboxes.on('remove', @render, @)
+    window.app.mailboxes.on('change', @render, @)
 
   render: ->
     @collection.fetch()

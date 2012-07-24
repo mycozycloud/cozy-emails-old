@@ -5185,6 +5185,7 @@ a.badge:hover {
 }
 body{padding-top:10px}
 .sidebar-nav{padding:9px 0}
+#column-list{height:770px;overflow:auto}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */

@@ -32,6 +32,10 @@ class exports.AppView extends Backbone.View
     @container_content.html require('./templates/layout_mailboxes')
     window.app.view_mailboxes = new MailboxesList $("#content"), window.app.mailboxes
     window.app.view_mailboxes.render()
+    
+  set_layout_cols: ->
+    #layout pour les mails
+    @container_content.html require('./templates/mails_view')
 
 
   add_mailbox: (event) ->

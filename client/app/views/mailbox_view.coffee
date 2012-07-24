@@ -41,6 +41,7 @@ class exports.MailboxView extends Backbone.View
   # delete the mailbox
   buttonDelete: (event) ->
     console.log @
+    $(".delete_mailbox").addClass("disabled")
     @collection.removeOne @model, @
 
   # Render wiew and bind it to model.

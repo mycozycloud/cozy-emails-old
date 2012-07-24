@@ -4,9 +4,10 @@ class exports.MainRouter extends Backbone.Router
     'config-mailboxes' : 'configMailboxes'
 
 ################################################################
-############## CONFIG
+############## INDEX
   home : ->
     app.appView.render()
+    app.appView.set_layout_cols()
 
 
 ################################################################
