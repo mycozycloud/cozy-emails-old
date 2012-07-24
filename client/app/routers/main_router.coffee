@@ -2,5 +2,7 @@ class exports.MainRouter extends Backbone.Router
   routes:
     '': 'home'
 
-  home: ->
-    $('body').html app.homeView.render().el
+  home : ->
+    app.appView.render()
+    # app.appView.set_layout_mailboxes(app.appView)
+	

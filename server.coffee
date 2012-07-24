@@ -11,4 +11,3 @@ if not module.parent
     	console.log mail
     	mail.from = "lama"
     	mail.save
-    	console.log mail

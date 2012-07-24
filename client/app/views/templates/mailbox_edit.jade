@@ -1,0 +1,7 @@
+form
+  input.content(id="name", value="#{model.name}")
+  input.content(id="createdAt", value="#{model.createdAt}")
+  input.content(id="SMTP_server", value="#{model.SMTP_server}")
+  a.edit_mailbox.isntEdit.btn(type='submit') Edit
+  input.save_mailbox.isEdit.btn.btn-success(type='submit', value="Save")
+  a.delete_mailbox.isEdit.btn.btn-danger(type='submit') Delete

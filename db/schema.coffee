@@ -38,14 +38,12 @@ Mail = define 'Mail', ->
     #property 'attachements'
     
 Attachement = define 'Attachements', ->
-    property 'id', index: true
     property 'mail_id',
     property 'content_raw'
     
 Mail.hasMany(Attachement,   {as: 'attachements',  foreignKey: 'id'});
     
 Mailbox = define 'Mailbox', ->
-    property 'id', index: true
     property 'name'
     property 'createdAt', Date, default: Date
     property 'SMTP_server'
