@@ -98,18 +98,6 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
         return this.fetch;
       };
 
-      MailboxCollection.prototype.removeOne = function(mailbox, view) {
-        mailbox.destroy({
-          success: function() {
-            return view.remove();
-          },
-          error: function() {
-            return alert("error");
-          }
-        });
-        return view.remove();
-      };
-
       return MailboxCollection;
 
     })(Backbone.Collection);
@@ -405,12 +393,12 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
       };
 
       MailboxView.prototype.buttonEdit = function(event) {
-        this.isEdit = true;
+        this.model.isEdit = true;
         return this.render();
       };
 
       MailboxView.prototype.buttonCancel = function(event) {
-        this.isEdit = false;
+        this.model.isEdit = false;
         return this.render();
       };
 
@@ -422,19 +410,28 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
           return data[input[i].id] = input[i].value;
         });
         this.model.save(data);
-        this.isEdit = false;
+        this.collection.trigger("update_menu");
+        this.model.isEdit = false;
         return this.render();
       };
 
       MailboxView.prototype.buttonDelete = function(event) {
         console.log(this);
         $(".delete_mailbox").addClass("disabled");
-        return this.collection.removeOne(this.model, this);
+        return this.model.destroy({
+          success: function() {
+            return this.remove();
+          },
+          error: function() {
+            alert("error");
+            return this.remove();
+          }
+        });
       };
 
       MailboxView.prototype.render = function() {
         var template;
-        if (this.isEdit) {
+        if (this.model.isEdit) {
           template = require('./templates/mailbox_edit');
         } else {
           template = require('./templates/mailbox');
@@ -475,12 +472,11 @@ window.require.define({"views/mailboxes_menu_view": function(exports, require, m
         window.app.mailboxes.on('reset', this.render, this);
         window.app.mailboxes.on('add', this.render, this);
         window.app.mailboxes.on('remove', this.render, this);
-        window.app.mailboxes.on('change', this.render, this);
+        window.app.mailboxes.on('update_menu', this.render, this);
       }
 
       MailboxesMenuList.prototype.render = function() {
         var _this = this;
-        this.collection.fetch();
         $(this.el).html("");
         this.somme = 0;
         this.collection.each(function(mail) {
@@ -523,9 +519,7 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
         this.collection = collection;
         MailboxesList.__super__.constructor.call(this);
         window.app.mailboxes.on('reset', this.render, this);
-        window.app.mailboxes.on('add', this.render, this);
         window.app.mailboxes.on('remove', this.render, this);
-        window.app.mailboxes.on('change', this.render, this);
       }
 
       MailboxesList.prototype.events = {
@@ -540,61 +534,25 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
         var newbox;
         event.preventDefault();
         newbox = new Mailbox;
-        this.collection.create(newbox);
+        this.collection.add(newbox);
         return this.addNew(newbox);
       };
 
       MailboxesList.prototype.addOne = function(mail) {
         var box;
         box = new MailboxView(mail, mail.collection);
+        mail.isEdit = false;
         return $("#mail_list_container").append(box.render().el);
       };
 
       MailboxesList.prototype.addNew = function(mail) {
         var box;
         box = new MailboxView(mail, mail.collection);
-        box.isEdit = true;
+        mail.isEdit = true;
         return $("#mail_list_container").append(box.render().el);
       };
 
       MailboxesList.prototype.render = function() {
-        this.collection.fetch();
-        $("#mail_list_container").html("");
-        this.collection.each(this.addOne);
-        return $("#mail_list_container");
-      };
-
-      return MailboxesList;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/menu_view": function(exports, require, module) {
-  (function() {
-    var __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    exports.MailboxesList = (function(_super) {
-
-      __extends(MailboxesList, _super);
-
-      MailboxesList.prototype.id = "menu";
-
-      MailboxesList.prototype.className = "mailboxes";
-
-      el;
-
-      function MailboxesList(el, collection) {
-        this.el = el;
-        this.collection = collection;
-        MailboxesList.__super__.constructor.call(this);
-      }
-
-      MailboxesList.prototype.render = function() {
-        this.collection.fetch();
         $("#mail_list_container").html("");
         this.collection.each(this.addOne);
         return $("#mail_list_container");

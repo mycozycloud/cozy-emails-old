@@ -8,9 +8,9 @@ class exports.MailboxesList extends Backbone.View
   constructor: (@el, @collection) ->
     super()
     window.app.mailboxes.on('reset', @render, @)
-    window.app.mailboxes.on('add', @render, @)
+    # window.app.mailboxes.on('add', @render, @)
     window.app.mailboxes.on('remove', @render, @)
-    window.app.mailboxes.on('change', @render, @)
+    # window.app.mailboxes.on('change', @render, @)
     
   events: {
      "click #add_mailbox" : 'addMailbox',
@@ -22,21 +22,21 @@ class exports.MailboxesList extends Backbone.View
   addMailbox: (event) ->
     event.preventDefault()
     newbox = new Mailbox
-    @collection.create newbox
+    @collection.add newbox
     @addNew newbox
     
   # Add a line at the bottom of the list.
   addOne: (mail) ->
     box = new MailboxView mail, mail.collection
+    mail.isEdit = false
     $("#mail_list_container").append box.render().el
     
   addNew: (mail) ->
     box = new MailboxView mail, mail.collection
-    box.isEdit = true
+    mail.isEdit = true
     $("#mail_list_container").append box.render().el    
 
   render: ->
-    @collection.fetch()
     $("#mail_list_container").html("")
     @collection.each @addOne
     # $("#mail_list_container").html "lama lama"

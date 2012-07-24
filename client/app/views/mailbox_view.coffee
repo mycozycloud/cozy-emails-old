@@ -19,13 +19,13 @@ class exports.MailboxView extends Backbone.View
   # enter edit mode
   buttonEdit: (event) ->
     # console.log event
-    @isEdit = true
+    @model.isEdit = true
     @render()
     
     # enter edit mode
   buttonCancel: (event) ->
     # console.log event
-    @isEdit = false
+    @model.isEdit = false
     @render()
     
   # save changes to server
@@ -35,19 +35,25 @@ class exports.MailboxView extends Backbone.View
     input.each (i) ->
       data[input[i].id] = input[i].value;
     @model.save data
-    @isEdit = false
+    @collection.trigger("update_menu")
+    @model.isEdit = false
     @render()
     
   # delete the mailbox
   buttonDelete: (event) ->
     console.log @
     $(".delete_mailbox").addClass("disabled")
-    @collection.removeOne @model, @
+    @model.destroy
+      success: ->
+        @remove()
+      error: ->
+        alert "error"
+        @remove()
 
   # Render wiew and bind it to model.
   render: ->
     # whether we should activate the edit mode or not
-    if @isEdit
+    if @model.isEdit
       template = require('./templates/mailbox_edit')
     else
       template = require('./templates/mailbox')

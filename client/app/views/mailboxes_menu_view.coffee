@@ -10,10 +10,9 @@ class exports.MailboxesMenuList extends Backbone.View
     window.app.mailboxes.on('reset', @render, @)
     window.app.mailboxes.on('add', @render, @)
     window.app.mailboxes.on('remove', @render, @)
-    window.app.mailboxes.on('change', @render, @)
+    window.app.mailboxes.on('update_menu', @render, @)
 
   render: ->
-    @collection.fetch()
     $(@el).html("")
     @somme = 0
     @collection.each (mail) =>

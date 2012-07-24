@@ -14,12 +14,3 @@ class exports.MailboxCollection extends Backbone.Collection
     # ,
     #   "name": "miko2", server: "s2"
     # ]
-  
-  
-  removeOne: (mailbox, view) ->
-    mailbox.destroy
-      success: ->
-        view.remove()
-      error: ->
-        alert "error"
-    view.remove()
