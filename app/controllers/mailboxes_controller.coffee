@@ -1,8 +1,6 @@
-load 'application'
-
 before ->
   Mailbox.find req.params.id, (err, box) =>
-    if err or not box
+    if err or !box
       send 403
     else
       @box = box
@@ -12,28 +10,35 @@ before ->
 # GET /mailboxes
 action 'index', ->
   Mailbox.all (err, boxes) ->
-    send JSON.stringify(boxes)
+    send boxes
+
+# POST /mailboxes
+action 'create', ->
+  Mailbox.create req.body, (error) =>
+    if !error
+      send 200
+    else
+      send 500
 
 # GET /mailboxes/:id
 action 'show', ->
     if !@box
-      send JSON.stringify(new Mailbox)
+      send new Mailbox
     else
-      send JSON.stringify(@box)
+      send @box
 
 # PUT /mailboxes/:id
 action 'update', ->
-  # console.log req.body
   @box.updateAttributes req.body, (error) =>
-    if not error
+    if !error
       send 200
     else
-      send 403
+      send 500
 
 # DELETE /mailboxes/:id
 action 'destroy', ->
-  @box.destroy (error) ->
-    if not error
+  @box.destroy (error) =>
+    if !error
       send 200
     else
-      send 403
+      send 500

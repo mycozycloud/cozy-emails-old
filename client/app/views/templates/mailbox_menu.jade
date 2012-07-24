@@ -1,4 +1,5 @@
 a(href='#')
   input(type='checkbox')
   | #{model.name}
-  span.badge.badge-warning #{model.new_messages}
+  if model.new_messages > 0
+    span.badge.badge-warning #{model.new_messages}

@@ -98,6 +98,10 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
         return this.fetch;
       };
 
+      MailboxCollection.prototype.comparator = function(Mailbox) {
+        return Mailbox.get("name");
+      };
+
       return MailboxCollection;
 
     })(Backbone.Collection);
@@ -195,6 +199,22 @@ window.require.define({"models/mailbox": function(exports, require, module) {
         'SMTP_login': "login",
         'SMTP_pass': "pass",
         'SMTP_send_as': "You"
+      };
+
+      Mailbox.prototype.deleted = false;
+
+      Mailbox.prototype.initialize = function() {
+        console.log("binding");
+        this.on("destroy", this.removeView, this);
+        return this.on("change", this.redraw, this);
+      };
+
+      Mailbox.prototype.removeView = function() {
+        if (this.view != null) return this.view.remove();
+      };
+
+      Mailbox.prototype.redraw = function() {
+        if (this.view != null) return this.view.render();
       };
 
       return Mailbox;
@@ -364,6 +384,7 @@ window.require.define({"views/mailbox_menu_view": function(exports, require, mod
 window.require.define({"views/mailbox_view": function(exports, require, module) {
   (function() {
     var Mailbox,
+      __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -382,7 +403,9 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
       function MailboxView(model, collection) {
         this.model = model;
         this.collection = collection;
+        this.buttonDelete = __bind(this.buttonDelete, this);
         MailboxView.__super__.constructor.call(this);
+        this.model.view = this;
       }
 
       MailboxView.prototype.events = {
@@ -404,6 +427,7 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
 
       MailboxView.prototype.buttonSave = function(event) {
         var data, input;
+        $(event.target).addClass("disabled").removeClass("buttonSave");
         input = this.$("input.content");
         data = {};
         input.each(function(i) {
@@ -416,17 +440,8 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
       };
 
       MailboxView.prototype.buttonDelete = function(event) {
-        console.log(this);
-        $(".delete_mailbox").addClass("disabled");
-        return this.model.destroy({
-          success: function() {
-            return this.remove();
-          },
-          error: function() {
-            alert("error");
-            return this.remove();
-          }
-        });
+        $(event.target).addClass("disabled").removeClass("delete_mailbox");
+        return this.model.destroy();
       };
 
       MailboxView.prototype.render = function() {
@@ -462,28 +477,27 @@ window.require.define({"views/mailboxes_menu_view": function(exports, require, m
 
       __extends(MailboxesMenuList, _super);
 
-      MailboxesMenuList.prototype.somme = 0;
+      MailboxesMenuList.prototype.total_inbox = 0;
 
       function MailboxesMenuList(el, collection) {
         this.el = el;
         this.collection = collection;
         MailboxesMenuList.__super__.constructor.call(this);
-        this.element = this.el;
         window.app.mailboxes.on('reset', this.render, this);
         window.app.mailboxes.on('add', this.render, this);
         window.app.mailboxes.on('remove', this.render, this);
-        window.app.mailboxes.on('update_menu', this.render, this);
+        window.app.mailboxes.on('change', this.render, this);
       }
 
       MailboxesMenuList.prototype.render = function() {
         var _this = this;
         $(this.el).html("");
-        this.somme = 0;
+        this.total_inbox = 0;
         this.collection.each(function(mail) {
           var box;
           box = new MailboxMenuView(mail, mail.collection);
           $(_this.el).append(box.render().el);
-          return _this.somme += Number(mail.toJSON().new_messages);
+          return _this.total_inbox += Number(mail.get("new_messages"));
         });
         return this;
       };
@@ -519,7 +533,6 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
         this.collection = collection;
         MailboxesList.__super__.constructor.call(this);
         window.app.mailboxes.on('reset', this.render, this);
-        window.app.mailboxes.on('remove', this.render, this);
       }
 
       MailboxesList.prototype.events = {
@@ -664,9 +677,14 @@ window.require.define({"views/templates/mailbox_menu": function(exports, require
   buf.push(attrs({ 'href':('#') }));
   buf.push('><input');
   buf.push(attrs({ 'type':('checkbox') }));
-  buf.push('/>' + escape((interp = model.name) == null ? '' : interp) + '\n<span');
+  buf.push('/>' + escape((interp = model.name) == null ? '' : interp) + '\n');
+  if ( model.new_messages > 0)
+  {
+  buf.push('<span');
   buf.push(attrs({ "class": ('badge') + ' ' + ('badge-warning') }));
-  buf.push('>' + escape((interp = model.new_messages) == null ? '' : interp) + '</span></a>');
+  buf.push('>' + escape((interp = model.new_messages) == null ? '' : interp) + '</span>');
+  }
+  buf.push('</a>');
   }
   return buf.join("");
   };

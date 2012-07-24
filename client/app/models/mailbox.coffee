@@ -13,3 +13,16 @@ class exports.Mailbox extends BaseModel
     'SMTP_login' : "login"
     'SMTP_pass' : "pass"
     'SMTP_send_as' : "You"
+  
+  deleted: false
+
+  initialize: ->
+    console.log "binding"
+    @on "destroy", @removeView, @
+    @on "change", @redraw, @
+
+  removeView: ->
+    @view.remove() if @view?
+
+  redraw: ->
+    @view.render() if @view?

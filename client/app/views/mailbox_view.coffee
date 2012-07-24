@@ -8,6 +8,7 @@ class exports.MailboxView extends Backbone.View
   
   constructor: (@model, @collection) ->
     super()
+    @model.view = @
   
   # EVENTS
   events:
@@ -30,6 +31,7 @@ class exports.MailboxView extends Backbone.View
     
   # save changes to server
   buttonSave: (event) ->    
+    $(event.target).addClass("disabled").removeClass("buttonSave")  
     input = @.$("input.content")
     data = {}
     input.each (i) ->
@@ -40,15 +42,9 @@ class exports.MailboxView extends Backbone.View
     @render()
     
   # delete the mailbox
-  buttonDelete: (event) ->
-    console.log @
-    $(".delete_mailbox").addClass("disabled")
-    @model.destroy
-      success: ->
-        @remove()
-      error: ->
-        alert "error"
-        @remove()
+  buttonDelete: (event) =>
+    $(event.target).addClass("disabled").removeClass("delete_mailbox")
+    @model.destroy()
 
   # Render wiew and bind it to model.
   render: ->
