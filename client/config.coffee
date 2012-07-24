@@ -31,10 +31,12 @@ exports.config =
       defaultExtension: 'styl'
       joinTo: 'stylesheets/app.css'
       order:
-        before: ['vendor/styles/normalize.css']
+        before: [
+          'vendor/styles/normalize.css',
+          'vendor/styles/bootstrap.css',
+          ]
         after: [
 	        'vendor/styles/helpers.css',
-	        'vendor/styles/bootstrap.css',
 	        ]
 
     templates:

@@ -4,6 +4,7 @@ BaseModel = require("./models").BaseModel
 class exports.Mailbox extends BaseModel
 
   defaults:
+    'new_messages' : 2
     'config' : 0
     'name' : "Mailbox"
     'createdAt' : "0"

@@ -1,5 +1,5 @@
-{MailboxCollection} = require '../collections/mailboxes'
 {MailboxesList} = require '../views/mailboxes_view'
+{MailboxesMenuList} = require '../views/mailboxes_menu_view'
 
 class exports.AppView extends Backbone.View
   id: 'home-view',
@@ -9,26 +9,29 @@ class exports.AppView extends Backbone.View
 
   constructor: ->
     super()
-    @mailboxCollection = new MailboxCollection
 
   render: ->
     # chargement de template par defaut
     $(@el).html require('./templates/app')
     @container_menu = @.$("#menu_container")
     @container_content = @.$("#content")
-
-
+    @set_layout_menu()
+    @
+    
+    
+  set_layout_menu: ->
     #layout pour les mailboxes:
-    @container_content.html require('./templates/layout_mailboxes')
-    window.app.view_mailboxes = new MailboxesList $("#content"), @mailboxCollection
-    window.app.view_mailboxes.render()
-    this
-
+    @container_menu.html require('./templates/menu')
+    window.app.view_menu = new MailboxesMenuList $("#menu_mailboxes"), window.app.mailboxes
+    window.app.view_menu.render()
 
 # layout pour la configuration des boites mails
 
-  set_layout_mailboxes: (view) ->
-    #
+  set_layout_mailboxes: ->
+    #layout pour les mailboxes:
+    @container_content.html require('./templates/layout_mailboxes')
+    window.app.view_mailboxes = new MailboxesList $("#content"), window.app.mailboxes
+    window.app.view_mailboxes.render()
 
 
   add_mailbox: (event) ->

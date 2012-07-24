@@ -1,8 +1,18 @@
 class exports.MainRouter extends Backbone.Router
   routes:
     '': 'home'
+    'config-mailboxes' : 'configMailboxes'
 
+################################################################
+############## CONFIG
   home : ->
     app.appView.render()
-    # app.appView.set_layout_mailboxes(app.appView)
+
+
+################################################################
+############## CONFIG
+
+  configMailboxes : ->
+    app.appView.render()
+    app.appView.set_layout_mailboxes()
 	

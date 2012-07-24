@@ -11,19 +11,25 @@ class exports.MailboxView extends Backbone.View
   
   # EVENTS
   events:
-    "click .edit_mailbox" : "edit"
-    "click .save_mailbox" : "save"
-    "click .delete_mailbox" : "delete"
-    
+    "click .edit_mailbox" : "buttonEdit"
+    "click .cancel_edit_mailbox" : "buttonCancel"
+    "click .save_mailbox" : "buttonSave"
+    "click .delete_mailbox" : "buttonDelete"
   
   # enter edit mode
-  edit: (event) ->
+  buttonEdit: (event) ->
     # console.log event
     @isEdit = true
     @render()
     
+    # enter edit mode
+  buttonCancel: (event) ->
+    # console.log event
+    @isEdit = false
+    @render()
+    
   # save changes to server
-  save: (event) ->    
+  buttonSave: (event) ->    
     input = @.$("input.content")
     data = {}
     input.each (i) ->
@@ -33,7 +39,7 @@ class exports.MailboxView extends Backbone.View
     @render()
     
   # delete the mailbox
-  delete: (event) ->
+  buttonDelete: (event) ->
     console.log @
     @collection.removeOne @model, @
 
@@ -42,12 +48,7 @@ class exports.MailboxView extends Backbone.View
     # whether we should activate the edit mode or not
     if @isEdit
       template = require('./templates/mailbox_edit')
-      $(@el).html template("model": @model.toJSON())
-      @.$(".isntEdit").hide()
-      @.$(".isEdit").show()
     else
       template = require('./templates/mailbox')
-      $(@el).html template("model": @model.toJSON())
-      @.$(".isntEdit").show()
-      @.$(".isEdit").hide()
+    $(@el).html template("model": @model.toJSON())
     @
