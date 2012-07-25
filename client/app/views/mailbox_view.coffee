@@ -6,26 +6,23 @@ class exports.MailboxView extends Backbone.View
   tagName: "div"
   isEdit: false
   
-  constructor: (@model, @collection) ->
-    super()
-    @model.view = @
-  
-  # EVENTS
   events:
     "click .edit_mailbox" : "buttonEdit"
     "click .cancel_edit_mailbox" : "buttonCancel"
     "click .save_mailbox" : "buttonSave"
     "click .delete_mailbox" : "buttonDelete"
-  
+
+  constructor: (@model, @collection) ->
+    super()
+    @model.view = @
+
   # enter edit mode
   buttonEdit: (event) ->
-    # console.log event
     @model.isEdit = true
     @render()
     
-    # enter edit mode
+  # quit edit mode, no changes saved
   buttonCancel: (event) ->
-    # console.log event
     @model.isEdit = false
     @render()
     
@@ -46,7 +43,6 @@ class exports.MailboxView extends Backbone.View
     $(event.target).addClass("disabled").removeClass("delete_mailbox")
     @model.destroy()
 
-  # Render wiew and bind it to model.
   render: ->
     # whether we should activate the edit mode or not
     if @model.isEdit

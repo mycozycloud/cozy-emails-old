@@ -4,7 +4,7 @@ BaseModel = require("./models").BaseModel
 class exports.Mailbox extends BaseModel
 
   defaults:
-    'new_messages' : 2
+    'new_messages' : 1
     'config' : 0
     'name' : "Mailbox"
     'createdAt' : "0"
@@ -17,12 +17,11 @@ class exports.Mailbox extends BaseModel
   deleted: false
 
   initialize: ->
-    console.log "binding"
     @on "destroy", @removeView, @
-    @on "change", @redraw, @
+    @on "change",  @redrawView, @
 
   removeView: ->
     @view.remove() if @view?
 
-  redraw: ->
+  redrawView: ->
     @view.render() if @view?

@@ -44,6 +44,7 @@ Attachement = define 'Attachements', ->
 Mail.hasMany(Attachement,   {as: 'attachements',  foreignKey: 'id'});
     
 Mailbox = define 'Mailbox', ->
+    property 'new_messages', default: 0
     property 'name'
     property 'createdAt', Date, default: Date
     property 'SMTP_server'
@@ -56,7 +57,7 @@ Mailbox = define 'Mailbox', ->
     property 'IMAP_secure', Boolean, default: true
     property 'IMAP_login'
     property 'IMAP_pass'
-    property 'IMAP_last_sync', Date, default: Date
+    property 'IMAP_last_sync', Date, default: 0
     property 'IMAP_last_fetched_id', Number
     property 'IMAP_last_fetched_date', Date
     

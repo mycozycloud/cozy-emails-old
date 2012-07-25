@@ -190,7 +190,7 @@ window.require.define({"models/mailbox": function(exports, require, module) {
       }
 
       Mailbox.prototype.defaults = {
-        'new_messages': 2,
+        'new_messages': 1,
         'config': 0,
         'name': "Mailbox",
         'createdAt': "0",
@@ -204,16 +204,15 @@ window.require.define({"models/mailbox": function(exports, require, module) {
       Mailbox.prototype.deleted = false;
 
       Mailbox.prototype.initialize = function() {
-        console.log("binding");
         this.on("destroy", this.removeView, this);
-        return this.on("change", this.redraw, this);
+        return this.on("change", this.redrawView, this);
       };
 
       Mailbox.prototype.removeView = function() {
         if (this.view != null) return this.view.remove();
       };
 
-      Mailbox.prototype.redraw = function() {
+      Mailbox.prototype.redrawView = function() {
         if (this.view != null) return this.view.render();
       };
 
@@ -325,6 +324,7 @@ window.require.define({"views/app_view": function(exports, require, module) {
       };
 
       AppView.prototype.set_layout_mailboxes = function() {
+        window.app.mailboxes.fetch();
         this.container_content.html(require('./templates/layout_mailboxes'));
         window.app.view_mailboxes = new MailboxesList($("#content"), window.app.mailboxes);
         return window.app.view_mailboxes.render();
@@ -332,11 +332,6 @@ window.require.define({"views/app_view": function(exports, require, module) {
 
       AppView.prototype.set_layout_cols = function() {
         return this.container_content.html(require('./templates/mails_view'));
-      };
-
-      AppView.prototype.add_mailbox = function(event) {
-        event.preventDefault();
-        return this.mailboxesList.append(require('./templates/add_new_mailbox'));
       };
 
       return AppView;
@@ -400,6 +395,13 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
 
       MailboxView.prototype.isEdit = false;
 
+      MailboxView.prototype.events = {
+        "click .edit_mailbox": "buttonEdit",
+        "click .cancel_edit_mailbox": "buttonCancel",
+        "click .save_mailbox": "buttonSave",
+        "click .delete_mailbox": "buttonDelete"
+      };
+
       function MailboxView(model, collection) {
         this.model = model;
         this.collection = collection;
@@ -407,13 +409,6 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
         MailboxView.__super__.constructor.call(this);
         this.model.view = this;
       }
-
-      MailboxView.prototype.events = {
-        "click .edit_mailbox": "buttonEdit",
-        "click .cancel_edit_mailbox": "buttonCancel",
-        "click .save_mailbox": "buttonSave",
-        "click .delete_mailbox": "buttonDelete"
-      };
 
       MailboxView.prototype.buttonEdit = function(event) {
         this.model.isEdit = true;
@@ -483,10 +478,11 @@ window.require.define({"views/mailboxes_menu_view": function(exports, require, m
         this.el = el;
         this.collection = collection;
         MailboxesMenuList.__super__.constructor.call(this);
-        window.app.mailboxes.on('reset', this.render, this);
-        window.app.mailboxes.on('add', this.render, this);
-        window.app.mailboxes.on('remove', this.render, this);
-        window.app.mailboxes.on('change', this.render, this);
+        this.collection.view_menu_mailboxes = this;
+        this.collection.on('reset', this.render, this);
+        this.collection.on('add', this.render, this);
+        this.collection.on('remove', this.render, this);
+        this.collection.on('change', this.render, this);
       }
 
       MailboxesMenuList.prototype.render = function() {
@@ -528,19 +524,19 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
 
       MailboxesList.prototype.className = "mailboxes";
 
-      function MailboxesList(el, collection) {
-        this.el = el;
-        this.collection = collection;
-        MailboxesList.__super__.constructor.call(this);
-        window.app.mailboxes.on('reset', this.render, this);
-      }
-
       MailboxesList.prototype.events = {
         "click #add_mailbox": 'addMailbox'
       };
 
+      function MailboxesList(el, collection) {
+        this.el = el;
+        this.collection = collection;
+        MailboxesList.__super__.constructor.call(this);
+        this.collection.view = this;
+      }
+
       MailboxesList.prototype.initialize = function() {
-        return this.collection.fetch();
+        return this.collection.on('reset', this.render, this);
       };
 
       MailboxesList.prototype.addMailbox = function(event) {
@@ -548,27 +544,24 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
         event.preventDefault();
         newbox = new Mailbox;
         this.collection.add(newbox);
-        return this.addNew(newbox);
+        return this.addOne(newbox, true);
       };
 
-      MailboxesList.prototype.addOne = function(mail) {
+      MailboxesList.prototype.addOne = function(mail, edit) {
         var box;
+        if (edit == null) edit = false;
+        mail.isEdit = edit;
         box = new MailboxView(mail, mail.collection);
-        mail.isEdit = false;
-        return $("#mail_list_container").append(box.render().el);
-      };
-
-      MailboxesList.prototype.addNew = function(mail) {
-        var box;
-        box = new MailboxView(mail, mail.collection);
-        mail.isEdit = true;
-        return $("#mail_list_container").append(box.render().el);
+        return this.$("#mail_list_container").append(box.render().el);
       };
 
       MailboxesList.prototype.render = function() {
-        $("#mail_list_container").html("");
-        this.collection.each(this.addOne);
-        return $("#mail_list_container");
+        var _this = this;
+        this.$("#mail_list_container").html("");
+        this.collection.each(function(mail) {
+          return _this.addOne(mail, false);
+        });
+        return this.$("#mail_list_container");
       };
 
       return MailboxesList;
@@ -676,8 +669,8 @@ window.require.define({"views/templates/mailbox_menu": function(exports, require
   buf.push('<a');
   buf.push(attrs({ 'href':('#') }));
   buf.push('><input');
-  buf.push(attrs({ 'type':('checkbox') }));
-  buf.push('/>' + escape((interp = model.name) == null ? '' : interp) + '\n');
+  buf.push(attrs({ 'type':('checkbox'), 'checked':('checked'), "class": ('change_mailboxes_list') }));
+  buf.push('/> ' + escape((interp = model.name) == null ? '' : interp) + '\n');
   if ( model.new_messages > 0)
   {
   buf.push('<span');
