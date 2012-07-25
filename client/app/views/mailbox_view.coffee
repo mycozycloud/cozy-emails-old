@@ -31,8 +31,8 @@ class exports.MailboxView extends Backbone.View
     $(event.target).addClass("disabled").removeClass("buttonSave")  
     input = @.$("input.content")
     data = {}
-    input.each (key, value) ->
-      data[key.id] = value.value;
+    input.each (i) ->
+      data[input[i].id] = input[i].value;
     @model.save data
     @collection.trigger("update_menu")
     @model.isEdit = false

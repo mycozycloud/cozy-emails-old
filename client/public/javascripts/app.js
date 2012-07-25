@@ -422,8 +422,8 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
         $(event.target).addClass("disabled").removeClass("buttonSave");
         input = this.$("input.content");
         data = {};
-        input.each(function(key, value) {
-          return data[key.id] = value.value;
+        input.each(function(i) {
+          return data[input[i].id] = input[i].value;
         });
         this.model.save(data);
         this.collection.trigger("update_menu");
