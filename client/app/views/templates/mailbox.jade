@@ -1,6 +1,8 @@
 form
-  | #{model.name}
-  | #{model.createdAt}
-  | #{model.SMTP_server}
-  a.edit_mailbox.isntEdit.btn(type='submit') Edit
-  a.delete_mailbox.isntEdit.btn.btn-danger(type='submit') Delete
+  p.editme #{model.name}
+  p.editme #{model.createdAt}
+  p.editme #{model.SMTP_server}
+  a.edit_mailbox.isntEdit.btn Edit
+  a.delete_mailbox.isntEdit.btn.btn-danger Delete
+  a.save_mailbox.isEdit.btn Save
+  a.cancel_edit_mailbox.isEdit.btn Save

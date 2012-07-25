@@ -1,7 +1,6 @@
 class exports.MenuView extends Backbone.View
   id: "menu"
   className: "mailboxes"
-  el: 
     
   constructor: (@el, @collection) ->
     super()
