@@ -19,8 +19,7 @@ class exports.MailboxView extends Backbone.View
   # enter edit mode
   buttonEdit: (event) ->
     @model.isEdit = true
-    @.$(".editme").attr("contentEditable", true)
-    # @render()
+    @render()
     
   # quit edit mode, no changes saved
   buttonCancel: (event) ->
@@ -30,14 +29,14 @@ class exports.MailboxView extends Backbone.View
   # save changes to server
   buttonSave: (event) ->    
     $(event.target).addClass("disabled").removeClass("buttonSave")  
-    input = @.$(".editme")
+    input = @.$("input.content")
     data = {}
     input.each (i) ->
-      data[input[i].id] = input[i].html;
+      data[input[i].id] = input[i].value;
     @model.save data
     @collection.trigger("update_menu")
     @model.isEdit = false
-    # @render()
+    @render()
     
   # delete the mailbox
   buttonDelete: (event) =>

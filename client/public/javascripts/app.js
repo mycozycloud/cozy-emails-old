@@ -412,7 +412,7 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
 
       MailboxView.prototype.buttonEdit = function(event) {
         this.model.isEdit = true;
-        return this.$(".editme").attr("contentEditable", true);
+        return this.render();
       };
 
       MailboxView.prototype.buttonCancel = function(event) {
@@ -423,14 +423,15 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
       MailboxView.prototype.buttonSave = function(event) {
         var data, input;
         $(event.target).addClass("disabled").removeClass("buttonSave");
-        input = this.$(".editme");
+        input = this.$("input.content");
         data = {};
         input.each(function(i) {
-          return data[input[i].id] = input[i].html;
+          return data[input[i].id] = input[i].value;
         });
         this.model.save(data);
         this.collection.trigger("update_menu");
-        return this.model.isEdit = false;
+        this.model.isEdit = false;
+        return this.render();
       };
 
       MailboxView.prototype.buttonDelete = function(event) {
@@ -571,40 +572,6 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
   
 }});
 
-window.require.define({"views/menu_view": function(exports, require, module) {
-  (function() {
-    var __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    exports.MenuView = (function(_super) {
-
-      __extends(MenuView, _super);
-
-      MenuView.prototype.id = "menu";
-
-      MenuView.prototype.className = "mailboxes";
-
-      function MenuView(el, collection) {
-        this.el = el;
-        this.collection = collection;
-        MenuView.__super__.constructor.call(this);
-      }
-
-      MenuView.prototype.render = function() {
-        this.collection.fetch();
-        $("#mail_list_container").html("");
-        this.collection.each(this.addOne);
-        return $("#mail_list_container");
-      };
-
-      return MenuView;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
 window.require.define({"views/templates/app": function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
@@ -661,21 +628,11 @@ window.require.define({"views/templates/mailbox": function(exports, require, mod
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<form><p');
-  buf.push(attrs({ "class": ('editme') }));
-  buf.push('>' + escape((interp = model.name) == null ? '' : interp) + '</p><p');
-  buf.push(attrs({ "class": ('editme') }));
-  buf.push('>' + escape((interp = model.createdAt) == null ? '' : interp) + '</p><p');
-  buf.push(attrs({ "class": ('editme') }));
-  buf.push('>' + escape((interp = model.SMTP_server) == null ? '' : interp) + '</p><a');
-  buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') }));
+  buf.push('<form>' + escape((interp = model.name) == null ? '' : interp) + '\n' + escape((interp = model.createdAt) == null ? '' : interp) + '\n' + escape((interp = model.SMTP_server) == null ? '' : interp) + '\n<a');
+  buf.push(attrs({ 'type':('submit'), "class": ('edit_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') }));
   buf.push('>Edit</a><a');
-  buf.push(attrs({ "class": ('delete_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') + ' ' + ('btn-danger') }));
-  buf.push('>Delete</a><a');
-  buf.push(attrs({ "class": ('save_mailbox') + ' ' + ('isEdit') + ' ' + ('btn') }));
-  buf.push('>Save</a><a');
-  buf.push(attrs({ "class": ('cancel_edit_mailbox') + ' ' + ('isEdit') + ' ' + ('btn') }));
-  buf.push('>Save</a></form>');
+  buf.push(attrs({ 'type':('submit'), "class": ('delete_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') + ' ' + ('btn-danger') }));
+  buf.push('>Delete</a></form>');
   }
   return buf.join("");
   };
