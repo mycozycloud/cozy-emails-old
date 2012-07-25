@@ -6,7 +6,8 @@ class exports.AppView extends Backbone.View
   el: 'body'
 
   initialize: ->
-
+    window.app.mailboxes.fetch()
+    
   constructor: ->
     super()
 
@@ -24,15 +25,17 @@ class exports.AppView extends Backbone.View
     window.app.view_menu = new MailboxesMenuList $("#menu_mailboxes"), window.app.mailboxes
     window.app.view_menu.render()
 
+###################################################
+## LAYOUTS
+###################################################
+
   # put on the layout to display mailboxes:
   set_layout_mailboxes: ->
-    # fetch the data
-    window.app.mailboxes.fetch()
     # lay the mailboxes out
-    @container_content.html require('./templates/layout_mailboxes')
+    @container_content.html require('./templates/_layouts/layout_mailboxes')
     window.app.view_mailboxes = new MailboxesList $("#content"), window.app.mailboxes
     window.app.view_mailboxes.render()
     
   # set the layout for coulmn view - mails
   set_layout_cols: ->
-    @container_content.html require('./templates/mails_view')
+    @container_content.html require('./templates/_mail/mails')

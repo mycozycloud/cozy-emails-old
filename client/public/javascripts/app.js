@@ -94,10 +94,6 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
 
       MailboxCollection.prototype.url = 'mailboxes/';
 
-      MailboxCollection.prototype.initialize = function() {
-        return this.fetch;
-      };
-
       MailboxCollection.prototype.comparator = function(Mailbox) {
         return Mailbox.get("name");
       };
@@ -303,7 +299,9 @@ window.require.define({"views/app_view": function(exports, require, module) {
 
       AppView.prototype.el = 'body';
 
-      AppView.prototype.initialize = function() {};
+      AppView.prototype.initialize = function() {
+        return window.app.mailboxes.fetch();
+      };
 
       function AppView() {
         AppView.__super__.constructor.call(this);
@@ -324,14 +322,13 @@ window.require.define({"views/app_view": function(exports, require, module) {
       };
 
       AppView.prototype.set_layout_mailboxes = function() {
-        window.app.mailboxes.fetch();
-        this.container_content.html(require('./templates/layout_mailboxes'));
+        this.container_content.html(require('./templates/_layouts/layout_mailboxes'));
         window.app.view_mailboxes = new MailboxesList($("#content"), window.app.mailboxes);
         return window.app.view_mailboxes.render();
       };
 
       AppView.prototype.set_layout_cols = function() {
-        return this.container_content.html(require('./templates/mails_view'));
+        return this.container_content.html(require('./templates/_mail/mails'));
       };
 
       return AppView;
@@ -361,7 +358,7 @@ window.require.define({"views/mailbox_menu_view": function(exports, require, mod
 
       MailboxMenuView.prototype.render = function() {
         var template;
-        template = require('./templates/mailbox_menu');
+        template = require('./templates/_mailbox/mailbox_menu');
         $(this.el).html(template({
           "model": this.model.toJSON()
         }));
@@ -425,8 +422,8 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
         $(event.target).addClass("disabled").removeClass("buttonSave");
         input = this.$("input.content");
         data = {};
-        input.each(function(i) {
-          return data[input[i].id] = input[i].value;
+        input.each(function(key, value) {
+          return data[key.id] = value.value;
         });
         this.model.save(data);
         this.collection.trigger("update_menu");
@@ -442,9 +439,9 @@ window.require.define({"views/mailbox_view": function(exports, require, module) 
       MailboxView.prototype.render = function() {
         var template;
         if (this.model.isEdit) {
-          template = require('./templates/mailbox_edit');
+          template = require('./templates/_mailbox/mailbox_edit');
         } else {
-          template = require('./templates/mailbox');
+          template = require('./templates/_mailbox/mailbox');
         }
         $(this.el).html(template({
           "model": this.model.toJSON()
@@ -536,7 +533,8 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
       }
 
       MailboxesList.prototype.initialize = function() {
-        return this.collection.on('reset', this.render, this);
+        this.collection.on('reset', this.render, this);
+        return this.collection.fetch();
       };
 
       MailboxesList.prototype.addMailbox = function(event) {
@@ -572,33 +570,41 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
   
 }});
 
-window.require.define({"views/templates/app": function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow) {
-  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<div');
-  buf.push(attrs({ "class": ('container-fluid') }));
-  buf.push('><div');
-  buf.push(attrs({ "class": ('row-fluid') }));
-  buf.push('><div');
-  buf.push(attrs({ 'id':('sidebar'), "class": ('span2') }));
-  buf.push('><div');
-  buf.push(attrs({ 'id':('menu_container'), "class": ('well') + ' ' + ('sidebar-nav') }));
-  buf.push('></div></div><div');
-  buf.push(attrs({ 'id':('content'), "class": ('span10') }));
-  buf.push('></div></div><div');
-  buf.push(attrs({ "class": ('row-fluid') }));
-  buf.push('><div');
-  buf.push(attrs({ "class": ('span12') }));
-  buf.push('><footer><p>© CozyCloud 2012</p></footer></div></div></div>');
-  }
-  return buf.join("");
-  };
+window.require.define({"views/menu_view": function(exports, require, module) {
+  (function() {
+    var __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    exports.MenuView = (function(_super) {
+
+      __extends(MenuView, _super);
+
+      MenuView.prototype.id = "menu";
+
+      MenuView.prototype.className = "mailboxes";
+
+      function MenuView(el, collection) {
+        this.el = el;
+        this.collection = collection;
+        MenuView.__super__.constructor.call(this);
+      }
+
+      MenuView.prototype.render = function() {
+        this.collection.fetch();
+        $("#mail_list_container").html("");
+        this.collection.each(this.addOne);
+        return $("#mail_list_container");
+      };
+
+      return MenuView;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
 }});
 
-window.require.define({"views/templates/layout_mailboxes": function(exports, require, module) {
+window.require.define({"views/templates/_layouts/layout_mailboxes": function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -622,68 +628,7 @@ window.require.define({"views/templates/layout_mailboxes": function(exports, req
   };
 }});
 
-window.require.define({"views/templates/mailbox": function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow) {
-  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<form>' + escape((interp = model.name) == null ? '' : interp) + '\n' + escape((interp = model.createdAt) == null ? '' : interp) + '\n' + escape((interp = model.SMTP_server) == null ? '' : interp) + '\n<a');
-  buf.push(attrs({ 'type':('submit'), "class": ('edit_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') }));
-  buf.push('>Edit</a><a');
-  buf.push(attrs({ 'type':('submit'), "class": ('delete_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') + ' ' + ('btn-danger') }));
-  buf.push('>Delete</a></form>');
-  }
-  return buf.join("");
-  };
-}});
-
-window.require.define({"views/templates/mailbox_edit": function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow) {
-  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<input');
-  buf.push(attrs({ 'id':("name"), 'value':("" + (model.name) + ""), "class": ('content') }));
-  buf.push('/><input');
-  buf.push(attrs({ 'id':("createdAt"), 'value':("" + (model.createdAt) + ""), "class": ('content') }));
-  buf.push('/><input');
-  buf.push(attrs({ 'id':("SMTP_server"), 'value':("" + (model.SMTP_server) + ""), "class": ('content') }));
-  buf.push('/><input');
-  buf.push(attrs({ 'type':('submit'), 'value':("Save"), "class": ('save_mailbox') + ' ' + ('isEdit') + ' ' + ('btn') + ' ' + ('btn-success') }));
-  buf.push('/><a');
-  buf.push(attrs({ "class": ('cancel_edit_mailbox') + ' ' + ('isEdit') + ' ' + ('btn') + ' ' + ('btn-warning') }));
-  buf.push('>Cancel</a>');
-  }
-  return buf.join("");
-  };
-}});
-
-window.require.define({"views/templates/mailbox_menu": function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow) {
-  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<a');
-  buf.push(attrs({ 'href':('#') }));
-  buf.push('><input');
-  buf.push(attrs({ 'type':('checkbox'), 'checked':('checked'), "class": ('change_mailboxes_list') }));
-  buf.push('/> ' + escape((interp = model.name) == null ? '' : interp) + '\n');
-  if ( model.new_messages > 0)
-  {
-  buf.push('<span');
-  buf.push(attrs({ "class": ('badge') + ' ' + ('badge-warning') }));
-  buf.push('>' + escape((interp = model.new_messages) == null ? '' : interp) + '</span>');
-  }
-  buf.push('</a>');
-  }
-  return buf.join("");
-  };
-}});
-
-window.require.define({"views/templates/mails_view": function(exports, require, module) {
+window.require.define({"views/templates/_mail/mails": function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -814,6 +759,93 @@ window.require.define({"views/templates/mails_view": function(exports, require, 
   buf.push('><p');
   buf.push(attrs({ "class": ('well') }));
   buf.push('>yoyoyy</p></div></div>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_mailbox/mailbox": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<form>' + escape((interp = model.name) == null ? '' : interp) + '\n' + escape((interp = model.createdAt) == null ? '' : interp) + '\n' + escape((interp = model.SMTP_server) == null ? '' : interp) + '\n<a');
+  buf.push(attrs({ 'type':('submit'), "class": ('edit_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') }));
+  buf.push('>Edit</a><a');
+  buf.push(attrs({ 'type':('submit'), "class": ('delete_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') + ' ' + ('btn-danger') }));
+  buf.push('>Delete</a></form>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_mailbox/mailbox_edit": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<input');
+  buf.push(attrs({ 'id':("name"), 'value':("" + (model.name) + ""), "class": ('content') }));
+  buf.push('/><input');
+  buf.push(attrs({ 'id':("createdAt"), 'value':("" + (model.createdAt) + ""), "class": ('content') }));
+  buf.push('/><input');
+  buf.push(attrs({ 'id':("SMTP_server"), 'value':("" + (model.SMTP_server) + ""), "class": ('content') }));
+  buf.push('/><input');
+  buf.push(attrs({ 'type':('submit'), 'value':("Save"), "class": ('save_mailbox') + ' ' + ('isEdit') + ' ' + ('btn') + ' ' + ('btn-success') }));
+  buf.push('/><a');
+  buf.push(attrs({ "class": ('cancel_edit_mailbox') + ' ' + ('isEdit') + ' ' + ('btn') + ' ' + ('btn-warning') }));
+  buf.push('>Cancel</a>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_mailbox/mailbox_menu": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<a');
+  buf.push(attrs({ 'href':('#') }));
+  buf.push('><input');
+  buf.push(attrs({ 'type':('checkbox'), 'checked':('checked'), "class": ('change_mailboxes_list') }));
+  buf.push('/> ' + escape((interp = model.name) == null ? '' : interp) + '\n');
+  if ( model.new_messages > 0)
+  {
+  buf.push('<span');
+  buf.push(attrs({ "class": ('badge') + ' ' + ('badge-warning') }));
+  buf.push('>' + escape((interp = model.new_messages) == null ? '' : interp) + '</span>');
+  }
+  buf.push('</a>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/app": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div');
+  buf.push(attrs({ "class": ('container-fluid') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('row-fluid') }));
+  buf.push('><div');
+  buf.push(attrs({ 'id':('sidebar'), "class": ('span2') }));
+  buf.push('><div');
+  buf.push(attrs({ 'id':('menu_container'), "class": ('well') + ' ' + ('sidebar-nav') }));
+  buf.push('></div></div><div');
+  buf.push(attrs({ 'id':('content'), "class": ('span10') }));
+  buf.push('></div></div><div');
+  buf.push(attrs({ "class": ('row-fluid') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('span12') }));
+  buf.push('><footer><p>© CozyCloud 2012</p></footer></div></div></div>');
   }
   return buf.join("");
   };

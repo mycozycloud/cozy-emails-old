@@ -31,8 +31,8 @@ class exports.MailboxView extends Backbone.View
     $(event.target).addClass("disabled").removeClass("buttonSave")  
     input = @.$("input.content")
     data = {}
-    input.each (i) ->
-      data[input[i].id] = input[i].value;
+    input.each (key, value) ->
+      data[key.id] = value.value;
     @model.save data
     @collection.trigger("update_menu")
     @model.isEdit = false
@@ -46,8 +46,8 @@ class exports.MailboxView extends Backbone.View
   render: ->
     # whether we should activate the edit mode or not
     if @model.isEdit
-      template = require('./templates/mailbox_edit')
+      template = require('./templates/_mailbox/mailbox_edit')
     else
-      template = require('./templates/mailbox')
+      template = require('./templates/_mailbox/mailbox')
     $(@el).html template("model": @model.toJSON())
     @

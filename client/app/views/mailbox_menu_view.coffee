@@ -7,6 +7,6 @@ class exports.MailboxMenuView extends Backbone.View
 
   # Render wiew and bind it to model.
   render: ->
-    template = require('./templates/mailbox_menu')
+    template = require('./templates/_mailbox/mailbox_menu')
     $(@el).html template("model": @model.toJSON())
     @

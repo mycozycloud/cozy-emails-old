@@ -15,6 +15,7 @@ class exports.MailboxesList extends Backbone.View
 
   initialize: ->
     @collection.on('reset', @render, @)
+    @collection.fetch()
 
   # Action when user clicks on new mailbox
   addMailbox: (event) ->
