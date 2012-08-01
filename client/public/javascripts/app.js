@@ -132,7 +132,7 @@ window.require.define({"collections/mails": function(exports, require, module) {
 
     /*
     
-      The collection to store emails - get populated with the content of the database.
+      The collection to store emails - gets populated with the content of the database.
       Uses standard "resourceful" approcha for API.
     */
 
@@ -204,11 +204,11 @@ window.require.define({"initialize": function(exports, require, module) {
 
     MainRouter = require('routers/main_router').MainRouter;
 
-    AppView = require('views/app_view').AppView;
-
     MailboxCollection = require('collections/mailboxes').MailboxCollection;
 
     MailsCollection = require('collections/mails').MailsCollection;
+
+    AppView = require('views/app').AppView;
 
     exports.Application = (function(_super) {
 
@@ -409,21 +409,26 @@ window.require.define({"routers/main_router": function(exports, require, module)
   
 }});
 
-window.require.define({"views/app_view": function(exports, require, module) {
+window.require.define({"views/app": function(exports, require, module) {
   (function() {
-    var MailColumnView, MailboxesList, MailboxesMenuList, MailboxesNew, MailsColumnList,
+    var MailboxesList, MailboxesListNew, MailsColumn, MailsElement, MenuMailboxesList,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-    MailboxesList = require('../views/mailboxes_view').MailboxesList;
+    MailboxesList = require('../views/mailboxes_list').MailboxesList;
 
-    MailboxesNew = require('../views/mailboxes_new_view').MailboxesNew;
+    MailboxesListNew = require('../views/mailboxes_list_new').MailboxesListNew;
 
-    MailboxesMenuList = require('../views/mailboxes_menu_view').MailboxesMenuList;
+    MenuMailboxesList = require('../views/menu_mailboxes_list').MenuMailboxesList;
 
-    MailsColumnList = require('../views/mails_column_view').MailsColumnList;
+    MailsColumn = require('../views/mails_column').MailsColumn;
 
-    MailColumnView = require('../views/mail_view').MailColumnView;
+    MailsElement = require('../views/mails_element').MailsElement;
+
+    /*
+    
+      The application's main view - creates other views, lays things out.
+    */
 
     exports.AppView = (function(_super) {
 
@@ -451,22 +456,22 @@ window.require.define({"views/app_view": function(exports, require, module) {
 
       AppView.prototype.set_layout_menu = function() {
         this.container_menu.html(require('./templates/menu'));
-        window.app.view_menu = new MailboxesMenuList(this.$("#menu_mailboxes"), window.app.mailboxes);
+        window.app.view_menu = new MenuMailboxesList(this.$("#menu_mailboxes"), window.app.mailboxes);
         return window.app.view_menu.render();
       };
 
       AppView.prototype.set_layout_mailboxes = function() {
         this.container_content.html(require('./templates/_layouts/layout_mailboxes'));
         window.app.view_mailboxes = new MailboxesList(this.$("#mail_list_container"), window.app.mailboxes);
-        window.app.view_mailboxes_new = new MailboxesNew(this.$("#add_mail_button_container"), window.app.mailboxes);
+        window.app.view_mailboxes_new = new MailboxesListNew(this.$("#add_mail_button_container"), window.app.mailboxes);
         window.app.view_mailboxes.render();
         return window.app.view_mailboxes_new.render();
       };
 
       AppView.prototype.set_layout_mails = function() {
         this.container_content.html(require('./templates/_layouts/layout_mails'));
-        window.app.view_mails_list = new MailsColumnList(this.$("#column_mails_list"), window.app.mails);
-        window.app.view_mail = new MailColumnView(this.$("#column_mail"), window.app.mails);
+        window.app.view_mails_list = new MailsColumn(this.$("#column_mails_list"), window.app.mails);
+        window.app.view_mail = new MailsElement(this.$("#column_mail"), window.app.mails);
         return window.app.view_mails_list.render();
       };
 
@@ -482,328 +487,20 @@ window.require.define({"views/app_view": function(exports, require, module) {
   
 }});
 
-window.require.define({"views/mail_list_view": function(exports, require, module) {
+window.require.define({"views/mailboxes_list": function(exports, require, module) {
   (function() {
-    var Mail,
-      __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    Mail = require("../models/mail").Mail;
-
-    exports.MailListView = (function(_super) {
-
-      __extends(MailListView, _super);
-
-      MailListView.prototype.tagName = "tr";
-
-      MailListView.prototype.events = {
-        "click .choose_mail_button": "setActiveMail"
-      };
-
-      function MailListView(model, collection) {
-        this.model = model;
-        this.collection = collection;
-        MailListView.__super__.constructor.call(this);
-        this.model.view = this;
-        this.collection.on("change_active_mail", this.render, this);
-      }
-
-      MailListView.prototype.setActiveMail = function(event) {
-        this.collection.activeMail = this.model;
-        return this.collection.trigger("change_active_mail");
-      };
-
-      MailListView.prototype.render = function() {
-        var template;
-        template = require('./templates/_mail/mail_list');
-        $(this.el).html(template({
-          "model": this.model.toJSON(),
-          "active": this.model === this.collection.activeMail
-        }));
-        return this;
-      };
-
-      return MailListView;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/mail_view": function(exports, require, module) {
-  (function() {
-    var Mail,
-      __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    Mail = require("../models/mail").Mail;
-
-    exports.MailColumnView = (function(_super) {
-
-      __extends(MailColumnView, _super);
-
-      function MailColumnView(el, collection) {
-        this.el = el;
-        this.collection = collection;
-        MailColumnView.__super__.constructor.call(this);
-        this.collection.on("change_active_mail", this.render, this);
-      }
-
-      MailColumnView.prototype.render = function() {
-        var template, _ref;
-        template = require('./templates/_mail/mail_big');
-        console.log(this.collection.activeMail);
-        $(this.el).html(template({
-          "model": (_ref = this.collection.activeMail) != null ? _ref.toJSON() : void 0
-        }));
-        return this;
-      };
-
-      return MailColumnView;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/mailbox_menu_view": function(exports, require, module) {
-  (function() {
-    var __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    exports.MailboxMenuView = (function(_super) {
-
-      __extends(MailboxMenuView, _super);
-
-      MailboxMenuView.prototype.tagName = 'li';
-
-      function MailboxMenuView(model, collection) {
-        this.model = model;
-        this.collection = collection;
-        MailboxMenuView.__super__.constructor.call(this);
-      }
-
-      MailboxMenuView.prototype.render = function() {
-        var template;
-        template = require('./templates/_mailbox/mailbox_menu');
-        $(this.el).html(template({
-          "model": this.model.toJSON()
-        }));
-        return this;
-      };
-
-      return MailboxMenuView;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/mailbox_view": function(exports, require, module) {
-  (function() {
-    var Mailbox,
-      __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    var Mailbox, MailboxesListElement,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     Mailbox = require("../models/mailbox").Mailbox;
 
-    exports.MailboxView = (function(_super) {
+    MailboxesListElement = require("../views/mailboxes_list_element").MailboxesListElement;
 
-      __extends(MailboxView, _super);
-
-      MailboxView.prototype.className = "mailbox_well well";
-
-      MailboxView.prototype.tagName = "div";
-
-      MailboxView.prototype.isEdit = false;
-
-      MailboxView.prototype.events = {
-        "click .edit_mailbox": "buttonEdit",
-        "click .cancel_edit_mailbox": "buttonCancel",
-        "click .save_mailbox": "buttonSave",
-        "click .delete_mailbox": "buttonDelete"
-      };
-
-      function MailboxView(model, collection) {
-        this.model = model;
-        this.collection = collection;
-        this.buttonDelete = __bind(this.buttonDelete, this);
-        MailboxView.__super__.constructor.call(this);
-        this.model.view = this;
-      }
-
-      MailboxView.prototype.buttonEdit = function(event) {
-        this.model.isEdit = true;
-        return this.render();
-      };
-
-      MailboxView.prototype.buttonCancel = function(event) {
-        this.model.isEdit = false;
-        return this.render();
-      };
-
-      MailboxView.prototype.buttonSave = function(event) {
-        var data, input;
-        $(event.target).addClass("disabled").removeClass("buttonSave");
-        input = this.$("input.content");
-        data = {};
-        input.each(function(i) {
-          return data[input[i].id] = input[i].value;
-        });
-        this.model.save(data);
-        this.collection.trigger("update_menu");
-        this.model.isEdit = false;
-        return this.render();
-      };
-
-      MailboxView.prototype.buttonDelete = function(event) {
-        $(event.target).addClass("disabled").removeClass("delete_mailbox");
-        return this.model.destroy();
-      };
-
-      MailboxView.prototype.render = function() {
-        var template;
-        if (this.model.isEdit) {
-          template = require('./templates/_mailbox/mailbox_edit');
-        } else {
-          template = require('./templates/_mailbox/mailbox');
-        }
-        $(this.el).html(template({
-          "model": this.model.toJSON()
-        }));
-        return this;
-      };
-
-      return MailboxView;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/mailboxes_menu_view": function(exports, require, module) {
-  (function() {
-    var MailboxMenuView,
-      __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    MailboxMenuView = require("./mailbox_menu_view").MailboxMenuView;
-
-    exports.MailboxesMenuList = (function(_super) {
-
-      __extends(MailboxesMenuList, _super);
-
-      MailboxesMenuList.prototype.total_inbox = 0;
-
-      function MailboxesMenuList(el, collection) {
-        this.el = el;
-        this.collection = collection;
-        MailboxesMenuList.__super__.constructor.call(this);
-        this.collection.view_menu_mailboxes = this;
-        this.collection.on('reset', this.render, this);
-        this.collection.on('add', this.render, this);
-        this.collection.on('remove', this.render, this);
-        this.collection.on('change', this.render, this);
-      }
-
-      MailboxesMenuList.prototype.events = {
-        "change input.change_mailboxes_list": 'setupMailboxes'
-      };
-
-      MailboxesMenuList.prototype.setupMailboxes = function(event) {
-        var data, element, input, _i, _len;
-        input = $("input.change_mailboxes_list");
-        data = {};
-        for (_i = 0, _len = input.length; _i < _len; _i++) {
-          element = input[_i];
-          if (element.checked) data[element.id] = true;
-        }
-        this.collection.active_mailboxes = data;
-        return this.collection.trigger("change_active_mailboxes");
-      };
-
-      MailboxesMenuList.prototype.render = function() {
-        var _this = this;
-        $(this.el).html("");
-        this.total_inbox = 0;
-        this.collection.each(function(mail) {
-          var box;
-          box = new MailboxMenuView(mail, mail.collection);
-          $(_this.el).append(box.render().el);
-          return _this.total_inbox += Number(mail.get("new_messages"));
-        });
-        return this;
-      };
-
-      return MailboxesMenuList;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/mailboxes_new_view": function(exports, require, module) {
-  (function() {
-    var Mailbox,
-      __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    Mailbox = require("../models/mailbox").Mailbox;
-
-    exports.MailboxesNew = (function(_super) {
-
-      __extends(MailboxesNew, _super);
-
-      MailboxesNew.prototype.id = "mailboxeslist_new";
-
-      MailboxesNew.prototype.className = "mailboxes_new";
-
-      MailboxesNew.prototype.events = {
-        "click #add_mailbox": 'addMailbox'
-      };
-
-      function MailboxesNew(el, collection) {
-        this.el = el;
-        this.collection = collection;
-        MailboxesNew.__super__.constructor.call(this);
-      }
-
-      MailboxesNew.prototype.addMailbox = function(event) {
-        var newbox;
-        event.preventDefault();
-        newbox = new Mailbox;
-        newbox.isEdit = true;
-        return this.collection.add(newbox);
-      };
-
-      MailboxesNew.prototype.render = function() {
-        $(this.el).html(require('./templates/_mailbox/mailbox_new'));
-        return this;
-      };
-
-      return MailboxesNew;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/mailboxes_view": function(exports, require, module) {
-  (function() {
-    var Mailbox, MailboxView,
-      __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    MailboxView = require("./mailbox_view").MailboxView;
-
-    Mailbox = require("../models/mailbox").Mailbox;
+    /*
+    
+      Displays the list of configured mailboxes.
+    */
 
     exports.MailboxesList = (function(_super) {
 
@@ -827,7 +524,7 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
 
       MailboxesList.prototype.addOne = function(mail) {
         var box;
-        box = new MailboxView(mail, mail.collection);
+        box = new MailboxesListElement(mail, mail.collection);
         return $(this.el).append(box.render().el);
       };
 
@@ -849,42 +546,192 @@ window.require.define({"views/mailboxes_view": function(exports, require, module
   
 }});
 
-window.require.define({"views/mails_column_view": function(exports, require, module) {
+window.require.define({"views/mailboxes_list_element": function(exports, require, module) {
   (function() {
-    var Mail, MailsList, MailsMore,
+    var Mailbox,
+      __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Mailbox = require("../models/mailbox").Mailbox;
+
+    /*
+    
+      The element of the list of mailboxes.
+      
+      mailboxes_list -> mailboxes_list_element
+    */
+
+    exports.MailboxesListElement = (function(_super) {
+
+      __extends(MailboxesListElement, _super);
+
+      MailboxesListElement.prototype.className = "mailbox_well well";
+
+      MailboxesListElement.prototype.tagName = "div";
+
+      MailboxesListElement.prototype.isEdit = false;
+
+      MailboxesListElement.prototype.events = {
+        "click .edit_mailbox": "buttonEdit",
+        "click .cancel_edit_mailbox": "buttonCancel",
+        "click .save_mailbox": "buttonSave",
+        "click .delete_mailbox": "buttonDelete"
+      };
+
+      function MailboxesListElement(model, collection) {
+        this.model = model;
+        this.collection = collection;
+        this.buttonDelete = __bind(this.buttonDelete, this);
+        MailboxesListElement.__super__.constructor.call(this);
+        this.model.view = this;
+      }
+
+      MailboxesListElement.prototype.buttonEdit = function(event) {
+        this.model.isEdit = true;
+        return this.render();
+      };
+
+      MailboxesListElement.prototype.buttonCancel = function(event) {
+        this.model.isEdit = false;
+        return this.render();
+      };
+
+      MailboxesListElement.prototype.buttonSave = function(event) {
+        var data, input;
+        $(event.target).addClass("disabled").removeClass("buttonSave");
+        input = this.$("input.content");
+        data = {};
+        input.each(function(i) {
+          return data[input[i].id] = input[i].value;
+        });
+        this.model.save(data);
+        this.collection.trigger("update_menu");
+        this.model.isEdit = false;
+        return this.render();
+      };
+
+      MailboxesListElement.prototype.buttonDelete = function(event) {
+        $(event.target).addClass("disabled").removeClass("delete_mailbox");
+        return this.model.destroy();
+      };
+
+      MailboxesListElement.prototype.render = function() {
+        var template;
+        if (this.model.isEdit) {
+          template = require('./templates/_mailbox/mailbox_edit');
+        } else {
+          template = require('./templates/_mailbox/mailbox');
+        }
+        $(this.el).html(template({
+          "model": this.model.toJSON()
+        }));
+        return this;
+      };
+
+      return MailboxesListElement;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/mailboxes_list_new": function(exports, require, module) {
+  (function() {
+    var Mailbox,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Mailbox = require("../models/mailbox").Mailbox;
+
+    /*
+    
+      The toolbar to add a new mailbox.
+      
+      mailboxes_list -> mailboxes_list_new
+    */
+
+    exports.MailboxesListNew = (function(_super) {
+
+      __extends(MailboxesListNew, _super);
+
+      MailboxesListNew.prototype.id = "mailboxeslist_new";
+
+      MailboxesListNew.prototype.className = "mailboxes_new";
+
+      MailboxesListNew.prototype.events = {
+        "click #add_mailbox": 'addMailbox'
+      };
+
+      function MailboxesListNew(el, collection) {
+        this.el = el;
+        this.collection = collection;
+        MailboxesListNew.__super__.constructor.call(this);
+      }
+
+      MailboxesListNew.prototype.addMailbox = function(event) {
+        var newbox;
+        event.preventDefault();
+        newbox = new Mailbox;
+        newbox.isEdit = true;
+        return this.collection.add(newbox);
+      };
+
+      MailboxesListNew.prototype.render = function() {
+        $(this.el).html(require('./templates/_mailbox/mailbox_new'));
+        return this;
+      };
+
+      return MailboxesListNew;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/mails_column": function(exports, require, module) {
+  (function() {
+    var Mail, MailsList, MailsListMore,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     Mail = require("../models/mail").Mail;
 
-    MailsList = require("./mails_view").MailsList;
+    MailsList = require("../views/mails_list").MailsList;
 
-    MailsMore = require("./mails_more_view").MailsMore;
+    MailsListMore = require("../views/mails_list_more").MailsListMore;
 
-    exports.MailsColumnList = (function(_super) {
+    /*
+    
+      The view of the central column - the one which holds the list of mail.
+    */
 
-      __extends(MailsColumnList, _super);
+    exports.MailsColumn = (function(_super) {
 
-      MailsColumnList.prototype.id = "mailboxeslist";
+      __extends(MailsColumn, _super);
 
-      MailsColumnList.prototype.className = "mailboxes";
+      MailsColumn.prototype.id = "mailboxeslist";
 
-      function MailsColumnList(el, collection) {
+      MailsColumn.prototype.className = "mailboxes";
+
+      function MailsColumn(el, collection) {
         this.el = el;
         this.collection = collection;
-        MailsColumnList.__super__.constructor.call(this);
+        MailsColumn.__super__.constructor.call(this);
       }
 
-      MailsColumnList.prototype.render = function() {
+      MailsColumn.prototype.render = function() {
         $(this.el).html(require('./templates/_mail/mails'));
         this.view_mails_list = new MailsList(this.$("#mails_list_container"), this.collection);
-        this.view_mails_list_more = new MailsMore(this.$("#button_load_more_mails"), this.collection);
+        this.view_mails_list_more = new MailsListMore(this.$("#button_load_more_mails"), this.collection);
         this.view_mails_list.render();
         this.view_mails_list_more.render();
         return this;
       };
 
-      return MailsColumnList;
+      return MailsColumn;
 
     })(Backbone.View);
 
@@ -892,53 +739,62 @@ window.require.define({"views/mails_column_view": function(exports, require, mod
   
 }});
 
-window.require.define({"views/mails_more_view": function(exports, require, module) {
+window.require.define({"views/mails_element": function(exports, require, module) {
   (function() {
-    var Mail, MailListView,
+    var Mail,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    MailListView = require("./mail_list_view").MailListView;
-
-    Mail = require("../models/mail").Mail;
-
-    exports.MailsMore = (function(_super) {
-
-      __extends(MailsMore, _super);
-
-      function MailsMore(el, collection) {
-        this.el = el;
-        this.collection = collection;
-        MailsMore.__super__.constructor.call(this);
-      }
-
-      MailsMore.prototype.render = function() {
-        $(this.el).html(require("./templates/_mail/mails_more"));
-        return this;
-      };
-
-      return MailsMore;
-
-    })(Backbone.View);
-
-  }).call(this);
-  
-}});
-
-window.require.define({"views/mails_view": function(exports, require, module) {
-  (function() {
-    var Mail, MailListView,
-      __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    MailListView = require("./mail_list_view").MailListView;
 
     Mail = require("../models/mail").Mail;
 
     /*
     
+      The mail view. Displays all data & options
+    */
+
+    exports.MailsElement = (function(_super) {
+
+      __extends(MailsElement, _super);
+
+      function MailsElement(el, collection) {
+        this.el = el;
+        this.collection = collection;
+        MailsElement.__super__.constructor.call(this);
+        this.collection.on("change_active_mail", this.render, this);
+      }
+
+      MailsElement.prototype.render = function() {
+        var template, _ref;
+        template = require('./templates/_mail/mail_big');
+        console.log(this.collection.activeMail);
+        $(this.el).html(template({
+          "model": (_ref = this.collection.activeMail) != null ? _ref.toJSON() : void 0
+        }));
+        return this;
+      };
+
+      return MailsElement;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/mails_list": function(exports, require, module) {
+  (function() {
+    var Mail, MailsListElement,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Mail = require("../models/mail").Mail;
+
+    MailsListElement = require("./mails_list_element").MailsListElement;
+
+    /*
+    
       View to generate the list of mails - the second column from the left.
-      Uses MailListView to generate each mail's view
+      Uses MailsListElement to generate each mail's view
     */
 
     exports.MailsList = (function(_super) {
@@ -961,7 +817,7 @@ window.require.define({"views/mails_view": function(exports, require, module) {
 
       MailsList.prototype.addOne = function(mail) {
         var box;
-        box = new MailListView(mail, mail.collection);
+        box = new MailsListElement(mail, mail.collection);
         return $(this.el).append(box.render().el);
       };
 
@@ -975,6 +831,203 @@ window.require.define({"views/mails_view": function(exports, require, module) {
       };
 
       return MailsList;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/mails_list_element": function(exports, require, module) {
+  (function() {
+    var Mail,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Mail = require("../models/mail").Mail;
+
+    /*
+    
+      The element on the list of mails. Reacts for events, and stuff.
+    */
+
+    exports.MailsListElement = (function(_super) {
+
+      __extends(MailsListElement, _super);
+
+      MailsListElement.prototype.tagName = "tr";
+
+      MailsListElement.prototype.events = {
+        "click .choose_mail_button": "setActiveMail"
+      };
+
+      function MailsListElement(model, collection) {
+        this.model = model;
+        this.collection = collection;
+        MailsListElement.__super__.constructor.call(this);
+        this.model.view = this;
+        this.collection.on("change_active_mail", this.render, this);
+      }
+
+      MailsListElement.prototype.setActiveMail = function(event) {
+        this.collection.activeMail = this.model;
+        return this.collection.trigger("change_active_mail");
+      };
+
+      MailsListElement.prototype.render = function() {
+        var template;
+        template = require('./templates/_mail/mail_list');
+        $(this.el).html(template({
+          "model": this.model.toJSON(),
+          "active": this.model === this.collection.activeMail
+        }));
+        return this;
+      };
+
+      return MailsListElement;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/mails_list_more": function(exports, require, module) {
+  (function() {
+    var Mail,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Mail = require("../models/mail").Mail;
+
+    /*
+    
+      The view with the "load more" button.
+    */
+
+    exports.MailsListMore = (function(_super) {
+
+      __extends(MailsListMore, _super);
+
+      function MailsListMore(el, collection) {
+        this.el = el;
+        this.collection = collection;
+        MailsListMore.__super__.constructor.call(this);
+      }
+
+      MailsListMore.prototype.render = function() {
+        $(this.el).html(require("./templates/_mail/mails_more"));
+        return this;
+      };
+
+      return MailsListMore;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/menu_mailboxes_list": function(exports, require, module) {
+  (function() {
+    var MenuMailboxListElement,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    MenuMailboxListElement = require("./menu_mailboxes_list_element").MenuMailboxListElement;
+
+    /*
+    
+      The list of mailboxes in the leftmost column - the menu.
+    */
+
+    exports.MenuMailboxesList = (function(_super) {
+
+      __extends(MenuMailboxesList, _super);
+
+      MenuMailboxesList.prototype.total_inbox = 0;
+
+      function MenuMailboxesList(el, collection) {
+        this.el = el;
+        this.collection = collection;
+        MenuMailboxesList.__super__.constructor.call(this);
+        this.collection.view_menu_mailboxes = this;
+        this.collection.on('reset', this.render, this);
+        this.collection.on('add', this.render, this);
+        this.collection.on('remove', this.render, this);
+        this.collection.on('change', this.render, this);
+      }
+
+      MenuMailboxesList.prototype.events = {
+        "change input.change_mailboxes_list": 'setupMailboxes'
+      };
+
+      MenuMailboxesList.prototype.setupMailboxes = function(event) {
+        var data, element, input, _i, _len;
+        input = $("input.change_mailboxes_list");
+        data = {};
+        for (_i = 0, _len = input.length; _i < _len; _i++) {
+          element = input[_i];
+          if (element.checked) data[element.id] = true;
+        }
+        this.collection.active_mailboxes = data;
+        return this.collection.trigger("change_active_mailboxes");
+      };
+
+      MenuMailboxesList.prototype.render = function() {
+        var _this = this;
+        $(this.el).html("");
+        this.total_inbox = 0;
+        this.collection.each(function(mail) {
+          var box;
+          box = new MenuMailboxListElement(mail, mail.collection);
+          $(_this.el).append(box.render().el);
+          return _this.total_inbox += Number(mail.get("new_messages"));
+        });
+        return this;
+      };
+
+      return MenuMailboxesList;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/menu_mailboxes_list_element": function(exports, require, module) {
+  
+  /*
+
+    The element of the list of mailboxes in the leftmost column - the menu.
+  */
+
+  (function() {
+    var __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    exports.MenuMailboxListElement = (function(_super) {
+
+      __extends(MenuMailboxListElement, _super);
+
+      MenuMailboxListElement.prototype.tagName = 'li';
+
+      function MenuMailboxListElement(model, collection) {
+        this.model = model;
+        this.collection = collection;
+        MenuMailboxListElement.__super__.constructor.call(this);
+      }
+
+      MenuMailboxListElement.prototype.render = function() {
+        var template;
+        template = require('./templates/_mailbox/mailbox_menu');
+        $(this.el).html(template({
+          "model": this.model.toJSON()
+        }));
+        return this;
+      };
+
+      return MenuMailboxListElement;
 
     })(Backbone.View);
 

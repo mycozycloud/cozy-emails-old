@@ -1,9 +1,14 @@
-{MailboxesList} = require '../views/mailboxes_view'
-{MailboxesNew} = require '../views/mailboxes_new_view'
-{MailboxesMenuList} = require '../views/mailboxes_menu_view'
-{MailsColumnList} = require '../views/mails_column_view'
-{MailColumnView} = require '../views/mail_view'
+{MailboxesList} = require '../views/mailboxes_list'
+{MailboxesListNew} = require '../views/mailboxes_list_new'
+{MenuMailboxesList} = require '../views/menu_mailboxes_list'
+{MailsColumn} = require '../views/mails_column'
+{MailsElement} = require '../views/mails_element'
 
+###
+
+  The application's main view - creates other views, lays things out.
+
+###
 class exports.AppView extends Backbone.View
   id: 'home-view',
   el: 'body'
@@ -29,7 +34,7 @@ class exports.AppView extends Backbone.View
   # layout the dynamic menu
   set_layout_menu: ->
     @container_menu.html require('./templates/menu')
-    window.app.view_menu = new MailboxesMenuList @.$("#menu_mailboxes"), window.app.mailboxes
+    window.app.view_menu = new MenuMailboxesList @.$("#menu_mailboxes"), window.app.mailboxes
     window.app.view_menu.render()
 
 ###################################################
@@ -41,7 +46,7 @@ class exports.AppView extends Backbone.View
     # lay the mailboxes out
     @container_content.html require('./templates/_layouts/layout_mailboxes')
     window.app.view_mailboxes = new MailboxesList @.$("#mail_list_container"), window.app.mailboxes
-    window.app.view_mailboxes_new = new MailboxesNew @.$("#add_mail_button_container"), window.app.mailboxes
+    window.app.view_mailboxes_new = new MailboxesListNew @.$("#add_mail_button_container"), window.app.mailboxes
     window.app.view_mailboxes.render()
     window.app.view_mailboxes_new.render()
     
@@ -51,8 +56,8 @@ class exports.AppView extends Backbone.View
     # lay the mailboxes out
     @container_content.html require('./templates/_layouts/layout_mails')
     # create views for the columns
-    window.app.view_mails_list = new MailsColumnList @.$("#column_mails_list"), window.app.mails
-    window.app.view_mail = new MailColumnView @.$("#column_mail"), window.app.mails
+    window.app.view_mails_list = new MailsColumn @.$("#column_mails_list"), window.app.mails
+    window.app.view_mail = new MailsElement @.$("#column_mail"), window.app.mails
     window.app.view_mails_list.render()
     
   # set the layout for coulmn view - mails

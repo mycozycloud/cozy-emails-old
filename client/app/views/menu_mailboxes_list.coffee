@@ -1,6 +1,11 @@
-{MailboxMenuView} = require "./mailbox_menu_view"
+{MenuMailboxListElement} = require "./menu_mailboxes_list_element"
 
-class exports.MailboxesMenuList extends Backbone.View
+###
+
+  The list of mailboxes in the leftmost column - the menu.
+
+###
+class exports.MenuMailboxesList extends Backbone.View
   
   total_inbox: 0
   
@@ -29,7 +34,7 @@ class exports.MailboxesMenuList extends Backbone.View
     $(@el).html("")
     @total_inbox = 0
     @collection.each (mail) =>
-      box = new MailboxMenuView mail, mail.collection
+      box = new MenuMailboxListElement mail, mail.collection
       $(@el).append box.render().el
       @total_inbox += (Number) mail.get("new_messages")
     @

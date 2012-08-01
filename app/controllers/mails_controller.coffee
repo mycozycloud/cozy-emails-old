@@ -48,10 +48,10 @@ action 'index', ->
   server.connect (err) ->
     exitOnErr err if err
     server.openBox "INBOX", false, (err, box) ->
+      
+      # open or die
       exitOnErr err if err
       
-      console.log "You have #{box.messages.total} messages in your INBOX"
-
       server.search ["ALL", ['SINCE', 'July 25, 2012']], (err, results) ->
         exitOnErr err if err
 
@@ -69,25 +69,8 @@ action 'index', ->
           fds = {}
           filenames = {}
           parser = new mailparser.MailParser
-
-          parser.on "headers", (headers) ->
-            console.log "Message: #{headers.subject}"
-
-          parser.on "astart", (id, headers) ->
-            filenames[id] = headers.filename
-            fds[id] = fs.openSync headers.filename, 'w'
-
-          parser.on "astream", (id, buffer) ->
-            fs.writeSync fds[id], buffer, 0, buffer.length, null
-
-          parser.on "aend", (id) ->
-            return unless fds[id]
-            fs.close fds[id], (err) ->
-              return console.error err if err
-              console.log "Writing #{filenames[id]} completed"
           
           parser.on "end", (mail) ->
-            console.log mail
             mails.push mail
 
           message.on "data", (data) ->
@@ -95,10 +78,11 @@ action 'index', ->
 
           message.on "end", ->
             do parser.end
+            # stock in the database
 
         fetch.on "end", ->
-          do server.logout
           send mails
+          do server.logout
 
 # POST /mailboxes
 action 'create', ->

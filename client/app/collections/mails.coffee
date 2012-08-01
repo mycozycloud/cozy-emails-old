@@ -2,7 +2,7 @@
 
 ###
 
-  The collection to store emails - get populated with the content of the database.
+  The collection to store emails - gets populated with the content of the database.
   Uses standard "resourceful" approcha for API.
 
 ###

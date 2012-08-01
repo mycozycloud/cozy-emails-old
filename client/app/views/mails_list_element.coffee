@@ -1,7 +1,11 @@
 {Mail} = require "../models/mail"
 
-# Row displaying task status and description
-class exports.MailListView extends Backbone.View
+###
+
+  The element on the list of mails. Reacts for events, and stuff.
+
+###
+class exports.MailsListElement extends Backbone.View
 
   tagName : "tr"
 

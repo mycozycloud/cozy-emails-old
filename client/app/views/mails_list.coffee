@@ -1,10 +1,11 @@
-{MailListView} = require "./mail_list_view"
 {Mail} = require "../models/mail"
+
+{MailsListElement} = require "./mails_list_element"
 
 ###
 
   View to generate the list of mails - the second column from the left.
-  Uses MailListView to generate each mail's view
+  Uses MailsListElement to generate each mail's view
 
 ###
 class exports.MailsList extends Backbone.View
@@ -19,7 +20,7 @@ class exports.MailsList extends Backbone.View
     @collection.fetch()
 
   addOne: (mail) ->
-    box = new MailListView mail, mail.collection
+    box = new MailsListElement mail, mail.collection
     $(@el).append box.render().el    
 
   render: ->

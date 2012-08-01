@@ -1,11 +1,14 @@
-# Row displaying task status and description
-class exports.MailboxMenuView extends Backbone.View
+###
+
+  The element of the list of mailboxes in the leftmost column - the menu.
+
+###
+class exports.MenuMailboxListElement extends Backbone.View
   tagName: 'li'
 
   constructor: (@model, @collection) ->
     super()
 
-  # Render wiew and bind it to model.
   render: ->
     template = require('./templates/_mailbox/mailbox_menu')
     $(@el).html template("model": @model.toJSON())

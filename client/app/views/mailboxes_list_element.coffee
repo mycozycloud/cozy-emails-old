@@ -1,7 +1,13 @@
 {Mailbox} = require "../models/mailbox"
 
-# Row displaying task status and description
-class exports.MailboxView extends Backbone.View
+###
+
+  The element of the list of mailboxes.
+  
+  mailboxes_list -> mailboxes_list_element
+
+###
+class exports.MailboxesListElement extends Backbone.View
   className: "mailbox_well well"
   tagName: "div"
   isEdit: false

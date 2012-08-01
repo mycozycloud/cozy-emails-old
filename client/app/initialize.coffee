@@ -1,8 +1,8 @@
 {BrunchApplication} = require 'helpers'
 {MainRouter} = require 'routers/main_router'
-{AppView} = require 'views/app_view'
 {MailboxCollection} = require 'collections/mailboxes'
 {MailsCollection} = require 'collections/mails'
+{AppView} = require 'views/app'
 
 class exports.Application extends BrunchApplication
   # This callback would be executed on document ready event.

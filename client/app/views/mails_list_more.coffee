@@ -1,7 +1,11 @@
-{MailListView} = require "./mail_list_view"
 {Mail} = require "../models/mail"
 
-class exports.MailsMore extends Backbone.View
+###
+
+  The view with the "load more" button.
+
+###
+class exports.MailsListMore extends Backbone.View
 
   constructor: (@el, @collection) ->
     super()

@@ -1,6 +1,13 @@
 {Mailbox} = require "../models/mailbox"
 
-class exports.MailboxesNew extends Backbone.View
+###
+
+  The toolbar to add a new mailbox.
+  
+  mailboxes_list -> mailboxes_list_new
+
+###
+class exports.MailboxesListNew extends Backbone.View
   
   id: "mailboxeslist_new"
   className: "mailboxes_new"

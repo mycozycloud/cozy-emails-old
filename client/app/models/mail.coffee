@@ -1,4 +1,5 @@
 BaseModel = require("./models").BaseModel
+
 ###
 
   Model which defines the MAIL object.

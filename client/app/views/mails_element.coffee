@@ -1,6 +1,11 @@
 {Mail} = require "../models/mail"
 
-class exports.MailColumnView extends Backbone.View
+###
+
+  The mail view. Displays all data & options
+
+###
+class exports.MailsElement extends Backbone.View
 
   constructor: (@el, @collection) ->
     super()
