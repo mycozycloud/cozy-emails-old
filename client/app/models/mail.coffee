@@ -1,12 +1,10 @@
 BaseModel = require("./models").BaseModel
+###
 
-# Defines a mailbox
+  Model which defines the MAIL object.
+
+###
 class exports.Mail extends BaseModel
-  # 
-  # defaults:
-  #   'title' : "hello"
-  #   'date' : "yesterday"
-  #   'from' : "example@domain.com"
 
   initialize: ->
     @on "destroy", @removeView, @

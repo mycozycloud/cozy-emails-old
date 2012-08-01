@@ -82,6 +82,12 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
 
     Mailbox = require("../models/mailbox").Mailbox;
 
+    /*
+    
+      Generic collection of all mailboxes configured by user.
+      Uses standard "resourceful" approach for DB API, via it's url.
+    */
+
     exports.MailboxCollection = (function(_super) {
 
       __extends(MailboxCollection, _super);
@@ -98,8 +104,8 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
         return this.on("add", this.addView, this);
       };
 
-      MailboxCollection.prototype.comparator = function(Mailbox) {
-        return Mailbox.get("name");
+      MailboxCollection.prototype.comparator = function(mailbox) {
+        return mailbox.get("name");
       };
 
       MailboxCollection.prototype.addView = function(mail) {
@@ -124,6 +130,12 @@ window.require.define({"collections/mails": function(exports, require, module) {
 
     Mail = require("../models/mail").Mail;
 
+    /*
+    
+      The collection to store emails - get populated with the content of the database.
+      Uses standard "resourceful" approcha for API.
+    */
+
     exports.MailsCollection = (function(_super) {
 
       __extends(MailsCollection, _super);
@@ -136,8 +148,17 @@ window.require.define({"collections/mails": function(exports, require, module) {
 
       MailsCollection.prototype.url = 'mails/';
 
-      MailsCollection.prototype.comparator = function(Mail) {
-        return Mail.get("date");
+      MailsCollection.prototype.comparator = function(mail) {
+        return mail.get("date");
+      };
+
+      MailsCollection.prototype.initialize = function() {
+        return this.on("change_active_mail", this.navigateMail, this);
+      };
+
+      MailsCollection.prototype.navigateMail = function(event) {
+        window.app.router.navigate("mail:" + this.activeMail.id);
+        return console.log("mail:" + this.activeMail.id);
       };
 
       return MailsCollection;
@@ -214,35 +235,6 @@ window.require.define({"initialize": function(exports, require, module) {
   
 }});
 
-window.require.define({"models/config": function(exports, require, module) {
-  (function() {
-    var BaseModel,
-      __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    BaseModel = require("./models").BaseModel;
-
-    exports.Config = (function(_super) {
-
-      __extends(Config, _super);
-
-      function Config() {
-        Config.__super__.constructor.apply(this, arguments);
-      }
-
-      Config.prototype.defaults = {
-        'active_mailboxes': {},
-        'active_mail': ""
-      };
-
-      return Config;
-
-    })(BaseModel);
-
-  }).call(this);
-  
-}});
-
 window.require.define({"models/mail": function(exports, require, module) {
   (function() {
     var BaseModel,
@@ -250,6 +242,11 @@ window.require.define({"models/mail": function(exports, require, module) {
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     BaseModel = require("./models").BaseModel;
+
+    /*
+    
+      Model which defines the MAIL object.
+    */
 
     exports.Mail = (function(_super) {
 
@@ -287,6 +284,13 @@ window.require.define({"models/mailbox": function(exports, require, module) {
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     BaseModel = require("./models").BaseModel;
+
+    /*
+    
+      A model which defines the MAILBOX object.
+      MAILBOX stocks all the data necessary for a successful connection to IMAP and SMTP servers,
+      and all the data relative to this mailbox, internal to the application.
+    */
 
     exports.Mailbox = (function(_super) {
 
@@ -332,6 +336,13 @@ window.require.define({"models/mailbox": function(exports, require, module) {
 }});
 
 window.require.define({"models/models": function(exports, require, module) {
+  
+  /*
+
+      Base class which contains methods common for all the models.
+      Might get useful at some point, even though it's not visible yet...
+  */
+
   (function() {
     var __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
@@ -357,6 +368,12 @@ window.require.define({"models/models": function(exports, require, module) {
 }});
 
 window.require.define({"routers/main_router": function(exports, require, module) {
+  
+  /*
+
+    Application's router.
+  */
+
   (function() {
     var __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
@@ -1013,7 +1030,7 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   buf.push(attrs({ "class": ('well') }));
   buf.push('><p>' + escape((interp = model.headers.from) == null ? '' : interp) + '\n<i');
   buf.push(attrs({ 'style':('color: lightgray;') }));
-  buf.push('>' + escape((interp = model.headers.date) == null ? '' : interp) + '</i></p><h4>' + escape((interp = model.subject) == null ? '' : interp) + '</h4><p>' + escape((interp = model.html) == null ? '' : interp) + '\n</p></div><div');
+  buf.push('>' + escape((interp = model.headers.date) == null ? '' : interp) + '</i></p><h4>' + escape((interp = model.subject) == null ? '' : interp) + '</h4><div>' + escape((interp = model.html) == null ? '' : interp) + '\n</div></div><div');
   buf.push(attrs({ "class": ('btn-toolbar') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('btn-group') }));
@@ -1061,7 +1078,11 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   buf.push(attrs({  }));
   buf.push('/><i');
   buf.push(attrs({ 'style':('color: lightgray;') }));
-  buf.push('>' + escape((interp = model.headers.date) == null ? '' : interp) + '</i></p><p>' + escape((interp = model.subject) == null ? '' : interp) + '</p></td><td></td>');
+  buf.push('>' + escape((interp = model.headers.date) == null ? '' : interp) + '</i></p><p>' + escape((interp = model.subject) == null ? '' : interp) + '</p><td><a');
+  buf.push(attrs({ "class": ('btn') + ' ' + ('btn-mini') + ' ' + ('choose_mail_button') }));
+  buf.push('><i');
+  buf.push(attrs({ "class": ('icon-arrow-right') }));
+  buf.push('></i></a></td></td>');
   }
   else
   {

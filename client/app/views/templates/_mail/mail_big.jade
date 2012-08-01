@@ -3,8 +3,8 @@
     | #{model.headers.from}
     i(style='color: lightgray;') #{model.headers.date}
   h4 #{model.subject}
-  p 
-    | #{model.html}
+  div.
+    #{model.html}
 .btn-toolbar
   .btn-group
     a.btn.btn-primary

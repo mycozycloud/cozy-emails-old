@@ -1,4 +1,10 @@
+###
+
+  Application's router.
+
+###
 class exports.MainRouter extends Backbone.Router
+
   routes:
     '' : 'home'
     'config-mailboxes' : 'configMailboxes'

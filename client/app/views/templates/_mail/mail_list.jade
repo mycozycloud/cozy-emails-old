@@ -5,7 +5,9 @@ if active
       br
       i(style='color: lightgray;') #{model.headers.date}
     p #{model.subject}
-  td
+    td
+        a.btn.btn-mini.choose_mail_button
+          i.icon-arrow-right
 else
   td
     p
