@@ -1,7 +1,4 @@
 before ->
-  ## dependances
-  imap = require "imap"
-  mailparser = require "mailparser"
 
   Mail.find req.params.id, (err, box) =>
     if err or !box
@@ -14,11 +11,15 @@ before ->
 # GET /mailboxes
 action 'index', ->
   
+  ## dependances
+  imap = require "imap"
+  mailparser = require "mailparser"
+  
   config = {
     "name": "My Name",
     "email": "jaime.la.viande.bovine@gmail.com",
     "username": "jaime.la.viande.bovine@gmail.com",
-    "password": "PUT_THE_PASSWORD_HERE",
+    "password": "",
     "imap": {
       "host": "imap.gmail.com",
       "port": 993,

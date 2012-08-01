@@ -2,6 +2,7 @@ if active
   td
     p
       | #{model.headers.from}
+      br
       i(style='color: lightgray;') #{model.headers.date}
     p #{model.subject}
   td
@@ -9,6 +10,7 @@ else
   td
     p
       | #{model.headers.from}
+      br
       i(style='color: lightgray;') #{model.headers.date}
     p #{model.subject}
   td

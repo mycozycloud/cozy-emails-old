@@ -1057,13 +1057,17 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   var interp;
   if ( active)
   {
-  buf.push('<td><p>' + escape((interp = model.headers.from) == null ? '' : interp) + '\n<i');
+  buf.push('<td><p>' + escape((interp = model.headers.from) == null ? '' : interp) + '\n<br');
+  buf.push(attrs({  }));
+  buf.push('/><i');
   buf.push(attrs({ 'style':('color: lightgray;') }));
   buf.push('>' + escape((interp = model.headers.date) == null ? '' : interp) + '</i></p><p>' + escape((interp = model.subject) == null ? '' : interp) + '</p></td><td></td>');
   }
   else
   {
-  buf.push('<td><p>' + escape((interp = model.headers.from) == null ? '' : interp) + '\n<i');
+  buf.push('<td><p>' + escape((interp = model.headers.from) == null ? '' : interp) + '\n<br');
+  buf.push(attrs({  }));
+  buf.push('/><i');
   buf.push(attrs({ 'style':('color: lightgray;') }));
   buf.push('>' + escape((interp = model.headers.date) == null ? '' : interp) + '</i></p><p>' + escape((interp = model.subject) == null ? '' : interp) + '</p></td><td><a');
   buf.push(attrs({ "class": ('btn') + ' ' + ('btn-mini') + ' ' + ('choose_mail_button') }));
