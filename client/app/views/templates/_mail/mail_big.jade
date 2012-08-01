@@ -1,0 +1,28 @@
+.well
+  p
+    | #{model.headers.from}
+    i(style='color: lightgray;') #{model.headers.date}
+  h4 #{model.subject}
+  p 
+    | #{model.html}
+.btn-toolbar
+  .btn-group
+    a.btn.btn-primary
+      i.icon-share-alt
+      | Answer
+    a.btn
+      i.icon-share-alt
+      | Answer to all
+    a.btn
+      i.icon-arrow-up
+      | Forward
+  .btn-group
+    a.btn.btn-warning
+      i.icon-star
+      | Important
+    a.btn
+      i.icon-ban-circle
+      | Spam
+    a.btn.btn-danger
+      i.icon-remove
+      | Delete

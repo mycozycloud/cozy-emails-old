@@ -11,6 +11,19 @@ class exports.MailboxesMenuList extends Backbone.View
     @collection.on('add', @render, @)
     @collection.on('remove', @render, @)
     @collection.on('change', @render, @)
+    
+  events: {
+    "change input.change_mailboxes_list" : 'setupMailboxes',
+  }
+
+  setupMailboxes: (event) ->
+    input = $("input.change_mailboxes_list")
+    data = {}
+    for element in input
+      data[element.id] = true if element.checked
+    @collection.active_mailboxes = data
+    @collection.trigger "change_active_mailboxes"
+    # console.log @collection.active_mailboxes
 
   render: ->
     $(@el).html("")

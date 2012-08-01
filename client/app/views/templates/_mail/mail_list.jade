@@ -1,0 +1,16 @@
+if active
+  td
+    p
+      | #{model.headers.from}
+      i(style='color: lightgray;') #{model.headers.date}
+    p #{model.subject}
+  td
+else
+  td
+    p
+      | #{model.headers.from}
+      i(style='color: lightgray;') #{model.headers.date}
+    p #{model.subject}
+  td
+      a.btn.btn-mini.choose_mail_button
+        i.icon-arrow-right

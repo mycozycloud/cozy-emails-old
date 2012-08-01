@@ -5,10 +5,6 @@ class exports.MailboxesList extends Backbone.View
   id: "mailboxeslist"
   className: "mailboxes"
 
-  events: {
-     "click #add_mailbox" : 'addMailbox',
-  }
-
   constructor: (@el, @collection) ->
     super()
     @collection.view = @
@@ -17,21 +13,14 @@ class exports.MailboxesList extends Backbone.View
     @collection.on('reset', @render, @)
     @collection.fetch()
 
-  # Action when user clicks on new mailbox
-  addMailbox: (event) ->
-    event.preventDefault()
-    newbox = new Mailbox
-    @collection.add newbox
-    @addOne newbox, true
-
   # Add a mailbox at the bottom of the list
-  addOne: (mail, edit = false) ->
-    mail.isEdit = edit
+  addOne: (mail) ->
     box = new MailboxView mail, mail.collection
-    @.$("#mail_list_container").append box.render().el    
+    $(@el).append box.render().el    
 
   render: ->
-    @.$("#mail_list_container").html("")
-    @collection.each (mail) =>
-      @addOne mail, false
-    @.$("#mail_list_container")
+    $(@el).html ""
+    @collection.each (m) =>
+      m.isEdit = false
+      @addOne m
+    @

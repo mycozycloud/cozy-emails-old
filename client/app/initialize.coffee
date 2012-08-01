@@ -2,6 +2,7 @@
 {MainRouter} = require 'routers/main_router'
 {AppView} = require 'views/app_view'
 {MailboxCollection} = require 'collections/mailboxes'
+{MailsCollection} = require 'collections/mails'
 
 class exports.Application extends BrunchApplication
   # This callback would be executed on document ready event.
@@ -9,6 +10,7 @@ class exports.Application extends BrunchApplication
   # group things by their type e.g. `@views = {}; @views.home = new HomeView`.
   initialize: ->
     @mailboxes = new MailboxCollection
+    @mails = new MailsCollection
     @router = new MainRouter
     @appView = new AppView
 

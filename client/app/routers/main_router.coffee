@@ -7,7 +7,7 @@ class exports.MainRouter extends Backbone.Router
 ############## INDEX
   home : ->
     app.appView.render()
-    app.appView.set_layout_cols()
+    app.appView.set_layout_mails()
 
 
 ################################################################
