@@ -1,36 +1,23 @@
+Mailbox.checkAllMailboxes = ->
+  Mailbox.all (err, mbs) ->
+    for mb in mbs
+      Mailbox.getMail(mb)
+
 Mailbox.getMail = (mailbox) ->
   
   ## dependences
   imap = require "imap"
   mailparser = require "mailparser"
   
-  config = {
-    "name": mailbox.name,
-    "email": mailbox.SMTP_send_as,
-    "username": mailbox.login,
-    "password": mailbox.pass,
-    "imap": {
-      "host": mailbox.IMAP_server,
-      "port": mailbox.IMAP_port,
-      "secure": mailbox.IMAP_secure
-    },
-    "smtp": {
-      "host": mailbox.SMTP_server,
-      "ssl": mailbox.SMTP_ssl
-    }
-  }
   
-  
-  console.log "Checking out une mailbox: " + mailbox
-  console.log "Config: " + config
-  
+  console.log "getMail of mailbox: " + JSON.stringify(mailbox)
   # 
   server = new imap.ImapConnection
-    username: config.username
-    password: config.password
-    host: config.imap.host
-    port: config.imap.port
-    secure: config.imap.secure
+    username: mailbox.login
+    password: mailbox.pass
+    host:     mailbox.IMAP_server
+    port:     mailbox.IMAP_port
+    secure:   mailbox.IMAP_secure
     
   exitOnErr = (err) ->
     console.error err
@@ -38,6 +25,7 @@ Mailbox.getMail = (mailbox) ->
 
   server.connect (err) =>
     exitOnErr err if err
+    
     server.openBox "INBOX", false, (err, box) ->
       
       # open or die
@@ -74,8 +62,3 @@ Mailbox.getMail = (mailbox) ->
 
         fetch.on "end", ->
           do server.logout
-
-Mailbox.checkAllMailboxes = ->
-  Mailbox.all (err, mbs) ->
-    for mb in mbs
-      Mailbox.getMail(mb)
