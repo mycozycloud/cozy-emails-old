@@ -1,12 +1,55 @@
-input.content(id="name", value= model.name)
-input.content(id="login", value="#{model.login}")
-input.content(id="pass", value="#{model.pass}")
-input.content(id="SMTP_server", value="#{model.SMTP_server}")
-input.content(id="SMTP_ssl", value="#{model.SMTP_ssl}")
-input.content(id="SMTP_send_as", value="#{model.SMTP_send_as}")
-input.content(id="IMAP_server", value="#{model.IMAP_server}")
-input.content(id="IMAP_port", value="#{model.IMAP_port}")
-input.content(id="IMAP_secure", value="#{model.IMAP_secure}")
+from.form-horizontal
+  fieldset
+    legend Access data
+    .control-group
+      label(for="name").control-label Your name
+      .controls
+        input.content(id="name", type="text", value= model.name).input-xlarge
+        p.help-block This name will be visible to people to whom you send mail.
+    .control-group
+      label(for="SMTP_send_as").control-label Your address
+      .controls
+        input.content(id="SMTP_send_as", type="text", value= model.SMTP_send_as).input-xlarge
+        p.help-block Your mail address associated with this account.
+    .control-group
+      label(for="login").control-label Your login
+      .controls
+        input.content(id="login", type="text", value= model.login).input-xlarge
+    .control-group
+      label(for="pass").control-label Your password
+      .controls
+        input.content(id="pass", type="password", value= model.pass).input-xlarge
+        p.help-block Login and password you use for this mailbox. It's stored safely, don't worry.
 
-input.save_mailbox.isEdit.btn.btn-success(type='submit', value="Save")
-a.cancel_edit_mailbox.isEdit.btn.btn-warning() Cancel
+  fieldset
+    legend Server data
+    .control-group
+      label(for="SMTP_server").control-label SMTP host
+      .controls
+        input.content(id="SMTP_server", type="text", value= model.SMTP_server).input-xlarge
+        p.help-block The address of your server. Like smtp.gmail.com
+    .control-group
+      label(for="SMTP_ssl").control-label SMTP ssl
+      .controls
+        input.content(id="SMTP_ssl", type="text", value= "#{model.SMTP_ssl}").input-xlarge
+        p.help-block Everybody wants it, but some servers may not have it. Leave it "true" :)
+    .control-group
+      label(for="IMAP_server").control-label IMAP host
+      .controls
+        input.content(id="IMAP_server", type="text", value= model.IMAP_server).input-xlarge
+        p.help-block The inbound server address. Say imap.gmail.com ..
+    .control-group
+      label(for="IMAP_port").control-label IMAP port
+      .controls
+        input.content(id="IMAP_port", type="text", value= model.IMAP_port).input-xlarge
+        p.help-block Usually 993.
+    .control-group
+      label(for="IMAP_secure").control-label IMAP secure
+      .controls
+        input.content(id="IMAP_secure", type="text", value= "#{model.IMAP_secure}").input-xlarge
+        p.help-block Everybody wants it, but some servers may not have it. Leave it "true" :)
+
+  .form-actions
+    input.save_mailbox.isEdit.btn.btn-success(type='submit', value="Save")
+    a.cancel_edit_mailbox.isEdit.btn.btn-warning() Cancel
+  
