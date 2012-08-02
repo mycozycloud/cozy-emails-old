@@ -21,10 +21,11 @@ User = define 'User', ->
     
 Mail = define 'Mail', ->
     #property 'id', index: true
-    property 'mailbox'
+    property 'mailbox', index: true
     property 'id_remote_mailbox', index: true
     property 'id_agent_sent', index: true
     property 'createdAt', Date, default: Date
+    property 'date', Date, default: 0
     property 'fetched', Boolean, default: false
     property 'headers_raw', Text
     property 'priority',
@@ -45,20 +46,20 @@ Mail.hasMany(Attachement,   {as: 'attachements',  foreignKey: 'id'});
     
 Mailbox = define 'Mailbox', ->
     property 'new_messages', default: 0
+    property 'checked', Boolean, default: true
+    property 'config', Number, default: 0
     property 'name'
+    property 'login'
+    property 'pass'
     property 'createdAt', Date, default: Date
     property 'SMTP_server'
-    property 'SMTP_port'
-    property 'SMTP_login'
-    property 'SMTP_pass'
     property 'SMTP_send_as'
+    property 'SMTP_ssl'
     property 'IMAP_server'
     property 'IMAP_port'
     property 'IMAP_secure', Boolean, default: true
-    property 'IMAP_login'
-    property 'IMAP_pass'
     property 'IMAP_last_sync', Date, default: 0
-    property 'IMAP_last_fetched_id', Number
-    property 'IMAP_last_fetched_date', Date
+    property 'IMAP_last_fetched_id', Number, default: 0
+    property 'IMAP_last_fetched_date', Date, default: 0
     
-Mailbox.hasMany(Mail,   {as: 'mails',  foreignKey: 'mailbox'});
+Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'});

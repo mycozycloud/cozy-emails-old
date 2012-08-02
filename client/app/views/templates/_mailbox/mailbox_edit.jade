@@ -1,5 +1,12 @@
-input.content(id="name", value="#{model.name}")
-input.content(id="createdAt", value="#{model.createdAt}")
+input.content(id="name", value= model.name)
+input.content(id="login", value="#{model.login}")
+input.content(id="pass", value="#{model.pass}")
 input.content(id="SMTP_server", value="#{model.SMTP_server}")
+input.content(id="SMTP_ssl", value="#{model.SMTP_ssl}")
+input.content(id="SMTP_send_as", value="#{model.SMTP_send_as}")
+input.content(id="IMAP_server", value="#{model.IMAP_server}")
+input.content(id="IMAP_port", value="#{model.IMAP_port}")
+input.content(id="IMAP_secure", value="#{model.IMAP_secure}")
+
 input.save_mailbox.isEdit.btn.btn-success(type='submit', value="Save")
 a.cancel_edit_mailbox.isEdit.btn.btn-warning() Cancel

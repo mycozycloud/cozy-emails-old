@@ -1,5 +1,8 @@
-a(href='#')
-  input(type='checkbox', id=model.id).change_mailboxes_list
+a(mailbox_id=model.id).change_mailboxes_list
+  if model.checked == true
+    input(type='checkbox', mailbox_id=model.id, checked="checked").change_mailboxes_list
+  else
+    input(type='checkbox', mailbox_id=model.id).change_mailboxes_list
   |  #{model.name}
   if model.new_messages > 0
     span.badge.badge-warning #{model.new_messages}

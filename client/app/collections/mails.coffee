@@ -19,4 +19,3 @@ class exports.MailsCollection extends Backbone.Collection
 
   navigateMail: (event) ->
     window.app.router.navigate "mail:" + @activeMail.id
-    console.log "mail:" + @activeMail.id

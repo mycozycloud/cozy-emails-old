@@ -9,18 +9,20 @@ BaseModel = require("./models").BaseModel
 ###
 class exports.Mailbox extends BaseModel
 
+  @urlRoot = 'mailboxes/'
+
   defaults:
-    'new_messages' : 1
+    'checked' : true
     'config' : 0
     'name' : "Mailbox"
-    'createdAt' : "0"
+    'login' : "login"
+    'pass' : "pass"
     'SMTP_server' : "smtp.gmail.com"
-    'SMTP_port' : "465"
-    'SMTP_login' : "login"
-    'SMTP_pass' : "pass"
-    'SMTP_send_as' : "You"
-  
-  deleted: false
+    'SMTP_ssl' : true
+    'SMTP_send_as' : "Adam Smith"
+    'IMAP_server' : "imap.gmail.com"
+    'IMAP_port' : 993
+    'IMAP_secure' : true
 
   initialize: ->
     @on "destroy", @removeView, @

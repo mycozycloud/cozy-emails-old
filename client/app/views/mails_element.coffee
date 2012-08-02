@@ -13,6 +13,5 @@ class exports.MailsElement extends Backbone.View
 
   render: ->
     template = require('./templates/_mail/mail_big')
-    console.log @collection.activeMail
     $(@el).html template("model" : @collection.activeMail?.toJSON())
     @

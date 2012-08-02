@@ -1,9 +1,9 @@
 if active
   td
     p
-      | #{model.headers.from}
+      | #{model.from}
       br
-      i(style='color: lightgray;') #{model.headers.date}
+      i(style='color: lightgray;') #{model.date}
     p #{model.subject}
     td
         a.btn.btn-mini.choose_mail_button
@@ -11,9 +11,9 @@ if active
 else
   td
     p
-      | #{model.headers.from}
+      | #{model.from}
       br
-      i(style='color: lightgray;') #{model.headers.date}
+      i(style='color: lightgray;') #{model.date}
     p #{model.subject}
   td
       a.btn.btn-mini.choose_mail_button
