@@ -146,8 +146,14 @@ window.require.define({"collections/mails": function(exports, require, module) {
 
       MailsCollection.prototype.url = 'mails/';
 
-      MailsCollection.prototype.comparator = function(mail) {
-        return mail.get("date");
+      MailsCollection.prototype.comparator = function(a, b) {
+        if (a.get("date") > b.get("date")) {
+          return -1;
+        } else if (a.get("date") === b.get("date")) {
+          return 0;
+        } else {
+          return 1;
+        }
       };
 
       MailsCollection.prototype.initialize = function() {
@@ -155,7 +161,7 @@ window.require.define({"collections/mails": function(exports, require, module) {
       };
 
       MailsCollection.prototype.navigateMail = function(event) {
-        return window.app.router.navigate("mail:" + this.activeMail.id);
+        return window.app.router.navigate("mail/" + this.activeMail.id);
       };
 
       return MailsCollection;
@@ -270,6 +276,10 @@ window.require.define({"models/mail": function(exports, require, module) {
 
     })(BaseModel);
 
+    /*
+        PRERENDERING
+    */
+
   }).call(this);
   
 }});
@@ -354,8 +364,47 @@ window.require.define({"models/models": function(exports, require, module) {
         BaseModel.__super__.constructor.apply(this, arguments);
       }
 
+      BaseModel.prototype.debug = true;
+
       BaseModel.prototype.isNew = function() {
         return !(this.id != null);
+      };
+
+      BaseModel.prototype.prerender = function() {
+        var prop, val, _ref;
+        if (this.debug != null) console.log("Prerender");
+        _ref = this.attributes;
+        for (prop in _ref) {
+          val = _ref[prop];
+          if (this["_render_" + prop] != null) {
+            if (this.debug != null) {
+              console.log("rendering " + prop + " -> __" + prop);
+            }
+            this.attributes["__" + prop] = this["_render_" + prop](val);
+          } else {
+            if (this.debug != null) console.log("copying " + prop + " -> __" + prop);
+            this.attributes["__" + prop] = this.attributes[prop];
+          }
+        }
+        if (this.debug != null) console.log(this);
+        return this;
+      };
+
+      BaseModel.prototype._render_from = function(from) {
+        var obj, out, parsed, _i, _len;
+        parsed = JSON.parse(from);
+        out = "";
+        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+          obj = parsed[_i];
+          out += obj.name + " <" + obj.address + "> ";
+        }
+        return out;
+      };
+
+      BaseModel.prototype._render_date = function(date) {
+        var parsed;
+        parsed = new Date(date);
+        return parsed.toUTCString();
       };
 
       return BaseModel;
@@ -390,6 +439,10 @@ window.require.define({"routers/main_router": function(exports, require, module)
         'config-mailboxes': 'configMailboxes'
       };
 
+      MainRouter.prototype.initialize = function() {
+        return this.route(/^mail\/(.*?)$/, 'mail');
+      };
+
       MainRouter.prototype.home = function() {
         app.appView.render();
         return app.appView.set_layout_mails();
@@ -398,6 +451,15 @@ window.require.define({"routers/main_router": function(exports, require, module)
       MainRouter.prototype.configMailboxes = function() {
         app.appView.render();
         return app.appView.set_layout_mailboxes();
+      };
+
+      MainRouter.prototype.mail = function(path) {
+        app.appView.render();
+        app.appView.set_layout_mails();
+        if (app.mails.get(path) != null) {
+          app.mails.activeMail = app.mails.get(path);
+          return app.mails.trigger("change_active_mail");
+        }
       };
 
       return MainRouter;
@@ -442,7 +504,15 @@ window.require.define({"views/app": function(exports, require, module) {
       };
 
       function AppView() {
+        var tick,
+          _this = this;
         AppView.__super__.constructor.call(this);
+        tick = function(event) {
+          return window.app.mails.fetch({
+            add: true
+          });
+        };
+        this.timer = window.setInterval(tick, 5000);
       }
 
       AppView.prototype.render = function() {
@@ -763,11 +833,13 @@ window.require.define({"views/mails_element": function(exports, require, module)
       }
 
       MailsElement.prototype.render = function() {
-        var template, _ref;
+        var template;
+        this.collection.activeMail.prerender();
         template = require('./templates/_mail/mail_big');
         $(this.el).html(template({
-          "model": (_ref = this.collection.activeMail) != null ? _ref.toJSON() : void 0
+          "model": this.collection.activeMail.toJSON()
         }));
+        this.$("#mail_content").html(this.$("#mail_content").text());
         return this;
       };
 
@@ -874,6 +946,7 @@ window.require.define({"views/mails_list_element": function(exports, require, mo
 
       MailsListElement.prototype.render = function() {
         var template;
+        this.model.prerender();
         template = require('./templates/_mail/mail_list');
         $(this.el).html(template({
           "model": this.model.toJSON(),
@@ -1081,9 +1154,22 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   var interp;
   buf.push('<div');
   buf.push(attrs({ "class": ('well') }));
-  buf.push('><p>' + escape((interp = model.from) == null ? '' : interp) + '\n<i');
+  buf.push('><p>' + escape((interp = model.__from) == null ? '' : interp) + '\n<i');
   buf.push(attrs({ 'style':('color: lightgray;') }));
-  buf.push('>' + escape((interp = model.date) == null ? '' : interp) + '</i></p><h4>' + escape((interp = model.subject) == null ? '' : interp) + '</h4><div>' + escape((interp = model.html) == null ? '' : interp) + '\n</div></div><div');
+  buf.push('>' + escape((interp = model.__date) == null ? '' : interp) + '</i></p><h3>' + escape((interp = model.__subject) == null ? '' : interp) + '</h3><br');
+  buf.push(attrs({  }));
+  buf.push('/><div');
+  buf.push(attrs({ 'id':('mail_content') }));
+  buf.push('>');
+  if ( model.__html)
+  {
+  buf.push('' + escape((interp = model.__html) == null ? '' : interp) + '\n');
+  }
+  else
+  {
+  buf.push('' + escape((interp = model.__text) == null ? '' : interp) + '\n');
+  }
+  buf.push('</div></div><div');
   buf.push(attrs({ "class": ('btn-toolbar') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('btn-group') }));
@@ -1127,23 +1213,23 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   var interp;
   if ( active)
   {
-  buf.push('<td><p>' + escape((interp = model.from) == null ? '' : interp) + '\n<br');
+  buf.push('<td><p>' + escape((interp = model.__from) == null ? '' : interp) + '\n<br');
   buf.push(attrs({  }));
   buf.push('/><i');
   buf.push(attrs({ 'style':('color: lightgray;') }));
-  buf.push('>' + escape((interp = model.date) == null ? '' : interp) + '</i></p><p>' + escape((interp = model.subject) == null ? '' : interp) + '</p><td><a');
+  buf.push('>' + escape((interp = model.__date) == null ? '' : interp) + '</i></p><p>' + escape((interp = model.__subject) == null ? '' : interp) + '</p></td><td><a');
   buf.push(attrs({ "class": ('btn') + ' ' + ('btn-mini') + ' ' + ('choose_mail_button') }));
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-arrow-right') }));
-  buf.push('></i></a></td></td>');
+  buf.push('></i></a></td>');
   }
   else
   {
-  buf.push('<td><p>' + escape((interp = model.from) == null ? '' : interp) + '\n<br');
+  buf.push('<td><p>' + escape((interp = model.__from) == null ? '' : interp) + '\n<br');
   buf.push(attrs({  }));
   buf.push('/><i');
   buf.push(attrs({ 'style':('color: lightgray;') }));
-  buf.push('>' + escape((interp = model.date) == null ? '' : interp) + '</i></p><p>' + escape((interp = model.subject) == null ? '' : interp) + '</p></td><td><a');
+  buf.push('>' + escape((interp = model.__date) == null ? '' : interp) + '</i></p><p>' + escape((interp = model.__subject) == null ? '' : interp) + '</p></td><td><a');
   buf.push(attrs({ "class": ('btn') + ' ' + ('btn-mini') + ' ' + ('choose_mail_button') }));
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-arrow-right') }));

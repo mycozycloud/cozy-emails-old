@@ -1,14 +1,18 @@
 Mailbox.checkAllMailboxes = ->
   Mailbox.all (err, mbs) ->
     for mb in mbs
-      Mailbox.getMail(mb)
+      mb.getNewMail
 
-Mailbox.getMail = (mailbox) ->
-  
+Mailbox.prototype.getNewMail = ->
+  @getMail ["ALL", ['SINCE', 'July 1, 2012']]
+
+
+Mailbox.prototype.getMail = (constraints) ->
   ## dependences
   imap = require "imap"
   mailparser = require "mailparser"
-  
+
+  mailbox = this
   
   console.log "getMail of mailbox: " + JSON.stringify(mailbox)
   # 
@@ -31,7 +35,7 @@ Mailbox.getMail = (mailbox) ->
       # open or die
       exitOnErr err if err
       
-      server.search ["ALL", ['SINCE', 'July 25, 2012']], (err, results) =>
+      server.search constraints, (err, results) =>
         exitOnErr err if err
 
         unless results.length
@@ -45,14 +49,29 @@ Mailbox.getMail = (mailbox) ->
             headers: false
 
         fetch.on "message", (message) ->
-          fds = {}
-          filenames = {}
           parser = new mailparser.MailParser
           
-          parser.on "end", (mail) =>
-            console.log "About to create a new mail: " + JSON.stringify(mail)
+          parser.on "end", (m) =>
+            # console.log "About to create a new mail:\n" + JSON.stringify(m)
+            mail =
+              date:         new Date(m.headers.date).toJSON()
+              createdAt:    new Date().toJSON()
+              
+              from:         JSON.stringify m.from
+              to:           JSON.stringify m.to
+              subject:      m.subject
+              priority:     m.priority
+              
+              text:         m.text
+              html:         m.html
+              
+              headers_raw:  JSON.stringify m.headers
+              raw:          JSON.stringify m
+              
+              # id_remote_mailbox: m.headers.getAttribute("message-id")
+            
             mailbox.mails.create mail, (err, mail) ->
-              console.log "New mail created: " + JSON.stringify(mail)
+              console.log "New mail created:\n" + JSON.stringify(mail)
 
           message.on "data", (data) ->
             parser.write data.toString()

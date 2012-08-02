@@ -1,20 +1,20 @@
 if active
   td
     p
-      | #{model.from}
+      | #{model.__from}
       br
-      i(style='color: lightgray;') #{model.date}
-    p #{model.subject}
-    td
-        a.btn.btn-mini.choose_mail_button
-          i.icon-arrow-right
+      i(style='color: lightgray;') #{model.__date}
+    p #{model.__subject}
+  td
+    a.btn.btn-mini.choose_mail_button
+      i.icon-arrow-right
 else
   td
     p
-      | #{model.from}
+      | #{model.__from}
       br
-      i(style='color: lightgray;') #{model.date}
-    p #{model.subject}
+      i(style='color: lightgray;') #{model.__date}
+    p #{model.__subject}
   td
-      a.btn.btn-mini.choose_mail_button
-        i.icon-arrow-right
+    a.btn.btn-mini.choose_mail_button
+      i.icon-arrow-right

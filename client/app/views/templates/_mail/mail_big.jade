@@ -1,10 +1,15 @@
 .well
   p
-    | #{model.from}
-    i(style='color: lightgray;') #{model.date}
-  h4 #{model.subject}
-  div.
-    #{model.html}
+    | #{model.__from}
+    i(style='color: lightgray;') #{model.__date}
+  h3 #{model.__subject}
+  br
+  div#mail_content
+    if model.__html
+      #{model.__html}
+    else
+      #{model.__text}
+      
 .btn-toolbar
   .btn-group
     a.btn.btn-primary

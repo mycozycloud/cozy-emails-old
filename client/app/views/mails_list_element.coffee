@@ -23,6 +23,7 @@ class exports.MailsListElement extends Backbone.View
     @collection.trigger "change_active_mail"
 
   render: ->
+    @model.prerender()
     template = require('./templates/_mail/mail_list')
     $(@el).html template({"model" : @model.toJSON(), "active" : @model == @collection.activeMail})
     @

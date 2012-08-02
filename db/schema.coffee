@@ -20,14 +20,12 @@ User = define 'User', ->
     
     
 Mail = define 'Mail', ->
-    #property 'id', index: true
     property 'mailbox', index: true
     property 'id_remote_mailbox', index: true
-    property 'id_agent_sent', index: true
     property 'createdAt', Date, default: Date
     property 'date', Date, default: 0
-    property 'fetched', Boolean, default: false
     property 'headers_raw', Text
+    property 'raw', Text
     property 'priority',
     property 'flags',
     property 'keywords',

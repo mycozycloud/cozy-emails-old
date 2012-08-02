@@ -18,6 +18,9 @@ class exports.AppView extends Backbone.View
     
   constructor: ->
     super()
+    tick = (event) =>
+      window.app.mails.fetch({add : true})
+    @timer = window.setInterval tick, 5000
 
   render: ->
     # put on the big layout
