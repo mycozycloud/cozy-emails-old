@@ -1,20 +1,32 @@
 if active
-  td
+  td(style='background-color: lightgray;')
     p
-      | #{model.__from}
+      if model.is_unread()
+        strong #{model.from_short()}
+      else
+        #{model.from_short()}
       br
-      i(style='color: lightgray;') #{model.__date}
-    p #{model.__subject}
-  td
-    a.btn.btn-mini.choose_mail_button
-      i.icon-arrow-right
+      i(style='color: gray;') #{model.date()}
+      if model.is_unread()
+        p 
+          strong #{model.get("subject")}
+      else
+        p #{model.get("subject")}
+  td(style='background-color: lightgray;')
 else
   td
     p
-      | #{model.__from}
+      if model.is_unread()
+        strong #{model.from_short()}
+      else
+        #{model.from_short()}
       br
-      i(style='color: lightgray;') #{model.__date}
-    p #{model.__subject}
+      i(style='color: lightgray;') #{model.date()}
+    if model.is_unread()
+      p 
+        strong #{model.get("subject")}
+    else
+      p #{model.get("subject")}
   td
     a.btn.btn-mini.choose_mail_button
       i.icon-arrow-right

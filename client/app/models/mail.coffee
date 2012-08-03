@@ -15,16 +15,52 @@ class exports.Mail extends BaseModel
     @view.remove() if @view?
 
   redrawView: ->
-    @prerender()
     @view.render() if @view?
-  
-###
-    PRERENDERING
-###
 
-  _render_from: (from) ->
-    parsed = JSON.parse(from)
+  ###
+      RENDERING
+  ###
+
+  from: ->
+    parsed = JSON.parse(@get("from"))
     out = ""
-    for addr, name in parsed
-      out + name + ", "
+    for obj in parsed
+      out += obj.name + " <" + obj.address + "> "
     out
+    
+  from_short: ->
+    parsed = JSON.parse(@get("from"))
+    out = ""
+    for obj in parsed
+      out += obj.name + " "
+    out
+    
+  cc: ->
+    parsed = JSON.parse(@get("cc"))
+    out = ""
+    for obj in parsed
+      out += obj.name + " <" + obj.address + "> "
+    out
+
+  cc_short: ->
+    parsed = JSON.parse(@get("cc"))
+    out = ""
+    for obj in parsed
+      out += obj.name + " "
+    out
+    
+  date: ->
+    parsed = new Date @get("date")
+    parsed.toUTCString()
+
+  is_unread: ->
+    not("\\Seen" in JSON.parse @get("flags"))
+    
+  set_read: (read=true) ->
+    flags = JSON.parse @get("flags")
+    if read
+      flags.push("\\Seen") unless "\\Seen" in flags
+    else
+      flags = $.grep flags, (val) ->
+        val != "\\Seen"
+    @set({"flags" : JSON.stringify flags})

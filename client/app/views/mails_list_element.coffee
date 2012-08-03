@@ -21,9 +21,9 @@ class exports.MailsListElement extends Backbone.View
   setActiveMail: (event) ->
     @collection.activeMail = @model
     @collection.trigger "change_active_mail"
+    @collection.activeMail.set_read()
 
   render: ->
-    @model.prerender()
     template = require('./templates/_mail/mail_list')
-    $(@el).html template({"model" : @model.toJSON(), "active" : @model == @collection.activeMail})
+    $(@el).html template({"model" : @model, "active" : @model == @collection.activeMail})
     @

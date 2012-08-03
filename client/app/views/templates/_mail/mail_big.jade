@@ -1,15 +1,18 @@
 .well
   p
-    | #{model.__from}
-    i(style='color: lightgray;') #{model.__date}
-  h3 #{model.__subject}
+    | From: #{model.from()}
+    i(style='color: lightgray;') sent #{model.date()}
+    br
+    if model.get("cc")
+      | CC:  #{model.cc()}
+  h3 #{model.get("subject")}
   br
   div#mail_content
-    if model.__html
-      #{model.__html}
+    if model.get("html")
+      !{model.get("html")}
     else
-      #{model.__text}
-      
+      #{model.get("text")}
+  
 .btn-toolbar
   .btn-group
     a.btn.btn-primary

@@ -1,20 +1,25 @@
-Mailbox.checkAllMailboxes = ->
+Mailbox.checkAllMailboxes = (callback) ->
   Mailbox.all (err, mbs) ->
+    return callback err if err
     for mb in mbs
-      mb.getNewMail
+      mb.getNewMail 50, callback
 
-Mailbox.prototype.getNewMail = ->
-  @getMail ["ALL", ['SINCE', 'July 1, 2012']]
+Mailbox.prototype.getNewMail = (limit=100, callback)->
+  id = @IMAP_last_fetched_id + 1
+  console.log "# Fetching mail | UID " + id + ':' + (id + limit)
+  
+  @getMail "INBOX", [['UID', id + ':' + (id + limit)]], callback
 
+Mailbox.prototype.getAllMail = (callback) ->
+  console.log "# Fetching all mail"
+  @getMail "INBOX", ['ALL'], callback
 
-Mailbox.prototype.getMail = (constraints) ->
+Mailbox.prototype.getMail = (boxname, constraints, callback) ->
   ## dependences
   imap = require "imap"
   mailparser = require "mailparser"
 
-  mailbox = this
-  
-  console.log "getMail of mailbox: " + JSON.stringify(mailbox)
+  mailbox = @
   # 
   server = new imap.ImapConnection
     username: mailbox.login
@@ -25,23 +30,29 @@ Mailbox.prototype.getMail = (constraints) ->
     
   exitOnErr = (err) ->
     console.error err
-    do process.exit
+    callback err
+    return
 
   server.connect (err) =>
+    
+    # ERROR
     exitOnErr err if err
     
-    server.openBox "INBOX", false, (err, box) ->
+    server.openBox boxname, false, (err, box) ->
       
-      # open or die
+      # ERROR
       exitOnErr err if err
       
       server.search constraints, (err, results) =>
         exitOnErr err if err
 
         unless results.length
-          console.log "No unread messages from #{config.email}"
+          # console.log "nothing to download"
+          callback()
           do server.logout
           return
+        
+        # console.log "Fetching #{results.length} mails"
 
         fetch = server.fetch results,
           request:
@@ -59,25 +70,48 @@ Mailbox.prototype.getMail = (constraints) ->
               
               from:         JSON.stringify m.from
               to:           JSON.stringify m.to
+              cc:           JSON.stringify m.cc
               subject:      m.subject
               priority:     m.priority
               
               text:         m.text
               html:         m.html
               
+              id_remote_mailbox: parser.message_id
+              flags:        JSON.stringify parser.message_flags
+              
               headers_raw:  JSON.stringify m.headers
               raw:          JSON.stringify m
-              
-              # id_remote_mailbox: m.headers.getAttribute("message-id")
             
             mailbox.mails.create mail, (err, mail) ->
-              console.log "New mail created:\n" + JSON.stringify(mail)
+              
+              # ERROR
+              exitOnErr err if err
+              
+              console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
+              
+              # update last fetched element
+              if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
+                mailbox.IMAP_last_fetched_id = mail.id_remote_mailbox
+                mailbox.IMAP_last_fetched_date = new Date().toJSON()
+                mailbox.save()
+              
+              # update new mail counter
+              unless "\\Seen" in JSON.parse mail.flags
+                mailbox.new_messages++ 
+                mailbox.save()
+              
+              # callback "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
 
           message.on "data", (data) ->
             parser.write data.toString()
 
           message.on "end", ->
+            parser.message_id = message.id
+            parser.message_flags = message.flags
             do parser.end
 
         fetch.on "end", ->
+          # console.log "appel callback done"
+          callback()
           do server.logout

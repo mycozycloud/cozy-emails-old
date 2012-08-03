@@ -28,10 +28,10 @@ Mail = define 'Mail', ->
     property 'raw', Text
     property 'priority',
     property 'flags',
-    property 'keywords',
     property 'subject',
     property 'from',
     property 'to',
+    property 'cc',
     property 'text', Text
     property 'html', Text
     #property 'attachements'
@@ -57,7 +57,7 @@ Mailbox = define 'Mailbox', ->
     property 'IMAP_port'
     property 'IMAP_secure', Boolean, default: true
     property 'IMAP_last_sync', Date, default: 0
-    property 'IMAP_last_fetched_id', Number, default: 0
+    property 'IMAP_last_fetched_id', Number, default: 1
     property 'IMAP_last_fetched_date', Date, default: 0
     
 Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'});
