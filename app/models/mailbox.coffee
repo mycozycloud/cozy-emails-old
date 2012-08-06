@@ -20,7 +20,8 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
   mailparser = require "mailparser"
 
   mailbox = @
-  # 
+  
+  # so  let's create 
   server = new imap.ImapConnection
     username: mailbox.login
     password: mailbox.pass
@@ -51,8 +52,6 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
           callback()
           do server.logout
           return
-        
-        # console.log "Fetching #{results.length} mails"
 
         fetch = server.fetch results,
           request:

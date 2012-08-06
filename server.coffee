@@ -15,7 +15,7 @@ if not module.parent
     
     # set up CRON
     lookupNewMail = (event) =>
-      job = @jobs.create("check mailboxes", {title: "Routine mail check"}).priority('high').attempts(5).save();
+      job = @jobs.create("check mailboxes", {title: "Routine mail check at " + new Date().toUTCString()}).priority('high').attempts(5).save();
       job.on 'complete', () ->
         console.log job.data.title + " complete" 
       job.on 'failed', () ->
@@ -23,7 +23,7 @@ if not module.parent
       job.on 'progress', (progress) ->
         console.log job.data.title + '#' + job.id + ' ' + progress + '% complete'
       
-    @timer = setInterval lookupNewMail, 0.5 * 60 * 1000
+    @timer = setInterval lookupNewMail, 60 * 1000
     
     # initial check on bootup
     lookupNewMail()
