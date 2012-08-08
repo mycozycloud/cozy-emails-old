@@ -123,6 +123,7 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
 window.require.define({"collections/mails": function(exports, require, module) {
   (function() {
     var Mail,
+      __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -139,12 +140,17 @@ window.require.define({"collections/mails": function(exports, require, module) {
       __extends(MailsCollection, _super);
 
       function MailsCollection() {
+        this.fetchNew = __bind(this.fetchNew, this);
         MailsCollection.__super__.constructor.apply(this, arguments);
       }
 
       MailsCollection.prototype.model = Mail;
 
       MailsCollection.prototype.url = 'mails/';
+
+      MailsCollection.prototype.timestampNew = new Date().valueOf();
+
+      MailsCollection.prototype.timestampOld = new Date().valueOf();
 
       MailsCollection.prototype.comparator = function(a, b) {
         if (a.get("date") > b.get("date")) {
@@ -157,11 +163,47 @@ window.require.define({"collections/mails": function(exports, require, module) {
       };
 
       MailsCollection.prototype.initialize = function() {
-        return this.on("change_active_mail", this.navigateMail, this);
+        this.on("change_active_mail", this.navigateMail, this);
+        this.on("add", this.treatAdd, this);
+        return setInterval(this.fetchNew, 0.5 * 60 * 1000);
+      };
+
+      MailsCollection.prototype.treatAdd = function(model) {
+        var box;
+        if (new Date(model.get("createdAt")).valueOf() < this.timestampOld) {
+          this.timestampOld = new Date(model.get("createdAt")).valueOf();
+        }
+        if (new Date(model.get("createdAt")).valueOf() > this.timestampNew) {
+          this.timestampNew = new Date(model.get("createdAt")).valueOf();
+          if (model.is_unread()) {
+            box = window.app.mailboxes.get(model.get("mailbox"));
+            return box != null ? box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) + 1) : void 0;
+          }
+        }
       };
 
       MailsCollection.prototype.navigateMail = function(event) {
-        return window.app.router.navigate("mail/" + this.activeMail.id);
+        if (this.activeMail != null) {
+          return window.app.router.navigate("mail/" + this.activeMail.id);
+        } else {
+          return console.error("NavigateMail without active mail");
+        }
+      };
+
+      MailsCollection.prototype.fetchOlder = function() {
+        this.url = "mailslist/" + this.timestampOld + "." + 0;
+        console.log("fetchOlder: " + this.url);
+        return this.fetch({
+          add: true
+        });
+      };
+
+      MailsCollection.prototype.fetchNew = function() {
+        this.url = "mailsnew/" + this.timestampNew;
+        console.log("fetchNew: " + this.url);
+        return this.fetch({
+          add: true
+        });
       };
 
       return MailsCollection;
@@ -332,15 +374,28 @@ window.require.define({"models/mail": function(exports, require, module) {
       };
 
       Mail.prototype.set_read = function(read) {
-        var flags;
+        var box, flags, flags_prev;
         if (read == null) read = true;
         flags = JSON.parse(this.get("flags"));
         if (read) {
-          if (__indexOf.call(flags, "\\Seen") < 0) flags.push("\\Seen");
+          if (__indexOf.call(flags, "\\Seen") < 0) {
+            flags.push("\\Seen");
+            box = window.app.mailboxes.get(this.get("mailbox"));
+            if (box != null) {
+              box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) - 1);
+            }
+          }
         } else {
+          flags_prev = flags.length;
           flags = $.grep(flags, function(val) {
             return val !== "\\Seen";
           });
+          if (glasgs_prev !== flags.length) {
+            box = window.app.mailboxes.get(this.get("mailbox"));
+            if (box != null) {
+              box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) + 1);
+            }
+          }
         }
         return this.set({
           "flags": JSON.stringify(flags)
@@ -508,6 +563,7 @@ window.require.define({"routers/main_router": function(exports, require, module)
 
       MainRouter.prototype.routes = {
         '': 'home',
+        'inbox': 'home',
         'config-mailboxes': 'configMailboxes'
       };
 
@@ -944,7 +1000,9 @@ window.require.define({"views/mails_list": function(exports, require, module) {
 
       MailsList.prototype.initialize = function() {
         this.collection.on('reset', this.render, this);
-        return this.collection.fetch();
+        this.collection.on('add', this.render, this);
+        this.collection.on('change', this.render, this);
+        return this.collection.fetchOlder();
       };
 
       MailsList.prototype.addOne = function(mail) {
@@ -1048,9 +1106,17 @@ window.require.define({"views/mails_list_more": function(exports, require, modul
         MailsListMore.__super__.constructor.call(this);
       }
 
+      MailsListMore.prototype.events = {
+        "click #add_more_mails": 'loadOlderMails'
+      };
+
       MailsListMore.prototype.render = function() {
         $(this.el).html(require("./templates/_mail/mails_more"));
         return this;
+      };
+
+      MailsListMore.prototype.loadOlderMails = function() {
+        return this.collection.fetchOlder();
       };
 
       return MailsListMore;
@@ -1372,10 +1438,10 @@ window.require.define({"views/templates/_mail/mails_more": function(exports, req
   buf.push('<div');
   buf.push(attrs({ "class": ('btn-group') + ' ' + ('pull-left') }));
   buf.push('><a');
-  buf.push(attrs({ "class": ('button_more_mails') + ' ' + ('btn') + ' ' + ('btn-primary') }));
+  buf.push(attrs({ 'id':('add_more_mails'), "class": ('btn') + ' ' + ('btn-primary') }));
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-plus') }));
-  buf.push('></i>Load 25 older messages\n</a></div>');
+  buf.push('></i>Load 5 older messages\n</a></div>');
   }
   return buf.join("");
   };
@@ -1595,13 +1661,7 @@ window.require.define({"views/templates/menu": function(exports, require, module
   buf.push(attrs({ "class": ('active') }));
   buf.push('><a');
   buf.push(attrs({ 'href':('#') }));
-  buf.push('>Inbox\n</a></li><li><a');
-  buf.push(attrs({ 'href':('#') }));
-  buf.push('>Sent</a></li><li><a');
-  buf.push(attrs({ 'href':('#') }));
-  buf.push('>Drafts</a></li><li><a');
-  buf.push(attrs({ 'href':('#') }));
-  buf.push('>Bin</a></li><li');
+  buf.push('>Inbox\n</a></li><li');
   buf.push(attrs({ "class": ('divider') }));
   buf.push('></li><li');
   buf.push(attrs({ "class": ('nav-header') }));
@@ -1611,19 +1671,7 @@ window.require.define({"views/templates/menu": function(exports, require, module
   buf.push(attrs({ "class": ('nav') + ' ' + ('nav-list') }));
   buf.push('><li><a');
   buf.push(attrs({ 'href':('#config-mailboxes') }));
-  buf.push('>add/modify\n</a></li><li');
-  buf.push(attrs({ "class": ('divider') }));
-  buf.push('></li><li');
-  buf.push(attrs({ "class": ('nav-header') }));
-  buf.push('>Filters</li><li><a');
-  buf.push(attrs({ 'href':('#') }));
-  buf.push('>Marked</a></li><li><a');
-  buf.push(attrs({ 'href':('#') }));
-  buf.push('>New</a></li><li><a');
-  buf.push(attrs({ 'href':('#') }));
-  buf.push('>Today</a></li><li><a');
-  buf.push(attrs({ 'href':('#') }));
-  buf.push('>Yesterday</a></li></ul>');
+  buf.push('>add/modify\n</a></li></ul>');
   }
   return buf.join("");
   };

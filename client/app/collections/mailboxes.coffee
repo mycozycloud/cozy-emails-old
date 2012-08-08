@@ -20,3 +20,4 @@ class exports.MailboxCollection extends Backbone.Collection
   addView: (mail) ->
     @view.addOne(mail) if @view?
 
+    

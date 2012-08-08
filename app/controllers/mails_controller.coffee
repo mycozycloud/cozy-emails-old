@@ -1,19 +1,18 @@
 before ->
-
   Mail.find req.params.id, (err, box) =>
     if err or !box
       send 403
     else
       @box = box
       next()
-, only: ['índex', 'show', 'edit', 'update', 'destroy']
+, {}
 
-# GET /mailboxes
+# GET /mails
 action 'index', ->
   Mail.all (err, mails) ->
     send mails
 
-# POST /mailboxes
+# POST /mails
 action 'create', ->
   Mail.create req.body, (error) =>
     if !error
@@ -21,14 +20,14 @@ action 'create', ->
     else
       send 500
 
-# GET /mailboxes/:id
+# GET /mails/:id
 action 'show', ->
   if !@box
     send new Mailbox
   else
     send @box
 
-# PUT /mailboxes/:id
+# PUT /mails/:id
 action 'update', ->
   @box.updateAttributes req.body, (error) =>
     if !error
@@ -36,10 +35,33 @@ action 'update', ->
     else
       send 500
 
-# DELETE /mailboxes/:id
+# DELETE /mails/:id
 action 'destroy', ->
   @box.destroy (error) =>
     if !error
       send 200
+    else
+      send 500
+      
+# GET '/mailslist/:timestamp.:num'
+action 'getlist', ->
+  num = parseInt req.params.num
+  num = 5
+  timestamp = parseInt req.params.timestamp
+  console.log {where : {"createdAt" : {lt : timestamp}}, limit : num, order: 'date DESC'}
+  Mail.all {where : {"createdAt" : {lt : timestamp}}, limit : num, order: 'date DESC'}, (error, mails) ->
+    if !error
+      send mails
+    else
+      send 500
+      
+# GET '/mailsnew/:timestamp'
+action 'getnewlist', ->
+  num = parseInt req.params.num
+  timestamp = parseInt req.params.timestamp
+  console.log {where : {"createdAt" : {gt : timestamp}}, order: 'date ASC'}
+  Mail.all {where : {"createdAt" : {gt : timestamp}}, order: 'date ASC'}, (error, mails) ->
+    if !error
+      send mails
     else
       send 500

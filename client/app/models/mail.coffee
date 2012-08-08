@@ -59,8 +59,19 @@ class exports.Mail extends BaseModel
   set_read: (read=true) ->
     flags = JSON.parse @get("flags")
     if read
-      flags.push("\\Seen") unless "\\Seen" in flags
+      # set as read
+      unless "\\Seen" in flags
+        flags.push("\\Seen")
+        # decrement number of read messages in the mailbox
+        box = window.app.mailboxes.get @get("mailbox")
+        box?.set "new_messages", ((parseInt box?.get "new_messages") - 1)
     else
+      # set as unread
+      flags_prev = flags.length
       flags = $.grep flags, (val) ->
         val != "\\Seen"
+      unless glasgs_prev == flags.length
+        # increment the number of unread messages in the mailbox
+        box = window.app.mailboxes.get @get("mailbox")
+        box?.set "new_messages", ((parseInt box?.get "new_messages") + 1)
     @set({"flags" : JSON.stringify flags})

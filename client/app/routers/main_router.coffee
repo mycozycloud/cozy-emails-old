@@ -7,6 +7,7 @@ class exports.MainRouter extends Backbone.Router
 
   routes:
     '' : 'home'
+    'inbox' : 'home'
     'config-mailboxes' : 'configMailboxes'
 
   # routes that need regexp.

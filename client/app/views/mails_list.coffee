@@ -17,7 +17,9 @@ class exports.MailsList extends Backbone.View
 
   initialize: ->
     @collection.on('reset', @render, @)
-    @collection.fetch()
+    @collection.on('add', @render, @)
+    @collection.on('change', @render, @)
+    @collection.fetchOlder()
 
   addOne: (mail) ->
     box = new MailsListElement mail, mail.collection

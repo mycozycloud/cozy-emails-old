@@ -5,7 +5,7 @@ before ->
     else
       @box = box
       next()
-, only: ['índex', 'show', 'edit', 'update', 'destroy']
+, {}
 
 # GET /mailboxes
 action 'index', ->

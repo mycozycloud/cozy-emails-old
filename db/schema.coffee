@@ -22,7 +22,7 @@ User = define 'User', ->
 Mail = define 'Mail', ->
     property 'mailbox', index: true
     property 'id_remote_mailbox', index: true
-    property 'createdAt', Date, default: Date
+    property 'createdAt', Number, 0
     property 'date', Date, default: 0
     property 'headers_raw', Text
     property 'raw', Text

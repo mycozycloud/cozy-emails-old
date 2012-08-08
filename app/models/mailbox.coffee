@@ -2,7 +2,7 @@ Mailbox.checkAllMailboxes = (callback) ->
   Mailbox.all (err, mbs) ->
     return callback err if err
     for mb in mbs
-      mb.getNewMail 50, callback
+      mb.getNewMail 100, callback
 
 Mailbox.prototype.getNewMail = (limit=100, callback)->
   id = @IMAP_last_fetched_id + 1
@@ -59,13 +59,13 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
             headers: false
 
         fetch.on "message", (message) ->
-          parser = new mailparser.MailParser
+          parser = new mailparser.MailParser { streamAttachments: true }
           
           parser.on "end", (m) =>
             # console.log "About to create a new mail:\n" + JSON.stringify(m)
             mail =
               date:         new Date(m.headers.date).toJSON()
-              createdAt:    new Date().toJSON()
+              createdAt:    new Date().valueOf()
               
               from:         JSON.stringify m.from
               to:           JSON.stringify m.to
