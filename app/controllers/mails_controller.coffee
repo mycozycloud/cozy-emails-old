@@ -46,7 +46,6 @@ action 'destroy', ->
 # GET '/mailslist/:timestamp.:num'
 action 'getlist', ->
   num = parseInt req.params.num
-  num = 5
   timestamp = parseInt req.params.timestamp
   console.log {where : {"createdAt" : {lt : timestamp}}, limit : num, order: 'date DESC'}
   Mail.all {where : {"createdAt" : {lt : timestamp}}, limit : num, order: 'date DESC'}, (error, mails) ->

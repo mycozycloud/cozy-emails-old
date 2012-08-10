@@ -33,3 +33,7 @@ class exports.Mailbox extends BaseModel
 
   redrawView: ->
     @view.render() if @view?
+    
+  IMAP_last_fetched_date: ->
+    parsed = new Date @get("IMAP_last_fetched_date")
+    parsed.toUTCString()

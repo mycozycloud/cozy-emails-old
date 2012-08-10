@@ -12,6 +12,8 @@ class exports.MailsElement extends Backbone.View
     @collection.on "change_active_mail", @render, @
 
   render: ->
+    $(@el).html ""
     template = require('./templates/_mail/mail_big')
-    $(@el).html template("model" : @collection.activeMail)
+    if @collection.activeMail?
+      $(@el).html template("model" : @collection.activeMail)
     @

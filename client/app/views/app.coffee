@@ -14,7 +14,11 @@ class exports.AppView extends Backbone.View
   el: 'body'
 
   initialize: ->
-    window.app.mailboxes.fetch()
+    window.app.mailboxes.fetch({
+      success: ->
+        window.app.mailboxes.updateActiveMailboxes()
+        window.app.mailboxes.trigger("change_active_mailboxes")
+      })
     
   constructor: ->
     super()
@@ -59,6 +63,7 @@ class exports.AppView extends Backbone.View
     window.app.view_mails_list = new MailsColumn @.$("#column_mails_list"), window.app.mails
     window.app.view_mail = new MailsElement @.$("#column_mail"), window.app.mails
     window.app.view_mails_list.render()
+    window.app.view_mail.render()
     
   # set the layout for coulmn view - mails
   set_layout_cols: ->

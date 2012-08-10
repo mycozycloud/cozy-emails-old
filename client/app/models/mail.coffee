@@ -53,6 +53,9 @@ class exports.Mail extends BaseModel
     parsed = new Date @get("date")
     parsed.toUTCString()
 
+  text: ->
+    @get("text").replace(/\r\n/g,'\n').replace(/\n/g, '<br />')
+   
   is_unread: ->
     not("\\Seen" in JSON.parse @get("flags"))
     

@@ -22,8 +22,8 @@ User = define 'User', ->
 Mail = define 'Mail', ->
     property 'mailbox', index: true
     property 'id_remote_mailbox', index: true
-    property 'createdAt', Number, 0
-    property 'date', Date, default: 0
+    property 'createdAt', Number, default: 0, index: true
+    property 'date', Date, default: 0, index: true
     property 'headers_raw', Text
     property 'raw', Text
     property 'priority',
@@ -59,5 +59,7 @@ Mailbox = define 'Mailbox', ->
     property 'IMAP_last_sync', Date, default: 0
     property 'IMAP_last_fetched_id', Number, default: 1
     property 'IMAP_last_fetched_date', Date, default: 0
+    property 'status'
+    property 'color', default: "#0099FF"
     
 Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'});

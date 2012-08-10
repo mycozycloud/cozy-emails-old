@@ -35,7 +35,7 @@ class exports.MailboxesListElement extends Backbone.View
   # save changes to server
   buttonSave: (event) ->    
     $(event.target).addClass("disabled").removeClass("buttonSave")  
-    input = @.$("input.content")
+    input = @.$(".content")
     data = {}
     input.each (i) ->
       data[input[i].id] = input[i].value;
@@ -55,5 +55,5 @@ class exports.MailboxesListElement extends Backbone.View
       template = require('./templates/_mailbox/mailbox_edit')
     else
       template = require('./templates/_mailbox/mailbox')
-    $(@el).html template("model": @model.toJSON())
+    $(@el).html template("model": @model)
     @

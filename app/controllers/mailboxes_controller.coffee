@@ -5,7 +5,7 @@ before ->
     else
       @box = box
       next()
-, {}
+, { only: ['índex', 'create', 'show', 'update', 'destroy'] }
 
 # GET /mailboxes
 action 'index', ->
@@ -29,7 +29,26 @@ action 'show', ->
 
 # PUT /mailboxes/:id
 action 'update', ->
-  @box.updateAttributes req.body, (error) =>
+  data = {}
+  attrs = [
+    "checked",
+    "config",
+    "name",
+    "login",
+    "pass",
+    "SMTP_server",
+    "SMTP_ssl",
+    "SMTP_send_as",
+    "IMAP_server",
+    "IMAP_port",
+    "IMAP_secure",
+    "color"
+  ]
+  
+  for attr in attrs
+    data[attr] = req.body[attr]
+    
+  @box.updateAttributes data, (error) =>
     if !error
       send 200
     else

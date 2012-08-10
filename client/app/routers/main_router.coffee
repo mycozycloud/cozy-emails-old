@@ -38,3 +38,10 @@ class exports.MainRouter extends Backbone.Router
     if app.mails.get(path)?
       app.mails.activeMail = app.mails.get(path)
       app.mails.trigger "change_active_mail"
+    else
+      app.mails.fetch({
+        "success": ->
+          app.mails.activeMail = app.mails.get(path)
+          console.log app.mails.activeMail
+          app.mails.trigger "change_active_mail"
+      })

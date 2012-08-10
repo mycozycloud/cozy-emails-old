@@ -14,6 +14,8 @@ class exports.MailsCollection extends Backbone.Collection
   timestampNew: new Date().valueOf()
   timestampOld: new Date().valueOf()
   
+  mailsAtOnce: 100
+  
   comparator: (a, b) ->
     if a.get("date") > b.get("date")
       -1
@@ -49,7 +51,7 @@ class exports.MailsCollection extends Backbone.Collection
   
   # fetches older mails (the list of mails)
   fetchOlder: () ->
-    @url = "mailslist/" + @timestampOld + "." + 0
+    @url = "mailslist/" + @timestampOld + "." + @mailsAtOnce
     console.log "fetchOlder: " + @url
     @fetch {add : true}
 

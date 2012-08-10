@@ -22,17 +22,24 @@ if not module.parent
           console.log job.data.title + " #" + job.id + " completed job removed"
 
     # set up CRON
-    lookupNewMail = (event) =>
-      job = @jobs.create("check mailboxes", {title: "Routine mail check at " + new Date().toUTCString()}).priority('high').save();
-      job.on 'complete', () ->
-        console.log job.data.title + " #" + job.id + " complete"
-      job.on 'failed', () ->
-        console.log job.data.title + " #" + job.id + " failed" 
-      job.on 'progress', (progress) ->
-        console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
+    createCheckMailboxJobs = =>
+      Mailbox.all (err, mbs) =>
+        for mb in mbs
+          job = @jobs.create("check mailbox",
+            mailbox: mb
+            num: 250
+            title: "Periodical mail check of " + mb + " at " + new Date().toUTCString()
+          ).priority("high").save()
+           
+          job.on 'complete', () ->
+            console.log job.data.title + " #" + job.id + " complete"
+          job.on 'failed', () ->
+            console.log job.data.title + " #" + job.id + " failed" 
+          job.on 'progress', (progress) ->
+            console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
         
     importAll = (event) =>
-      job = @jobs.create("import mailbox", {title: "Routine mail check at " + new Date().toUTCString()}).priority('high').attempts(5).save();
+      job = @jobs.create("import mailbox", {title: "Importing mail at " + new Date().toUTCString()}).attempts(5).save();
       job.on 'complete', () ->
         console.log job.data.title + " #" + job.id + " complete"
         importAll() 
@@ -41,13 +48,15 @@ if not module.parent
       job.on 'progress', (progress) ->
         console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
     
-    # initial check on bootup
-    # lookupNewMail()
-    importAll()
-    # 
-    @timer = setInterval lookupNewMail, 5 * 60 * 1000
+    # set-up CRON
+    createCheckMailboxJobs()
+    @timer = setInterval createCheckMailboxJobs, 60 * 1000 *     1 #minutes
   
     # KUE jobs
+    @jobs.process "check mailbox", 1, (job, done) ->
+      console.log job.data.title + " #" + job.id + " job started"
+      (Mailbox job.data.mailbox).getNewMail job.data.num, done
+    
     @jobs.process "check mailboxes", 1, (job, done) ->
       console.log job.data.title + " #" + job.id + " job started"
       Mailbox.checkAllMailboxes done

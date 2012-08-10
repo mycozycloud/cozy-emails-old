@@ -15,7 +15,8 @@ class exports.MailsListMore extends Backbone.View
   }
   
   render: ->
-    $(@el).html require "./templates/_mail/mails_more"
+    template = require "./templates/_mail/mails_more"
+    $(@el).html template({"collection" : @collection})
     @
     
   loadOlderMails: () ->

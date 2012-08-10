@@ -10,7 +10,7 @@ class exports.MailsListElement extends Backbone.View
   tagName : "tr"
 
   events : {
-    "click .choose_mail_button" : "setActiveMail"
+    "click" : "setActiveMail"
   }
   
   constructor: (@model, @collection) ->
