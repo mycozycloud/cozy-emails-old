@@ -61,9 +61,10 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
 
         unless results.length
           # console.log "nothing to download"
-          callback()
           mailbox.status = ""
+          mailbox.IMAP_last_sync = new Date().toJSON()
           mailbox.save()
+          callback()
           do server.logout
           return
 
@@ -108,6 +109,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
               if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
                 mailbox.IMAP_last_fetched_id = mail.id_remote_mailbox
                 mailbox.IMAP_last_fetched_date = new Date().toJSON()
+                mailbox.IMAP_last_sync = new Date().toJSON()
                 mailbox.save()
             
               # update new mail counter

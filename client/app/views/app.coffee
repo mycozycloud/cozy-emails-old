@@ -19,9 +19,21 @@ class exports.AppView extends Backbone.View
         window.app.mailboxes.updateActiveMailboxes()
         window.app.mailboxes.trigger("change_active_mailboxes")
       })
+    window.onresize = @resize
     
   constructor: ->
     super()
+    
+  resize: ->
+    viewport = ->
+      e = window
+      a = "inner"
+      unless "innerWidth" of window
+        a = "client"
+        e = document.documentElement or document.body
+      e[a + "Height"]
+    $("body").height viewport()
+    $("#content").height viewport() - 40
 
   render: ->
     # put on the big layout
@@ -40,6 +52,7 @@ class exports.AppView extends Backbone.View
     @container_menu.html require('./templates/menu')
     window.app.view_menu = new MenuMailboxesList @.$("#menu_mailboxes"), window.app.mailboxes
     window.app.view_menu.render()
+    @resize()
 
 ###################################################
 ## LAYOUTS
@@ -53,6 +66,7 @@ class exports.AppView extends Backbone.View
     window.app.view_mailboxes_new = new MailboxesListNew @.$("#add_mail_button_container"), window.app.mailboxes
     window.app.view_mailboxes.render()
     window.app.view_mailboxes_new.render()
+    @resize()
     
 
   # put on the layout to display mails:
@@ -64,7 +78,4 @@ class exports.AppView extends Backbone.View
     window.app.view_mail = new MailsElement @.$("#column_mail"), window.app.mails
     window.app.view_mails_list.render()
     window.app.view_mail.render()
-    
-  # set the layout for coulmn view - mails
-  set_layout_cols: ->
-    @container_content.html require('./templates/_mail/mails')
+    @resize()

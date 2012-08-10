@@ -613,9 +613,10 @@ window.require.define({"routers/main_router": function(exports, require, module)
         } else {
           return app.mails.fetch({
             "success": function() {
-              app.mails.activeMail = app.mails.get(path);
-              console.log(app.mails.activeMail);
-              return app.mails.trigger("change_active_mail");
+              if (app.mails.get(path) != null) {
+                app.mails.activeMail = app.mails.get(path);
+                return app.mails.trigger("change_active_mail");
+              }
             }
           });
         }
@@ -659,17 +660,34 @@ window.require.define({"views/app": function(exports, require, module) {
       AppView.prototype.el = 'body';
 
       AppView.prototype.initialize = function() {
-        return window.app.mailboxes.fetch({
+        window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
             return window.app.mailboxes.trigger("change_active_mailboxes");
           }
         });
+        return window.onresize = this.resize;
       };
 
       function AppView() {
         AppView.__super__.constructor.call(this);
       }
+
+      AppView.prototype.resize = function() {
+        var viewport;
+        viewport = function() {
+          var a, e;
+          e = window;
+          a = "inner";
+          if (!("innerWidth" in window)) {
+            a = "client";
+            e = document.documentElement || document.body;
+          }
+          return e[a + "Height"];
+        };
+        $("body").height(viewport());
+        return $("#content").height(viewport() - 40);
+      };
 
       AppView.prototype.render = function() {
         $(this.el).html(require('./templates/app'));
@@ -682,7 +700,8 @@ window.require.define({"views/app": function(exports, require, module) {
       AppView.prototype.set_layout_menu = function() {
         this.container_menu.html(require('./templates/menu'));
         window.app.view_menu = new MenuMailboxesList(this.$("#menu_mailboxes"), window.app.mailboxes);
-        return window.app.view_menu.render();
+        window.app.view_menu.render();
+        return this.resize();
       };
 
       AppView.prototype.set_layout_mailboxes = function() {
@@ -690,7 +709,8 @@ window.require.define({"views/app": function(exports, require, module) {
         window.app.view_mailboxes = new MailboxesList(this.$("#mail_list_container"), window.app.mailboxes);
         window.app.view_mailboxes_new = new MailboxesListNew(this.$("#add_mail_button_container"), window.app.mailboxes);
         window.app.view_mailboxes.render();
-        return window.app.view_mailboxes_new.render();
+        window.app.view_mailboxes_new.render();
+        return this.resize();
       };
 
       AppView.prototype.set_layout_mails = function() {
@@ -698,11 +718,8 @@ window.require.define({"views/app": function(exports, require, module) {
         window.app.view_mails_list = new MailsColumn(this.$("#column_mails_list"), window.app.mails);
         window.app.view_mail = new MailsElement(this.$("#column_mail"), window.app.mails);
         window.app.view_mails_list.render();
-        return window.app.view_mail.render();
-      };
-
-      AppView.prototype.set_layout_cols = function() {
-        return this.container_content.html(require('./templates/_mail/mails'));
+        window.app.view_mail.render();
+        return this.resize();
       };
 
       return AppView;
