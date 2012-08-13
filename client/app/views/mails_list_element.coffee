@@ -9,9 +9,8 @@ class exports.MailsListElement extends Backbone.View
 
   tagName : "tr"
 
-  events : {
+  events :
     "click" : "setActiveMail"
-  }
   
   constructor: (@model, @collection) ->
     super()

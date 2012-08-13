@@ -15,22 +15,24 @@
   
 .btn-toolbar
   .btn-group
-    a.btn.btn-primary
+    a#button_answer.btn.btn-primary
       i.icon-share-alt
       | Answer
-    a.btn
+    a#button_answer_all.btn
       i.icon-share-alt
       | Answer to all
-    a.btn
+    a#button_forward.btn
       i.icon-arrow-up
       | Forward
   .btn-group
-    a.btn.btn-warning
+    a.btn.btn-warning.disabled
       i.icon-star
       | Important
-    a.btn
+    a.btn.disabled
       i.icon-ban-circle
       | Spam
-    a.btn.btn-danger
+    a.btn.btn-danger.disabled
       i.icon-remove
       | Delete
+
+#answer_form

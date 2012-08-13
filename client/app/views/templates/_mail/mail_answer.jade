@@ -1,0 +1,23 @@
+form.well
+  fieldset
+    .control-group
+      .controls
+        .input-prepend
+          span.add-on To
+          input.content.span6(id="to", type="text", value=model.from()).input-xlarge
+      .controls
+        .input-prepend
+          span.add-on Cc
+          input.content.span6(id="cc", type="text", value="").input-xlarge
+    .control-group
+      .controls
+        .input-prepend
+          span.add-on Subject
+          input.content.span9(id="subject", type="text", value=model.get("subject")).input-xlarge
+    .control-group
+      .controls
+        textarea.content.span10(id="body", rows=15, cols=80).input-xlarge !{model.get("text")}
+    .form-actions
+      a.btn.btn-success Send
+      a.btn.btn-warning Discard
+  

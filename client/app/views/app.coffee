@@ -34,6 +34,7 @@ class exports.AppView extends Backbone.View
       e[a + "Height"]
     $("body").height viewport()
     $("#content").height viewport() - 40
+    $(".column").height viewport() - 40
 
   render: ->
     # put on the big layout

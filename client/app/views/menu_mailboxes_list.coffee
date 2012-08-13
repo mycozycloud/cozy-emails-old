@@ -16,25 +16,12 @@ class exports.MenuMailboxesList extends Backbone.View
     @collection.on('add', @render, @)
     @collection.on('remove', @render, @)
     @collection.on('change', @render, @)
-    
-  events: {
-    "click .change_mailboxes_list" : 'setupMailbox'
-  }
-
-  setupMailbox: (event) ->
-    id = event.target.getAttribute("mailbox_id")
-    mb = @collection.get(id)
-    mb.set("checked", not mb.get("checked"))
-    mb.save()
-    @collection.updateActiveMailboxes()
-    @collection.trigger("change_active_mailboxes")
-    console.log "yaha"
 
   render: ->
     $(@el).html("")
     @total_inbox = 0
-    @collection.each (mail) =>
-      box = new MenuMailboxListElement mail, mail.collection
+    @collection.each (mailbox) =>
+      box = new MenuMailboxListElement mailbox, @collection
       $(@el).append box.render().el
-      @total_inbox += (Number) mail.get("new_messages")
+      @total_inbox += (Number) mailbox.get("new_messages")
     @
