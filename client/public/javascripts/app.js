@@ -685,9 +685,9 @@ window.require.define({"views/app": function(exports, require, module) {
           }
           return e[a + "Height"];
         };
-        $("body").height(viewport());
-        $("#content").height(viewport() - 40);
-        return $(".column").height(viewport() - 40);
+        $("body").height(viewport() - 10);
+        $("#content").height(viewport() - 10);
+        return $(".column").height(viewport() - 10);
       };
 
       AppView.prototype.render = function() {
@@ -1890,11 +1890,7 @@ window.require.define({"views/templates/app": function(exports, require, module)
   buf.push(attrs({ 'id':('menu_container'), "class": ('well') + ' ' + ('sidebar-nav') }));
   buf.push('></div></div><div');
   buf.push(attrs({ 'id':('content'), "class": ('span10') }));
-  buf.push('></div></div><div');
-  buf.push(attrs({ "class": ('row-fluid') }));
-  buf.push('><div');
-  buf.push(attrs({ "class": ('span12') }));
-  buf.push('><footer><p>© CozyCloud 2012</p></footer></div></div></div>');
+  buf.push('></div></div></div>');
   }
   return buf.join("");
   };

@@ -32,9 +32,9 @@ class exports.AppView extends Backbone.View
         a = "client"
         e = document.documentElement or document.body
       e[a + "Height"]
-    $("body").height viewport()
-    $("#content").height viewport() - 40
-    $(".column").height viewport() - 40
+    $("body").height viewport() - 10
+    $("#content").height viewport() - 10
+    $(".column").height viewport() - 10
 
   render: ->
     # put on the big layout
