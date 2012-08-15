@@ -5,7 +5,7 @@ before ->
     else
       @box = box
       next()
-, { only: ['índex', 'show', 'update', 'destroy'] }
+, { only: ['índex', 'show', 'update', 'destroy', 'sendmail'] }
 
 # GET /mailboxes
 action 'index', ->
@@ -57,6 +57,25 @@ action 'update', ->
 # DELETE /mailboxes/:id
 action 'destroy', ->
   @box.destroy (error) =>
+    if !error
+      send 200
+    else
+      send 500
+      
+
+# post /sendmail
+action 'sendmail', ->
+  data = {}
+  attrs = [
+    "to",
+    "subject",
+    "html",
+  ]
+  
+  for attr in attrs
+    data[attr] = req.body[attr]
+    
+  @box.sendMail data, (error) =>
     if !error
       send 200
     else

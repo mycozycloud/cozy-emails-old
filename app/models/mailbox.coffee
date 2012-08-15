@@ -1,3 +1,50 @@
+Mailbox.prototype.sendMail = (data, callback) ->
+  nodemailer = require "nodemailer"
+
+  transport = nodemailer.createTransport("SMTP",
+    host: @SMTP_server
+    secureConnection: @SMTP_ssl
+    port: 465 # port for secure SMTP
+    
+    auth:
+      user: @login
+      pass: @pass
+  )
+
+  message =
+
+    from: @SMTP_send_as
+    to: data.to
+    subject: data.subject
+    headers: data.headers
+    text: data.text
+    html: data.html
+    
+    attachments: [
+      # String attachment
+      fileName: "notes.txt"
+      contents: "Some notes about this e-mail"
+      contentType: "text/plain" # optional, would be detected from the filename
+    ,
+      # Binary Buffer attachment
+      fileName: "image.png"
+      contents: new Buffer("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD/" + "//+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4U" + "g9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC", "base64")
+      cid: "note@node" # should be as unique as possible
+    ]
+
+  console.log "Sending Mail"
+  transport.sendMail message, (error) ->
+    if error
+      console.log "Error occured"
+      console.log error.message
+      callback error
+    else
+      console.log "Message sent successfully!"
+      callback()
+
+  transport.close();
+
+
 Mailbox.checkAllMailboxes = (callback) ->
   Mailbox.all (err, mbs) ->
     return callback err if err

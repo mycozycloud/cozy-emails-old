@@ -427,6 +427,42 @@ window.require.define({"models/mail": function(exports, require, module) {
   
 }});
 
+window.require.define({"models/mail_new": function(exports, require, module) {
+  (function() {
+    var BaseModel,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    BaseModel = require("./models").BaseModel;
+
+    /*
+    
+      Model which defines the new MAIL object (to send).
+    */
+
+    exports.MailNew = (function(_super) {
+
+      __extends(MailNew, _super);
+
+      function MailNew() {
+        MailNew.__super__.constructor.apply(this, arguments);
+      }
+
+      MailNew.prototype.url = "sendmail";
+
+      MailNew.prototype.initialize = function() {
+        this.on("destroy", this.removeView, this);
+        return this.on("change", this.redrawView, this);
+      };
+
+      return MailNew;
+
+    })(BaseModel);
+
+  }).call(this);
+  
+}});
+
 window.require.define({"models/mailbox": function(exports, require, module) {
   (function() {
     var BaseModel,
@@ -937,11 +973,13 @@ window.require.define({"views/mailboxes_list_new": function(exports, require, mo
 
 window.require.define({"views/mails_answer": function(exports, require, module) {
   (function() {
-    var Mail,
+    var Mail, MailNew,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     Mail = require("../models/mail").Mail;
+
+    MailNew = require("../models/mail_new").MailNew;
 
     /*
     
@@ -957,6 +995,23 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         this.mail = mail;
         MailsAnswer.__super__.constructor.call(this);
       }
+
+      MailsAnswer.prototype.events = {
+        "click a#send_button": 'send'
+      };
+
+      MailsAnswer.prototype.send = function() {
+        var data, input;
+        input = this.$(".content");
+        data = {};
+        input.each(function(i) {
+          return data[input[i].id] = input[i].value;
+        });
+        this.model = new MailNew(data);
+        console.log(this.model);
+        this.model.url = "sendmail/" + this.mail.get("mailbox");
+        return this.model.save();
+      };
 
       MailsAnswer.prototype.render = function() {
         var template;
@@ -1471,11 +1526,11 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push('><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><textarea');
-  buf.push(attrs({ 'id':("body"), 'rows':(15), 'cols':(80), "class": ('content') + ' ' + ('span10') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("html"), 'rows':(15), 'cols':(80), "class": ('content') + ' ' + ('span10') + ' ' + ('input-xlarge') }));
   buf.push('>' + ((interp = model.get("text")) == null ? '' : interp) + '</textarea></div></div><div');
   buf.push(attrs({ "class": ('form-actions') }));
   buf.push('><a');
-  buf.push(attrs({ "class": ('btn') + ' ' + ('btn-success') }));
+  buf.push(attrs({ 'id':('send_button'), "class": ('btn') + ' ' + ('btn-success') }));
   buf.push('>Send</a><a');
   buf.push(attrs({ "class": ('btn') + ' ' + ('btn-warning') }));
   buf.push('>Discard</a></div></fieldset></form>');

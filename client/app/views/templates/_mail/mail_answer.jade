@@ -16,8 +16,8 @@ form.well
           input.content.span9(id="subject", type="text", value=model.get("subject")).input-xlarge
     .control-group
       .controls
-        textarea.content.span10(id="body", rows=15, cols=80).input-xlarge !{model.get("text")}
+        textarea.content.span10(id="html", rows=15, cols=80).input-xlarge !{model.get("text")}
     .form-actions
-      a.btn.btn-success Send
+      a#send_button.btn.btn-success Send
       a.btn.btn-warning Discard
   
