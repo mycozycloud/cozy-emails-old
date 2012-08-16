@@ -6,6 +6,8 @@ if active
         strong #{model.from_short()}
       else
         #{model.from_short()}
+      if model.is_flagged()
+        i.icon-star
       br
       i(style='color: gray;') #{model.date()}
       if model.is_unread()
@@ -22,6 +24,8 @@ else
         strong #{model.from_short()}
       else
         #{model.from_short()}
+      if model.is_flagged()
+        i.icon-star
       br
       i(style='color: lightgray;') #{model.date()}
     if model.is_unread()

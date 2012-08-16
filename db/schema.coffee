@@ -27,13 +27,15 @@ Mail = define 'Mail', ->
     property 'headers_raw', Text
     property 'raw', Text
     property 'priority',
-    property 'flags',
     property 'subject',
     property 'from',
     property 'to',
     property 'cc',
     property 'text', Text
     property 'html', Text
+    property 'flags',
+    property 'read', Boolean, default: false
+    property 'flagged', Boolean, default: false
     #property 'attachements'
     
 Attachement = define 'Attachements', ->

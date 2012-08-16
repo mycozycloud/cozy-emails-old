@@ -1,6 +1,9 @@
 ul.nav.nav-list
   li.nav-header All your mail
-  li.active
+  li#newmailbutton.menu_option
+    a(href='#new-mail')
+      | Compose a new mail
+  li#inboxbutton.menu_option
     a(href='#')
       | Inbox
   //- li
@@ -13,7 +16,7 @@ ul.nav.nav-list
   li.nav-header Mailboxes
 ul#menu_mailboxes.nav.nav-list
 ul.nav.nav-list
-  li
+  li#mailboxesbutton
     a(href='#config-mailboxes')
       | add/modify
   //- li.divider

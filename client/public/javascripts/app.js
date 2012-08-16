@@ -349,7 +349,11 @@ window.require.define({"models/mail": function(exports, require, module) {
         out = "";
         for (_i = 0, _len = parsed.length; _i < _len; _i++) {
           obj = parsed[_i];
-          out += obj.name + " ";
+          if (obj.name) {
+            out += obj.name + " ";
+          } else {
+            out += obj.address + " ";
+          }
         }
         return out;
       };
@@ -387,7 +391,7 @@ window.require.define({"models/mail": function(exports, require, module) {
       };
 
       Mail.prototype.is_unread = function() {
-        return !(__indexOf.call(JSON.parse(this.get("flags")), "\\Seen") >= 0);
+        return !this.get("read");
       };
 
       Mail.prototype.set_read = function(read) {
@@ -402,18 +406,48 @@ window.require.define({"models/mail": function(exports, require, module) {
               box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) - 1);
             }
           }
+          this.set({
+            "read": true
+          });
         } else {
           flags_prev = flags.length;
           flags = $.grep(flags, function(val) {
             return val !== "\\Seen";
           });
-          if (glasgs_prev !== flags.length) {
+          if (flags_prev !== flags.length) {
             box = window.app.mailboxes.get(this.get("mailbox"));
             if (box != null) {
               box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) + 1);
             }
           }
+          this.set({
+            "read": false
+          });
         }
+        return this.set({
+          "flags": JSON.stringify(flags)
+        });
+      };
+
+      Mail.prototype.is_flagged = function() {
+        return this.get("flagged");
+      };
+
+      Mail.prototype.set_flagged = function(flagged) {
+        var flags, flags_prev;
+        if (flagged == null) flagged = true;
+        flags = JSON.parse(this.get("flags"));
+        if (flagged) {
+          if (__indexOf.call(flags, "\\Flagged") < 0) flags.push("\\Flagged");
+        } else {
+          flags_prev = flags.length;
+          flags = $.grep(flags, function(val) {
+            return val !== "\\Flagged";
+          });
+        }
+        this.set({
+          "flagged": flagged
+        });
         return this.set({
           "flags": JSON.stringify(flags)
         });
@@ -623,6 +657,7 @@ window.require.define({"routers/main_router": function(exports, require, module)
       MainRouter.prototype.routes = {
         '': 'home',
         'inbox': 'home',
+        'new-mail': 'new',
         'config-mailboxes': 'configMailboxes'
       };
 
@@ -632,12 +667,23 @@ window.require.define({"routers/main_router": function(exports, require, module)
 
       MainRouter.prototype.home = function() {
         app.appView.render();
-        return app.appView.set_layout_mails();
+        app.appView.set_layout_mails();
+        $(".menu_option").removeClass("active");
+        return $("#inboxbutton").addClass("active");
+      };
+
+      MainRouter.prototype["new"] = function() {
+        app.appView.render();
+        app.appView.set_layout_mailboxes();
+        $(".menu_option").removeClass("active");
+        return $("#newmailbutton").addClass("active");
       };
 
       MainRouter.prototype.configMailboxes = function() {
         app.appView.render();
-        return app.appView.set_layout_mailboxes();
+        app.appView.set_layout_mailboxes();
+        $(".menu_option").removeClass("active");
+        return $("#mailboxesbutton").addClass("active");
       };
 
       MainRouter.prototype.mail = function(path) {
@@ -990,10 +1036,12 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
 
       __extends(MailsAnswer, _super);
 
-      function MailsAnswer(el, mail) {
+      function MailsAnswer(el, mail, mailtosend) {
         this.el = el;
         this.mail = mail;
+        this.mailtosend = mailtosend;
         MailsAnswer.__super__.constructor.call(this);
+        this.mail.on("change", this.render, this);
       }
 
       MailsAnswer.prototype.events = {
@@ -1007,10 +1055,11 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         input.each(function(i) {
           return data[input[i].id] = input[i].value;
         });
-        this.model = new MailNew(data);
-        console.log(this.model);
-        this.model.url = "sendmail/" + this.mail.get("mailbox");
-        return this.model.save();
+        this.mailtosend.set(data);
+        this.mailtosend.url = "sendmail/" + this.mail.get("mailbox");
+        console.log(this.mailtosend);
+        this.mailtosend.save();
+        return $(this.el).html(require('./templates/_mail/mail_sent'));
       };
 
       MailsAnswer.prototype.render = function() {
@@ -1018,7 +1067,8 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         $(this.el).html("");
         template = require('./templates/_mail/mail_answer');
         $(this.el).html(template({
-          "model": this.mail
+          "model": this.mail,
+          "mailtosend": this.mailtosend
         }));
         return this;
       };
@@ -1081,13 +1131,15 @@ window.require.define({"views/mails_column": function(exports, require, module) 
 
 window.require.define({"views/mails_element": function(exports, require, module) {
   (function() {
-    var Mail, MailsAnswer,
+    var Mail, MailNew, MailsAnswer,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     Mail = require("../models/mail").Mail;
 
     MailsAnswer = require("../views/mails_answer").MailsAnswer;
+
+    MailNew = require("../models/mail_new").MailNew;
 
     /*
     
@@ -1103,12 +1155,15 @@ window.require.define({"views/mails_element": function(exports, require, module)
         this.collection = collection;
         MailsElement.__super__.constructor.call(this);
         this.collection.on("change_active_mail", this.render, this);
+        window.app.mailtosend = new MailNew();
       }
 
       MailsElement.prototype.events = {
         "click a#button_answer_all": 'bt_answer_all',
         "click a#button_answer": 'bt_answer',
-        "click a#button_forward": 'bt_forward'
+        "click a#button_forward": 'bt_forward',
+        "click a#button_unread": 'bt_unread',
+        "click a#button_flagged": 'bt_flagged'
       };
 
       /*
@@ -1118,24 +1173,46 @@ window.require.define({"views/mails_element": function(exports, require, module)
       MailsElement.prototype.create_answer_view = function() {
         if (!window.app.view_answer) {
           console.log("create new answer view");
-          window.app.view_answer = new MailsAnswer(this.$("#answer_form"), this.collection.activeMail);
+          window.app.view_answer = new MailsAnswer(this.$("#answer_form"), this.collection.activeMail, window.app.mailtosend);
           return window.app.view_answer.render();
         }
       };
 
       MailsElement.prototype.bt_answer_all = function() {
         console.log("answer all");
-        return this.create_answer_view();
+        this.create_answer_view();
+        return window.app.mailtosend.set("mode", "answer_all");
       };
 
       MailsElement.prototype.bt_answer = function() {
         console.log("answer");
-        return this.create_answer_view();
+        this.create_answer_view();
+        return window.app.mailtosend.set("mode", "answer");
       };
 
       MailsElement.prototype.bt_forward = function() {
         console.log("forward");
-        return this.create_answer_view();
+        this.create_answer_view();
+        return window.app.mailtosend.set("mode", "forward");
+      };
+
+      MailsElement.prototype.bt_unread = function() {
+        console.log("unread");
+        this.collection.activeMail.set_read(false);
+        this.collection.activeMail.url = "mails/" + this.collection.activeMail.get("id");
+        return this.collection.activeMail.save();
+      };
+
+      MailsElement.prototype.bt_flagged = function() {
+        if (this.collection.activeMail.is_flagged()) {
+          console.log("unflagged");
+          this.collection.activeMail.set_flagged(false);
+        } else {
+          this.collection.activeMail.set_flagged(true);
+          console.log("flagged");
+        }
+        this.collection.activeMail.url = "mails/" + this.collection.activeMail.get("id");
+        return this.collection.activeMail.save();
       };
 
       MailsElement.prototype.render = function() {
@@ -1270,7 +1347,11 @@ window.require.define({"views/mails_list_element": function(exports, require, mo
       MailsListElement.prototype.setActiveMail = function(event) {
         this.collection.activeMail = this.model;
         this.collection.trigger("change_active_mail");
-        return this.collection.activeMail.set_read();
+        this.collection.activeMail.set_read();
+        this.collection.activeMail.url = "mails/" + this.collection.activeMail.get("id");
+        return this.collection.activeMail.save({
+          "read": true
+        });
       };
 
       MailsListElement.prototype.render = function() {
@@ -1501,7 +1582,7 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push(attrs({ "class": ('input-prepend') }));
   buf.push('><span');
   buf.push(attrs({ "class": ('add-on') }));
-  buf.push('>To</span><input');
+  buf.push('>To&nbsp;</span><input');
   buf.push(attrs({ 'id':("to"), 'type':("text"), 'value':(model.from()), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
   buf.push('/></div></div><div');
   buf.push(attrs({ "class": ('controls') }));
@@ -1509,8 +1590,16 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push(attrs({ "class": ('input-prepend') }));
   buf.push('><span');
   buf.push(attrs({ "class": ('add-on') }));
-  buf.push('>Cc</span><input');
+  buf.push('>Cc&nbsp;</span><input');
   buf.push(attrs({ 'id':("cc"), 'type':("text"), 'value':(""), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
+  buf.push('/></div></div><div');
+  buf.push(attrs({ "class": ('controls') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('input-prepend') }));
+  buf.push('><span');
+  buf.push(attrs({ "class": ('add-on') }));
+  buf.push('>Bcc</span><input');
+  buf.push(attrs({ 'id':("bcc"), 'type':("text"), 'value':(""), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
   buf.push('/></div></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><div');
@@ -1519,9 +1608,32 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push(attrs({ "class": ('input-prepend') }));
   buf.push('><span');
   buf.push(attrs({ "class": ('add-on') }));
-  buf.push('>Subject</span><input');
+  buf.push('>Subject</span>');
+  if ( mailtosend.get("mode") == "answer")
+  {
+  buf.push('<input');
+  buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':("RE: " + model.get("subject")), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
+  buf.push('/>');
+  }
+  else if ( mailtosend.get("mode") == "answer_all")
+  {
+  buf.push('<input');
+  buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':("RE: " + model.get("subject")), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
+  buf.push('/>');
+  }
+  else if ( mailtosend.get("mode") == "forward")
+  {
+  buf.push('<input');
+  buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':("FWD: " + model.get("subject")), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
+  buf.push('/>');
+  }
+  else
+  {
+  buf.push('<input');
   buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':(model.get("subject")), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
-  buf.push('/></div></div></div><div');
+  buf.push('/>');
+  }
+  buf.push('</div></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('controls') }));
@@ -1588,10 +1700,12 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   buf.push('></i>Forward\n</a></div><div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
-  buf.push(attrs({ "class": ('btn') + ' ' + ('btn-warning') + ' ' + ('disabled') }));
+  buf.push(attrs({ 'id':('button_flagged'), "class": ('btn') + ' ' + ('btn-warning') }));
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-star') }));
-  buf.push('></i>Important\n</a><a');
+  buf.push('></i>Flag\n</a><a');
+  buf.push(attrs({ 'id':('button_unread'), "class": ('btn') }));
+  buf.push('>Unread\n</a><a');
   buf.push(attrs({ "class": ('btn') + ' ' + ('disabled') }));
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-ban-circle') }));
@@ -1628,6 +1742,12 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   {
   buf.push('' + escape((interp = model.from_short()) == null ? '' : interp) + '\n');
   }
+  if ( model.is_flagged())
+  {
+  buf.push('<i');
+  buf.push(attrs({ "class": ('icon-star') }));
+  buf.push('></i>');
+  }
   buf.push('<br');
   buf.push(attrs({  }));
   buf.push('/><i');
@@ -1657,6 +1777,12 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   else
   {
   buf.push('' + escape((interp = model.from_short()) == null ? '' : interp) + '\n');
+  }
+  if ( model.is_flagged())
+  {
+  buf.push('<i');
+  buf.push(attrs({ "class": ('icon-star') }));
+  buf.push('></i>');
   }
   buf.push('<br');
   buf.push(attrs({  }));
@@ -1693,6 +1819,20 @@ window.require.define({"views/templates/_mail/mail_list_empty": function(exports
   buf.push('><p><strong>Ups, no mails to show...\n</strong></p><p><a');
   buf.push(attrs({ 'href':("#config-mailboxes") }));
   buf.push('>Perhaps configure a mailbox ?</a></p></div>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_mail/mail_sent": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<p');
+  buf.push(attrs({ "class": ('well') }));
+  buf.push('><strong>Mail sent !</strong></p>');
   }
   return buf.join("");
   };
@@ -1962,7 +2102,11 @@ window.require.define({"views/templates/menu": function(exports, require, module
   buf.push('><li');
   buf.push(attrs({ "class": ('nav-header') }));
   buf.push('>All your mail</li><li');
-  buf.push(attrs({ "class": ('active') }));
+  buf.push(attrs({ 'id':('newmailbutton'), "class": ('menu_option') }));
+  buf.push('><a');
+  buf.push(attrs({ 'href':('#new-mail') }));
+  buf.push('>Compose a new mail\n</a></li><li');
+  buf.push(attrs({ 'id':('inboxbutton'), "class": ('menu_option') }));
   buf.push('><a');
   buf.push(attrs({ 'href':('#') }));
   buf.push('>Inbox\n</a></li><li');
@@ -1973,7 +2117,9 @@ window.require.define({"views/templates/menu": function(exports, require, module
   buf.push(attrs({ 'id':('menu_mailboxes'), "class": ('nav') + ' ' + ('nav-list') }));
   buf.push('></ul><ul');
   buf.push(attrs({ "class": ('nav') + ' ' + ('nav-list') }));
-  buf.push('><li><a');
+  buf.push('><li');
+  buf.push(attrs({ 'id':('mailboxesbutton') }));
+  buf.push('><a');
   buf.push(attrs({ 'href':('#config-mailboxes') }));
   buf.push('>add/modify\n</a></li></ul>');
   }

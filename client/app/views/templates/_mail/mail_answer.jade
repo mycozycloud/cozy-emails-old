@@ -3,17 +3,28 @@ form.well
     .control-group
       .controls
         .input-prepend
-          span.add-on To
+          span.add-on To&nbsp;
           input.content.span6(id="to", type="text", value=model.from()).input-xlarge
       .controls
         .input-prepend
-          span.add-on Cc
+          span.add-on Cc&nbsp;
           input.content.span6(id="cc", type="text", value="").input-xlarge
+      .controls
+        .input-prepend
+          span.add-on Bcc
+          input.content.span6(id="bcc", type="text", value="").input-xlarge
     .control-group
       .controls
         .input-prepend
           span.add-on Subject
-          input.content.span9(id="subject", type="text", value=model.get("subject")).input-xlarge
+          if mailtosend.get("mode") == "answer"
+            input.content.span9(id="subject", type="text", value= "RE: " + model.get("subject")).input-xlarge
+          else if mailtosend.get("mode") == "answer_all"
+            input.content.span9(id="subject", type="text", value= "RE: " + model.get("subject")).input-xlarge
+          else if mailtosend.get("mode") == "forward"
+            input.content.span9(id="subject", type="text", value= "FWD: " + model.get("subject")).input-xlarge
+          else
+            input.content.span9(id="subject", type="text", value= model.get("subject")).input-xlarge
     .control-group
       .controls
         textarea.content.span10(id="html", rows=15, cols=80).input-xlarge !{model.get("text")}

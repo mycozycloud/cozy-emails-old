@@ -21,6 +21,8 @@ class exports.MailsListElement extends Backbone.View
     @collection.activeMail = @model
     @collection.trigger "change_active_mail"
     @collection.activeMail.set_read()
+    @collection.activeMail.url = "mails/" + @collection.activeMail.get("id")
+    @collection.activeMail.save({"read" : true})
 
   render: ->
     template = require('./templates/_mail/mail_list')

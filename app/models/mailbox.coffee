@@ -15,10 +15,12 @@ Mailbox.prototype.sendMail = (data, callback) ->
 
     from: @SMTP_send_as
     to: data.to
+    cc: data.cc if data.cc?
+    bcc: data.bcc if data.bcc?
     subject: data.subject
-    headers: data.headers
-    text: data.text
+    headers: data.headers if data.headers?
     html: data.html
+    generateTextFromHTML: true
     
     attachments: [
       # String attachment
@@ -142,6 +144,10 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
             
               headers_raw:  JSON.stringify m.headers
               raw:          JSON.stringify m
+              
+              read:         "\\Seen" in parser.message_flags
+              flagged:      "\\Flagged" in parser.message_flags
+              
           
             mailbox.mails.create mail, (err, mail) ->
             

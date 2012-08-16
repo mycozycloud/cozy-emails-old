@@ -5,20 +5,20 @@ before ->
     else
       @box = box
       next()
-, {}
+, { only: ['show', 'update', 'destroy'] }
 
-# GET /mails
-action 'index', ->
-  Mail.all (err, mails) ->
-    send mails
-
-# POST /mails
-action 'create', ->
-  Mail.create req.body, (error) =>
-    if !error
-      send 200
-    else
-      send 500
+# # GET /mails
+# action 'index', ->
+#   Mail.all (err, mails) ->
+#     send mails
+# # 
+# # POST /mails
+# action 'create', ->
+#   Mail.create req.body, (error) =>
+#     if !error
+#       send 200
+#     else
+#       send 500
 
 # GET /mails/:id
 action 'show', ->
@@ -29,7 +29,17 @@ action 'show', ->
 
 # PUT /mails/:id
 action 'update', ->
-  @box.updateAttributes req.body, (error) =>
+  data = {}
+  attrs = [
+    "flags",
+    "flagged",
+    "read"
+  ]
+  
+  for attr in attrs
+    data[attr] = req.body[attr]
+    
+  @box.updateAttributes data, (error) =>
     if !error
       send 200
     else

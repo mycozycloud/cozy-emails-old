@@ -1,13 +1,17 @@
+################################################################
 ###
 
   Application's router.
 
 ###
+################################################################
+
 class exports.MainRouter extends Backbone.Router
 
   routes:
     '' : 'home'
     'inbox' : 'home'
+    'new-mail' : 'new'
     'config-mailboxes' : 'configMailboxes'
 
   # routes that need regexp.
@@ -15,10 +19,21 @@ class exports.MainRouter extends Backbone.Router
     @route(/^mail\/(.*?)$/, 'mail')
 
 ################################################################
-############## INDEX
+############## INDEX 
   home : ->
     app.appView.render()
     app.appView.set_layout_mails()
+    $(".menu_option").removeClass("active")
+    $("#inboxbutton").addClass("active")
+
+
+################################################################
+############## NEW MAIL 
+  new : ->
+    app.appView.render()
+    app.appView.set_layout_mailboxes()
+    $(".menu_option").removeClass("active")
+    $("#newmailbutton").addClass("active")
 
 
 ################################################################
@@ -27,7 +42,8 @@ class exports.MainRouter extends Backbone.Router
   configMailboxes : ->
     app.appView.render()
     app.appView.set_layout_mailboxes()
-    
+    $(".menu_option").removeClass("active")
+    $("#mailboxesbutton").addClass("active")
     
 ################################################################
 ############## INDEX
