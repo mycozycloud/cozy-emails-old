@@ -58,7 +58,21 @@ class exports.Mail extends BaseModel
 
   text: ->
     @get("text").replace(/\r\n/g,'\n').replace(/\n/g, '<br />')
-   
+
+  html: ->
+    expression = new RegExp("(<style>(.|\s)*?</style>)", "gi");
+    exp = ///
+      /(<style>(.|\s)*?</style>)/ig
+      ///
+    string = new String @get("html")
+    string.replace(expression,"")
+  
+  text_or_html: ->
+    if @get("html")
+      @html()
+    else
+      @text()
+  
   is_unread: ->
     # not("\\Seen" in JSON.parse @get("flags"))
     not @get("read")

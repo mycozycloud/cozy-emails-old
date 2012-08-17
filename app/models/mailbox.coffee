@@ -74,19 +74,36 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
 
   mailbox = @
 
-  # so  let's create 
+  # so  let's create a connection
   server = new imap.ImapConnection
     username: mailbox.login
     password: mailbox.pass
     host:     mailbox.IMAP_server
     port:     mailbox.IMAP_port
     secure:   mailbox.IMAP_secure
-  
-  exitOnErr = (err) =>
-    @status = err.toString()
-    @save()
-    callback err
+    
+  server.on "alert", (alert) ->
+    console.log "[SERVER ALERT]" + alert
+      
+  server.on "error", (error) ->
+    console.log "[SERVER ERROR]" + error.toString()
+    callback error.toString()
 
+  server.on "close", (error) ->
+    if error
+      callback "transmission error"
+  
+  server.on "end", () ->
+    console.log "event end: " + callback
+    do callback
+      
+  exitOnErr = (err) =>
+     mailbox.status = err.toString()
+     mailbox.save (error) ->
+       callback error if error
+
+  # TODO - socket errors on no-internet kind of situation produces an uncatched error
+  # Admittedly, it would be nice to find out why this is not being caught, wouldn't it ?
   server.connect (err) =>
   
     # ERROR
@@ -100,7 +117,10 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
       if err
         exitOnErr err 
         return
-    
+      
+      # update number of new mails
+      mailbox.new_messages = box.messages.new
+      
       server.search constraints, (err, results) =>
         
         # ERROR
@@ -109,12 +129,11 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
           return
 
         unless results.length
-          # console.log "nothing to download"
+          console.log "nothing to download"
           mailbox.status = ""
           mailbox.IMAP_last_sync = new Date().toJSON()
           mailbox.save()
-          callback()
-          do server.logout
+          server.logout()
           return
 
         fetch = server.fetch results,
@@ -160,15 +179,16 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
             
               # update last fetched element
               if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
+                console.log "Updating the id"
                 mailbox.IMAP_last_fetched_id = mail.id_remote_mailbox
                 mailbox.IMAP_last_fetched_date = new Date().toJSON()
                 mailbox.IMAP_last_sync = new Date().toJSON()
-                mailbox.save()
             
               # update new mail counter
               unless "\\Seen" in JSON.parse mail.flags
-                mailbox.new_messages++ 
-                mailbox.save()
+                mailbox.new_messages++
+              
+              mailbox.save()
 
           message.on "data", (data) ->
             parser.write data.toString()
@@ -180,6 +200,5 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
 
         fetch.on "end", ->
           mailbox.status = ""
-          mailbox.save()
-          callback()
-          do server.logout
+          console.log "end"
+          server.logout()

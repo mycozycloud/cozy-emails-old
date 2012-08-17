@@ -14,53 +14,52 @@ if not module.parent
     
     @jobs = @kue.createQueue()
     
-    @jobs.on "job complete", (id) ->
-      Job.get id, (err, job) ->
-        return if err
-        job.remove (err) ->
-          throw err if err
-          console.log job.data.title + " #" + job.id + " completed job removed"
+    # @jobs.on "job complete", (id) ->
+    #   Job.get id, (error, job) ->
+    #     return if error
+    #     createCheckJob job.data.mb, 1000 * 60 * 0.5, (error) ->
+    #       return if error
+    #       job.remove (err) ->
+    #         throw err if err
+    #         console.log job.data.title + " #" + job.id + " complete job removed"
+    #       
+    # @jobs.on "job error", (id) ->
+    #   Job.get id, (error, job) ->
+    #     return if error
+    #     createCheckJob job.data.mb, 1000 * 60 * 1, (error) ->
+    #       console.log error if error
 
-    # set up CRON
-    createCheckMailboxJobs = =>
-      Mailbox.all (err, mbs) =>
-        for mb in mbs
-          job = @jobs.create("check mailbox",
-            mailbox: mb
-            num: 250
-            title: "Periodical mail check of " + mb + " at " + new Date().toUTCString()
-          ).priority("high").save()
-           
-          job.on 'complete', () ->
-            console.log job.data.title + " #" + job.id + " complete"
-          job.on 'failed', () ->
-            console.log job.data.title + " #" + job.id + " failed" 
-          job.on 'progress', (progress) ->
-            console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
-        
-    importAll = (event) =>
-      job = @jobs.create("import mailbox", {title: "Importing mail at " + new Date().toUTCString()}).attempts(5).save();
+# BUILD JOBS
+
+    createCheckJob = (mb, delay=0, callback) =>
+      job = @jobs.create("check mailbox",
+        mailbox: mb
+        num: 250
+        title: "Periodical mail check of " + mb + " at " + new Date().toUTCString()
+      ).delay(delay).save(callback)
+       
       job.on 'complete', () ->
         console.log job.data.title + " #" + job.id + " complete"
-        importAll() 
+        createCheckJob mb, 1000 * 60 * 0.5
       job.on 'failed', () ->
-        console.log job.data.title + " #" + job.id + " failed" 
+        console.log job.data.title + " #" + job.id + " failed"
+        createCheckJob mb, 1000 * 60 * 1
       job.on 'progress', (progress) ->
         console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
-    
+        
+    createCheckJobs = =>
+      Mailbox.all (err, mbs) =>
+        for mb in mbs
+          createCheckJob mb, 1000 * 0.5
+          
+          
     # set-up CRON
-    createCheckMailboxJobs()
-    @timer = setInterval createCheckMailboxJobs, 60 * 1000 *     1 #minutes
-  
+    createCheckJobs()
+    
+    @jobs.promote()
+
     # KUE jobs
     @jobs.process "check mailbox", 1, (job, done) ->
       console.log job.data.title + " #" + job.id + " job started"
       (Mailbox job.data.mailbox).getNewMail job.data.num, done
-    
-    @jobs.process "check mailboxes", 1, (job, done) ->
-      console.log job.data.title + " #" + job.id + " job started"
-      Mailbox.checkAllMailboxes done
-      
-    @jobs.process "import mailbox", 1, (job, done) ->
-      console.log job.data.title + " #" + job.id + " job started"
-      Mailbox.checkAllMailboxes done
+

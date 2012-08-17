@@ -3,6 +3,7 @@
 {MailboxCollection} = require 'collections/mailboxes'
 {MailsCollection} = require 'collections/mails'
 {AppView} = require 'views/app'
+{MailNew} = require 'models/mail_new'
 
 class exports.Application extends BrunchApplication
   # This callback would be executed on document ready event.
@@ -14,5 +15,6 @@ class exports.Application extends BrunchApplication
     @mails = new MailsCollection
     @router = new MainRouter
     @appView = new AppView
+    @mailtosend = new MailNew
 
 window.app = new exports.Application

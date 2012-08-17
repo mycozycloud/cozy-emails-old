@@ -3,7 +3,7 @@
 {MenuMailboxesList} = require '../views/menu_mailboxes_list'
 {MailsColumn} = require '../views/mails_column'
 {MailsElement} = require '../views/mails_element'
-
+{MessageBox} = require 'views/message_box'
 ###
 
   The application's main view - creates other views, lays things out.
@@ -41,6 +41,7 @@ class exports.AppView extends Backbone.View
     $(@el).html require('./templates/app')
     @container_menu = @.$("#menu_container")
     @container_content = @.$("#content")
+    @message_box_view = new MessageBox @.$("#message_box"), window.app.mailboxes, window.app.mails
     @set_layout_menu()
     @
     

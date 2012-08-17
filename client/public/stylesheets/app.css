@@ -5183,10 +5183,36 @@ a.badge:hover {
 .invisible {
   visibility: hidden;
 }
-body{padding-top:10px}
+textarea:focus {
+  color: black;
+  border: 2px solid black;
+}
+
+.wysihtml5-command-active {
+  font-weight: bold;
+}
+
+[data-wysihtml5-dialog] {
+  margin: 5px 0 0;
+  padding: 5px;
+  border: 1px solid #666;
+}
+
+a[data-wysihtml5-command-value="red"] {
+  color: red;
+}
+
+a[data-wysihtml5-command-value="green"] {
+  color: green;
+}
+
+a[data-wysihtml5-command-value="blue"] {
+  color: blue;
+}body{padding-top:10px}
 .sidebar-nav{padding:9px 0}
 div.column{height:770px;overflow:auto}
 footer{height:30px}
+#message_box{position:absolute;top:15px;right:15px}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */

@@ -12,7 +12,6 @@ class exports.MailsElement extends Backbone.View
   constructor: (@el, @collection) ->
     super()
     @collection.on "change_active_mail", @render, @
-    window.app.mailtosend = new MailNew()
     
   events:
     "click a#button_answer_all" : 'bt_answer_all'
@@ -34,17 +33,29 @@ class exports.MailsElement extends Backbone.View
   bt_answer_all: ->
     console.log "answer all"
     @create_answer_view()
-    window.app.mailtosend.set "mode", "answer_all"
+    window.app.mailtosend.set 
+      mode: "answer_all"
+    window.app.view_answer.set_basic true
+    window.app.view_answer.set_to false
+    window.app.view_answer.set_advanced false
 
   bt_answer: ->
     console.log "answer"
     @create_answer_view()
-    window.app.mailtosend.set "mode", "answer"
+    window.app.mailtosend.set 
+      mode: "answer"
+    window.app.view_answer.set_basic true
+    window.app.view_answer.set_to false
+    window.app.view_answer.set_advanced false
 
   bt_forward: ->
     console.log "forward"
     @create_answer_view()
-    window.app.mailtosend.set "mode", "forward"
+    window.app.mailtosend.set 
+      mode: "forward"
+    window.app.view_answer.set_basic true
+    window.app.view_answer.set_to true
+    window.app.view_answer.set_advanced false
     
   bt_unread: ->
     console.log "unread"

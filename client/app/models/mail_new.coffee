@@ -8,7 +8,3 @@ BaseModel = require("./models").BaseModel
 class exports.MailNew extends BaseModel
   
   url: "sendmail"
-
-  initialize: ->
-    @on "destroy", @removeView, @
-    @on "change",  @redrawView, @

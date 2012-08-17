@@ -1,10 +1,20 @@
 form.well
   fieldset
-    .control-group
+    .control-group#mail_basic
+      p
+        if mailtosend.get("mode") == "answer"
+          | Answering to #{model.from()} ...
+        else if mailtosend.get("mode") == "answer_all"
+          | Answering to #{model.from()} ...
+        else
+          | Forwarding ...
+        a#mail_detailed_view_button.btn-mini.btn-primary show details
+    .control-group#mail_to
       .controls
         .input-prepend
           span.add-on To&nbsp;
           input.content.span6(id="to", type="text", value=model.from()).input-xlarge
+    .control-group#mail_advanced
       .controls
         .input-prepend
           span.add-on Cc&nbsp;
@@ -12,8 +22,7 @@ form.well
       .controls
         .input-prepend
           span.add-on Bcc
-          input.content.span6(id="bcc", type="text", value="").input-xlarge
-    .control-group
+          input.content.span6(id="bcc", type="text", value="").input-xlarge d
       .controls
         .input-prepend
           span.add-on Subject
@@ -27,8 +36,26 @@ form.well
             input.content.span9(id="subject", type="text", value= model.get("subject")).input-xlarge
     .control-group
       .controls
-        textarea.content.span10(id="html", rows=15, cols=80).input-xlarge !{model.get("text")}
-    .form-actions
-      a#send_button.btn.btn-success Send
-      a.btn.btn-warning Discard
-  
+        #wysihtml5-toolbar(style='display: none;')
+          .btn-toolbar
+            .btn-group
+              a.btn.btn-mini(data-wysihtml5-command='bold') bold
+              a.btn.btn-mini(data-wysihtml5-command='italic') italic
+              a.btn.btn-mini(data-wysihtml5-command='underline') underline
+           
+            .btn-group
+              a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='red') red
+              a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='green') green
+              a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='blue') blue
+          
+            .btn-group
+              a.btn.btn-mini(data-wysihtml5-command='createLink') insert link
+            div(data-wysihtml5-dialog='createLink', style='display: none;border: none;')
+              form.form-inline
+                input.text(data-wysihtml5-dialog-field='href', value='http://')
+                a.btn.btn-mini(data-wysihtml5-dialog-action='save') OK
+                a.btn.btn-mini(data-wysihtml5-dialog-action='cancel') Cancel
+      .controls
+        textarea.content.span10(id="html", rows=15, cols=80).input-xlarge !{model.text_or_html()}
+        a#send_button.btn.btn-success Send
+        a#cancel_button.btn.btn-warning Cancel

@@ -8,10 +8,7 @@
   h3 #{model.get("subject")}
   br
   div#mail_content
-    if model.get("html")
-      !{model.get("html")}
-    else
-      !{model.text()}
+    !{model.text_or_html()}
   
 .btn-toolbar
   .btn-group
