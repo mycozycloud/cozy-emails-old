@@ -22,39 +22,75 @@ class exports.Mail extends BaseModel
   ###
 
   from: ->
-    parsed = JSON.parse(@get("from"))
     out = ""
-    for obj in parsed
-      out += obj.name + " <" + obj.address + "> "
+    if @get "from"
+      parsed = JSON.parse @get "from"
+      for obj in parsed
+        out += obj.name + " <" + obj.address + ">, "
     out
     
   from_short: ->
-    parsed = JSON.parse(@get("from"))
     out = ""
-    for obj in parsed
-      if obj.name
-        out += obj.name + " "
-      else
-        out += obj.address + " "
+    if @get "from"
+      parsed = JSON.parse @get "from"
+      for obj in parsed
+        if obj.name
+          out += obj.name + " "
+        else
+          out += obj.address + " "
     out
     
   cc: ->
-    parsed = JSON.parse(@get("cc"))
     out = ""
-    for obj in parsed
-      out += obj.name + " <" + obj.address + "> "
+    if @get "cc"
+      parsed = JSON.parse @get "cc"
+      for obj in parsed
+        out += obj.name + " <" + obj.address + ">, "
     out
 
   cc_short: ->
-    parsed = JSON.parse(@get("cc"))
     out = ""
-    for obj in parsed
-      out += obj.name + " "
+    if @get "cc"
+      parsed = JSON.parse @get "cc"
+      for obj in parsed
+        out += obj.name + " "
+    out
+    
+  from_and_cc: ->
+    out = ""
+    if @get "from"
+      parsed = JSON.parse @get "from"
+      for obj in parsed
+        out += obj.name + " <" + obj.address + ">, "
+    if @get "cc"
+      parsed = JSON.parse @get "cc"
+      for obj in parsed
+        out += obj.name + " <" + obj.address + ">, "
     out
     
   date: ->
     parsed = new Date @get("date")
     parsed.toUTCString()
+    
+  subject_response: (mode="answer") ->
+    subject = @get "subject"
+    switch mode
+      when "answer" then "RE: " + subject.replace(/RE:?/, "")
+      when "answer_all" then "RE: " + subject.replace(/RE:?/, "")
+      when "forward" then "FWD: " + subject.replace(/FWD:?/, "")
+      else subject
+
+  cc_response: (mode="answer") ->
+    switch mode
+      when "answer_all" then @cc()
+      else ""
+
+
+  to_response: (mode="answer") ->
+    switch mode
+      when "answer" then @from()
+      when "answer_all" then @from()
+      else ""
 
   text: ->
     @get("text").replace(/\r\n/g,'\n').replace(/\n/g, '<br />')

@@ -70,6 +70,8 @@ action 'sendmail', ->
     "to",
     "subject",
     "html",
+    "cc",
+    "bcc"
   ]
   
   for attr in attrs

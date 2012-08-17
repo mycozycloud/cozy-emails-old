@@ -54,6 +54,7 @@ if not module.parent
           
           
     # set-up CRON
+    setInterval createCheckJobs, 1000 * 60 * 2
     createCheckJobs()
     
     @jobs.promote()

@@ -11,7 +11,6 @@ class exports.MailsAnswer extends Backbone.View
   constructor: (@el, @mail, @mailtosend) ->
     super()
     @mail.on "change", @render, @
-    @mailtosend.on "change", @render, @
 
   events: {
     "click a#send_button" : 'send'
@@ -23,12 +22,14 @@ class exports.MailsAnswer extends Backbone.View
     data = {}
     input.each (i) ->
       data[input[i].id] = input[i].value
-    
-    @mailtosend.set data 
     @mailtosend.url = "sendmail/" + @mail.get("mailbox")
-    console.log @mailtosend
-    @mailtosend.save()
-    $(@el).html require('./templates/_mail/mail_sent')
+    el = @el
+    @mailtosend.save( data, {
+      success: (model, response) ->
+        console.log "sent!"
+        $(el).html require('./templates/_mail/mail_sent')
+      }
+    )
 
 
   set_basic: (show=true)->

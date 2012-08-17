@@ -337,25 +337,29 @@ window.require.define({"models/mail": function(exports, require, module) {
 
       Mail.prototype.from = function() {
         var obj, out, parsed, _i, _len;
-        parsed = JSON.parse(this.get("from"));
         out = "";
-        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-          obj = parsed[_i];
-          out += obj.name + " <" + obj.address + "> ";
+        if (this.get("from")) {
+          parsed = JSON.parse(this.get("from"));
+          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+            obj = parsed[_i];
+            out += obj.name + " <" + obj.address + ">, ";
+          }
         }
         return out;
       };
 
       Mail.prototype.from_short = function() {
         var obj, out, parsed, _i, _len;
-        parsed = JSON.parse(this.get("from"));
         out = "";
-        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-          obj = parsed[_i];
-          if (obj.name) {
-            out += obj.name + " ";
-          } else {
-            out += obj.address + " ";
+        if (this.get("from")) {
+          parsed = JSON.parse(this.get("from"));
+          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+            obj = parsed[_i];
+            if (obj.name) {
+              out += obj.name + " ";
+            } else {
+              out += obj.address + " ";
+            }
           }
         }
         return out;
@@ -363,22 +367,46 @@ window.require.define({"models/mail": function(exports, require, module) {
 
       Mail.prototype.cc = function() {
         var obj, out, parsed, _i, _len;
-        parsed = JSON.parse(this.get("cc"));
         out = "";
-        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-          obj = parsed[_i];
-          out += obj.name + " <" + obj.address + "> ";
+        if (this.get("cc")) {
+          parsed = JSON.parse(this.get("cc"));
+          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+            obj = parsed[_i];
+            out += obj.name + " <" + obj.address + ">, ";
+          }
         }
         return out;
       };
 
       Mail.prototype.cc_short = function() {
         var obj, out, parsed, _i, _len;
-        parsed = JSON.parse(this.get("cc"));
         out = "";
-        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-          obj = parsed[_i];
-          out += obj.name + " ";
+        if (this.get("cc")) {
+          parsed = JSON.parse(this.get("cc"));
+          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+            obj = parsed[_i];
+            out += obj.name + " ";
+          }
+        }
+        return out;
+      };
+
+      Mail.prototype.from_and_cc = function() {
+        var obj, out, parsed, _i, _j, _len, _len2;
+        out = "";
+        if (this.get("from")) {
+          parsed = JSON.parse(this.get("from"));
+          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+            obj = parsed[_i];
+            out += obj.name + " <" + obj.address + ">, ";
+          }
+        }
+        if (this.get("cc")) {
+          parsed = JSON.parse(this.get("cc"));
+          for (_j = 0, _len2 = parsed.length; _j < _len2; _j++) {
+            obj = parsed[_j];
+            out += obj.name + " <" + obj.address + ">, ";
+          }
         }
         return out;
       };
@@ -387,6 +415,44 @@ window.require.define({"models/mail": function(exports, require, module) {
         var parsed;
         parsed = new Date(this.get("date"));
         return parsed.toUTCString();
+      };
+
+      Mail.prototype.subject_response = function(mode) {
+        var subject;
+        if (mode == null) mode = "answer";
+        subject = this.get("subject");
+        switch (mode) {
+          case "answer":
+            return "RE: " + subject.replace(/RE:?/, "");
+          case "answer_all":
+            return "RE: " + subject.replace(/RE:?/, "");
+          case "forward":
+            return "FWD: " + subject.replace(/FWD:?/, "");
+          default:
+            return subject;
+        }
+      };
+
+      Mail.prototype.cc_response = function(mode) {
+        if (mode == null) mode = "answer";
+        switch (mode) {
+          case "answer_all":
+            return this.cc();
+          default:
+            return "";
+        }
+      };
+
+      Mail.prototype.to_response = function(mode) {
+        if (mode == null) mode = "answer";
+        switch (mode) {
+          case "answer":
+            return this.from();
+          case "answer_all":
+            return this.from();
+          default:
+            return "";
+        }
       };
 
       Mail.prototype.text = function() {
@@ -1059,7 +1125,6 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         this.mailtosend = mailtosend;
         MailsAnswer.__super__.constructor.call(this);
         this.mail.on("change", this.render, this);
-        this.mailtosend.on("change", this.render, this);
       }
 
       MailsAnswer.prototype.events = {
@@ -1068,17 +1133,20 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
       };
 
       MailsAnswer.prototype.send = function() {
-        var data, input;
+        var data, el, input;
         input = this.$(".content");
         data = {};
         input.each(function(i) {
           return data[input[i].id] = input[i].value;
         });
-        this.mailtosend.set(data);
         this.mailtosend.url = "sendmail/" + this.mail.get("mailbox");
-        console.log(this.mailtosend);
-        this.mailtosend.save();
-        return $(this.el).html(require('./templates/_mail/mail_sent'));
+        el = this.el;
+        return this.mailtosend.save(data, {
+          success: function(model, response) {
+            console.log("sent!");
+            return $(el).html(require('./templates/_mail/mail_sent'));
+          }
+        });
       };
 
       MailsAnswer.prototype.set_basic = function(show) {
@@ -1770,7 +1838,7 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   }
   else if ( mailtosend.get("mode") == "answer_all")
   {
-  buf.push('Answering to ' + escape((interp = model.from()) == null ? '' : interp) + ' ...\n');
+  buf.push('Answering to all ' + escape((interp = model.from_and_cc()) == null ? '' : interp) + ' ...\n');
   }
   else
   {
@@ -1778,7 +1846,7 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   }
   buf.push('<a');
   buf.push(attrs({ 'id':('mail_detailed_view_button'), "class": ('btn-mini') + ' ' + ('btn-primary') }));
-  buf.push('>show details</a></p></div><div');
+  buf.push('>show&nbsp;details</a></p></div><div');
   buf.push(attrs({ 'id':('mail_to'), "class": ('control-group') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('controls') }));
@@ -1787,7 +1855,7 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push('><span');
   buf.push(attrs({ "class": ('add-on') }));
   buf.push('>To&nbsp;</span><input');
-  buf.push(attrs({ 'id':("to"), 'type':("text"), 'value':(model.from()), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("to"), 'type':("text"), 'value':(model.to_response(mailtosend.get("mode"))), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
   buf.push('/></div></div></div><div');
   buf.push(attrs({ 'id':('mail_advanced'), "class": ('control-group') }));
   buf.push('><div');
@@ -1797,7 +1865,7 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push('><span');
   buf.push(attrs({ "class": ('add-on') }));
   buf.push('>Cc&nbsp;</span><input');
-  buf.push(attrs({ 'id':("cc"), 'type':("text"), 'value':(""), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("cc"), 'type':("text"), 'value':(model.cc_response(mailtosend.get("mode"))), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
   buf.push('/></div></div><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><div');
@@ -1812,32 +1880,9 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push(attrs({ "class": ('input-prepend') }));
   buf.push('><span');
   buf.push(attrs({ "class": ('add-on') }));
-  buf.push('>Subject</span>');
-  if ( mailtosend.get("mode") == "answer")
-  {
-  buf.push('<input');
-  buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':("RE: " + model.get("subject")), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
-  buf.push('/>');
-  }
-  else if ( mailtosend.get("mode") == "answer_all")
-  {
-  buf.push('<input');
-  buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':("RE: " + model.get("subject")), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
-  buf.push('/>');
-  }
-  else if ( mailtosend.get("mode") == "forward")
-  {
-  buf.push('<input');
-  buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':("FWD: " + model.get("subject")), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
-  buf.push('/>');
-  }
-  else
-  {
-  buf.push('<input');
-  buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':(model.get("subject")), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
-  buf.push('/>');
-  }
-  buf.push('</div></div></div><div');
+  buf.push('>Subject</span><input');
+  buf.push(attrs({ 'id':("subject"), 'type':("text"), 'value':(model.subject_response(mailtosend.get("mode"))), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
+  buf.push('/></div></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('controls') }));
@@ -1897,16 +1942,16 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   var interp;
   buf.push('<div');
   buf.push(attrs({ "class": ('well') }));
-  buf.push('><p>From: ' + escape((interp = model.from()) == null ? '' : interp) + '\n<i');
+  buf.push('><p>From: ' + escape((interp = model.from()) == null ? '' : interp) + '\n');
+  if ( model.get("cc"))
+  {
+  buf.push('<p>CC:  ' + escape((interp = model.cc()) == null ? '' : interp) + '\n</p>');
+  }
+  buf.push('</p><p><i');
   buf.push(attrs({ 'style':('color: lightgray;') }));
   buf.push('>sent ' + escape((interp = model.date()) == null ? '' : interp) + '</i><br');
   buf.push(attrs({  }));
-  buf.push('/>');
-  if ( model.get("cc"))
-  {
-  buf.push('CC:  ' + escape((interp = model.cc()) == null ? '' : interp) + '\n');
-  }
-  buf.push('</p><h3>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</h3><br');
+  buf.push('/></p><h3>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</h3><br');
   buf.push(attrs({  }));
   buf.push('/><div');
   buf.push(attrs({ 'id':('mail_content') }));

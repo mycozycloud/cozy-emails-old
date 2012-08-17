@@ -1,10 +1,13 @@
 .well
   p
     | From: #{model.from()}
+    if model.get("cc")
+      p
+        | CC:  #{model.cc()}
+  p
     i(style='color: lightgray;') sent #{model.date()}
     br
-    if model.get("cc")
-      | CC:  #{model.cc()}
+
   h3 #{model.get("subject")}
   br
   div#mail_content
