@@ -35,7 +35,7 @@ if not module.parent
       job = @jobs.create("check mailbox",
         mailbox: mb
         num: 250
-        title: "Periodical mail check of " + mb + " at " + new Date().toUTCString()
+        title: "Check of " + mb + " at " + new Date().toUTCString()
       ).delay(delay).save(callback)
        
       job.on 'complete', () ->

@@ -66,8 +66,11 @@ Mailbox.prototype.getAllMail = (callback) ->
   console.log "# Fetching all mail"
   @getMail "INBOX", ['ALL'], callback
 
-Mailbox.prototype.getMail = (boxname, constraints, callback) ->
+Mailbox.prototype.getMail = (boxname, constraints, c) ->
   
+  callback = ->
+    console.log "callback"
+    c()
   ## dependences
   imap = require "imap"
   mailparser = require "mailparser"
@@ -90,12 +93,11 @@ Mailbox.prototype.getMail = (boxname, constraints, callback) ->
     callback error.toString()
 
   server.on "close", (error) ->
+    console.log "event close: " + error
     if error
       callback "transmission error"
-  
-  server.on "end", () ->
-    console.log "event end: " + callback
-    do callback
+    else
+      callback()
       
   exitOnErr = (err) =>
      mailbox.status = err.toString()
