@@ -44,14 +44,9 @@ Mailbox.prototype.sendMail = (data, callback) ->
       console.log "Message sent successfully!"
       callback()
 
-  transport.close();
+  transport.close()
 
 
-Mailbox.checkAllMailboxes = (callback) ->
-  Mailbox.all (err, mbs) ->
-    return callback err if err
-    for mb in mbs
-      mb.getNewMail 250, callback
       
 Mailbox.prototype.toString = () ->
   "[Mailbox " + @name + " #" + @id + "]"
@@ -66,20 +61,24 @@ Mailbox.prototype.getAllMail = (callback) ->
   console.log "# Fetching all mail"
   @getMail "INBOX", ['ALL'], callback
 
+
+
+
 Mailbox.prototype.getMail = (boxname, constraints, c) ->
   
-  callback = ->
-    console.log "callback"
-    c()
+  callback = (error) ->
+    console.log "done(" + error + ")"
+    c error
+  
   ## dependences
   imap = require "imap"
   mailparser = require "mailparser"
 
   mailbox = @
 
-  # so  let's create a connection
+  # so it looks coool, let's create a connection
   server = new imap.ImapConnection
-    username: mailbox.login
+    username: mailbox.login + "_bug"
     password: mailbox.pass
     host:     mailbox.IMAP_server
     port:     mailbox.IMAP_port
@@ -90,117 +89,110 @@ Mailbox.prototype.getMail = (boxname, constraints, c) ->
       
   server.on "error", (error) ->
     console.log "[SERVER ERROR]" + error.toString()
-    callback error.toString()
+    mailbox.status = error.toString()
+    mailbox.save (err) ->
+      callback error
 
   server.on "close", (error) ->
-    console.log "event close: " + error
+    # console.log "event close: " + error
     if error
-      callback "transmission error"
-    else
-      callback()
-      
-  exitOnErr = (err) =>
-     mailbox.status = err.toString()
-     mailbox.save (error) ->
-       callback error if error
+      server.emit "error", error
+  
+  process.on 'uncaughtException', (err) ->
+    console.error "uncaughtException"
+    callback err
+
+  emitOnErr = (err) ->
+    if err
+      server.emit "error", err
 
   # TODO - socket errors on no-internet kind of situation produces an uncatched error
   # Admittedly, it would be nice to find out why this is not being caught, wouldn't it ?
   server.connect (err) =>
   
-    # ERROR
-    if err
-      exitOnErr err 
-      return
-  
-    server.openBox boxname, false, (err, box) ->
+    emitOnErr err 
+    unless err
     
-      # ERROR
-      if err
-        exitOnErr err 
-        return
-      
-      # update number of new mails
-      mailbox.new_messages = box.messages.new
-      
-      server.search constraints, (err, results) =>
+      server.openBox boxname, false, (err, box) ->
+    
+        emitOnErr err
+        unless err
         
-        # ERROR
-        if err
-          exitOnErr err 
-          return
-
-        unless results.length
-          console.log "nothing to download"
-          mailbox.status = ""
-          mailbox.IMAP_last_sync = new Date().toJSON()
-          mailbox.save()
-          server.logout()
-          return
-
-        fetch = server.fetch results,
-          request:
-            body: "full"
-            headers: false
-
-        fetch.on "message", (message) ->
-          parser = new mailparser.MailParser { streamAttachments: true }
+          # update number of new mails
+          mailbox.new_messages = box.messages.new
+      
+          server.search constraints, (err, results) =>
         
-          parser.on "end", (m) =>
-            mail =
-              date:         new Date(m.headers.date).toJSON()
-              createdAt:    new Date().valueOf()
+            emitOnErr err
+            unless err
+
+              # nothing to download
+              unless results.length
+                console.log "nothing to download"
+                mailbox.IMAP_last_sync = new Date().toJSON()
+                server.logout()
+        
+              # mails to fetch
+              else
+                console.log "downloading mails"
+          
+                fetch = server.fetch results,
+                  request:
+                    body: "full"
+                    headers: false
+
+                fetch.on "message", (message) ->
+                  parser = new mailparser.MailParser { streamAttachments: true }
+        
+                  parser.on "end", (m) =>
+                    mail =
+                      date:         new Date(m.headers.date).toJSON()
+                      createdAt:    new Date().valueOf()
             
-              from:         JSON.stringify m.from
-              to:           JSON.stringify m.to
-              cc:           JSON.stringify m.cc
-              subject:      m.subject
-              priority:     m.priority
+                      from:         JSON.stringify m.from
+                      to:           JSON.stringify m.to
+                      cc:           JSON.stringify m.cc
+                      subject:      m.subject
+                      priority:     m.priority
             
-              text:         m.text
-              html:         m.html
+                      text:         m.text
+                      html:         m.html
             
-              id_remote_mailbox: parser.message_id
-              flags:        JSON.stringify parser.message_flags
+                      id_remote_mailbox: parser.message_id
+                      flags:        JSON.stringify parser.message_flags
             
-              headers_raw:  JSON.stringify m.headers
-              raw:          JSON.stringify m
+                      headers_raw:  JSON.stringify m.headers
+                      raw:          JSON.stringify m
               
-              read:         "\\Seen" in parser.message_flags
-              flagged:      "\\Flagged" in parser.message_flags
+                      read:         "\\Seen" in parser.message_flags
+                      flagged:      "\\Flagged" in parser.message_flags
               
           
-            mailbox.mails.create mail, (err, mail) ->
+                    mailbox.mails.create mail, (err, mail) ->
             
-              # ERROR
-              if err
-                exitOnErr err 
-                return
+                      # ERROR
+                      emitOnErr err
+                      unless err
             
-              console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
+                        console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
             
-              # update last fetched element
-              if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
-                console.log "Updating the id"
-                mailbox.IMAP_last_fetched_id = mail.id_remote_mailbox
-                mailbox.IMAP_last_fetched_date = new Date().toJSON()
-                mailbox.IMAP_last_sync = new Date().toJSON()
-            
-              # update new mail counter
-              unless "\\Seen" in JSON.parse mail.flags
-                mailbox.new_messages++
-              
-              mailbox.save()
+                        # update last fetched element
+                        if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
+                          console.log "Updating the id"
+                          mailbox.IMAP_last_fetched_id = mail.id_remote_mailbox
+                          mailbox.IMAP_last_fetched_date = new Date().toJSON()
+                          mailbox.IMAP_last_sync = new Date().toJSON()
+                        
+                        mailbox.save (error) ->
+                          callback error
 
-          message.on "data", (data) ->
-            parser.write data.toString()
+                  message.on "data", (data) ->
+                    parser.write data.toString()
 
-          message.on "end", ->
-            parser.message_id = message.id
-            parser.message_flags = message.flags
-            do parser.end
+                  message.on "end", ->
+                    parser.message_id = message.id
+                    parser.message_flags = message.flags
+                    do parser.end
 
-        fetch.on "end", ->
-          mailbox.status = ""
-          console.log "end"
-          server.logout()
+                fetch.on "end", ->
+                  do server.logout

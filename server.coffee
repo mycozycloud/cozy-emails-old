@@ -31,12 +31,12 @@ if not module.parent
 
 # BUILD JOBS
 
-    createCheckJob = (mb, delay=0, callback) =>
+    createCheckJob = (mb, delay=0) =>
       job = @jobs.create("check mailbox",
         mailbox: mb
         num: 250
         title: "Check of " + mb + " at " + new Date().toUTCString()
-      ).delay(delay).save(callback)
+      ).delay(delay).save()
        
       job.on 'complete', () ->
         console.log job.data.title + " #" + job.id + " complete"
@@ -48,7 +48,7 @@ if not module.parent
         console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
         
     createCheckJobs = =>
-      Mailbox.all (err, mbs) =>
+      Mailbox.all (err, mbs) ->
         for mb in mbs
           createCheckJob mb, 1000 * 0.5
           
