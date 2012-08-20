@@ -10,8 +10,10 @@
 
   h3 #{model.get("subject")}
   br
-  div#mail_content
-    !{model.text_or_html()}
+  #mail_content_text
+    !{model.text()}
+  iframe#mail_content_html
+    !{model.text()}
   
 .btn-toolbar
   .btn-group

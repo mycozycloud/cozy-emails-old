@@ -6,6 +6,8 @@ BaseModel = require("./models").BaseModel
 
 ###
 class exports.Mail extends BaseModel
+  
+  url: "mails"
 
   initialize: ->
     @on "destroy", @removeView, @
@@ -102,6 +104,9 @@ class exports.Mail extends BaseModel
       ///
     string = new String @get("html")
     string.replace(expression,"")
+    
+  hasHtml: ->
+    @get "html" != ""
   
   text_or_html: ->
     if @get("html")

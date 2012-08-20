@@ -12,7 +12,6 @@ Mailbox.prototype.sendMail = (data, callback) ->
   )
 
   message =
-
     from: @SMTP_send_as
     to: data.to
     cc: data.cc if data.cc?
@@ -22,17 +21,17 @@ Mailbox.prototype.sendMail = (data, callback) ->
     html: data.html
     generateTextFromHTML: true
     
-    attachments: [
-      # String attachment
-      fileName: "notes.txt"
-      contents: "Some notes about this e-mail"
-      contentType: "text/plain" # optional, would be detected from the filename
-    ,
-      # Binary Buffer attachment
-      fileName: "image.png"
-      contents: new Buffer("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD/" + "//+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4U" + "g9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC", "base64")
-      cid: "note@node" # should be as unique as possible
-    ]
+    # attachments: [
+    #   # String attachment
+    #   fileName: "notes.txt"
+    #   contents: "Some notes about this e-mail"
+    #   contentType: "text/plain" # optional, would be detected from the filename
+    # ,
+    #   # Binary Buffer attachment
+    #   fileName: "image.png"
+    #   contents: new Buffer("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD/" + "//+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4U" + "g9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC", "base64")
+    #   cid: "note@node" # should be as unique as possible
+    # ]
 
   console.log "Sending Mail"
   transport.sendMail message, (error) ->
@@ -64,12 +63,8 @@ Mailbox.prototype.getAllMail = (callback) ->
 
 
 
-Mailbox.prototype.getMail = (boxname, constraints, c) ->
-  
-  callback = (error) ->
-    console.log "done(" + error + ")"
-    c error
-  
+Mailbox.prototype.getMail = (boxname, constraints, callback) ->
+
   ## dependences
   imap = require "imap"
   mailparser = require "mailparser"
@@ -97,6 +92,8 @@ Mailbox.prototype.getMail = (boxname, constraints, c) ->
     # console.log "event close: " + error
     if error
       server.emit "error", error
+    else
+      mailbox.save()
   
   process.on 'uncaughtException', (err) ->
     console.error "uncaughtException"
@@ -130,6 +127,7 @@ Mailbox.prototype.getMail = (boxname, constraints, c) ->
               unless results.length
                 console.log "nothing to download"
                 mailbox.IMAP_last_sync = new Date().toJSON()
+                mailbox.status = ""
                 server.logout()
                 callback()
         
@@ -183,6 +181,7 @@ Mailbox.prototype.getMail = (boxname, constraints, c) ->
                           mailbox.IMAP_last_fetched_id = mail.id_remote_mailbox
                           mailbox.IMAP_last_fetched_date = new Date().toJSON()
                           mailbox.IMAP_last_sync = new Date().toJSON()
+                          mailbox.status = ""
                         
                         mailbox.save (error) ->
                           callback error

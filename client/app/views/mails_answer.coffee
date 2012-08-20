@@ -11,49 +11,71 @@ class exports.MailsAnswer extends Backbone.View
   constructor: (@el, @mail, @mailtosend) ->
     super()
     @mail.on "change", @render, @
+    @mailtosend.on "change_mode", @render, @
 
   events: {
-    "click a#send_button" : 'send'
-    "click a#mail_detailed_view_button" : 'view_advanced'
+    "click a#send_button" : 'prepareSend'
+    "click a#mail_detailed_view_button" : 'viewAdvanced'
   }
   
-  send: ->
+  
+  # prepares data to save in @mailtosend object, which will be sent to server side
+  prepareSend: (event) ->
+    
+    # disable the button
+    $(event.target).addClass("disabled").removeClass("buttonSave")
+    @.$(".content").addClass("disabled")
+    
+    # get the data
     input = @.$(".content")
     data = {}
     input.each (i) ->
       data[input[i].id] = input[i].value
+      
+    # set the url to take into account the id of the mailbox
     @mailtosend.url = "sendmail/" + @mail.get("mailbox")
     el = @el
-    @mailtosend.save( data, {
-      success: (model, response) ->
+
+    # send, and collect the server's response
+    @mailtosend.save(data,
+      success: ->
+        # success, let's render it
         console.log "sent!"
         $(el).html require('./templates/_mail/mail_sent')
-      }
+        # message box
+        window.app.appView.message_box_view.renderMessageSentSuccess()
+      error: ->
+        console.error "error!"
     )
+    
+    console.log "sending mail: " + @mailtosend
 
-
-  set_basic: (show=true)->
+  
+  # set the visibility of 3 parts of answer view
+  setBasic: (show=true)->
     if show
       @.$("#mail_basic").show()
     else
       @.$("#mail_basic").hide()
-  set_to: (show=true)->
+  setTo: (show=true)->
     if show
       @.$("#mail_to").show()
     else
       @.$("#mail_to").hide()
-  set_advanced: (show=true)->
+  setAdvanced: (show=true)->
     if show
       @.$("#mail_advanced").show()
     else
       @.$("#mail_advanced").hide()
+  
+  # unlock additional data
+  viewAdvanced: ->
+    @setBasic false
+    @setTo true
+    @setAdvanced true
     
 
-  view_advanced: ->
-    @set_basic false
-    @set_to true
-    @set_advanced true
-
+  # render, including the wysihtml5 rich text editor
   render: ->
     $(@el).html ""
     template = require('./templates/_mail/mail_answer')
@@ -63,7 +85,7 @@ class exports.MailsAnswer extends Backbone.View
       parserRules: wysihtml5ParserRules # defined in parser rules set
       stylesheets: ["http://yui.yahooapis.com/2.9.0/build/reset/reset-min.css", "css/editor.css"],
     )
-    @set_basic true
-    @set_to false
-    @set_advanced false
+    @setBasic true
+    @setTo false
+    @setAdvanced false
     @

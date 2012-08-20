@@ -80,4 +80,5 @@ class exports.AppView extends Backbone.View
     window.app.view_mail = new MailsElement @.$("#column_mail"), window.app.mails
     window.app.view_mails_list.render()
     window.app.view_mail.render()
+
     @resize()

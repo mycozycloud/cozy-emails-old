@@ -35,27 +35,33 @@ class exports.MailsElement extends Backbone.View
     @create_answer_view()
     window.app.mailtosend.set 
       mode: "answer_all"
-    window.app.view_answer.set_basic true
-    window.app.view_answer.set_to false
-    window.app.view_answer.set_advanced false
+    window.app.view_answer.setBasic true
+    window.app.view_answer.setTo false
+    window.app.view_answer.setAdvanced false
+    
+    window.app.mailtosend.trigger "change_mode"
 
   bt_answer: ->
     console.log "answer"
     @create_answer_view()
     window.app.mailtosend.set 
       mode: "answer"
-    window.app.view_answer.set_basic true
-    window.app.view_answer.set_to false
-    window.app.view_answer.set_advanced false
+    window.app.view_answer.setBasic true
+    window.app.view_answer.setTo false
+    window.app.view_answer.setAdvanced false
+    
+    window.app.mailtosend.trigger "change_mode"
 
   bt_forward: ->
     console.log "forward"
     @create_answer_view()
     window.app.mailtosend.set 
       mode: "forward"
-    window.app.view_answer.set_basic true
-    window.app.view_answer.set_to true
-    window.app.view_answer.set_advanced false
+    window.app.view_answer.setBasic true
+    window.app.view_answer.setTo true
+    window.app.view_answer.setAdvanced false
+    
+    window.app.mailtosend.trigger "change_mode"
     
   bt_unread: ->
     console.log "unread"
@@ -81,4 +87,10 @@ class exports.MailsElement extends Backbone.View
     template = require('./templates/_mail/mail_big')
     if @collection.activeMail?
       $(@el).html template("model" : @collection.activeMail)
+      if @collection.activeMail.hasHtml()
+        $("#mail_content_html").contents().find("body").html @collection.activeMail.html()
+        $("#mail_content_text").hide()
+      else
+        $("#mail_content_text").html @collection.activeMail.text_or_html()
+        $("#mail_content_html").hide()
     @

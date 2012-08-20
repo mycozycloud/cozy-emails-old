@@ -7,25 +7,9 @@ before ->
       next()
 , { only: ['show', 'update', 'destroy'] }
 
-# # GET /mails
-# action 'index', ->
-#   Mail.all (err, mails) ->
-#     send mails
-# # 
-# # POST /mails
-# action 'create', ->
-#   Mail.create req.body, (error) =>
-#     if !error
-#       send 200
-#     else
-#       send 500
-
 # GET /mails/:id
 action 'show', ->
-  if !@box
-    send new Mailbox
-  else
-    send @box
+  send @box
 
 # PUT /mails/:id
 action 'update', ->

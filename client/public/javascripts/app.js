@@ -163,7 +163,11 @@ window.require.define({"collections/mails": function(exports, require, module) {
 
       MailsCollection.prototype.timestampOld = new Date().valueOf();
 
+      MailsCollection.prototype.timestampMiddle = new Date().valueOf();
+
       MailsCollection.prototype.mailsAtOnce = 100;
+
+      MailsCollection.prototype.visible_number = 0;
 
       MailsCollection.prototype.comparator = function(a, b) {
         if (a.get("date") > b.get("date")) {
@@ -177,22 +181,7 @@ window.require.define({"collections/mails": function(exports, require, module) {
 
       MailsCollection.prototype.initialize = function() {
         this.on("change_active_mail", this.navigateMail, this);
-        this.on("add", this.treatAdd, this);
         return setInterval(this.fetchNew, 0.5 * 60 * 1000);
-      };
-
-      MailsCollection.prototype.treatAdd = function(model) {
-        var box;
-        if (new Date(model.get("createdAt")).valueOf() < this.timestampOld) {
-          this.timestampOld = new Date(model.get("createdAt")).valueOf();
-        }
-        if (new Date(model.get("createdAt")).valueOf() > this.timestampNew) {
-          this.timestampNew = new Date(model.get("createdAt")).valueOf();
-          if (model.is_unread()) {
-            box = window.app.mailboxes.get(model.get("mailbox"));
-            return box != null ? box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) + 1) : void 0;
-          }
-        }
       };
 
       MailsCollection.prototype.navigateMail = function(event) {
@@ -317,6 +306,8 @@ window.require.define({"models/mail": function(exports, require, module) {
       function Mail() {
         Mail.__super__.constructor.apply(this, arguments);
       }
+
+      Mail.prototype.url = "mails";
 
       Mail.prototype.initialize = function() {
         this.on("destroy", this.removeView, this);
@@ -465,6 +456,10 @@ window.require.define({"models/mail": function(exports, require, module) {
         exp = /\/(<style>(.|\s)*?<\/style>)\/ig/;
         string = new String(this.get("html"));
         return string.replace(expression, "");
+      };
+
+      Mail.prototype.hasHtml = function() {
+        return this.get("html" !== "");
       };
 
       Mail.prototype.text_or_html = function() {
@@ -716,15 +711,17 @@ window.require.define({"models/models": function(exports, require, module) {
 }});
 
 window.require.define({"routers/main_router": function(exports, require, module) {
-  
-  /*
-
-    Application's router.
-  */
-
   (function() {
-    var __hasProp = Object.prototype.hasOwnProperty,
+    var Mail,
+      __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Mail = require("../models/mail").Mail;
+
+    /*
+    
+      Application's router.
+    */
 
     exports.MainRouter = (function(_super) {
 
@@ -760,6 +757,7 @@ window.require.define({"routers/main_router": function(exports, require, module)
       };
 
       MainRouter.prototype.configMailboxes = function() {
+        app.mailboxes.fetch();
         app.appView.render();
         app.appView.set_layout_mailboxes();
         $(".menu_option").removeClass("active");
@@ -773,12 +771,13 @@ window.require.define({"routers/main_router": function(exports, require, module)
           app.mails.activeMail = app.mails.get(path);
           return app.mails.trigger("change_active_mail");
         } else {
-          return app.mails.fetch({
-            "success": function() {
-              if (app.mails.get(path) != null) {
-                app.mails.activeMail = app.mails.get(path);
-                return app.mails.trigger("change_active_mail");
-              }
+          app.mails.activeMail = new Mail({
+            id: path
+          });
+          app.mails.activeMail.url = "mails/" + path;
+          return app.mails.activeMail.fetch({
+            success: function() {
+              return app.mails.trigger("change_active_mail");
             }
           });
         }
@@ -1125,15 +1124,18 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         this.mailtosend = mailtosend;
         MailsAnswer.__super__.constructor.call(this);
         this.mail.on("change", this.render, this);
+        this.mailtosend.on("change_mode", this.render, this);
       }
 
       MailsAnswer.prototype.events = {
-        "click a#send_button": 'send',
-        "click a#mail_detailed_view_button": 'view_advanced'
+        "click a#send_button": 'prepareSend',
+        "click a#mail_detailed_view_button": 'viewAdvanced'
       };
 
-      MailsAnswer.prototype.send = function() {
+      MailsAnswer.prototype.prepareSend = function(event) {
         var data, el, input;
+        $(event.target).addClass("disabled").removeClass("buttonSave");
+        this.$(".content").addClass("disabled");
         input = this.$(".content");
         data = {};
         input.each(function(i) {
@@ -1141,15 +1143,20 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         });
         this.mailtosend.url = "sendmail/" + this.mail.get("mailbox");
         el = this.el;
-        return this.mailtosend.save(data, {
-          success: function(model, response) {
+        this.mailtosend.save(data, {
+          success: function() {
             console.log("sent!");
-            return $(el).html(require('./templates/_mail/mail_sent'));
+            $(el).html(require('./templates/_mail/mail_sent'));
+            return window.app.appView.message_box_view.renderMessageSentSuccess();
+          },
+          error: function() {
+            return console.error("error!");
           }
         });
+        return console.log("sending mail: " + this.mailtosend);
       };
 
-      MailsAnswer.prototype.set_basic = function(show) {
+      MailsAnswer.prototype.setBasic = function(show) {
         if (show == null) show = true;
         if (show) {
           return this.$("#mail_basic").show();
@@ -1158,7 +1165,7 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         }
       };
 
-      MailsAnswer.prototype.set_to = function(show) {
+      MailsAnswer.prototype.setTo = function(show) {
         if (show == null) show = true;
         if (show) {
           return this.$("#mail_to").show();
@@ -1167,7 +1174,7 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         }
       };
 
-      MailsAnswer.prototype.set_advanced = function(show) {
+      MailsAnswer.prototype.setAdvanced = function(show) {
         if (show == null) show = true;
         if (show) {
           return this.$("#mail_advanced").show();
@@ -1176,10 +1183,10 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         }
       };
 
-      MailsAnswer.prototype.view_advanced = function() {
-        this.set_basic(false);
-        this.set_to(true);
-        return this.set_advanced(true);
+      MailsAnswer.prototype.viewAdvanced = function() {
+        this.setBasic(false);
+        this.setTo(true);
+        return this.setAdvanced(true);
       };
 
       MailsAnswer.prototype.render = function() {
@@ -1195,9 +1202,9 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
           parserRules: wysihtml5ParserRules,
           stylesheets: ["http://yui.yahooapis.com/2.9.0/build/reset/reset-min.css", "css/editor.css"]
         });
-        this.set_basic(true);
-        this.set_to(false);
-        this.set_advanced(false);
+        this.setBasic(true);
+        this.setTo(false);
+        this.setAdvanced(false);
         return this;
       };
 
@@ -1311,9 +1318,10 @@ window.require.define({"views/mails_element": function(exports, require, module)
         window.app.mailtosend.set({
           mode: "answer_all"
         });
-        window.app.view_answer.set_basic(true);
-        window.app.view_answer.set_to(false);
-        return window.app.view_answer.set_advanced(false);
+        window.app.view_answer.setBasic(true);
+        window.app.view_answer.setTo(false);
+        window.app.view_answer.setAdvanced(false);
+        return window.app.mailtosend.trigger("change_mode");
       };
 
       MailsElement.prototype.bt_answer = function() {
@@ -1322,9 +1330,10 @@ window.require.define({"views/mails_element": function(exports, require, module)
         window.app.mailtosend.set({
           mode: "answer"
         });
-        window.app.view_answer.set_basic(true);
-        window.app.view_answer.set_to(false);
-        return window.app.view_answer.set_advanced(false);
+        window.app.view_answer.setBasic(true);
+        window.app.view_answer.setTo(false);
+        window.app.view_answer.setAdvanced(false);
+        return window.app.mailtosend.trigger("change_mode");
       };
 
       MailsElement.prototype.bt_forward = function() {
@@ -1333,9 +1342,10 @@ window.require.define({"views/mails_element": function(exports, require, module)
         window.app.mailtosend.set({
           mode: "forward"
         });
-        window.app.view_answer.set_basic(true);
-        window.app.view_answer.set_to(true);
-        return window.app.view_answer.set_advanced(false);
+        window.app.view_answer.setBasic(true);
+        window.app.view_answer.setTo(true);
+        window.app.view_answer.setAdvanced(false);
+        return window.app.mailtosend.trigger("change_mode");
       };
 
       MailsElement.prototype.bt_unread = function() {
@@ -1369,6 +1379,13 @@ window.require.define({"views/mails_element": function(exports, require, module)
           $(this.el).html(template({
             "model": this.collection.activeMail
           }));
+          if (this.collection.activeMail.hasHtml()) {
+            $("#mail_content_html").contents().find("body").html(this.collection.activeMail.html());
+            $("#mail_content_text").hide();
+          } else {
+            $("#mail_content_text").html(this.collection.activeMail.text_or_html());
+            $("#mail_content_html").hide();
+          }
         }
         return this;
       };
@@ -1385,8 +1402,7 @@ window.require.define({"views/mails_list": function(exports, require, module) {
   (function() {
     var Mail, MailsListElement,
       __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
-      __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     Mail = require("../models/mail").Mail;
 
@@ -1413,27 +1429,39 @@ window.require.define({"views/mails_list": function(exports, require, module) {
 
       MailsList.prototype.initialize = function() {
         this.collection.on('reset', this.render, this);
-        this.collection.on('add', this.addOne, this);
-        window.app.mailboxes.on('change_active_mailboxes', this.render, this);
-        return this.collection.fetchOlder();
+        this.collection.fetchOlder();
+        this.collection.on("add", this.treatAdd, this);
+        return window.app.mailboxes.updateActiveMailboxes();
+      };
+
+      MailsList.prototype.treatAdd = function(mail) {
+        var dateCreatedAt;
+        dateCreatedAt = new Date(mail.get("createdAt")).valueOf();
+        if (dateCreatedAt <= window.app.mails.timestampMiddle) {
+          if (dateCreatedAt < window.app.mails.timestampOld) {
+            window.app.mails.timestampOld = dateCreatedAt;
+          }
+          return this.addOne(mail);
+        } else {
+          if (dateCreatedAt > window.app.mails.timestampNew) {
+            window.app.mails.timestampNew = dateCreatedAt;
+          }
+          return this.addNew(mail);
+        }
       };
 
       MailsList.prototype.addOne = function(mail) {
-        var box, _ref;
-        if (_ref = mail.get("mailbox"), __indexOf.call(window.app.mailboxes.activeMailboxes, _ref) >= 0) {
-          mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"));
-          box = new MailsListElement(mail, mail.collection);
-          return $(this.el).append(box.render().el);
-        }
+        var box;
+        mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"));
+        box = new MailsListElement(mail, mail.collection);
+        return $(this.el).append(box.render().el);
       };
 
       MailsList.prototype.addNew = function(mail) {
-        var box, _ref;
-        if (_ref = mail.get("mailbox"), __indexOf.call(window.app.mailboxes.activeMailboxes, _ref) >= 0) {
-          mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"));
-          box = new MailsListElement(mail, mail.collection);
-          return $(this.el).prepend(box.render().el);
-        }
+        var box;
+        mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"));
+        box = new MailsListElement(mail, mail.collection);
+        return $(this.el).prepend(box.render().el);
       };
 
       MailsList.prototype.render = function() {
@@ -1459,7 +1487,8 @@ window.require.define({"views/mails_list_element": function(exports, require, mo
   (function() {
     var Mail,
       __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
+      __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
     Mail = require("../models/mail").Mail;
 
@@ -1474,6 +1503,10 @@ window.require.define({"views/mails_list_element": function(exports, require, mo
 
       MailsListElement.prototype.tagName = "tr";
 
+      MailsListElement.prototype.active = false;
+
+      MailsListElement.prototype.visible = true;
+
       MailsListElement.prototype.events = {
         "click": "setActiveMail"
       };
@@ -1483,17 +1516,35 @@ window.require.define({"views/mails_list_element": function(exports, require, mo
         this.collection = collection;
         MailsListElement.__super__.constructor.call(this);
         this.model.view = this;
-        this.collection.on("change_active_mail", this.render, this);
+        window.app.mailboxes.on("change_active_mailboxes", this.checkVisible, this);
       }
 
       MailsListElement.prototype.setActiveMail = function(event) {
+        var _ref, _ref2, _ref3, _ref4;
+        if ((_ref = this.collection.activeMail) != null) {
+          if ((_ref2 = _ref.view) != null) _ref2.active = false;
+        }
+        if ((_ref3 = this.collection.activeMail) != null) {
+          if ((_ref4 = _ref3.view) != null) _ref4.render();
+        }
         this.collection.activeMail = this.model;
-        this.collection.trigger("change_active_mail");
+        this.collection.activeMail.view.active = true;
+        this.render();
         this.collection.activeMail.set_read();
         this.collection.activeMail.url = "mails/" + this.collection.activeMail.get("id");
-        return this.collection.activeMail.save({
+        this.collection.activeMail.save({
           "read": true
         });
+        return this.collection.trigger("change_active_mail");
+      };
+
+      MailsListElement.prototype.checkVisible = function() {
+        var state, _ref;
+        state = (_ref = this.model.get("mailbox"), __indexOf.call(window.app.mailboxes.activeMailboxes, _ref) >= 0);
+        if (state !== this.visible) {
+          this.visible = state;
+          return this.render();
+        }
       };
 
       MailsListElement.prototype.render = function() {
@@ -1501,7 +1552,8 @@ window.require.define({"views/mails_list_element": function(exports, require, mo
         template = require('./templates/_mail/mail_list');
         $(this.el).html(template({
           "model": this.model,
-          "active": this.model === this.collection.activeMail
+          "active": this.active,
+          "visible": this.visible
         }));
         return this;
       };
@@ -1531,6 +1583,8 @@ window.require.define({"views/mails_list_more": function(exports, require, modul
 
       __extends(MailsListMore, _super);
 
+      MailsListMore.prototype.clickable = true;
+
       function MailsListMore(el, collection) {
         this.el = el;
         this.collection = collection;
@@ -1539,25 +1593,36 @@ window.require.define({"views/mails_list_more": function(exports, require, modul
 
       MailsListMore.prototype.initialize = function() {
         this.collection.on('reset', this.render, this);
-        this.collection.on('change', this.render, this);
-        return window.app.mailboxes.on('change_active_mailboxes', this.render, this);
+        return this.collection.on('add', this.render, this);
       };
 
       MailsListMore.prototype.events = {
         "click #add_more_mails": 'loadOlderMails'
       };
 
+      MailsListMore.prototype.loadOlderMails = function() {
+        var element;
+        $("#add_more_mails").addClass("disabled");
+        if (this.clickable) {
+          this.collection.fetchOlder();
+          this.clickable = false;
+          element = this;
+          return setTimeout(function() {
+            element.clickable = true;
+            element.render();
+            return console.log("retry");
+          }, 1000 * 10);
+        }
+      };
+
       MailsListMore.prototype.render = function() {
         var template;
+        this.clickable = true;
         template = require("./templates/_mail/mails_more");
         $(this.el).html(template({
           "collection": this.collection
         }));
         return this;
-      };
-
-      MailsListMore.prototype.loadOlderMails = function() {
-        return this.collection.fetchOlder();
       };
 
       return MailsListMore;
@@ -1775,6 +1840,13 @@ window.require.define({"views/message_box": function(exports, require, module) {
         return this;
       };
 
+      MessageBox.prototype.renderMessageSentSuccess = function() {
+        var template;
+        template = require('./templates/_message/message_sent');
+        $(this.el).html(template());
+        return this;
+      };
+
       return MessageBox;
 
     })(Backbone.View);
@@ -1925,10 +1997,8 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push('><textarea');
   buf.push(attrs({ 'id':("html"), 'rows':(15), 'cols':(80), "class": ('content') + ' ' + ('span10') + ' ' + ('input-xlarge') }));
   buf.push('>' + ((interp = model.text_or_html()) == null ? '' : interp) + '</textarea><a');
-  buf.push(attrs({ 'id':('send_button'), "class": ('btn') + ' ' + ('btn-success') }));
-  buf.push('>Send</a><a');
-  buf.push(attrs({ 'id':('cancel_button'), "class": ('btn') + ' ' + ('btn-warning') }));
-  buf.push('>Cancel</a></div></div></fieldset></form>');
+  buf.push(attrs({ 'id':('send_button'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
+  buf.push('>Send !</a></div></div></fieldset></form>');
   }
   return buf.join("");
   };
@@ -1954,8 +2024,10 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   buf.push('/></p><h3>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</h3><br');
   buf.push(attrs({  }));
   buf.push('/><div');
-  buf.push(attrs({ 'id':('mail_content') }));
-  buf.push('>' + ((interp = model.text_or_html()) == null ? '' : interp) + '\n</div></div><div');
+  buf.push(attrs({ 'id':('mail_content_text') }));
+  buf.push('>' + ((interp = model.text()) == null ? '' : interp) + '\n</div><iframe');
+  buf.push(attrs({ 'id':('mail_content_html') }));
+  buf.push('>' + ((interp = model.text()) == null ? '' : interp) + '\n</iframe></div><div');
   buf.push(attrs({ "class": ('btn-toolbar') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('btn-group') }));
@@ -2001,6 +2073,8 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   var buf = [];
   with (locals || {}) {
   var interp;
+  if ( visible)
+  {
   if ( active)
   {
   buf.push('<td');
@@ -2078,6 +2152,7 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   buf.push('></i></a></td>');
   }
   }
+  }
   return buf.join("");
   };
 }});
@@ -2137,12 +2212,12 @@ window.require.define({"views/templates/_mail/mails_more": function(exports, req
   with (locals || {}) {
   var interp;
   buf.push('<div');
-  buf.push(attrs({ "class": ('btn-group') + ' ' + ('pull-left') }));
+  buf.push(attrs({ 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
-  buf.push(attrs({ 'id':('add_more_mails'), "class": ('btn') + ' ' + ('btn-primary') }));
+  buf.push(attrs({ 'id':('add_more_mails'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-plus') }));
-  buf.push('></i>Load up to ' + escape((interp = collection.mailsAtOnce) == null ? '' : interp) + ' messages more\n</a></div>');
+  buf.push('></i> Load up to ' + escape((interp = collection.mailsAtOnce) == null ? '' : interp) + ' messages more\n</a></div>');
   }
   return buf.join("");
   };
@@ -2338,6 +2413,22 @@ window.require.define({"views/templates/_mailbox/mailbox_new": function(exports,
   buf.push('><a');
   buf.push(attrs({ 'id':('add_mailbox'), "class": ('btn') }));
   buf.push('>Add a new mailbox</a></form>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_message/message_sent": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div');
+  buf.push(attrs({ "class": ('alert') + ' ' + ('alert-success') }));
+  buf.push('><button');
+  buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
+  buf.push('>x</button><strong>Success !\n</strong><p>Your message has been sent successfully !\n</p></div>');
   }
   return buf.join("");
   };

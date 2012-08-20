@@ -79,6 +79,6 @@ action 'sendmail', ->
     
   @box.sendMail data, (error) =>
     if !error
-      send 200
+      send {success: true}
     else
       send 500

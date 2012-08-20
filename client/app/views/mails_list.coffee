@@ -17,21 +17,40 @@ class exports.MailsList extends Backbone.View
 
   initialize: ->
     @collection.on('reset', @render, @)
-    @collection.on('add', @addOne, @)
-    window.app.mailboxes.on('change_active_mailboxes', @render, @)
     @collection.fetchOlder()
+    
+    @collection.on "add", @treatAdd, @
+    window.app.mailboxes.updateActiveMailboxes()
+
+  treatAdd: (mail) ->
+
+    dateCreatedAt = new Date(mail.get("createdAt")).valueOf()
+    
+    # check if we are adding a new message, or an old one
+    if dateCreatedAt <= window.app.mails.timestampMiddle
+      # update timestamp for the list of messages
+      if dateCreatedAt < window.app.mails.timestampOld
+        window.app.mails.timestampOld = dateCreatedAt
+    
+      # add its view at the bottom of the list
+      @addOne mail
+    else
+      # update timestamp for new messages
+      if dateCreatedAt > window.app.mails.timestampNew
+        window.app.mails.timestampNew = dateCreatedAt
+      
+      # add its view on top of the list
+      @addNew mail
 
   addOne: (mail) ->
-    if mail.get("mailbox") in window.app.mailboxes.activeMailboxes
-      mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"))
-      box = new MailsListElement mail, mail.collection
-      $(@el).append box.render().el
+    mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"))
+    box = new MailsListElement mail, mail.collection
+    $(@el).append box.render().el
       
   addNew: (mail) ->
-    if mail.get("mailbox") in window.app.mailboxes.activeMailboxes
-      mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"))
-      box = new MailsListElement mail, mail.collection
-      $(@el).prepend box.render().el
+    mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"))
+    box = new MailsListElement mail, mail.collection
+    $(@el).prepend box.render().el
 
   render: ->
     $(@el).html ""

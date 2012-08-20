@@ -1,3 +1,4 @@
+{Mail} = require "../models/mail"
 ################################################################
 ###
 
@@ -40,6 +41,7 @@ class exports.MainRouter extends Backbone.Router
 ############## CONFIG
 
   configMailboxes : ->
+    app.mailboxes.fetch()
     app.appView.render()
     app.appView.set_layout_mailboxes()
     $(".menu_option").removeClass("active")
@@ -51,13 +53,15 @@ class exports.MainRouter extends Backbone.Router
     app.appView.render()
     app.appView.set_layout_mails()
     
+    # if the mail is already downloaded, show it
     if app.mails.get(path)?
       app.mails.activeMail = app.mails.get(path)
       app.mails.trigger "change_active_mail"
+    # otherwise, download it
     else
-      app.mails.fetch({
-        "success": ->
-          if app.mails.get(path)?
-            app.mails.activeMail = app.mails.get(path)
-            app.mails.trigger "change_active_mail"
+      app.mails.activeMail = new Mail {id: path}
+      app.mails.activeMail.url = "mails/" + path
+      app.mails.activeMail.fetch({
+        success : ->
+          app.mails.trigger "change_active_mail"
       })
