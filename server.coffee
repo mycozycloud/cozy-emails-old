@@ -14,14 +14,14 @@ if not module.parent
     
     @jobs = @kue.createQueue()
     
-    # @jobs.on "job complete", (id) ->
-    #   Job.get id, (error, job) ->
-    #     return if error
-    #     createCheckJob job.data.mb, 1000 * 60 * 0.5, (error) ->
-    #       return if error
-    #       job.remove (err) ->
-    #         throw err if err
-    #         console.log job.data.title + " #" + job.id + " complete job removed"
+    @jobs.on "job complete", (id) ->
+      Job.get id, (error, job) ->
+        return if error
+        createCheckJob job.data.mb, 1000 * 60 * 0.5, (error) ->
+          return if error
+          job.remove (err) ->
+            throw err if err
+            console.log job.data.title + " #" + job.id + " complete job removed"
     #       
     # @jobs.on "job error", (id) ->
     #   Job.get id, (error, job) ->
@@ -58,9 +58,25 @@ if not module.parent
     createCheckJobs()
     
     @jobs.promote()
+    
+    Step = require "step"
 
     # KUE jobs
     @jobs.process "check mailbox", 1, (job, done) ->
-      console.log job.data.title + " #" + job.id + " job started"
-      (Mailbox job.data.mailbox).getNewMail job.data.num, done
 
+      Step (prepare = ->
+        console.log job.data.title + " #" + job.id + " job started"
+        this()
+      ),
+      (fetch = (err) ->
+        console.log err if err
+        (Mailbox job.data.mailbox).getNewMail job.data.num, this
+      ), 
+      (showIt = (err) ->
+        if err
+          console.log "KO: " + err
+          done "error"
+        else
+          console.log "OK"
+          done()
+      )

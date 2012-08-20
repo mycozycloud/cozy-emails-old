@@ -78,7 +78,7 @@ Mailbox.prototype.getMail = (boxname, constraints, c) ->
 
   # so it looks coool, let's create a connection
   server = new imap.ImapConnection
-    username: mailbox.login + "_bug"
+    username: mailbox.login
     password: mailbox.pass
     host:     mailbox.IMAP_server
     port:     mailbox.IMAP_port
@@ -131,6 +131,7 @@ Mailbox.prototype.getMail = (boxname, constraints, c) ->
                 console.log "nothing to download"
                 mailbox.IMAP_last_sync = new Date().toJSON()
                 server.logout()
+                callback()
         
               # mails to fetch
               else
