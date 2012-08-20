@@ -1,4 +1,5 @@
 class exports.BrunchApplication
+
   constructor: ->
     $ =>
       @initialize this
