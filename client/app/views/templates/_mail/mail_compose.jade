@@ -1,51 +1,57 @@
-form.well
-  fieldset
-    .control-group#mail_from
-      .controls
-        .input-prepend
-          span.add-on From:
-          select.content(id="mailbox").input-xlarge
-            for mailbox in models
-              option(value=#{mailbox.get("name")}) #{mailbox.get("name")}
-    .control-group#mail_to
-      .controls
-        .input-prepend
-          span.add-on To&nbsp;
-          input.content.span6(id="to", type="text").input-xlarge
-    .control-group#mail_advanced
-      .controls
-        .input-prepend
-          span.add-on Cc&nbsp;
-          input.content.span6(id="cc", type="text").input-xlarge
-      .controls
-        .input-prepend
-          span.add-on Bcc
-          input.content.span6(id="bcc", type="text").input-xlarge d
-      .controls
-        .input-prepend
-          span.add-on Subject
-          input.content.span9(id="subject", type="text").input-xlarge
-    .control-group
-      .controls
-        #wysihtml5-toolbar(style='display: none;')
-          .btn-toolbar
-            .btn-group
-              a.btn.btn-mini(data-wysihtml5-command='bold') bold
-              a.btn.btn-mini(data-wysihtml5-command='italic') italic
-              a.btn.btn-mini(data-wysihtml5-command='underline') underline
+if models
+  form.well
+    fieldset
+      .control-group#mail_from
+        .controls
+          .input-prepend
+            span.add-on From:
+            select.content(id="mailbox").input-xlarge
+              for mailbox in models
+                option(value=#{mailbox.get("name")}) #{mailbox.get("name")}
+      .control-group#mail_to
+        .controls
+          .input-prepend
+            span.add-on To&nbsp;
+            input.content.span6(id="to", type="text").input-xlarge
+      .control-group#mail_advanced
+        .controls
+          .input-prepend
+            span.add-on Cc&nbsp;
+            input.content.span6(id="cc", type="text").input-xlarge
+        .controls
+          .input-prepend
+            span.add-on Bcc
+            input.content.span6(id="bcc", type="text").input-xlarge d
+        .controls
+          .input-prepend
+            span.add-on Subject
+            input.content.span9(id="subject", type="text").input-xlarge
+      .control-group
+        .controls
+          #wysihtml5-toolbar(style='display: none;')
+            .btn-toolbar
+              .btn-group
+                a.btn.btn-mini(data-wysihtml5-command='bold') bold
+                a.btn.btn-mini(data-wysihtml5-command='italic') italic
+                a.btn.btn-mini(data-wysihtml5-command='underline') underline
            
-            .btn-group
-              a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='red') red
-              a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='green') green
-              a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='blue') blue
+              .btn-group
+                a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='red') red
+                a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='green') green
+                a.btn.btn-mini(data-wysihtml5-command='foreColor', data-wysihtml5-command-value='blue') blue
           
-            .btn-group
-              a.btn.btn-mini(data-wysihtml5-command='createLink') insert link
-            div(data-wysihtml5-dialog='createLink', style='display: none;border: none;')
-              form.form-inline
-                input.text(data-wysihtml5-dialog-field='href', value='http://')
-                a.btn.btn-mini(data-wysihtml5-dialog-action='save') OK
-                a.btn.btn-mini(data-wysihtml5-dialog-action='cancel') Cancel
-      .controls
-        textarea.content.span10(id="html", rows=15, cols=80).input-xlarge
-        a#send_button.btn.btn-primary.btn-large Send !
+              .btn-group
+                a.btn.btn-mini(data-wysihtml5-command='createLink') insert link
+              div(data-wysihtml5-dialog='createLink', style='display: none;border: none;')
+                form.form-inline
+                  input.text(data-wysihtml5-dialog-field='href', value='http://')
+                  a.btn.btn-mini(data-wysihtml5-dialog-action='save') OK
+                  a.btn.btn-mini(data-wysihtml5-dialog-action='cancel') Cancel
+        .controls
+          textarea.content.span10(id="html", rows=15, cols=80).input-xlarge
+          a#send_button.btn.btn-primary.btn-large Send !
+else
+  .well
+    p
+      strong Hey !
+      | before You'll be able to send mail, configure a mailbox !
