@@ -1,4 +1,17 @@
+if collection.length == 0
+  .well
+    h3 
+      | Welcome !
+    p
+      | It looks like there are no mails to show...
+    p
+      | If you're here for the first time, just add a new mailbox in menu on your left.
+    p
+      | If You just did it, and still see no messages, you may need to wait for us to download them for you.
+      | Enjoy  :)
 .btn-group.center(style="margin-bottom: 50px; margin-top: 50px;")
   a#add_more_mails.btn.btn-primary.btn-large
     i.icon-plus
     |  Load up to #{collection.mailsAtOnce} messages more
+p
+  i #{collection.length} messages downloaded in total

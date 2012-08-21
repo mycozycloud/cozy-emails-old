@@ -95,7 +95,7 @@ class exports.Mail extends BaseModel
       else ""
 
   text: ->
-    @get("text").replace(/\r\n/g,'\n').replace(/\n/g, '<br />')
+    @get("text")
 
   html: ->
     expression = new RegExp("(<style>(.|\s)*?</style>)", "gi");
@@ -106,7 +106,8 @@ class exports.Mail extends BaseModel
     string.replace(expression,"")
     
   hasHtml: ->
-    @get "html" != ""
+    html = @get "html"
+    html? and html != ""
   
   text_or_html: ->
     if @get("html")

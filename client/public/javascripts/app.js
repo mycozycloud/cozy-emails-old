@@ -447,7 +447,7 @@ window.require.define({"models/mail": function(exports, require, module) {
       };
 
       Mail.prototype.text = function() {
-        return this.get("text").replace(/\r\n/g, '\n').replace(/\n/g, '<br />');
+        return this.get("text");
       };
 
       Mail.prototype.html = function() {
@@ -459,7 +459,9 @@ window.require.define({"models/mail": function(exports, require, module) {
       };
 
       Mail.prototype.hasHtml = function() {
-        return this.get("html" !== "");
+        var html;
+        html = this.get("html");
+        return (html != null) && html !== "";
       };
 
       Mail.prototype.text_or_html = function() {
@@ -1016,6 +1018,7 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
         this.model.save(data);
         this.collection.trigger("update_menu");
         this.model.isEdit = false;
+        window.app.appView.message_box_view.renderNewMailboxSuccess();
         return this.render();
       };
 
@@ -1429,22 +1432,22 @@ window.require.define({"views/mails_list": function(exports, require, module) {
 
       MailsList.prototype.initialize = function() {
         this.collection.on('reset', this.render, this);
-        this.collection.fetchOlder();
         this.collection.on("add", this.treatAdd, this);
+        this.collection.fetchOlder();
         return window.app.mailboxes.updateActiveMailboxes();
       };
 
       MailsList.prototype.treatAdd = function(mail) {
-        var dateCreatedAt;
-        dateCreatedAt = new Date(mail.get("createdAt")).valueOf();
-        if (dateCreatedAt <= window.app.mails.timestampMiddle) {
-          if (dateCreatedAt < window.app.mails.timestampOld) {
-            window.app.mails.timestampOld = dateCreatedAt;
+        var dateValueOf;
+        dateValueOf = mail.get("dateValueOf");
+        if (dateValueOf <= window.app.mails.timestampMiddle) {
+          if (dateValueOf < window.app.mails.timestampOld) {
+            window.app.mails.timestampOld = dateValueOf;
           }
           return this.addOne(mail);
         } else {
-          if (dateCreatedAt > window.app.mails.timestampNew) {
-            window.app.mails.timestampNew = dateCreatedAt;
+          if (dateValueOf > window.app.mails.timestampNew) {
+            window.app.mails.timestampNew = dateValueOf;
           }
           return this.addNew(mail);
         }
@@ -1847,6 +1850,13 @@ window.require.define({"views/message_box": function(exports, require, module) {
         return this;
       };
 
+      MessageBox.prototype.renderNewMailboxSuccess = function() {
+        var template;
+        template = require('./templates/_message/new_mailbox');
+        $(this.el).html(template());
+        return this;
+      };
+
       return MessageBox;
 
     })(Backbone.View);
@@ -2025,9 +2035,9 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   buf.push(attrs({  }));
   buf.push('/><div');
   buf.push(attrs({ 'id':('mail_content_text') }));
-  buf.push('>' + ((interp = model.text()) == null ? '' : interp) + '\n</div><iframe');
+  buf.push('>' + escape((interp = model.text()) == null ? '' : interp) + '\n</div><iframe');
   buf.push(attrs({ 'id':('mail_content_html') }));
-  buf.push('>' + ((interp = model.text()) == null ? '' : interp) + '\n</iframe></div><div');
+  buf.push('>' + escape((interp = model.text()) == null ? '' : interp) + '\n</iframe></div><div');
   buf.push(attrs({ "class": ('btn-toolbar') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('btn-group') }));
@@ -2211,13 +2221,19 @@ window.require.define({"views/templates/_mail/mails_more": function(exports, req
   var buf = [];
   with (locals || {}) {
   var interp;
+  if ( collection.length == 0)
+  {
+  buf.push('<div');
+  buf.push(attrs({ "class": ('well') }));
+  buf.push('><h3>Welcome !\n</h3><p>It looks like there are no mails to show...\n</p><p>If you\'re here for the first time, just add a new mailbox in menu on your left.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div>');
+  }
   buf.push('<div');
   buf.push(attrs({ 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
   buf.push(attrs({ 'id':('add_more_mails'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-plus') }));
-  buf.push('></i> Load up to ' + escape((interp = collection.mailsAtOnce) == null ? '' : interp) + ' messages more\n</a></div>');
+  buf.push('></i> Load up to ' + escape((interp = collection.mailsAtOnce) == null ? '' : interp) + ' messages more\n</a></div><p><i>' + escape((interp = collection.length) == null ? '' : interp) + ' messages downloaded in total</i></p>');
   }
   return buf.join("");
   };
@@ -2304,7 +2320,19 @@ window.require.define({"views/templates/_mailbox/mailbox_edit": function(exports
   buf.push(attrs({ 'value':("blue") }));
   buf.push('>blue</option><option');
   buf.push(attrs({ 'value':("red") }));
-  buf.push('>red</option></select><p');
+  buf.push('>red</option><option');
+  buf.push(attrs({ 'value':("green") }));
+  buf.push('>green</option><option');
+  buf.push(attrs({ 'value':("gold") }));
+  buf.push('>gold</option><option');
+  buf.push(attrs({ 'value':("purple") }));
+  buf.push('>purple</option><option');
+  buf.push(attrs({ 'value':("pink") }));
+  buf.push('>pink</option><option');
+  buf.push(attrs({ 'value':("black") }));
+  buf.push('>black</option><option');
+  buf.push(attrs({ 'value':("brown") }));
+  buf.push('>brown</option></select><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>The color to mark mails from this inbox. Enjoy!</p></div></div></fieldset><fieldset><legend>Server data</legend><div');
   buf.push(attrs({ "class": ('control-group') }));
@@ -2429,6 +2457,22 @@ window.require.define({"views/templates/_message/message_sent": function(exports
   buf.push('><button');
   buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
   buf.push('>x</button><strong>Success !\n</strong><p>Your message has been sent successfully !\n</p></div>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_message/new_mailbox": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div');
+  buf.push(attrs({ "class": ('alert') + ' ' + ('alert-success') }));
+  buf.push('><button');
+  buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
+  buf.push('>x</button><strong>Success !\n</strong><p>Your brand new mailbox has been saved. Give us now some time to import Your mail.\n</p></div>');
   }
   return buf.join("");
   };

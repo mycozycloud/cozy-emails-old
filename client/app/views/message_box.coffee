@@ -27,3 +27,8 @@ class exports.MessageBox extends Backbone.View
     template = require('./templates/_message/message_sent')
     $(@el).html template()
     @
+    
+  renderNewMailboxSuccess: ->
+    template = require('./templates/_message/new_mailbox')
+    $(@el).html template()
+    @

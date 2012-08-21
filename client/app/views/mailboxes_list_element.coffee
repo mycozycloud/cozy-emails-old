@@ -42,6 +42,7 @@ class exports.MailboxesListElement extends Backbone.View
     @model.save data
     @collection.trigger("update_menu")
     @model.isEdit = false
+    window.app.appView.message_box_view.renderNewMailboxSuccess()
     @render()
     
   # delete the mailbox

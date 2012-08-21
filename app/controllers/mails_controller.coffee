@@ -41,8 +41,8 @@ action 'destroy', ->
 action 'getlist', ->
   num = parseInt req.params.num
   timestamp = parseInt req.params.timestamp
-  console.log {where : {"createdAt" : {lt : timestamp}}, limit : num, order: 'createdAt DESC'}
-  Mail.all {where : {"createdAt" : {lt : timestamp}}, limit : num, order: 'createdAt DESC'}, (error, mails) ->
+  console.log {where : {"dateValueOf" : {lt : timestamp}}, limit : num, order: 'dateValueOf DESC'}
+  Mail.all {where : {"dateValueOf" : {lt : timestamp}}, limit : num, order: 'dateValueOf DESC'}, (error, mails) ->
     if !error
       send mails
     else
@@ -52,8 +52,8 @@ action 'getlist', ->
 action 'getnewlist', ->
   num = parseInt req.params.num
   timestamp = parseInt req.params.timestamp
-  console.log {where : {"createdAt" : {gt : timestamp}}, order: 'createdAt ASC'}
-  Mail.all {where : {"createdAt" : {gt : timestamp}}, order: 'createdAt ASC'}, (error, mails) ->
+  console.log {where : {"dateValueOf" : {gt : timestamp}}, order: 'dateValueOf ASC'}
+  Mail.all {where : {"dateValueOf" : {gt : timestamp}}, order: 'dateValueOf ASC'}, (error, mails) ->
     if !error
       send mails
     else
