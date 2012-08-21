@@ -764,7 +764,7 @@ window.require.define({"routers/main_router": function(exports, require, module)
       };
 
       MainRouter.prototype["new"] = function() {
-        app.appView.set_layout_mailboxes();
+        app.appView.set_layout_compose_mail();
         $(".menu_option").removeClass("active");
         return $("#newmailbutton").addClass("active");
       };
@@ -803,7 +803,7 @@ window.require.define({"routers/main_router": function(exports, require, module)
 
 window.require.define({"views/app": function(exports, require, module) {
   (function() {
-    var MailboxesList, MailboxesListNew, MailsColumn, MailsElement, MenuMailboxesList, MessageBox,
+    var MailboxesList, MailboxesListNew, MailsColumn, MailsCompose, MailsElement, MenuMailboxesList, MessageBox,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -816,6 +816,8 @@ window.require.define({"views/app": function(exports, require, module) {
     MailsColumn = require('../views/mails_column').MailsColumn;
 
     MailsElement = require('../views/mails_element').MailsElement;
+
+    MailsCompose = require('../views/mails_compose').MailsCompose;
 
     MessageBox = require('views/message_box').MessageBox;
 
@@ -875,27 +877,40 @@ window.require.define({"views/app": function(exports, require, module) {
 
       AppView.prototype.set_layout_mailboxes = function() {
         this.set_layout_menu();
-        this.resize();
         this.container_content.html(require('./templates/_layouts/layout_mailboxes'));
         window.app.view_mailboxes = new MailboxesList(this.$("#mail_list_container"), window.app.mailboxes);
         window.app.view_mailboxes_new = new MailboxesListNew(this.$("#add_mail_button_container"), window.app.mailboxes);
         window.app.view_mailboxes_new.render();
-        return window.app.mailboxes.fetch({
+        window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
             return console.log("Initial mailbox view mailboxes load OK");
           }
         });
+        return this.resize();
+      };
+
+      AppView.prototype.set_layout_compose_mail = function() {
+        this.set_layout_menu();
+        this.container_content.html(require('./templates/_layouts/layout_compose_mail'));
+        window.app.view_compose_mail = new MailsCompose(this.$("#compose_mail_container"), window.app.mailboxes);
+        window.app.mailboxes.fetch({
+          success: function() {
+            window.app.mailboxes.updateActiveMailboxes();
+            console.log("Initial compose view mailboxes load OK");
+            return window.app.view_compose_mail.render();
+          }
+        });
+        return this.resize();
       };
 
       AppView.prototype.set_layout_mails = function() {
         this.set_layout_menu();
-        this.resize();
         this.container_content.html(require('./templates/_layouts/layout_mails'));
         window.app.view_mails_list = new MailsColumn(this.$("#column_mails_list"), window.app.mails);
         window.app.view_mails_list.render();
         window.app.view_mail = new MailsElement(this.$("#column_mail"), window.app.mails);
-        return window.app.mailboxes.fetch({
+        window.app.mailboxes.fetch({
           success: function() {
             console.log("Initial mails mailboxes load OK");
             return window.app.mails.fetchOlder(function() {
@@ -904,6 +919,7 @@ window.require.define({"views/app": function(exports, require, module) {
             });
           }
         });
+        return this.resize();
       };
 
       return AppView;
@@ -1280,6 +1296,87 @@ window.require.define({"views/mails_column": function(exports, require, module) 
       };
 
       return MailsColumn;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/mails_compose": function(exports, require, module) {
+  (function() {
+    var Mail, MailNew, MailsAnswer,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Mail = require("../models/mail").Mail;
+
+    MailsAnswer = require("../views/mails_answer").MailsAnswer;
+
+    MailNew = require("../models/mail_new").MailNew;
+
+    /*
+    
+      The new mail view. To compose a new message
+    */
+
+    exports.MailsCompose = (function(_super) {
+
+      __extends(MailsCompose, _super);
+
+      MailsCompose.prototype.events = {
+        "click a#send_button": 'prepareSend'
+      };
+
+      function MailsCompose(el, collection) {
+        this.el = el;
+        this.collection = collection;
+        MailsCompose.__super__.constructor.call(this);
+        this.mailtosend = new MailNew();
+      }
+
+      MailsCompose.prototype.prepareSend = function(event) {
+        var data, el, input, _ref;
+        $(event.target).addClass("disabled").removeClass("buttonSave");
+        this.$(".content").addClass("disabled");
+        input = this.$(".content");
+        data = {};
+        input.each(function(i) {
+          return data[input[i].id] = input[i].value;
+        });
+        this.mailtosend.url = "sendmail/" + ((_ref = window.app.mailboxes.get(data["mailbox"])) != null ? _ref.get("id") : void 0);
+        el = this.el;
+        this.mailtosend.save(data, {
+          success: function() {
+            console.log("sent!");
+            $(el).html(require('./templates/_mail/mail_sent'));
+            return window.app.appView.message_box_view.renderMessageSentSuccess();
+          },
+          error: function() {
+            return console.error("error!");
+          }
+        });
+        return console.log("sending mail: " + this.mailtosend);
+      };
+
+      MailsCompose.prototype.render = function() {
+        var editor, template;
+        template = require('./templates/_mail/mail_compose');
+        $(this.el).html(template({
+          "models": this.collection.models
+        }));
+        try {
+          return editor = new wysihtml5.Editor("html", {
+            toolbar: "wysihtml5-toolbar",
+            parserRules: wysihtml5ParserRules,
+            stylesheets: ["http://yui.yahooapis.com/2.9.0/build/reset/reset-min.css", "css/editor.css"]
+          });
+        } catch (error) {
+          return console.log(error.toString());
+        }
+      };
+
+      return MailsCompose;
 
     })(Backbone.View);
 
@@ -1894,6 +1991,22 @@ window.require.define({"views/message_box": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/templates/_layouts/layout_compose_mail": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div');
+  buf.push(attrs({ "class": ('row-fluid') }));
+  buf.push('><div');
+  buf.push(attrs({ 'id':('compose_mail_container'), "class": ('span12') }));
+  buf.push('></div></div>');
+  }
+  return buf.join("");
+  };
+}});
+
 window.require.define({"views/templates/_layouts/layout_mailboxes": function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
@@ -2133,6 +2246,132 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   buf.push('></i>Delete\n</a></div></div><div');
   buf.push(attrs({ 'id':('answer_form') }));
   buf.push('></div>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_mail/mail_compose": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<form');
+  buf.push(attrs({ "class": ('well') }));
+  buf.push('><fieldset><div');
+  buf.push(attrs({ 'id':('mail_from'), "class": ('control-group') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('controls') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('input-prepend') }));
+  buf.push('><span');
+  buf.push(attrs({ "class": ('add-on') }));
+  buf.push('>From:</span><select');
+  buf.push(attrs({ 'id':("mailbox"), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push('>');
+  // iterate models
+  (function(){
+    if ('number' == typeof models.length) {
+      for (var $index = 0, $$l = models.length; $index < $$l; $index++) {
+        var mailbox = models[$index];
+
+  buf.push('<option');
+  buf.push(attrs({ 'value':(mailbox.get("id")) }));
+  buf.push('>' + escape((interp = mailbox.get("name")) == null ? '' : interp) + '</option>');
+      }
+    } else {
+      for (var $index in models) {
+        var mailbox = models[$index];
+
+  buf.push('<option');
+  buf.push(attrs({ 'value':(mailbox.get("id")) }));
+  buf.push('>' + escape((interp = mailbox.get("name")) == null ? '' : interp) + '</option>');
+     }
+    }
+  }).call(this);
+
+  buf.push('</select></div></div></div><div');
+  buf.push(attrs({ 'id':('mail_to'), "class": ('control-group') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('controls') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('input-prepend') }));
+  buf.push('><span');
+  buf.push(attrs({ "class": ('add-on') }));
+  buf.push('>To&nbsp;</span><input');
+  buf.push(attrs({ 'id':("to"), 'type':("text"), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
+  buf.push('/></div></div></div><div');
+  buf.push(attrs({ 'id':('mail_advanced'), "class": ('control-group') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('controls') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('input-prepend') }));
+  buf.push('><span');
+  buf.push(attrs({ "class": ('add-on') }));
+  buf.push('>Cc&nbsp;</span><input');
+  buf.push(attrs({ 'id':("cc"), 'type':("text"), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
+  buf.push('/></div></div><div');
+  buf.push(attrs({ "class": ('controls') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('input-prepend') }));
+  buf.push('><span');
+  buf.push(attrs({ "class": ('add-on') }));
+  buf.push('>Bcc</span><input');
+  buf.push(attrs({ 'id':("bcc"), 'type':("text"), "class": ('content') + ' ' + ('span6') + ' ' + ('input-xlarge') }));
+  buf.push('/></div></div><div');
+  buf.push(attrs({ "class": ('controls') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('input-prepend') }));
+  buf.push('><span');
+  buf.push(attrs({ "class": ('add-on') }));
+  buf.push('>Subject</span><input');
+  buf.push(attrs({ 'id':("subject"), 'type':("text"), "class": ('content') + ' ' + ('span9') + ' ' + ('input-xlarge') }));
+  buf.push('/></div></div></div><div');
+  buf.push(attrs({ "class": ('control-group') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('controls') }));
+  buf.push('><div');
+  buf.push(attrs({ 'id':('wysihtml5-toolbar'), 'style':('display: none;') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('btn-toolbar') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('btn-group') }));
+  buf.push('><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('bold'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>bold</a><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('italic'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>italic</a><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('underline'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>underline</a></div><div');
+  buf.push(attrs({ "class": ('btn-group') }));
+  buf.push('><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('foreColor'), 'data-wysihtml5-command-value':('red'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>red</a><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('foreColor'), 'data-wysihtml5-command-value':('green'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>green</a><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('foreColor'), 'data-wysihtml5-command-value':('blue'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>blue</a></div><div');
+  buf.push(attrs({ "class": ('btn-group') }));
+  buf.push('><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('createLink'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>insert link</a></div><div');
+  buf.push(attrs({ 'data-wysihtml5-dialog':('createLink'), 'style':('display: none;border: none;') }));
+  buf.push('><form');
+  buf.push(attrs({ "class": ('form-inline') }));
+  buf.push('><input');
+  buf.push(attrs({ 'data-wysihtml5-dialog-field':('href'), 'value':('http://'), "class": ('text') }));
+  buf.push('/><a');
+  buf.push(attrs({ 'data-wysihtml5-dialog-action':('save'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>OK</a><a');
+  buf.push(attrs({ 'data-wysihtml5-dialog-action':('cancel'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>Cancel</a></form></div></div></div></div><div');
+  buf.push(attrs({ "class": ('controls') }));
+  buf.push('><textarea');
+  buf.push(attrs({ 'id':("html"), 'rows':(15), 'cols':(80), "class": ('content') + ' ' + ('span10') + ' ' + ('input-xlarge') }));
+  buf.push('></textarea><a');
+  buf.push(attrs({ 'id':('send_button'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
+  buf.push('>Send !</a></div></div></fieldset></form>');
   }
   return buf.join("");
   };

@@ -3,6 +3,7 @@
 {MenuMailboxesList} = require '../views/menu_mailboxes_list'
 {MailsColumn} = require '../views/mails_column'
 {MailsElement} = require '../views/mails_element'
+{MailsCompose} = require '../views/mails_compose'
 {MessageBox} = require 'views/message_box'
 ###
 
@@ -66,7 +67,6 @@ class exports.AppView extends Backbone.View
     
     # ensure the right size
     @set_layout_menu()
-    @resize()
     
     # lay the mailboxes out
     @container_content.html require('./templates/_layouts/layout_mailboxes')
@@ -80,13 +80,37 @@ class exports.AppView extends Backbone.View
         window.app.mailboxes.updateActiveMailboxes()
         console.log "Initial mailbox view mailboxes load OK"
       })
+    
+    # ensure the right size
+    @resize()
+
+
+  # put on the layout to display mailboxes:
+  set_layout_compose_mail: ->
+
+    # ensure the right size
+    @set_layout_menu()
+
+    # lay the mailboxes out
+    @container_content.html require('./templates/_layouts/layout_compose_mail')
+    window.app.view_compose_mail = new MailsCompose @.$("#compose_mail_container"), window.app.mailboxes
+
+    # fetch necessary data
+    window.app.mailboxes.fetch({
+      success: ->
+        window.app.mailboxes.updateActiveMailboxes()
+        console.log "Initial compose view mailboxes load OK"
+        window.app.view_compose_mail.render()
+      })
+
+    # ensure the right size
+    @resize()
 
   # put on the layout to display mails:
   set_layout_mails: ->
     
-    # ensure the right size
+    # set menu
     @set_layout_menu()
-    @resize()
     
     # lay the mails out
     @container_content.html require('./templates/_layouts/layout_mails')
@@ -105,3 +129,6 @@ class exports.AppView extends Backbone.View
             console.log "Initial mails mails load OK"
             window.app.mailboxes.updateActiveMailboxes()
       })
+    
+    # ensure the right size
+    @resize()

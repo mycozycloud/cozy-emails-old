@@ -30,7 +30,7 @@ class exports.MainRouter extends Backbone.Router
 ################################################################
 ############## NEW MAIL 
   new : ->
-    app.appView.set_layout_mailboxes()
+    app.appView.set_layout_compose_mail()
     $(".menu_option").removeClass("active")
     $("#newmailbutton").addClass("active")
 
