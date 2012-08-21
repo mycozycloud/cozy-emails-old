@@ -1,6 +1,6 @@
 if visible
   if active
-    td(style='width: 5px; padding: 0; background-color: #{model.mailbox.get("color")};')
+    td(style='width: 5px; padding: 0; background-color: #{model.mailbox().get("color")};')
     td(style='background-color: lightgray;')
       p
         if model.is_unread()
@@ -18,7 +18,7 @@ if visible
           p #{model.get("subject")}
     td(style='background-color: lightgray;')
   else
-    td(style='width: 5px; padding: 0; background-color: #{model.mailbox.get("color")};')
+    td(style='width: 5px; padding: 0; background-color: #{model.mailbox().get("color")};')
     td
       p
         if model.is_unread()

@@ -80,11 +80,15 @@ class exports.MailsAnswer extends Backbone.View
     $(@el).html ""
     template = require('./templates/_mail/mail_answer')
     $(@el).html template({"model" : @mail, "mailtosend" : @mailtosend})
-    editor = new wysihtml5.Editor("html", # id of textarea element
-      toolbar: "wysihtml5-toolbar" # id of toolbar element
-      parserRules: wysihtml5ParserRules # defined in parser rules set
-      stylesheets: ["http://yui.yahooapis.com/2.9.0/build/reset/reset-min.css", "css/editor.css"],
-    )
+    
+    try
+      editor = new wysihtml5.Editor("html", # id of textarea element
+        toolbar: "wysihtml5-toolbar" # id of toolbar element
+        parserRules: wysihtml5ParserRules # defined in parser rules set
+        stylesheets: ["http://yui.yahooapis.com/2.9.0/build/reset/reset-min.css", "css/editor.css"],
+      )
+    catch error
+      console.log error
     @setBasic true
     @setTo false
     @setAdvanced false

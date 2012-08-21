@@ -55,14 +55,18 @@ if not module.parent
       mailbox: mailbox
       title: "Import of " + mailbox + " at " + new Date().toUTCString()
     ).save()
+    
+    lastProgress = 0
    
     job.on 'complete', () ->
       console.log job.data.title + " #" + job.id + " complete"
     job.on 'failed', () ->
       console.log job.data.title + " #" + job.id + " failed"
     job.on 'progress', (progress) ->
-      console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
-
+      if progress != lastProgress
+        console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
+        lastProgress = progress
+      
   createImportJobs = =>
     Mailbox.all {where: {activated: false}}, (err, mailboxes) ->
       for mailbox in mailboxes
@@ -77,7 +81,7 @@ if not module.parent
     console.log job.data.title + " #" + job.id + " job started"
     (Mailbox job.data.mailbox).getNewMail job.data.num, done, job, "asc"
     
-  @jobs.process "import mailbox", 1, (job, done) ->
+  @jobs.process "import mailbox", 3, (job, done) ->
     console.log job.data.title + " #" + job.id + " job started"
     if job.data.mailbox.activated == false
       (Mailbox job.data.mailbox).getAllMail done, job

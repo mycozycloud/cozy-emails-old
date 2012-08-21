@@ -28,3 +28,5 @@ class exports.MailboxCollection extends Backbone.Collection
       if mb.get("checked")
         @activeMailboxes.push mb.get("id")
     
+    console.log "update mailboxes: " + @activeMailboxes
+    @trigger "change_active_mailboxes", @

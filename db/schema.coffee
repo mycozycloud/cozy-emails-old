@@ -1,5 +1,5 @@
 Mail = define 'Mail', ->
-    property 'mailbox', String, index: true
+    property 'mailbox', index: true
     property 'id_remote_mailbox', index: true
     property 'createdAt', Number, default: 0, index: true
     property 'dateValueOf', Number, default: 0, index: true

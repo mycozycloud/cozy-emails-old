@@ -18,8 +18,6 @@ class exports.MailsList extends Backbone.View
   initialize: ->
     @collection.on('reset', @render, @)
     @collection.on "add", @treatAdd, @
-    @collection.fetchOlder()
-    window.app.mailboxes.updateActiveMailboxes()
 
   treatAdd: (mail) ->
 
@@ -42,13 +40,11 @@ class exports.MailsList extends Backbone.View
       @addNew mail
 
   addOne: (mail) ->
-    mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"))
-    box = new MailsListElement mail, mail.collection
+    box = new MailsListElement mail, window.app.mails
     $(@el).append box.render().el
       
   addNew: (mail) ->
-    mail.mailbox = window.app.mailboxes.get(mail.get("mailbox"))
-    box = new MailsListElement mail, mail.collection
+    box = new MailsListElement mail, window.app.mails
     $(@el).prepend box.render().el
 
   render: ->

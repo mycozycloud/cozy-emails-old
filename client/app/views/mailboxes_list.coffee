@@ -17,7 +17,6 @@ class exports.MailboxesList extends Backbone.View
 
   initialize: ->
     @collection.on('reset', @render, @)
-    @collection.fetch()
 
   # Add a mailbox at the bottom of the list
   addOne: (mail) ->

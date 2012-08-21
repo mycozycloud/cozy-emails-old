@@ -40,6 +40,9 @@ class exports.MailsListElement extends Backbone.View
       @visible = state
       @render()
     
+    if state
+      window.app.mails.mailsShown++
+    
   render: ->
     template = require('./templates/_mail/mail_list')
     $(@el).html template({"model" : @model, "active" : @active, "visible" : @visible})

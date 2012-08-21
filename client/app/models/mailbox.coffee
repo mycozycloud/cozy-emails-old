@@ -14,7 +14,7 @@ class exports.Mailbox extends BaseModel
   defaults:
     'checked' : true
     'config' : 0
-    'name' : "Mailbox"
+    'name' : "new mailbox"
     'login' : "login"
     'pass' : "pass"
     'SMTP_server' : "smtp.gmail.com"
@@ -23,6 +23,7 @@ class exports.Mailbox extends BaseModel
     'IMAP_server' : "imap.gmail.com"
     'IMAP_port' : 993
     'IMAP_secure' : true
+    'color' : "blue"
 
   initialize: ->
     @on "destroy", @removeView, @

@@ -29,8 +29,16 @@ class exports.MailsElement extends Backbone.View
       console.log "create new answer view"
       window.app.view_answer = new MailsAnswer @.$("#answer_form"), @collection.activeMail, window.app.mailtosend
       window.app.view_answer.render()
+  
+  scrollDown: ->
+    # console.log "scroll: " + $("#column_mail").outerHeight true
+    # scroll down
+    setTimeout () ->
+      $("#column_mail").animate({scrollTop: 2 * $("#column_mail").outerHeight true}, 750)
+    , 250
 
   bt_answer_all: ->
+    
     console.log "answer all"
     @create_answer_view()
     window.app.mailtosend.set 
@@ -40,6 +48,9 @@ class exports.MailsElement extends Backbone.View
     window.app.view_answer.setAdvanced false
     
     window.app.mailtosend.trigger "change_mode"
+    
+    # scroll down the view, to show the answer form
+    @scrollDown()
 
   bt_answer: ->
     console.log "answer"
@@ -51,7 +62,10 @@ class exports.MailsElement extends Backbone.View
     window.app.view_answer.setAdvanced false
     
     window.app.mailtosend.trigger "change_mode"
-
+    
+    # scroll down the view, to show the answer form
+    @scrollDown()
+    
   bt_forward: ->
     console.log "forward"
     @create_answer_view()
@@ -62,6 +76,9 @@ class exports.MailsElement extends Backbone.View
     window.app.view_answer.setAdvanced false
     
     window.app.mailtosend.trigger "change_mode"
+
+    # scroll down the view, to show the answer form
+    @scrollDown()
     
   bt_unread: ->
     console.log "unread"
@@ -89,6 +106,7 @@ class exports.MailsElement extends Backbone.View
       $(@el).html template("model" : @collection.activeMail)
       if @collection.activeMail.hasHtml()
         $("#mail_content_html").contents().find("body").html @collection.activeMail.html()
+        $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
         $("#mail_content_text").hide()
       else
         $("#mail_content_text").html @collection.activeMail.text_or_html()

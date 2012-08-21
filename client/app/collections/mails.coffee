@@ -17,7 +17,10 @@ class exports.MailsCollection extends Backbone.Collection
   
   mailsAtOnce: 100
   
-  visible_number: 0
+  mailsShown: 0
+  
+  zeroMailsShown: ->
+    @mailsShown = 0
   
   comparator: (a, b) ->
     if a.get("date") > b.get("date")
@@ -30,6 +33,8 @@ class exports.MailsCollection extends Backbone.Collection
   initialize: ->
     @on "change_active_mail", @navigateMail, @
     setInterval @fetchNew, 0.5 * 60 * 1000
+    
+    window.app.mailboxes.on "change_active_mailboxes", @zeroMailsShown, @
 
   navigateMail: (event) ->
     if @activeMail?
@@ -38,10 +43,10 @@ class exports.MailsCollection extends Backbone.Collection
       console.error "NavigateMail without active mail"
   
   # fetches older mails (the list of mails)
-  fetchOlder: () ->
+  fetchOlder: (callback) ->
     @url = "mailslist/" + @timestampOld + "." + @mailsAtOnce
     console.log "fetchOlder: " + @url
-    @fetch {add : true}
+    @fetch {add : true, success: callback}
 
   # fetches new mails from server
   fetchNew: () =>
