@@ -1,4 +1,6 @@
 #!/usr/bin/env coffee
+kue = require 'kue'
+jobs = kue.createQueue()
 
 app = module.exports = require('railway').createServer()
 
@@ -8,31 +10,14 @@ if not module.parent
     console.log "Railway server listening on port %d within %s environment", port, app.settings.env
     
     # setup KUE
-    @kue = require 'kue'
-    Job = @kue.Job
-    @kue.app.listen 3003
+    Job = kue.Job
+    kue.app.listen 3003
     
-    @jobs = @kue.createQueue()
     
-    # @jobs.on "job complete", (id) ->
-    #   Job.get id, (error, job) ->
-    #     return if error
-    #     createCheckJob job.data.mb, 1000 * 60 * 0.5, (error) ->
-    #       return if error
-    #       job.remove (err) ->
-    #         throw err if err
-    #         console.log job.data.title + " #" + job.id + " complete job removed"
-    #       
-    # @jobs.on "job error", (id) ->
-    #   Job.get id, (error, job) ->
-    #     return if error
-    #     createCheckJob job.data.mb, 1000 * 60 * 1, (error) ->
-    #       console.log error if error
-
 # BUILD JOBS
 
     createCheckJob = (mb, delay=0, callback) =>
-      job = @jobs.create("check mailbox",
+      job = jobs.create("check mailbox",
         mailbox: mb
         num: 250
         title: "Check of " + mb + " at " + new Date().toUTCString()
@@ -56,10 +41,10 @@ if not module.parent
     # set-up CRON
     createCheckJobs()
     
-    @jobs.promote()
+    jobs.promote()
 
     # KUE jobs
-    @jobs.process "check mailbox", 1, (job, done) ->
+    jobs.process "check mailbox", 1, (job, done) ->
       console.log job.data.title + " #" + job.id + " job started"
       (Mailbox job.data.mailbox).getNewMail job.data.num, done
 
