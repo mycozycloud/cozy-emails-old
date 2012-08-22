@@ -43,5 +43,7 @@ Mailbox = define 'Mailbox', ->
     property 'status'
     property 'color', default: "#0099FF"
     property 'activated', Boolean, default: false
+    property 'imported', Boolean, default: false
+    property 'importing', Boolean, default: false
     
 Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'});

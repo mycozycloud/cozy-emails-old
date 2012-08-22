@@ -7,7 +7,7 @@ if models
             span.add-on From:
             select.content(id="mailbox").input-xlarge
               for mailbox in models
-                option(value=#{mailbox.get("name")}) #{mailbox.get("name")}
+                option(value= mailbox.get("id")) #{mailbox.get("name")}
       .control-group#mail_to
         .controls
           .input-prepend
@@ -54,4 +54,4 @@ else
   .well
     p
       strong Hey !
-      | before You'll be able to send mail, configure a mailbox !
+      | before You'll be able to send mail, configure a mailbox!

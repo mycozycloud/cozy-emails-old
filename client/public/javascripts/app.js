@@ -1185,7 +1185,8 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
             return window.app.appView.message_box_view.renderMessageSentSuccess();
           },
           error: function() {
-            return console.error("error!");
+            console.log("error!");
+            return window.app.appView.message_box_view.renderMessageSentError();
           }
         });
         return console.log("sending mail: " + this.mailtosend);
@@ -1353,7 +1354,8 @@ window.require.define({"views/mails_compose": function(exports, require, module)
             return window.app.appView.message_box_view.renderMessageSentSuccess();
           },
           error: function() {
-            return console.error("error!");
+            console.log("error!");
+            return window.app.appView.message_box_view.renderMessageSentError();
           }
         });
         return console.log("sending mail: " + this.mailtosend);
@@ -1512,6 +1514,8 @@ window.require.define({"views/mails_element": function(exports, require, module)
           }));
           if (this.collection.activeMail.hasHtml()) {
             $("#mail_content_html").contents().find("body").html(this.collection.activeMail.html());
+            $("#mail_content_html").contents().find("head").append('<link rel="stylesheet" href="http://localhost:8001/css/reset_bootstrap.css">');
+            $("#mail_content_html").contents().find("head").append('<base target="_blank">');
             $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
             $("#mail_content_text").hide();
           } else {
@@ -1976,6 +1980,13 @@ window.require.define({"views/message_box": function(exports, require, module) {
         return this;
       };
 
+      MessageBox.prototype.renderMessageSentError = function() {
+        var template;
+        template = require('./templates/_message/message_error');
+        $(this.el).html(template());
+        return this;
+      };
+
       MessageBox.prototype.renderNewMailboxSuccess = function() {
         var template;
         template = require('./templates/_message/new_mailbox');
@@ -2148,7 +2159,7 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><textarea');
   buf.push(attrs({ 'id':("html"), 'rows':(15), 'cols':(80), "class": ('content') + ' ' + ('span10') + ' ' + ('input-xlarge') }));
-  buf.push('>' + ((interp = model.text_or_html()) == null ? '' : interp) + '</textarea><a');
+  buf.push('><blockquote>' + ((interp = model.text_or_html()) == null ? '' : interp) + '\n</blockquote></textarea><a');
   buf.push(attrs({ 'id':('send_button'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
   buf.push('>Send !</a></div></div></fieldset></form>');
   }
@@ -2257,6 +2268,8 @@ window.require.define({"views/templates/_mail/mail_compose": function(exports, r
   var buf = [];
   with (locals || {}) {
   var interp;
+  if ( models)
+  {
   buf.push('<form');
   buf.push(attrs({ "class": ('well') }));
   buf.push('><fieldset><div');
@@ -2372,6 +2385,13 @@ window.require.define({"views/templates/_mail/mail_compose": function(exports, r
   buf.push('></textarea><a');
   buf.push(attrs({ 'id':('send_button'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
   buf.push('>Send !</a></div></div></fieldset></form>');
+  }
+  else
+  {
+  buf.push('<div');
+  buf.push(attrs({ "class": ('well') }));
+  buf.push('><p><strong>Hey !</strong>before You\'ll be able to send mail, configure a mailbox!\n</p></div>');
+  }
   }
   return buf.join("");
   };
@@ -2741,6 +2761,22 @@ window.require.define({"views/templates/_mailbox/mailbox_new": function(exports,
   buf.push('><a');
   buf.push(attrs({ 'id':('add_mailbox'), "class": ('btn') }));
   buf.push('>Add a new mailbox</a></form>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_message/message_error": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div');
+  buf.push(attrs({ "class": ('alert') + ' ' + ('alert-error') }));
+  buf.push('><button');
+  buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
+  buf.push('>x</button><strong>Error !\n</strong><p>Your message could not be sent!\n</p><p>Please verify Your mailbox settings!\n</p></div>');
   }
   return buf.join("");
   };

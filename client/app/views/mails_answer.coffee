@@ -45,7 +45,10 @@ class exports.MailsAnswer extends Backbone.View
         # message box
         window.app.appView.message_box_view.renderMessageSentSuccess()
       error: ->
-        console.error "error!"
+        # success, let's render it
+        console.log "error!"
+        # message box
+        window.app.appView.message_box_view.renderMessageSentError()
     )
     
     console.log "sending mail: " + @mailtosend

@@ -79,7 +79,8 @@ Mailbox.prototype.getNewMail = (limit=250, callback, job, order)->
 ###
 Mailbox.prototype.getAllMail = (callback, job) ->
   
-  @mails.destroyAll (error) =>
+  @importing = true
+  @save (error) =>
     console.log "# Fetching all mail from " + @
     @getMail "INBOX", ['ALL'], callback, job, "desc"
 
@@ -118,7 +119,6 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
   server.on "error", (error) ->
     console.log "[SERVER ERROR]" + error.toString()
     mailbox.status = error.toString()
-    mailbox.activated = false
     mailbox.save (err) ->
       callback error
 
@@ -127,7 +127,6 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
     if error
       server.emit "error", error
     else
-      mailbox.save({'activated' : true})
       callback()
   
   # process.on 'uncaughtException', (err) ->
@@ -221,8 +220,6 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                         unless err
             
                           # console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
-                        
-                          
                           
                           # update last fetched element
                           if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
