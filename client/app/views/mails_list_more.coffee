@@ -16,6 +16,7 @@ class exports.MailsListMore extends Backbone.View
   initialize: ->
     @collection.on('reset', @render, @)
     @collection.on('add', @render, @)
+    window.app.mailboxes.on "change_active_mailboxes", @render, @
 
   events: {
      "click #add_more_mails" : 'loadOlderMails',

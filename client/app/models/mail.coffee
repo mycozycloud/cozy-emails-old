@@ -110,7 +110,10 @@ class exports.Mail extends BaseModel
   hasHtml: ->
     html = @get "html"
     html? and html != ""
-  
+    
+  hasAttachments: ->
+    @get "hasAttachments"
+
   text_or_html: ->
     if @get("html")
       @html()

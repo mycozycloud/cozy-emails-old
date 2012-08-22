@@ -40,12 +40,13 @@ if not module.parent
       console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
   
   createCheckJobs = =>
+    console.log "createCheckJobs"
     Mailbox.all {where: {activated: true}}, (err, mailboxes) ->
       for mailbox in mailboxes
         createCheckJob mailbox
   
   # set-up CRON
-  setInterval createCheckJobs, 1000 * 60 * 0.5
+  setInterval createCheckJobs, 1000 * 60 * 1
   createCheckJobs()
   
 ## IMPORT A NEW MAILBOX
@@ -60,20 +61,16 @@ if not module.parent
     
     job.on 'complete', () ->
       console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
-      mailbox.imported = true
-      mailbox.save (error) ->
+      mailbox.updateAttributes {imported: true}, (error) ->
         unless error
           console.log "Import successful !"
         else
           console.log "Import error...."
-    
+
     job.on 'failed', () ->
       console.log job.data.title + " #" + job.id + " failed at " + new Date().toUTCString()
       mailbox.mails.destroyAll () ->
-        mailbox.imported = false
-        mailbox.importing = false
-        mailbox.activated = false
-        mailbox.save (error) ->
+        mailbox.updateAttributes {imported: false, importing: false, activated: false}, (error) ->
           console.log "Import failed !"
     
     job.on 'progress', (progress) ->
@@ -82,11 +79,12 @@ if not module.parent
         lastProgress = progress
       
   createImportJobs = =>
-    Mailbox.all {where: {imported: false, importing: false, activated: false}}, (err, mailboxes) ->
+    console.log "createImportJobs"
+    Mailbox.all {where: {imported: false, importing: false}}, (err, mailboxes) ->
       for mailbox in mailboxes
         createImportJob mailbox
 
-  setInterval createImportJobs, 1000 * 60 * 0.5
+  setInterval createImportJobs, 1000 * 60 * 1
   createImportJobs()
         
         

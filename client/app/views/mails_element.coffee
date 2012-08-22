@@ -97,26 +97,35 @@ class exports.MailsElement extends Backbone.View
     @collection.activeMail.save()
 
   render: ->
+    
     if window.app.view_answer
       delete window.app.view_answer
       console.log "delete answer view"
+    
     $(@el).html ""
-    template = require('./templates/_mail/mail_big')
-    if @collection.activeMail?
+    
+    if @collection.activeMail
+      
+      template = require('./templates/_mail/mail_big')
+      
+      $(@el).hide()
+      
       $(@el).html template("model" : @collection.activeMail)
+      
       if @collection.activeMail.hasHtml()
-        # inject the html into the iframe
-        $("#mail_content_html").contents().find("body").html @collection.activeMail.html()
-        # add some basci styling and targeting to the internal document
-        $("#mail_content_html").contents().find("head").append '<link rel="stylesheet" href="http://localhost:8001/css/reset_bootstrap.css">'
-        $("#mail_content_html").contents().find("head").append '<base target="_blank">'
-        # adjust the height of the iframe
-        $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
-        # hide the text area
-        $("#mail_content_text").hide()
+        setTimeout () =>
+          $("#mail_content_html").contents().find("html").html @collection.activeMail.html()
+          # frames["mail_content_html"].document.documentElement.innerHTML = @collection.activeMail.html()
+          
+          # add some basic styling and targeting to the internal document
+          $("#mail_content_html").contents().find("head").append '<link rel="stylesheet" href="css/reset_bootstrap.css">'
+          $("#mail_content_html").contents().find("head").append '<base target="_blank">'
+        
+          # adjust the height of the iframe
+          $(@el).show()
+          $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
+          
+        , 1
       else
-        # inject the text into the text area
-        $("#mail_content_text").html @collection.activeMail.text_or_html()
-        # and hide the iframe
-        $("#mail_content_html").hide()
+        $(@el).show()
     @

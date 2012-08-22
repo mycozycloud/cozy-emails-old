@@ -1,12 +1,32 @@
 if visible
+  td(style='width: 5px; padding: 0; background-color: #{model.mailbox().get("color")};')
   if active
-    td(style='width: 5px; padding: 0; background-color: #{model.mailbox().get("color")};')
-    td(style='background-color: lightgray;')
+    td(style='background-color: lightgray; overflow: hidden;')
       p
         if model.is_unread()
           strong #{model.from_short()}
         else
           #{model.from_short()}
+        if model.hasAttachments()
+          i.icon-file
+        if model.is_flagged()
+          i.icon-star
+        br
+        i(style='color: black;') #{model.date()}
+        if model.is_unread()
+          p 
+            strong #{model.get("subject")}
+        else
+          p #{model.get("subject")}
+  else
+    td
+      p
+        if model.is_unread()
+          strong #{model.from_short()}
+        else
+          #{model.from_short()}
+        if model.hasAttachments()
+          i.icon-file
         if model.is_flagged()
           i.icon-star
         br
@@ -16,24 +36,3 @@ if visible
             strong #{model.get("subject")}
         else
           p #{model.get("subject")}
-    td(style='background-color: lightgray;')
-  else
-    td(style='width: 5px; padding: 0; background-color: #{model.mailbox().get("color")};')
-    td
-      p
-        if model.is_unread()
-          strong #{model.from_short()}
-        else
-          #{model.from_short()}
-        if model.is_flagged()
-          i.icon-star
-        br
-        i(style='color: lightgray;') #{model.date()}
-      if model.is_unread()
-        p 
-          strong #{model.get("subject")}
-      else
-        p #{model.get("subject")}
-    td
-      a.btn.btn-mini.choose_mail_button
-        i.icon-arrow-right

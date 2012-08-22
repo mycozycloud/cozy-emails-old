@@ -14,7 +14,7 @@ class exports.Mailbox extends BaseModel
   defaults:
     'checked' : true
     'config' : 0
-    'name' : "new mailbox"
+    'name' : "box"
     'login' : "login"
     'pass' : "pass"
     'SMTP_server' : "smtp.gmail.com"
@@ -23,17 +23,13 @@ class exports.Mailbox extends BaseModel
     'IMAP_server' : "imap.gmail.com"
     'IMAP_port' : 993
     'IMAP_secure' : true
-    'color' : "blue"
+    'color' : "orange"
 
   initialize: ->
     @on "destroy", @removeView, @
-    @on "change",  @redrawView, @
 
   removeView: ->
     @view.remove() if @view?
-
-  redrawView: ->
-    @view.render() if @view?
     
   IMAP_last_fetched_date: ->
     parsed = new Date @get("IMAP_last_fetched_date")

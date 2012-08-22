@@ -14,7 +14,6 @@ class exports.MailboxCollection extends Backbone.Collection
   
   initialize: ->
     @on "add", @addView, @
-    @on "change", @updateActiveMailboxes, @
 
   comparator: (mailbox) ->
     mailbox.get("name")

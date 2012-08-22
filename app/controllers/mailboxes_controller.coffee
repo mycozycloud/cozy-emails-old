@@ -5,7 +5,7 @@ before ->
     else
       @box = box
       next()
-, { only: ['índex', 'show', 'update', 'destroy', 'sendmail'] }
+, { only: ['show', 'update', 'destroy', 'sendmail'] }
 
 # GET /mailboxes
 action 'index', ->
@@ -16,7 +16,7 @@ action 'index', ->
 action 'create', ->
   Mailbox.create req.body, (error) =>
     if !error
-      send 200
+      send {success: true}
     else
       send 500
 
@@ -50,17 +50,18 @@ action 'update', ->
     
   @box.updateAttributes data, (error) =>
     if !error
-      send 200
+      send {success: true}
     else
       send 500
 
 # DELETE /mailboxes/:id
 action 'destroy', ->
-  @box.destroy (error) =>
-    if !error
-      send 200
-    else
-      send 500
+  @box.mails.destroyAll (error) =>
+    @box.destroy (error) ->
+      if !error
+        send 200
+      else
+        send 500
       
 
 # post /sendmail

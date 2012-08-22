@@ -8,8 +8,8 @@
 
 ###
 class exports.MailboxesListElement extends Backbone.View
+  
   className: "mailbox_well well"
-  tagName: "div"
   isEdit: false
   
   events:
@@ -17,10 +17,16 @@ class exports.MailboxesListElement extends Backbone.View
     "click .cancel_edit_mailbox" : "buttonCancel"
     "click .save_mailbox" : "buttonSave"
     "click .delete_mailbox" : "buttonDelete"
+    "input input#name" : "updateName"
 
   constructor: (@model, @collection) ->
     super()
     @model.view = @
+    
+  # updates the name of the mailbox
+  updateName: (event) ->
+    @model.set "name", $(event.target).val()
+    $(event.target).focus()
 
   # enter edit mode
   buttonEdit: (event) ->
@@ -29,6 +35,8 @@ class exports.MailboxesListElement extends Backbone.View
     
   # quit edit mode, no changes saved
   buttonCancel: (event) ->
+    if @model.isNew()
+      @model.destroy()
     @model.isEdit = false
     @render()
     
@@ -38,12 +46,13 @@ class exports.MailboxesListElement extends Backbone.View
     input = @.$(".content")
     data = {}
     input.each (i) ->
-      data[input[i].id] = input[i].value;
-    @model.save data
-    @collection.trigger("update_menu")
+      data[input[i].id] = input[i].value
     @model.isEdit = false
-    window.app.appView.message_box_view.renderNewMailboxSuccess()
-    @render()
+    @model.save data, {
+      success: () =>
+        window.app.appView.message_box_view.renderNewMailboxSuccess()
+        @render()
+    }
     
   # delete the mailbox
   buttonDelete: (event) =>

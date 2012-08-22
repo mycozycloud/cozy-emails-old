@@ -16,12 +16,18 @@ Mail = define 'Mail', ->
     property 'flags',
     property 'read', Boolean, default: false
     property 'flagged', Boolean, default: false
+    property 'hasAttachments', Boolean, default: false
     
-Attachement = define 'Attachements', ->
-    property 'mail_id', Number
-    property 'content_raw', Text
+Attachment = define 'Attachment', ->
+    property 'mailId', index: true
+    property 'cid', Number
+    property 'fileName',
+    property 'contentType',
+    property 'length', Number
+    property 'checksum'
+    property 'content64', Text
     
-Mail.hasMany(Attachement, {as: 'attachements',  foreignKey: 'mail_id'});
+Mail.hasMany(Attachment, {as: 'attachments',  foreignKey: 'mailId'});
     
 Mailbox = define 'Mailbox', ->
     property 'new_messages', default: 0
@@ -38,7 +44,7 @@ Mailbox = define 'Mailbox', ->
     property 'IMAP_port'
     property 'IMAP_secure', Boolean, default: true
     property 'IMAP_last_sync', Date, default: 0
-    property 'IMAP_last_fetched_id', Number, default: 1
+    property 'IMAP_last_fetched_id', Number, default: 0
     property 'IMAP_last_fetched_date', Date, default: 0
     property 'status'
     property 'color', default: "#0099FF"

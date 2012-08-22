@@ -84,7 +84,6 @@ class exports.AppView extends Backbone.View
     # ensure the right size
     @resize()
 
-
   # put on the layout to display mailboxes:
   set_layout_compose_mail: ->
 
