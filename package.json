@@ -1,11 +1,11 @@
 { "name": "cozy-template"
 , "version": "0.0.1"
 , "engines": ["node >= 0.6.0"]
-, "description": "A template project for cozy applications"
+, "description": "Cozy mails"
 , "repository":
   {
     "type": "git"
-  , "url": "https://github.com/mycozycloud/cozy-template.git"
+  , "url": "https://github.com/mycozycloud/cozy-mails.git"
   }
 , "main": "server.coffee"
 , "dependencies":
@@ -23,6 +23,11 @@
   , "passport":         ">= 0"
   , "async":            ">= 0"
   , "request":          ">= 0"
+  , "nodemailer":       ">= 0"
+  , "imap":             ">= 0"
+  , "mailparser":       ">= 0"
+  , "kue":              ">= 0"
+  , "cluster":          ">= 0"
   }
 , "devDependencies": 
   { "should":           ">= 0"

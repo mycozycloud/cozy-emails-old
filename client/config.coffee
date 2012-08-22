@@ -23,15 +23,24 @@ exports.config =
           'vendor/scripts/console-helper.js',
           'vendor/scripts/jquery-1.7.1.js',
           'vendor/scripts/underscore-1.3.1.js',
-          'vendor/scripts/backbone-0.9.1.js'
+          'vendor/scripts/backbone-0.9.1.js',
+          'vendor/scripts/bootstrap.js',
+          'vendor/scripts/wysihtml5-0.3.0.min.js',
+          'vendor/scripts/wysihtml5-rules-advanced.js'
         ]
 
     stylesheets:
       defaultExtension: 'styl'
       joinTo: 'stylesheets/app.css'
       order:
-        before: ['vendor/styles/normalize.css']
-        after: ['vendor/styles/helpers.css']
+        before: [
+          'vendor/styles/normalize.css',
+          'vendor/styles/bootstrap.css',
+          'vendor/styles/wysihtml5.css',
+          ]
+        after: [
+	        'vendor/styles/helpers.css',
+	        ]
 
     templates:
       defaultExtension: 'jade'
