@@ -1,7 +1,7 @@
 {Mail} = require "../models/mail"
 {MailsAnswer} = require "../views/mails_answer"
 {MailNew} = require "../models/mail_new"
-
+{MailsAttachmentsList} = require "../views/mails_attachments_list"
 ###
 
   The mail view. Displays all data & options
@@ -104,7 +104,7 @@ class exports.MailsElement extends Backbone.View
     
     $(@el).html ""
     
-    if @collection.activeMail
+    if @collection.activeMail?
       
       template = require('./templates/_mail/mail_big')
       
@@ -126,6 +126,8 @@ class exports.MailsElement extends Backbone.View
           $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
           
         , 1
+        
+        window.app.view_attachments = new MailsAttachmentsList $("#attachments_list"), @collection.activeMail
       else
         $(@el).show()
     @

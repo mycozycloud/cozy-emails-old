@@ -2,6 +2,7 @@
 {MainRouter} = require 'routers/main_router'
 {MailboxCollection} = require 'collections/mailboxes'
 {MailsCollection} = require 'collections/mails'
+{AttachmentsCollection} = require "collections/attachments"
 {AppView} = require 'views/app'
 {MailNew} = require 'models/mail_new'
 
@@ -16,5 +17,6 @@ class exports.Application extends BrunchApplication
     @router = new MainRouter
     @appView = new AppView
     @mailtosend = new MailNew
+    @attachments = new AttachmentsCollection
 
 window.app = new exports.Application

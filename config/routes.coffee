@@ -8,3 +8,6 @@ exports.routes = (map) ->
     
     map.put '/sendmail/:id', 'mailboxes#sendmail'
     map.post '/sendmail/:id', 'mailboxes#sendmail'
+
+    map.get '/getattachments/:mail', 'mails#getattachmentslist'
+    map.get '/getattachment/:attachment', 'mails#getattachment'

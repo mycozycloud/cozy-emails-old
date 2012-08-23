@@ -58,3 +58,30 @@ action 'getnewlist', ->
       send mails
     else
       send 500
+
+# GET '/getattachments/:mail
+action 'getattachmentslist', ->
+  Mail.find req.params.mail, (err, box) =>
+    if err or !box
+      send 403
+    else
+      box.attachments (error, attachments) =>
+        if error
+          send 403
+        else
+          send attachments
+          
+# GET '/getattachment/:attachment'
+action 'getattachment', ->
+  Attachment.find req.params.attachment, (err, box) =>
+    if err or !box
+      send 403
+    else
+      header "Content-Type", "application/force-download"
+      header "Content-Disposition", 'attachment; filename="' + box.fileName + '"'
+      header "Content-Length", box.length
+      console.log box.contentType
+      console.log box.length
+      buf = new Buffer box.content64
+      res.write buf, "binary"
+      res.end()

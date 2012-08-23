@@ -74,6 +74,43 @@
   globals.require.brunch = true;
 })();
 
+window.require.define({"collections/attachments": function(exports, require, module) {
+  (function() {
+    var Attachment,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Attachment = require("../models/attachment").Attachment;
+
+    /*
+    */
+
+    exports.AttachmentsCollection = (function(_super) {
+
+      __extends(AttachmentsCollection, _super);
+
+      function AttachmentsCollection() {
+        AttachmentsCollection.__super__.constructor.apply(this, arguments);
+      }
+
+      AttachmentsCollection.prototype.model = Attachment;
+
+      AttachmentsCollection.prototype.url = 'getattachments';
+
+      AttachmentsCollection.prototype.setModel = function(areAttachmentsOf) {
+        this.areAttachmentsOf = areAttachmentsOf;
+        this.url = 'getattachments/' + this.areAttachmentsOf.get("id");
+        return this.fetch();
+      };
+
+      return AttachmentsCollection;
+
+    })(Backbone.Collection);
+
+  }).call(this);
+  
+}});
+
 window.require.define({"collections/mailboxes": function(exports, require, module) {
   (function() {
     var Mailbox,
@@ -250,7 +287,7 @@ window.require.define({"helpers": function(exports, require, module) {
 
 window.require.define({"initialize": function(exports, require, module) {
   (function() {
-    var AppView, BrunchApplication, MailNew, MailboxCollection, MailsCollection, MainRouter,
+    var AppView, AttachmentsCollection, BrunchApplication, MailNew, MailboxCollection, MailsCollection, MainRouter,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -261,6 +298,8 @@ window.require.define({"initialize": function(exports, require, module) {
     MailboxCollection = require('collections/mailboxes').MailboxCollection;
 
     MailsCollection = require('collections/mails').MailsCollection;
+
+    AttachmentsCollection = require("collections/attachments").AttachmentsCollection;
 
     AppView = require('views/app').AppView;
 
@@ -279,7 +318,8 @@ window.require.define({"initialize": function(exports, require, module) {
         this.mails = new MailsCollection;
         this.router = new MainRouter;
         this.appView = new AppView;
-        return this.mailtosend = new MailNew;
+        this.mailtosend = new MailNew;
+        return this.attachments = new AttachmentsCollection;
       };
 
       return Application;
@@ -287,6 +327,35 @@ window.require.define({"initialize": function(exports, require, module) {
     })(BrunchApplication);
 
     window.app = new exports.Application;
+
+  }).call(this);
+  
+}});
+
+window.require.define({"models/attachment": function(exports, require, module) {
+  (function() {
+    var BaseModel,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    BaseModel = require("./models").BaseModel;
+
+    /*
+    
+      Model which defines the attachment
+    */
+
+    exports.Attachment = (function(_super) {
+
+      __extends(Attachment, _super);
+
+      function Attachment() {
+        Attachment.__super__.constructor.apply(this, arguments);
+      }
+
+      return Attachment;
+
+    })(BaseModel);
 
   }).call(this);
   
@@ -1262,6 +1331,100 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
   
 }});
 
+window.require.define({"views/mails_attachments_list": function(exports, require, module) {
+  (function() {
+    var Attachment, AttachmentsCollection, MailsAttachmentsListElement,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    Attachment = require("../models/attachment").Attachment;
+
+    AttachmentsCollection = require("../collections/attachments").AttachmentsCollection;
+
+    MailsAttachmentsListElement = require("./mails_attachments_list_element").MailsAttachmentsListElement;
+
+    /*
+    */
+
+    exports.MailsAttachmentsList = (function(_super) {
+
+      __extends(MailsAttachmentsList, _super);
+
+      function MailsAttachmentsList(el, model) {
+        this.el = el;
+        this.model = model;
+        MailsAttachmentsList.__super__.constructor.call(this);
+      }
+
+      MailsAttachmentsList.prototype.initialize = function() {
+        window.app.attachments.on('reset', this.render, this);
+        window.app.attachments.on('add', this.addOne, this);
+        return window.app.attachments.setModel(this.model);
+      };
+
+      MailsAttachmentsList.prototype.addOne = function(attachment) {
+        var box;
+        box = new MailsAttachmentsListElement(attachment, this.collection);
+        return $(this.el).append(box.render().el);
+      };
+
+      MailsAttachmentsList.prototype.render = function() {
+        var _this = this;
+        $(this.el).html("");
+        window.app.attachments.each(function(attachment) {
+          return _this.addOne(attachment);
+        });
+        return this;
+      };
+
+      return MailsAttachmentsList;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/mails_attachments_list_element": function(exports, require, module) {
+  
+  /*
+
+    The element on the list of mails. Reacts for events, and stuff.
+  */
+
+  (function() {
+    var __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    exports.MailsAttachmentsListElement = (function(_super) {
+
+      __extends(MailsAttachmentsListElement, _super);
+
+      MailsAttachmentsListElement.prototype.tagName = "p";
+
+      function MailsAttachmentsListElement(attachment) {
+        this.attachment = attachment;
+        MailsAttachmentsListElement.__super__.constructor.call(this);
+        this.attachment.view = this;
+      }
+
+      MailsAttachmentsListElement.prototype.render = function() {
+        var template;
+        template = require('./templates/_attachment/attachment_element');
+        $(this.el).html(template({
+          "attachment": this.attachment
+        }));
+        return this;
+      };
+
+      return MailsAttachmentsListElement;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
 window.require.define({"views/mails_column": function(exports, require, module) {
   (function() {
     var Mail, MailsList, MailsListMore,
@@ -1394,7 +1557,7 @@ window.require.define({"views/mails_compose": function(exports, require, module)
 
 window.require.define({"views/mails_element": function(exports, require, module) {
   (function() {
-    var Mail, MailNew, MailsAnswer,
+    var Mail, MailNew, MailsAnswer, MailsAttachmentsList,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -1403,6 +1566,8 @@ window.require.define({"views/mails_element": function(exports, require, module)
     MailsAnswer = require("../views/mails_answer").MailsAnswer;
 
     MailNew = require("../models/mail_new").MailNew;
+
+    MailsAttachmentsList = require("../views/mails_attachments_list").MailsAttachmentsList;
 
     /*
     
@@ -1514,7 +1679,7 @@ window.require.define({"views/mails_element": function(exports, require, module)
           console.log("delete answer view");
         }
         $(this.el).html("");
-        if (this.collection.activeMail) {
+        if (this.collection.activeMail != null) {
           template = require('./templates/_mail/mail_big');
           $(this.el).hide();
           $(this.el).html(template({
@@ -1528,6 +1693,7 @@ window.require.define({"views/mails_element": function(exports, require, module)
               $(_this.el).show();
               return $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
             }, 1);
+            window.app.view_attachments = new MailsAttachmentsList($("#attachments_list"), this.collection.activeMail);
           } else {
             $(this.el).show();
           }
@@ -2012,6 +2178,22 @@ window.require.define({"views/message_box": function(exports, require, module) {
   
 }});
 
+window.require.define({"views/templates/_attachment/attachment_element": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<i');
+  buf.push(attrs({ "class": ('icon-file') }));
+  buf.push('></i><a');
+  buf.push(attrs({ 'href':("getattachment/" + attachment.get("id")), 'target':("_blank") }));
+  buf.push('>' + escape((interp = attachment.get("fileName")) == null ? '' : interp) + '</a>');
+  }
+  return buf.join("");
+  };
+}});
+
 window.require.define({"views/templates/_layouts/layout_compose_mail": function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
@@ -2241,7 +2423,14 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   buf.push(attrs({ 'id':('mail_content_text') }));
   buf.push('>' + escape((interp = model.text()) == null ? '' : interp) + '\n</div>');
   }
-  buf.push('</div><div');
+  buf.push('</div>');
+  if ( model.hasAttachments())
+  {
+  buf.push('<div');
+  buf.push(attrs({ 'id':('attachments_list'), "class": ('well') }));
+  buf.push('></div>');
+  }
+  buf.push('<div');
   buf.push(attrs({ "class": ('btn-toolbar') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('btn-group') }));

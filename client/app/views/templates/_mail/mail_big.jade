@@ -41,6 +41,8 @@
   else
     #mail_content_text
       #{model.text()}
+if model.hasAttachments()
+  #attachments_list.well
 
 .btn-toolbar
   .btn-group
