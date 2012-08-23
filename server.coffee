@@ -11,7 +11,6 @@ if not module.parent
     
     # setup KUE
     Job = kue.Job
-    kue.app.listen 3003
     
     
 # BUILD JOBS
