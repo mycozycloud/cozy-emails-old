@@ -22,7 +22,7 @@ class exports.MainRouter extends Backbone.Router
 ################################################################
 ############## INDEX 
   home : ->
-    app.appView.set_layout_mails()
+    app.appView.setLayoutMails()
     $(".menu_option").removeClass("active")
     $("#inboxbutton").addClass("active")
 
@@ -30,7 +30,7 @@ class exports.MainRouter extends Backbone.Router
 ################################################################
 ############## NEW MAIL 
   new : ->
-    app.appView.set_layout_compose_mail()
+    app.appView.setLayoutComposeMail()
     $(".menu_option").removeClass("active")
     $("#newmailbutton").addClass("active")
 
@@ -39,14 +39,14 @@ class exports.MainRouter extends Backbone.Router
 ############## CONFIG
 
   configMailboxes : ->
-    app.appView.set_layout_mailboxes()
+    app.appView.setLayoutMailboxes()
     $(".menu_option").removeClass("active")
     $("#mailboxesbutton").addClass("active")
     
 ################################################################
 ############## INDEX
   mail : (path) ->
-    app.appView.set_layout_mails()
+    app.appView.setLayoutMails()
     
     # if the mail is already downloaded, show it
     if app.mails.get(path)?

@@ -28,7 +28,7 @@ class exports.MailsListElement extends Backbone.View
     @collection.activeMail.view.active = true
     @render()
     # set read and save to server
-    @collection.activeMail.set_read()
+    @collection.activeMail.setRead()
     @collection.activeMail.url = "mails/" + @collection.activeMail.get("id")
     @collection.activeMail.save({"read" : true})
     # trigger global event

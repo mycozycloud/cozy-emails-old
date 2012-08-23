@@ -33,7 +33,7 @@ class exports.Mail extends BaseModel
         out += obj.name + " <" + obj.address + ">, "
     out
     
-  from_short: ->
+  fromShort: ->
     out = ""
     if @get "from"
       parsed = JSON.parse @get "from"
@@ -52,7 +52,7 @@ class exports.Mail extends BaseModel
         out += obj.name + " <" + obj.address + ">, "
     out
 
-  cc_short: ->
+  ccShort: ->
     out = ""
     if @get "cc"
       parsed = JSON.parse @get "cc"
@@ -60,7 +60,7 @@ class exports.Mail extends BaseModel
         out += obj.name + " "
     out
     
-  from_and_cc: ->
+  fromAndCc: ->
     out = ""
     if @get "from"
       parsed = JSON.parse @get "from"
@@ -76,7 +76,7 @@ class exports.Mail extends BaseModel
     parsed = new Date @get("date")
     parsed.toUTCString()
     
-  subject_response: (mode="answer") ->
+  subjectResponse: (mode="answer") ->
     subject = @get "subject"
     switch mode
       when "answer" then "RE: " + subject.replace(/RE:?/, "")
@@ -84,13 +84,12 @@ class exports.Mail extends BaseModel
       when "forward" then "FWD: " + subject.replace(/FWD:?/, "")
       else subject
 
-  cc_response: (mode="answer") ->
+  ccResponse: (mode="answer") ->
     switch mode
       when "answer_all" then @cc()
       else ""
 
-
-  to_response: (mode="answer") ->
+  toResponse: (mode="answer") ->
     switch mode
       when "answer" then @from()
       when "answer_all" then @from()
@@ -114,17 +113,17 @@ class exports.Mail extends BaseModel
   hasAttachments: ->
     @get "hasAttachments"
 
-  text_or_html: ->
+  htmlOrText: ->
     if @get("html")
       @html()
     else
       @text()
   
-  is_unread: ->
+  isUnread: ->
     # not("\\Seen" in JSON.parse @get("flags"))
     not @get("read")
     
-  set_read: (read=true) ->
+  setRead: (read=true) ->
     flags = JSON.parse @get("flags")
     if read
       # set as read
@@ -139,10 +138,10 @@ class exports.Mail extends BaseModel
     else
       # set as unread
       # flags
-      flags_prev = flags.length
+      flagsPrev = flags.length
       flags = $.grep flags, (val) ->
         val != "\\Seen"
-      unless flags_prev == flags.length
+      unless flagsPrev == flags.length
         # increment the number of unread messages in the mailbox
         box = window.app.mailboxes.get @get("mailbox")
         box?.set "new_messages", ((parseInt box?.get "new_messages") + 1)
@@ -150,17 +149,16 @@ class exports.Mail extends BaseModel
       @set({"read" : false})
     @set({"flags" : JSON.stringify flags})
     
-  is_flagged: ->
+  isFlagged: ->
     @get "flagged"
 
-  set_flagged: (flagged=true) ->
+  setFlagged: (flagged=true) ->
     flags = JSON.parse @get("flags")
     
     if flagged
       unless "\\Flagged" in flags
         flags.push("\\Flagged")
     else
-      flags_prev = flags.length
       flags = $.grep flags, (val) ->
         val != "\\Flagged"
         

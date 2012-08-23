@@ -83,5 +83,5 @@ action 'getattachment', ->
       console.log box.contentType
       console.log box.length
       buf = new Buffer box.content64
-      res.write buf, "binary"
+      res.write buf.toString("binary"), "binary"
       res.end()

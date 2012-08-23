@@ -14,9 +14,9 @@ class exports.Application extends BrunchApplication
   initialize: ->
     @mailboxes = new MailboxCollection
     @mails = new MailsCollection
+    @attachments = new AttachmentsCollection
     @router = new MainRouter
     @appView = new AppView
     @mailtosend = new MailNew
-    @attachments = new AttachmentsCollection
 
 window.app = new exports.Application

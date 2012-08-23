@@ -3,17 +3,17 @@ if visible
   if active
     td(style='background-color: lightgray; overflow: hidden;')
       p
-        if model.is_unread()
-          strong #{model.from_short()}
+        if model.isUnread()
+          strong #{model.fromShort()}
         else
-          #{model.from_short()}
+          #{model.fromShort()}
         if model.hasAttachments()
           i.icon-file
-        if model.is_flagged()
+        if model.isFlagged()
           i.icon-star
         br
         i(style='color: black;') #{model.date()}
-        if model.is_unread()
+        if model.isUnread()
           p 
             strong #{model.get("subject")}
         else
@@ -21,17 +21,17 @@ if visible
   else
     td
       p
-        if model.is_unread()
-          strong #{model.from_short()}
+        if model.isUnread()
+          strong #{model.fromShort()}
         else
-          #{model.from_short()}
+          #{model.fromShort()}
         if model.hasAttachments()
           i.icon-file
-        if model.is_flagged()
+        if model.isFlagged()
           i.icon-star
         br
         i(style='color: gray;') #{model.date()}
-        if model.is_unread()
+        if model.isUnread()
           p 
             strong #{model.get("subject")}
         else

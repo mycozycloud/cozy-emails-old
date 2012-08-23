@@ -244,7 +244,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                             # update last fetched element
                             if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
                               updates.IMAP_last_fetched_id = mail.id_remote_mailbox
-                              updates.IMAP_last_fetched_date = new Date().toJSON()
+                              updates.IMAPLastFetchedDate = new Date().toJSON()
                         
                             mailbox.updateAttributes updates, (error) ->
                               unless error

@@ -31,6 +31,6 @@ class exports.Mailbox extends BaseModel
   removeView: ->
     @view.remove() if @view?
     
-  IMAP_last_fetched_date: ->
+  IMAPLastFetchedDate: ->
     parsed = new Date @get("IMAP_last_fetched_date")
     parsed.toUTCString()

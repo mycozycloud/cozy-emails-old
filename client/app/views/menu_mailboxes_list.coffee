@@ -11,7 +11,7 @@ class exports.MenuMailboxesList extends Backbone.View
   
   constructor: (@el, @collection) ->
     super() 
-    @collection.view_menu_mailboxes = @
+    @collection.viewMenu_mailboxes = @
     @collection.on('reset', @render, @)
     @collection.on('add', @render, @)
     @collection.on('remove', @render, @)

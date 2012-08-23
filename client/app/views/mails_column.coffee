@@ -17,8 +17,8 @@ class exports.MailsColumn extends Backbone.View
 
   render: ->
     $(@el).html require('./templates/_mail/mails')
-    @view_mails_list = new MailsList @.$("#mails_list_container"), @collection
-    @view_mails_list_more = new MailsListMore @.$("#button_load_more_mails"), @collection
-    @view_mails_list.render()
-    @view_mails_list_more.render()
+    @viewMailsList = new MailsList @.$("#mails_list_container"), @collection
+    @viewMailsListMore = new MailsListMore @.$("#button_load_more_mails"), @collection
+    @viewMailsList.render()
+    @viewMailsListMore.render()
     @

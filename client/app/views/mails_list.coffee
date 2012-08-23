@@ -1,5 +1,4 @@
 {Mail} = require "../models/mail"
-
 {MailsListElement} = require "./mails_list_element"
 
 ###

@@ -50,7 +50,7 @@ class exports.MailboxesListElement extends Backbone.View
     @model.isEdit = false
     @model.save data, {
       success: () =>
-        window.app.appView.message_box_view.renderNewMailboxSuccess()
+        window.app.appView.viewMessageBox.renderNewMailboxSuccess()
         @render()
     }
     

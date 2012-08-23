@@ -20,10 +20,10 @@ class exports.AppView extends Backbone.View
     
     # put on the big layout
     $(@el).html require('./templates/app')
-    @container_menu = @.$("#menu_container")
-    @container_content = @.$("#content")
-    @message_box_view = new MessageBox @.$("#message_box"), window.app.mailboxes, window.app.mails
-    @set_layout_menu()
+    @containerMenu = @.$("#menu_container")
+    @containerContent = @.$("#content")
+    @viewMessageBox = new MessageBox @.$("#message_box"), window.app.mailboxes, window.app.mails
+    @setLayoutMenu()
     
   resize: ->
     viewport = ->
@@ -43,11 +43,11 @@ class exports.AppView extends Backbone.View
 ###################################################
         
   # layout the dynamic menu
-  set_layout_menu: ->
+  setLayoutMenu: ->
     
     # set ut the menu view
-    @container_menu.html require('./templates/menu')
-    window.app.view_menu = new MenuMailboxesList @.$("#menu_mailboxes"), window.app.mailboxes
+    @containerMenu.html require('./templates/menu')
+    window.app.viewMenu = new MenuMailboxesList @.$("#menu_mailboxes"), window.app.mailboxes
     
     # fetch necessary data
     window.app.mailboxes.fetch({
@@ -55,7 +55,7 @@ class exports.AppView extends Backbone.View
         window.app.mailboxes.updateActiveMailboxes()
         window.app.mailboxes.trigger("change_active_mailboxes")
         console.log "Initial menu mailboxes load OK"
-        window.app.view_menu.render()
+        window.app.viewMenu.render()
       })
 
 ###################################################
@@ -63,16 +63,16 @@ class exports.AppView extends Backbone.View
 ###################################################
 
   # put on the layout to display mailboxes:
-  set_layout_mailboxes: ->
+  setLayoutMailboxes: ->
     
     # ensure the right size
-    @set_layout_menu()
+    @setLayoutMenu()
     
     # lay the mailboxes out
-    @container_content.html require('./templates/_layouts/layout_mailboxes')
-    window.app.view_mailboxes = new MailboxesList @.$("#mail_list_container"), window.app.mailboxes
-    window.app.view_mailboxes_new = new MailboxesListNew @.$("#add_mail_button_container"), window.app.mailboxes
-    window.app.view_mailboxes_new.render()
+    @containerContent.html require('./templates/_layouts/layout_mailboxes')
+    window.app.viewMailboxes = new MailboxesList @.$("#mail_list_container"), window.app.mailboxes
+    window.app.viewMailboxesNew = new MailboxesListNew @.$("#add_mail_button_container"), window.app.mailboxes
+    window.app.viewMailboxesNew.render()
     
     # fetch necessary data
     window.app.mailboxes.fetch({
@@ -85,38 +85,38 @@ class exports.AppView extends Backbone.View
     @resize()
 
   # put on the layout to display mailboxes:
-  set_layout_compose_mail: ->
+  setLayoutComposeMail: ->
 
     # ensure the right size
-    @set_layout_menu()
+    @setLayoutMenu()
 
     # lay the mailboxes out
-    @container_content.html require('./templates/_layouts/layout_compose_mail')
-    window.app.view_compose_mail = new MailsCompose @.$("#compose_mail_container"), window.app.mailboxes
+    @containerContent.html require('./templates/_layouts/layout_compose_mail')
+    window.app.viewComposeMail = new MailsCompose @.$("#compose_mail_container"), window.app.mailboxes
 
     # fetch necessary data
     window.app.mailboxes.fetch({
       success: ->
         window.app.mailboxes.updateActiveMailboxes()
         console.log "Initial compose view mailboxes load OK"
-        window.app.view_compose_mail.render()
+        window.app.viewComposeMail.render()
       })
 
     # ensure the right size
     @resize()
 
   # put on the layout to display mails:
-  set_layout_mails: ->
+  setLayoutMails: ->
     
     # set menu
-    @set_layout_menu()
+    @setLayoutMenu()
     
     # lay the mails out
-    @container_content.html require('./templates/_layouts/layout_mails')
+    @containerContent.html require('./templates/_layouts/layout_mails')
     
     # create views for the columns
-    window.app.view_mails_list = new MailsColumn @.$("#column_mails_list"), window.app.mails
-    window.app.view_mails_list.render()
+    window.app.viewMailsList = new MailsColumn @.$("#column_mails_list"), window.app.mails
+    window.app.viewMailsList.render()
     window.app.view_mail = new MailsElement @.$("#column_mail"), window.app.mails
     
     # fetch necessary data
