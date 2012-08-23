@@ -1,6 +1,6 @@
 { "name": "cozy-template"
 , "version": "0.0.1"
-, "engine": { "node = 0.6.x" }
+, "engine": { "node": "0.6.x" }
 , "description": "Cozy mails"
 , "repository":
   {
