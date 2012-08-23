@@ -28,6 +28,7 @@
   , "mailparser":       ">= 0"
   , "kue":              ">= 0"
   , "cluster":          ">= 0"
+  , "iconv":          ">= 0"
   }
 , "devDependencies": 
   { "should":           ">= 0"
