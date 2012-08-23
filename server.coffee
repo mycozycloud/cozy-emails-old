@@ -38,12 +38,12 @@ if not module.parent
           
           
     # set-up CRON
-    createCheckJobs()
+    #createCheckJobs()
     
-    jobs.promote()
+    #jobs.promote()
 
-    # KUE jobs
-    jobs.process "check mailbox", 1, (job, done) ->
-      console.log job.data.title + " #" + job.id + " job started"
-      (Mailbox job.data.mailbox).getNewMail job.data.num, done
+    ## KUE jobs
+    #jobs.process "check mailbox", 1, (job, done) ->
+      #console.log job.data.title + " #" + job.id + " job started"
+      #(Mailbox job.data.mailbox).getNewMail job.data.num, done
 
