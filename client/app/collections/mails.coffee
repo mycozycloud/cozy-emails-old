@@ -32,7 +32,7 @@ class exports.MailsCollection extends Backbone.Collection
   
   # comparator to sort the collection with the date
   comparator: (mail) ->
-    mail.get("dateValueOf")
+    - mail.get("dateValueOf")
   
   initialize: ->
     @on "change_active_mail", @navigateMail, @

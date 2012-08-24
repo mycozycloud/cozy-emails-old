@@ -235,18 +235,18 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                           unless err
                           
                             # attachements
-                            if mailParsedObject.attachments?
-                              for attachment in mailParsedObject.attachments
-                                console.log "Attachment: " + attachment.fileName
-                                
-                                mail.attachments.create {
-                                  cid:       attachment.contentId
-                                  fileName:  attachment.fileName
-                                  contentType: attachment.contentType
-                                  length:    attachment.length
-                                  checksum:  attachment.checksum
-                                  # content64: attachment.content.toString()
-                                }
+                            # if mailParsedObject.attachments
+                            #          for attachment in mailParsedObject.attachments
+                            #            console.log "Attachment: " + attachment.fileName
+                            #            
+                            #            mail.attachments.create {
+                            #              cid:       attachment.contentId
+                            #              fileName:  attachment.fileName
+                            #              contentType: attachment.contentType
+                            #              length:    attachment.length
+                            #              checksum:  attachment.checksum
+                            #              content: attachment.content.toString()
+                            #            }
                             
             
                             # console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from

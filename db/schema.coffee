@@ -25,7 +25,7 @@ Attachment = define 'Attachment', ->
     property 'contentType',
     property 'length', Number
     property 'checksum'
-    property 'content64', Text
+    property 'content', Text
     
 Mail.hasMany(Attachment, {as: 'attachments',  foreignKey: 'mailId'});
     

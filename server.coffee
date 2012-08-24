@@ -53,7 +53,7 @@ if not module.parent
 
   createImportJob = (mailbox) =>
     job = @jobs.create("import mailbox",
-      mailbox: mailbox.destroy "pass"
+      mailbox: mailbox
       title: "Import of " + mailbox.name
     ).attempts(999).save()
     

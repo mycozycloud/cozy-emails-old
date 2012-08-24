@@ -225,7 +225,7 @@ window.require.define({"collections/mails": function(exports, require, module) {
       };
 
       MailsCollection.prototype.comparator = function(mail) {
-        return mail.get("dateValueOf");
+        return -mail.get("dateValueOf");
       };
 
       MailsCollection.prototype.initialize = function() {
