@@ -1,8 +1,10 @@
 BaseModel = require("./models").BaseModel
 
 ###
-
-  Model which defines the attachment
+  @file: attachment.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Model which defines the attachment
 
 ###
 class exports.Attachment extends BaseModel

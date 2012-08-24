@@ -1,9 +1,11 @@
 {Mailbox} = require "../models/mailbox"
 
 ###
-
-  Generic collection of all mailboxes configured by user.
-  Uses standard "resourceful" approach for DB API, via it's url.
+  @file: mailboxes.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Generic collection of all mailboxes configured by user.
+    Uses standard "resourceful" approach for DB API, via it's url.
 
 ###
 class exports.MailboxCollection extends Backbone.Collection
@@ -20,7 +22,8 @@ class exports.MailboxCollection extends Backbone.Collection
     
   addView: (mail) ->
     @view.addOne(mail) if @view?
-    
+  
+  # function fired when user changes the set of active mailboxes - to rerender the list (filter it)
   updateActiveMailboxes: ->
     @activeMailboxes = []
     @each (mb) =>

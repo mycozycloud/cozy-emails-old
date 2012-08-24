@@ -2,11 +2,16 @@
 {MailsAnswer} = require "../views/mails_answer"
 {MailNew} = require "../models/mail_new"
 {MailsAttachmentsList} = require "../views/mails_attachments_list"
-###
-
-  The mail view. Displays all data & options
 
 ###
+  @file: mails_element.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The mail view. Displays all data & options.
+    Also, handles buttons.
+
+###
+
 class exports.MailsElement extends Backbone.View
 
   constructor: (@el, @collection) ->
@@ -37,6 +42,7 @@ class exports.MailsElement extends Backbone.View
       $("#column_mail").animate({scrollTop: 2 * $("#column_mail").outerHeight true}, 750)
     , 250
 
+  # handles click on button to answet to all
   buttonAnswerAll: ->
     
     console.log "answer all"
@@ -52,6 +58,7 @@ class exports.MailsElement extends Backbone.View
     # scroll down the view, to show the answer form
     @scrollDown()
 
+  # handles the click on answer button
   buttonAnswer: ->
     console.log "answer"
     @createAnswerView()
@@ -65,7 +72,8 @@ class exports.MailsElement extends Backbone.View
     
     # scroll down the view, to show the answer form
     @scrollDown()
-    
+  
+  # handles forward button
   buttonForward: ->
     console.log "forward"
     @createAnswerView()
@@ -79,13 +87,15 @@ class exports.MailsElement extends Backbone.View
 
     # scroll down the view, to show the answer form
     @scrollDown()
-    
+  
+  # handles unread button
   buttonUnread: ->
     console.log "unread"
     @collection.activeMail.setRead(false)
     @collection.activeMail.url = "mails/" + @collection.activeMail.get("id")
     @collection.activeMail.save()
-      
+  
+  # handles flagged button
   buttonFlagged: ->
     if @collection.activeMail.isFlagged()
       console.log "unflagged"
@@ -108,11 +118,11 @@ class exports.MailsElement extends Backbone.View
       
       template = require('./templates/_mail/mail_big')
       
-      $(@el).hide()
-      
       $(@el).html template("model" : @collection.activeMail)
       
       if @collection.activeMail.hasHtml()
+        
+        # this timeout is a walkaround the firefox empty iframe onLoad issue.
         setTimeout () =>
           $("#mail_content_html").contents().find("html").html @collection.activeMail.html()
           # frames["mail_content_html"].document.documentElement.innerHTML = @collection.activeMail.html()
@@ -122,12 +132,9 @@ class exports.MailsElement extends Backbone.View
           $("#mail_content_html").contents().find("head").append '<base target="_blank">'
         
           # adjust the height of the iframe
-          $(@el).show()
           $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
           
         , 1
         
         window.app.viewAttachments = new MailsAttachmentsList $("#attachments_list"), @collection.activeMail
-      else
-        $(@el).show()
     @

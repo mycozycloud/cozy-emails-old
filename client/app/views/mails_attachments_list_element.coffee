@@ -1,7 +1,8 @@
 ###
-
-  The element on the list of mails. Reacts for events, and stuff.
-
+  @file: mails_attachments_list_element.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Renders clickable attachments link.
 ###
 class exports.MailsAttachmentsListElement extends Backbone.View
 

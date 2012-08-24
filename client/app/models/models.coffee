@@ -1,5 +1,7 @@
 ###
-
+  @file: models.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
     Base class which contains methods common for all the models.
     Might get useful at some point, even though it's not visible yet...
  

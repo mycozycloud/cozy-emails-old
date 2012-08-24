@@ -1,3 +1,11 @@
+###
+  @file: initialize.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Building object used all over the place - collections, AppView, etc
+###
+
+
 {BrunchApplication} = require 'helpers'
 {MainRouter} = require 'routers/main_router'
 {MailboxCollection} = require 'collections/mailboxes'

@@ -2,10 +2,15 @@
 {Mail} = require "../models/mail"
 
 ###
-
-  Displays the list of configured mailboxes.
+  @file: message_box.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Serves a place to display messages which are meant to be seen by user.
+    
+    Has a set of preconfigured render methods, used by other views.
 
 ###
+
 class exports.MessageBox extends Backbone.View
 
   constructor: (@el, @mailboxes, @mails) ->
@@ -33,7 +38,12 @@ class exports.MessageBox extends Backbone.View
     $(@el).html template()
     @
     
-  renderNewMailboxSuccess: ->
-    template = require('./templates/_message/new_mailbox')
+  renderMailboxNewSuccess: ->
+    template = require('./templates/_message/mailbox_new')
+    $(@el).html template()
+    @
+
+  renderMailboxUpdateSuccess: ->
+    template = require('./templates/_message/mailbox_update')
     $(@el).html template()
     @

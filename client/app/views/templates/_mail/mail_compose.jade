@@ -1,4 +1,4 @@
-if models
+if models.length > 0
   form.well
     fieldset
       .control-group#mail_from
@@ -54,4 +54,9 @@ else
   .well
     p
       strong Hey !
-      | before You'll be able to send mail, configure a mailbox!
+    p
+      Before You'll be able to send mail, You need to configure a mailbox.
+    P
+      | It's easy - just click 
+      a(href="#config-mailboxes") add/modify 
+      | from the menu.

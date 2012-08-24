@@ -1,3 +1,16 @@
+###
+  @file: mailbox.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The model used to wrap tasks on other servers:
+      * fetching mails with node-imap,
+      * parsing mail with nodeparser,
+      * saving mail to the database,
+      * sending mail with nodemailer,
+      * flagging mail on remote servers (not yet implemented)
+###
+
+
 # Just to be able to recognise the mailbox in the console
 Mailbox.prototype.toString = () ->
   "[Mailbox " + @name + " #" + @id + "]"
@@ -116,8 +129,9 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
       
   server.on "error", (error) ->
     console.log "[SERVER ERROR]" + error.toString()
+    callback error
     mailbox.updateAttributes {status: error.toString()}, (err) ->
-      callback error
+      console.log "Mailbox update with error status OK"
 
   server.on "close", (error) ->
     mailbox.updateAttributes {IMAP_last_sync: new Date().toJSON()}, (err) ->
@@ -185,8 +199,8 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                         headers: false
 
                     fetch.on "message", (message) ->
-                      # parser = new mailparser.MailParser { streamAttachments: true }
-                      parser = new mailparser.MailParser
+                      parser = new mailparser.MailParser { streamAttachments: true }
+                      # parser = new mailparser.MailParser
  
                       parser.on "end", (mailParsedObject) ->
                         mail =
@@ -231,7 +245,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                                   contentType: attachment.contentType
                                   length:    attachment.length
                                   checksum:  attachment.checksum
-                                  content64: attachment.content.toString()
+                                  # content64: attachment.content.toString()
                                 }
                             
             

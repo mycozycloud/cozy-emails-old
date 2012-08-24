@@ -1,9 +1,13 @@
 {Attachment} = require "../models/attachment"
 
 ###
-
-
+  @file: attachments.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Backbone collection for handling Attachment objects.
+    Used to render the list of attachments fetched for the chosen mail.
 ###
+
 class exports.AttachmentsCollection extends Backbone.Collection
     
   model: Attachment
@@ -13,5 +17,5 @@ class exports.AttachmentsCollection extends Backbone.Collection
     @url = 'getattachments/' + @areAttachmentsOf.get "id"
     @fetch()
   
-  # comparator: (attachment) ->
-    # attachment.get("name")
+  comparator: (attachment) ->
+    attachment.get("fileName")

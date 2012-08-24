@@ -1,8 +1,10 @@
 BaseModel = require("./models").BaseModel
 
 ###
-
-  Model which defines the MAIL object.
+  @file: mail.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Model which defines the MAIL object.
 
 ###
 class exports.Mail extends BaseModel
@@ -21,8 +23,12 @@ class exports.Mail extends BaseModel
     
   mailbox: ->
     window.app.mailboxes.get @get "mailbox"
+    
+    
+    
   ###
-      RENDERING
+      RENDERING - these functions attr() replace @get "attr", and add some parsing logic.
+      To be used in views, to keep the maximum of logic related to mails in one place.
   ###
 
   from: ->
@@ -118,6 +124,11 @@ class exports.Mail extends BaseModel
       @html()
     else
       @text()
+      
+  ###
+    Changing mail's properties - read and flagged
+    TODO: synchronise them with remote servers.
+  ###
   
   isUnread: ->
     # not("\\Seen" in JSON.parse @get("flags"))

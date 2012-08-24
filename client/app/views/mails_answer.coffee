@@ -2,10 +2,12 @@
 {MailNew} = require "../models/mail_new"
 
 ###
-
-  The mail view. Displays all data & options
-
+  @file: mails_answer.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The mail response view. Created when user clicks "answer"
 ###
+
 class exports.MailsAnswer extends Backbone.View
 
   constructor: (@el, @mail, @mailtosend) ->

@@ -1,12 +1,14 @@
 {Mailbox} = require "../models/mailbox"
 
 ###
-
-  The element of the list of mailboxes.
-  
-  mailboxes_list -> mailboxes_list_element
+  @file: mailboxes_list_element.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The element of the list of mailboxes.
+    mailboxes_list -> mailboxes_list_element
 
 ###
+
 class exports.MailboxesListElement extends Backbone.View
   
   className: "mailbox_well well"
@@ -18,6 +20,7 @@ class exports.MailboxesListElement extends Backbone.View
     "click .save_mailbox" : "buttonSave"
     "click .delete_mailbox" : "buttonDelete"
     "input input#name" : "updateName"
+    "change #color" : "updateColor"
 
   constructor: (@model, @collection) ->
     super()
@@ -26,7 +29,10 @@ class exports.MailboxesListElement extends Backbone.View
   # updates the name of the mailbox
   updateName: (event) ->
     @model.set "name", $(event.target).val()
-    $(event.target).focus()
+
+  # updates the color of the mailbox
+  updateColor: (event) ->
+    @model.set "color", $(event.target).val()
 
   # enter edit mode
   buttonEdit: (event) ->
@@ -48,11 +54,18 @@ class exports.MailboxesListElement extends Backbone.View
     input.each (i) ->
       data[input[i].id] = input[i].value
     @model.isEdit = false
-    @model.save data, {
-      success: () =>
-        window.app.appView.viewMessageBox.renderNewMailboxSuccess()
-        @render()
-    }
+    if @model.isNew()
+      @model.save data, {
+        success: () =>
+          window.app.appView.viewMessageBox.renderMailboxNewSuccess()
+          @render()
+      }
+    else
+      @model.save data, {
+        success: () =>
+          window.app.appView.viewMessageBox.renderMailboxUpdateSuccess()
+          @render()
+      }
     
   # delete the mailbox
   buttonDelete: (event) =>

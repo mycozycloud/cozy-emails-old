@@ -1,9 +1,14 @@
 {Attachment} = require "../models/attachment"
 {AttachmentsCollection} = require "../collections/attachments"
 {MailsAttachmentsListElement} = require "./mails_attachments_list_element"
-###
 
 ###
+  @file: mails_attachments_list.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The list of attachments, created every time user displays a mail.
+###
+
 class exports.MailsAttachmentsList extends Backbone.View
   
   constructor: (@el, @model) ->

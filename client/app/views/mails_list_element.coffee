@@ -1,10 +1,13 @@
 {Mail} = require "../models/mail"
 
 ###
-
-  The element on the list of mails. Reacts for events, and stuff.
+  @file: mails_list_element.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The element on the list of mails. Reacts for events, and stuff.
 
 ###
+
 class exports.MailsListElement extends Backbone.View
 
   tagName : "tr"

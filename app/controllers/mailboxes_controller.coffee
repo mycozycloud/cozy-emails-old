@@ -1,3 +1,12 @@
+###
+  @file: mailboxes_controller.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Railwayjs controller to handle mailboxes CRUD backend plus a gateway to send mails via a mailbox.
+###
+
+
+# shared functionnality : find the mailbox via its ID
 before ->
   Mailbox.find req.params.id, (err, box) =>
     if err or !box

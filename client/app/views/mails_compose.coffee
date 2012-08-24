@@ -3,10 +3,14 @@
 {MailNew} = require "../models/mail_new"
 
 ###
-
-  The new mail view. To compose a new message
+  @file: mails_compose.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The new mail view, gives the choixe between configured mailboxes and makes it possible to send data.
+    
 
 ###
+
 class exports.MailsCompose extends Backbone.View
 
   events: {

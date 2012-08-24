@@ -1,10 +1,13 @@
 {Mail} = require "../models/mail"
 ################################################################
 ###
-
-  Application's router.
-
+  @file: main_router.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The application router.
+    Trying to recreate the minimum of object on every reroute.
 ###
+
 ################################################################
 
 class exports.MainRouter extends Backbone.Router
@@ -46,7 +49,7 @@ class exports.MainRouter extends Backbone.Router
 ################################################################
 ############## INDEX
   mail : (path) ->
-    app.appView.setLayoutMails()
+    @home()
     
     # if the mail is already downloaded, show it
     if app.mails.get(path)?

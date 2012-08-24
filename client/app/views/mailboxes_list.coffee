@@ -1,12 +1,14 @@
 {Mailbox} = require "../models/mailbox"
-
 {MailboxesListElement} = require "../views/mailboxes_list_element"
 
 ###
-
-  Displays the list of configured mailboxes.
+  @file: mailboxes_list.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Displays the list of configured mailboxes.
 
 ###
+
 class exports.MailboxesList extends Backbone.View
   id: "mailboxeslist"
   className: "mailboxes"

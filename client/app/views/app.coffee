@@ -5,11 +5,15 @@
 {MailsElement} = require '../views/mails_element'
 {MailsCompose} = require '../views/mails_compose'
 {MessageBox} = require 'views/message_box'
-###
-
-  The application's main view - creates other views, lays things out.
 
 ###
+  @file: app.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The application's main view - creates other views, lays things out.
+
+###
+
 class exports.AppView extends Backbone.View
 
   el: 'body'
@@ -24,7 +28,8 @@ class exports.AppView extends Backbone.View
     @containerContent = @.$("#content")
     @viewMessageBox = new MessageBox @.$("#message_box"), window.app.mailboxes, window.app.mails
     @setLayoutMenu()
-    
+  
+  # making sure the view takes 100% height of the viewport.
   resize: ->
     viewport = ->
       e = window
@@ -84,6 +89,8 @@ class exports.AppView extends Backbone.View
     # ensure the right size
     @resize()
 
+
+
   # put on the layout to display mailboxes:
   setLayoutComposeMail: ->
 
@@ -104,6 +111,8 @@ class exports.AppView extends Backbone.View
 
     # ensure the right size
     @resize()
+
+
 
   # put on the layout to display mails:
   setLayoutMails: ->

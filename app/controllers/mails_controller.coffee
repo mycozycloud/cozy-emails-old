@@ -1,3 +1,11 @@
+###
+  @file: mails_controller.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Railwayjs controller to handle mails CRUD backend and their attachments.
+###
+
+# shared functionnality : find the mail via its ID
 before ->
   Mail.find req.params.id, (err, box) =>
     if err or !box
@@ -80,8 +88,8 @@ action 'getattachment', ->
       header "Content-Type", "application/force-download"
       header "Content-Disposition", 'attachment; filename="' + box.fileName + '"'
       header "Content-Length", box.length
-      console.log box.contentType
-      console.log box.length
-      buf = new Buffer box.content64
-      res.write buf.toString("binary"), "binary"
+      # console.log box.contentType
+      # console.log box.length
+      # buf = new Buffer box.content64
+      # res.write buf.toString("binary"), "binary"
       res.end()

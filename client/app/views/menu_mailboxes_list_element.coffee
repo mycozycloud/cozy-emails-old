@@ -1,8 +1,11 @@
 ###
-
-  The element of the list of mailboxes in the leftmost column - the menu.
+  @file: menu_mailboxes_list_element.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The element of the list of mailboxes in the leftmost column - the menu.
 
 ###
+
 class exports.MenuMailboxListElement extends Backbone.View
   tagName: 'li'
 

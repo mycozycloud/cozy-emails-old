@@ -1,8 +1,11 @@
 {Mail} = require "../models/mail"
 
 ###
-
-  The view with the "load more" button.
+  @file: mails_list_more.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The view with the "load more" button.
+    Also displays info on how many messages are visible in this filer, and how many are effectiveley downloaded.
 
 ###
 class exports.MailsListMore extends Backbone.View
@@ -22,7 +25,7 @@ class exports.MailsListMore extends Backbone.View
      "click #add_more_mails" : 'loadOlderMails',
   }
   
-  # prepares 
+  # when user clicks on "more mails" button
   loadOlderMails: () ->
     # disable the button
     $("#add_more_mails").addClass("disabled")
