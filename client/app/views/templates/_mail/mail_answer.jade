@@ -5,20 +5,20 @@ form.well
         if mailtosend.get("mode") == "answer"
           | Answering to #{model.from()} ...
         else if mailtosend.get("mode") == "answer_all"
-          | Answering to #{model.from()} ...
+          | Answering to all #{model.fromAndCc()} ...
         else
           | Forwarding ...
-        a#mail_detailed_view_button.btn-mini.btn-primary show details
+        a#mail_detailed_view_button.btn-mini.btn-primary show&nbsp;details
     .control-group#mail_to
       .controls
         .input-prepend
           span.add-on To&nbsp;
-          input.content.span6(id="to", type="text", value=model.from()).input-xlarge
+          input.content.span6(id="to", type="text", value=model.toResponse(mailtosend.get("mode"))).input-xlarge
     .control-group#mail_advanced
       .controls
         .input-prepend
           span.add-on Cc&nbsp;
-          input.content.span6(id="cc", type="text", value="").input-xlarge
+          input.content.span6(id="cc", type="text", value=model.ccResponse(mailtosend.get("mode"))).input-xlarge
       .controls
         .input-prepend
           span.add-on Bcc
@@ -26,14 +26,7 @@ form.well
       .controls
         .input-prepend
           span.add-on Subject
-          if mailtosend.get("mode") == "answer"
-            input.content.span9(id="subject", type="text", value= "RE: " + model.get("subject")).input-xlarge
-          else if mailtosend.get("mode") == "answer_all"
-            input.content.span9(id="subject", type="text", value= "RE: " + model.get("subject")).input-xlarge
-          else if mailtosend.get("mode") == "forward"
-            input.content.span9(id="subject", type="text", value= "FWD: " + model.get("subject")).input-xlarge
-          else
-            input.content.span9(id="subject", type="text", value= model.get("subject")).input-xlarge
+          input.content.span9(id="subject", type="text", value= model.subjectResponse(mailtosend.get("mode"))).input-xlarge
     .control-group
       .controls
         #wysihtml5-toolbar(style='display: none;')
@@ -56,6 +49,7 @@ form.well
                 a.btn.btn-mini(data-wysihtml5-dialog-action='save') OK
                 a.btn.btn-mini(data-wysihtml5-dialog-action='cancel') Cancel
       .controls
-        textarea.content.span10(id="html", rows=15, cols=80).input-xlarge !{model.text_or_html()}
-        a#send_button.btn.btn-success Send
-        a#cancel_button.btn.btn-warning Cancel
+        textarea.content.span10(id="html", rows=15, cols=80).input-xlarge 
+          blockquote
+            !{model.htmlOrText()}
+        a#send_button.btn.btn-primary.btn-large Send !

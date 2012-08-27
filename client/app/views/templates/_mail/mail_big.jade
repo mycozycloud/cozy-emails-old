@@ -1,15 +1,49 @@
+.btn-toolbar
+  .btn-group
+    a#button_answer.btn.btn-primary
+      i.icon-share-alt
+      | Answer
+    a#button_answer_all.btn
+      i.icon-share-alt
+      | Answer to all
+    a#button_forward.btn
+      i.icon-arrow-up
+      | Forward
+  .btn-group
+    a#button_flagged.btn.btn-warning
+      i.icon-star
+      | Flag
+    a#button_unread.btn
+      | Unread
+    a.btn.disabled
+      i.icon-ban-circle
+      | Spam
+    a.btn.btn-danger.disabled
+      i.icon-remove
+      | Delete
+
 .well
   p
     | From: #{model.from()}
+    if model.get("cc")
+      p
+        | CC:  #{model.cc()}
+  p
     i(style='color: lightgray;') sent #{model.date()}
     br
-    if model.get("cc")
-      | CC:  #{model.cc()}
+
   h3 #{model.get("subject")}
   br
-  div#mail_content
-    !{model.text_or_html()}
-  
+
+  if model.hasHtml()
+    iframe#mail_content_html(id="mail_content_html", name="mail_content_html")
+      !{model.text()}
+  else
+    #mail_content_text
+      #{model.text()}
+if model.hasAttachments()
+  #attachments_list.well
+
 .btn-toolbar
   .btn-group
     a#button_answer.btn.btn-primary

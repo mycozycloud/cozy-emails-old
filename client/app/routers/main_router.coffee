@@ -1,9 +1,13 @@
+{Mail} = require "../models/mail"
 ################################################################
 ###
-
-  Application's router.
-
+  @file: main_router.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The application router.
+    Trying to recreate the minimum of object on every reroute.
 ###
+
 ################################################################
 
 class exports.MainRouter extends Backbone.Router
@@ -21,8 +25,7 @@ class exports.MainRouter extends Backbone.Router
 ################################################################
 ############## INDEX 
   home : ->
-    app.appView.render()
-    app.appView.set_layout_mails()
+    app.appView.setLayoutMails()
     $(".menu_option").removeClass("active")
     $("#inboxbutton").addClass("active")
 
@@ -30,8 +33,7 @@ class exports.MainRouter extends Backbone.Router
 ################################################################
 ############## NEW MAIL 
   new : ->
-    app.appView.render()
-    app.appView.set_layout_mailboxes()
+    app.appView.setLayoutComposeMail()
     $(".menu_option").removeClass("active")
     $("#newmailbutton").addClass("active")
 
@@ -40,24 +42,24 @@ class exports.MainRouter extends Backbone.Router
 ############## CONFIG
 
   configMailboxes : ->
-    app.appView.render()
-    app.appView.set_layout_mailboxes()
+    app.appView.setLayoutMailboxes()
     $(".menu_option").removeClass("active")
     $("#mailboxesbutton").addClass("active")
     
 ################################################################
 ############## INDEX
   mail : (path) ->
-    app.appView.render()
-    app.appView.set_layout_mails()
+    @home()
     
+    # if the mail is already downloaded, show it
     if app.mails.get(path)?
       app.mails.activeMail = app.mails.get(path)
       app.mails.trigger "change_active_mail"
+    # otherwise, download it
     else
-      app.mails.fetch({
-        "success": ->
-          if app.mails.get(path)?
-            app.mails.activeMail = app.mails.get(path)
-            app.mails.trigger "change_active_mail"
+      app.mails.activeMail = new Mail {id: path}
+      app.mails.activeMail.url = "mails/" + path
+      app.mails.activeMail.fetch({
+        success : ->
+          app.mails.trigger "change_active_mail"
       })

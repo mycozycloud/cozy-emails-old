@@ -2,15 +2,16 @@ from.form-horizontal
   fieldset
     legend Access data
     .control-group
-      label(for="name").control-label Your name
+      label(for="name").control-label Title
       .controls
         input.content(id="name", type="text", value= model.get("name")).input-xlarge
-        p.help-block This name will be visible to people to whom you send mail.
+        p.help-block Name your mailbox to identify it easily.
     .control-group
       label(for="SMTP_send_as").control-label Your address
       .controls
         input.content(id="SMTP_send_as", type="text", value= model.get("SMTP_send_as")).input-xlarge
-        p.help-block Your mail address associated with this account.
+        p.help-block This adress will be visible to people to whom you send mail.
+        p.help-block Like "johny@mnemonic.com" or "Mickey Mouse <mickey@domain.com>".
     .control-group
       label(for="login").control-label Your login
       .controls
@@ -27,6 +28,12 @@ from.form-horizontal
           option(value="orange") orange
           option(value="blue") blue
           option(value="red") red
+          option(value="green") green
+          option(value="gold") gold
+          option(value="purple") purple
+          option(value="pink") pink
+          option(value="black") black
+          option(value="brown") brown
         p.help-block The color to mark mails from this inbox. Enjoy!
 
   fieldset

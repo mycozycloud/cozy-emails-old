@@ -1,3 +1,12 @@
+###
+  @file: mailboxes_controller.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Railwayjs controller to handle mailboxes CRUD backend plus a gateway to send mails via a mailbox.
+###
+
+
+# shared functionnality : find the mailbox via its ID
 before ->
   Mailbox.find req.params.id, (err, box) =>
     if err or !box
@@ -5,7 +14,7 @@ before ->
     else
       @box = box
       next()
-, { only: ['índex', 'show', 'update', 'destroy', 'sendmail'] }
+, { only: ['show', 'update', 'destroy', 'sendmail'] }
 
 # GET /mailboxes
 action 'index', ->
@@ -16,7 +25,7 @@ action 'index', ->
 action 'create', ->
   Mailbox.create req.body, (error) =>
     if !error
-      send 200
+      send {success: true}
     else
       send 500
 
@@ -50,17 +59,18 @@ action 'update', ->
     
   @box.updateAttributes data, (error) =>
     if !error
-      send 200
+      send {success: true}
     else
       send 500
 
 # DELETE /mailboxes/:id
 action 'destroy', ->
-  @box.destroy (error) =>
-    if !error
-      send 200
-    else
-      send 500
+  @box.mails.destroyAll (error) =>
+    @box.destroy (error) ->
+      if !error
+        send 200
+      else
+        send 500
       
 
 # post /sendmail
@@ -70,6 +80,8 @@ action 'sendmail', ->
     "to",
     "subject",
     "html",
+    "cc",
+    "bcc"
   ]
   
   for attr in attrs
@@ -77,6 +89,6 @@ action 'sendmail', ->
     
   @box.sendMail data, (error) =>
     if !error
-      send 200
+      send {success: true}
     else
       send 500

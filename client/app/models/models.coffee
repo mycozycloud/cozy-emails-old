@@ -1,5 +1,7 @@
 ###
-
+  @file: models.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
     Base class which contains methods common for all the models.
     Might get useful at some point, even though it's not visible yet...
  
@@ -23,15 +25,3 @@ class exports.BaseModel extends Backbone.Model
         @["__" + prop] = @attributes[prop]
     console.log @ if @debug?
     @
-    
-
-  render_from: (from) ->
-    parsed = JSON.parse(from)
-    out = ""
-    for obj in parsed
-      out += obj.name + " <" + obj.address + "> "
-    out
-    
-  render_date: (date) ->
-    parsed = new Date date
-    parsed.toUTCString()

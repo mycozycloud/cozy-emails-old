@@ -1,10 +1,12 @@
 BaseModel = require("./models").BaseModel
 
 ###
-
-  A model which defines the MAILBOX object.
-  MAILBOX stocks all the data necessary for a successful connection to IMAP and SMTP servers,
-  and all the data relative to this mailbox, internal to the application.
+  @file: mailbox.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    A model which defines the MAILBOX object.
+    MAILBOX stocks all the data necessary for a successful connection to IMAP and SMTP servers,
+    and all the data relative to this mailbox, internal to the application.
 
 ###
 class exports.Mailbox extends BaseModel
@@ -14,7 +16,7 @@ class exports.Mailbox extends BaseModel
   defaults:
     'checked' : true
     'config' : 0
-    'name' : "Mailbox"
+    'name' : "box"
     'login' : "login"
     'pass' : "pass"
     'SMTP_server' : "smtp.gmail.com"
@@ -23,17 +25,14 @@ class exports.Mailbox extends BaseModel
     'IMAP_server' : "imap.gmail.com"
     'IMAP_port' : 993
     'IMAP_secure' : true
+    'color' : "orange"
 
   initialize: ->
     @on "destroy", @removeView, @
-    @on "change",  @redrawView, @
 
   removeView: ->
     @view.remove() if @view?
-
-  redrawView: ->
-    @view.render() if @view?
     
-  IMAP_last_fetched_date: ->
+  IMAPLastFetchedDate: ->
     parsed = new Date @get("IMAP_last_fetched_date")
     parsed.toUTCString()

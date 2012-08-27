@@ -1,12 +1,14 @@
 {Mailbox} = require "../models/mailbox"
 
 ###
-
-  The toolbar to add a new mailbox.
-  
-  mailboxes_list -> mailboxes_list_new
+  @file: mailboxes_list_new.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The toolbar to add a new mailbox.
+    mailboxes_list -> mailboxes_list_new
 
 ###
+
 class exports.MailboxesListNew extends Backbone.View
   
   id: "mailboxeslist_new"

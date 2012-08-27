@@ -30,7 +30,34 @@ Future versions will allow a purchase of your own domain and remote backup in th
 
 Our stack includes node.js, mongodb, expressjs, railwayjs, backbone, stylus, jade and brunch to start with.
 
-A bunch of top technologies, becoming extremely popular due to their innovative nature... Well, the technology of tomorrow, one would say.
+A bunch of top technologies, becoming extremely popular due to their innovative nature... Well, nice things.
+
+
+
+# Okay, so where are we in the development ?
+
+For today, application makes it possible to configure mailboxes, import all your mail and send mail.
+
+Once you have your data, it will be nicely displayed (filtered by mailboxes) in our quicky interface.
+
+Because the datasystem of Cozy isn't ready yet, you can't manage attachments though (yes, we're working at it hard !).
+
+
+
+
+
+# So, I can try it ?!
+
+Sure, it's free and easy. The code is open source and you can even propose an improvement.
+
+Basically, what You need to do is:
+
+* install node.js,
+* clone this repository,
+* install dependencies: npm install
+* you may like to install coffee globally: npm install -g coffee
+* run the server: coffee server.coffee
+* open your browser at localhost:8001 and enjoy!
 
 
 

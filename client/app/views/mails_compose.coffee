@@ -1,26 +1,26 @@
 {Mail} = require "../models/mail"
+{MailsAnswer} = require "../views/mails_answer"
 {MailNew} = require "../models/mail_new"
 
 ###
-  @file: mails_answer.coffee
+  @file: mails_compose.coffee
   @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
   @description: 
-    The mail response view. Created when user clicks "answer"
+    The new mail view, gives the choixe between configured mailboxes and makes it possible to send data.
+    
+
 ###
 
-class exports.MailsAnswer extends Backbone.View
-
-  constructor: (@el, @mail, @mailtosend) ->
-    super()
-    @mail.on "change", @render, @
-    @mailtosend.on "change_mode", @render, @
+class exports.MailsCompose extends Backbone.View
 
   events: {
     "click a#send_button" : 'prepareSend'
-    "click a#mail_detailed_view_button" : 'viewAdvanced'
   }
   
-  
+  constructor: (@el, @collection) ->
+    super()
+    @mailtosend = new MailNew()
+
   # prepares data to save in @mailtosend object, which will be sent to server side
   prepareSend: (event) ->
     
@@ -35,7 +35,7 @@ class exports.MailsAnswer extends Backbone.View
       data[input[i].id] = input[i].value
       
     # set the url to take into account the id of the mailbox
-    @mailtosend.url = "sendmail/" + @mail.get("mailbox")
+    @mailtosend.url = "sendmail/" + window.app.mailboxes.get(data["mailbox"])?.get("id")
     el = @el
 
     # send, and collect the server's response
@@ -55,35 +55,11 @@ class exports.MailsAnswer extends Backbone.View
     
     console.log "sending mail: " + @mailtosend
 
-  
-  # set the visibility of 3 parts of answer view
-  setBasic: (show=true)->
-    if show
-      @.$("#mail_basic").show()
-    else
-      @.$("#mail_basic").hide()
-  setTo: (show=true)->
-    if show
-      @.$("#mail_to").show()
-    else
-      @.$("#mail_to").hide()
-  setAdvanced: (show=true)->
-    if show
-      @.$("#mail_advanced").show()
-    else
-      @.$("#mail_advanced").hide()
-  
-  # unlock additional data
-  viewAdvanced: ->
-    @setBasic false
-    @setTo true
-    @setAdvanced true
 
   # render, including the wysihtml5 rich text editor
   render: ->
-    $(@el).html ""
-    template = require('./templates/_mail/mail_answer')
-    $(@el).html template({"model" : @mail, "mailtosend" : @mailtosend})
+    template = require('./templates/_mail/mail_compose')
+    $(@el).html template({"models" : @collection.models})
     
     try
       editor = new wysihtml5.Editor("html", # id of textarea element
@@ -92,8 +68,4 @@ class exports.MailsAnswer extends Backbone.View
         stylesheets: ["http://yui.yahooapis.com/2.9.0/build/reset/reset-min.css", "css/editor.css"],
       )
     catch error
-      console.log error
-    @setBasic true
-    @setTo false
-    @setAdvanced false
-    @
+      console.log error.toString()

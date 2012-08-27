@@ -1,12 +1,17 @@
 {Mail} = require "../models/mail"
 {MailsAnswer} = require "../views/mails_answer"
 {MailNew} = require "../models/mail_new"
+{MailsAttachmentsList} = require "../views/mails_attachments_list"
+
+###
+  @file: mails_element.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The mail view. Displays all data & options.
+    Also, handles buttons.
 
 ###
 
-  The mail view. Displays all data & options
-
-###
 class exports.MailsElement extends Backbone.View
 
   constructor: (@el, @collection) ->
@@ -14,71 +19,122 @@ class exports.MailsElement extends Backbone.View
     @collection.on "change_active_mail", @render, @
     
   events:
-    "click a#button_answer_all" : 'bt_answer_all'
-    "click a#button_answer" : 'bt_answer'
-    "click a#button_forward" : 'bt_forward'
-    "click a#button_unread" : 'bt_unread'
-    "click a#button_flagged" : 'bt_flagged'
+    "click a#button_answer_all" : 'buttonAnswerAll'
+    "click a#button_answer" : 'buttonAnswer'
+    "click a#button_forward" : 'buttonForward'
+    "click a#button_unread" : 'buttonUnread'
+    "click a#button_flagged" : 'buttonFlagged'
 
   ###
       CLICK ACTIONS
   ###
   
-  create_answer_view: ->
-    unless window.app.view_answer
+  createAnswerView: ->
+    unless window.app.viewAnswer
       console.log "create new answer view"
-      window.app.view_answer = new MailsAnswer @.$("#answer_form"), @collection.activeMail, window.app.mailtosend
-      window.app.view_answer.render()
+      window.app.viewAnswer = new MailsAnswer @.$("#answer_form"), @collection.activeMail, window.app.mailtosend
+      window.app.viewAnswer.render()
+  
+  scrollDown: ->
+    # console.log "scroll: " + $("#column_mail").outerHeight true
+    # scroll down
+    setTimeout () ->
+      $("#column_mail").animate({scrollTop: 2 * $("#column_mail").outerHeight true}, 750)
+    , 250
 
-  bt_answer_all: ->
+  # handles click on button to answet to all
+  buttonAnswerAll: ->
+    
     console.log "answer all"
-    @create_answer_view()
+    @createAnswerView()
     window.app.mailtosend.set 
       mode: "answer_all"
-    window.app.view_answer.set_basic true
-    window.app.view_answer.set_to false
-    window.app.view_answer.set_advanced false
+    window.app.viewAnswer.setBasic true
+    window.app.viewAnswer.setTo false
+    window.app.viewAnswer.setAdvanced false
+    
+    window.app.mailtosend.trigger "change_mode"
+    
+    # scroll down the view, to show the answer form
+    @scrollDown()
 
-  bt_answer: ->
+  # handles the click on answer button
+  buttonAnswer: ->
     console.log "answer"
-    @create_answer_view()
+    @createAnswerView()
     window.app.mailtosend.set 
       mode: "answer"
-    window.app.view_answer.set_basic true
-    window.app.view_answer.set_to false
-    window.app.view_answer.set_advanced false
-
-  bt_forward: ->
+    window.app.viewAnswer.setBasic true
+    window.app.viewAnswer.setTo false
+    window.app.viewAnswer.setAdvanced false
+    
+    window.app.mailtosend.trigger "change_mode"
+    
+    # scroll down the view, to show the answer form
+    @scrollDown()
+  
+  # handles forward button
+  buttonForward: ->
     console.log "forward"
-    @create_answer_view()
+    @createAnswerView()
     window.app.mailtosend.set 
       mode: "forward"
-    window.app.view_answer.set_basic true
-    window.app.view_answer.set_to true
-    window.app.view_answer.set_advanced false
+    window.app.viewAnswer.setBasic true
+    window.app.viewAnswer.setTo true
+    window.app.viewAnswer.setAdvanced false
     
-  bt_unread: ->
+    window.app.mailtosend.trigger "change_mode"
+
+    # scroll down the view, to show the answer form
+    @scrollDown()
+  
+  # handles unread button
+  buttonUnread: ->
     console.log "unread"
-    @collection.activeMail.set_read(false)
+    @collection.activeMail.setRead(false)
     @collection.activeMail.url = "mails/" + @collection.activeMail.get("id")
     @collection.activeMail.save()
-      
-  bt_flagged: ->
-    if @collection.activeMail.is_flagged()
+  
+  # handles flagged button
+  buttonFlagged: ->
+    if @collection.activeMail.isFlagged()
       console.log "unflagged"
-      @collection.activeMail.set_flagged(false)
+      @collection.activeMail.setFlagged(false)
     else
-      @collection.activeMail.set_flagged(true)
+      @collection.activeMail.setFlagged(true)
       console.log "flagged"
     @collection.activeMail.url = "mails/" + @collection.activeMail.get("id")
     @collection.activeMail.save()
 
   render: ->
-    if window.app.view_answer
-      delete window.app.view_answer
+    
+    if window.app.viewAnswer
+      delete window.app.viewAnswer
       console.log "delete answer view"
+    
     $(@el).html ""
-    template = require('./templates/_mail/mail_big')
+    
     if @collection.activeMail?
+      
+      template = require('./templates/_mail/mail_big')
+      
       $(@el).html template("model" : @collection.activeMail)
+      
+      if @collection.activeMail.hasHtml()
+        
+        # this timeout is a walkaround the firefox empty iframe onLoad issue.
+        setTimeout () =>
+          $("#mail_content_html").contents().find("html").html @collection.activeMail.html()
+          # frames["mail_content_html"].document.documentElement.innerHTML = @collection.activeMail.html()
+          
+          # add some basic styling and targeting to the internal document
+          $("#mail_content_html").contents().find("head").append '<link rel="stylesheet" href="css/reset_bootstrap.css">'
+          $("#mail_content_html").contents().find("head").append '<base target="_blank">'
+        
+          # adjust the height of the iframe
+          $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
+          
+        , 1
+        
+        window.app.viewAttachments = new MailsAttachmentsList $("#attachments_list"), @collection.activeMail
     @
