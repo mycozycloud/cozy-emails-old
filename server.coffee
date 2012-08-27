@@ -66,7 +66,7 @@ if not module.parent
       ).save()
       #.attempts(999).save()
     
-      lastProgress = 0
+      lastProgress = -1
     
       job.on 'complete', () ->
         console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
@@ -86,7 +86,9 @@ if not module.parent
         if progress != lastProgress
           console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
           lastProgress = progress
-          mailbox.updateAttributes {status: "Import " + progress + " %"}
+          mailbox.updateAttributes {status: "Import " + progress + " %"}, (error) ->
+            if error
+              console.log "Error trying to update attributes: " + error.toString()
       
   app.createImportJobs = =>
     console.log "createImportJobs"

@@ -2801,7 +2801,12 @@ window.require.define({"views/templates/_mailbox/mailbox": function(exports, req
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<p><strong>' + escape((interp = model.get('name')) == null ? '' : interp) + '</strong>: \n<i>"' + escape((interp = model.get('SMTP_send_as')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.IMAPLastFetchedDate()) == null ? '' : interp) + ' </i><div');
+  buf.push('<h3>' + escape((interp = model.get('name')) == null ? '' : interp) + '</h3><p><i>"' + escape((interp = model.get('SMTP_send_as')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.IMAPLastFetchedDate()) == null ? '' : interp) + ' </i></p>');
+  if ( model.get("status"))
+  {
+  buf.push('<p><i>status: ' + escape((interp = model.get('status')) == null ? '' : interp) + '</i></p>');
+  }
+  buf.push('<div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
   buf.push(attrs({ "class": ('fetch_mails') + ' ' + ('btn') }));
@@ -2811,11 +2816,7 @@ window.require.define({"views/templates/_mailbox/mailbox": function(exports, req
   buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('btn') }));
   buf.push('>Edit</a><a');
   buf.push(attrs({ "class": ('delete_mailbox') + ' ' + ('btn') + ' ' + ('btn-danger') }));
-  buf.push('>Delete</a></div></p>');
-  if ( model.get("status"))
-  {
-  buf.push('<p><i>status: ' + escape((interp = model.get('status')) == null ? '' : interp) + '</i></p>');
-  }
+  buf.push('>Delete</a></div>');
   }
   return buf.join("");
   };
