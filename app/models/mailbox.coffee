@@ -138,7 +138,8 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
       if error
         server.emit "error", error
       else
-        callback()
+        mailbox.updateAttributes {status: ""}, (err) ->
+          callback()
   
   # process.on 'uncaughtException', (err) ->
   #   console.error "uncaughtException"

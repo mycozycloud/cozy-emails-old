@@ -1,4 +1,4 @@
-a(mailbox_id=model.id, style="border-left: 3px solid #{model.color}; padding-left: 5px;").change_mailboxes_list
+a.menu_choose(style="border-left: 3px solid #{model.color}; padding-left: 5px;").change_mailboxes_list
   if model.checked == true
     input(type='checkbox', checked="checked").change_mailboxes_list
   else

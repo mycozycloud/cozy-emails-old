@@ -21,6 +21,9 @@ class exports.MailboxesListElement extends Backbone.View
     "click .delete_mailbox" : "buttonDelete"
     "input input#name" : "updateName"
     "change #color" : "updateColor"
+    
+    "click .fetch_mailbox" : "buttonFetchMailbox"
+    "click .fetch_mails" : "buttonFetchMails"
 
   constructor: (@model, @collection) ->
     super()
@@ -33,6 +36,24 @@ class exports.MailboxesListElement extends Backbone.View
   # updates the color of the mailbox
   updateColor: (event) ->
     @model.set "color", $(event.target).val()
+    
+  # download new mail
+  buttonFetchMails: (event) ->
+    $(event.target).addClass("disabled").removeClass("fetch_mails").text("Loading...")
+    $.ajax "fetchmailbox/" + @model.id, {
+      complete: () ->
+        window.app.mails.fetchNew()
+        $(event.target).removeClass("disabled").addClass("fetch_mails").text("Check for new mail complete")
+    }
+    
+  # fetch mailbox
+  buttonFetchMailbox: (event) ->
+    $(event.target).addClass("disabled").removeClass("fetch_mailbox").text("Loading...")
+    @model.fetch {
+      success: ->
+        $(event.target).removeClass("disabled").addClass("fetch_mailbox").text("Status verified")
+        @render()
+    }
 
   # enter edit mode
   buttonEdit: (event) ->
@@ -56,8 +77,12 @@ class exports.MailboxesListElement extends Backbone.View
     @model.isEdit = false
     if @model.isNew()
       @model.save data, {
-        success: () =>
-          window.app.appView.viewMessageBox.renderMailboxNewSuccess()
+        success: (modelSaved, response) =>
+          $.ajax "importmailbox/" + modelSaved.id, {
+            complete: () ->
+              console.log "importmailbox/" + modelSaved.id
+              window.app.appView.viewMessageBox.renderMailboxNewSuccess()
+          }
           @render()
       }
     else

@@ -14,7 +14,7 @@ before ->
     else
       @box = box
       next()
-, { only: ['show', 'update', 'destroy', 'sendmail'] }
+, { only: ['show', 'update', 'destroy', 'sendmail', 'import', 'fetch'] }
 
 # GET /mailboxes
 action 'index', ->
@@ -25,7 +25,8 @@ action 'index', ->
 action 'create', ->
   Mailbox.create req.body, (error, mailbox) =>
     if !error
-      send {success: true, mailbox: mailbox}
+      # mailbox.success = true
+      send mailbox
     else
       send 500
 
@@ -92,3 +93,24 @@ action 'sendmail', ->
       send {success: true}
     else
       send 500
+      
+
+# get /importmailbox/:id
+action 'import', ->
+    if !@box
+      send 500
+    else
+      app.createImportJob @box
+      send {success: true}
+
+
+# get /fetchmailbox/:id
+action 'fetch', ->
+    if !@box
+      send 500
+    else
+      app.createCheckJob @box, (error) ->
+        if not error
+          send {success: true}
+        else
+          send 500

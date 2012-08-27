@@ -8,7 +8,7 @@
   var cache = {};
 
   var has = function(object, name) {
-    return hasOwnProperty.call(object, name);
+    return ({}).hasOwnProperty.call(object, name);
   };
 
   var expand = function(root, name) {
@@ -37,7 +37,7 @@
     return function(name) {
       var dir = dirname(path);
       var absolute = expand(dir, name);
-      return require(absolute);
+      return globals.require(absolute);
     };
   };
 
@@ -1108,7 +1108,9 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
         "click .save_mailbox": "buttonSave",
         "click .delete_mailbox": "buttonDelete",
         "input input#name": "updateName",
-        "change #color": "updateColor"
+        "change #color": "updateColor",
+        "click .fetch_mailbox": "buttonFetchMailbox",
+        "click .fetch_mails": "buttonFetchMails"
       };
 
       function MailboxesListElement(model, collection) {
@@ -1125,6 +1127,26 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
 
       MailboxesListElement.prototype.updateColor = function(event) {
         return this.model.set("color", $(event.target).val());
+      };
+
+      MailboxesListElement.prototype.buttonFetchMails = function(event) {
+        $(event.target).addClass("disabled").removeClass("fetch_mails").text("Loading...");
+        return $.ajax("fetchmailbox/" + this.model.id, {
+          complete: function() {
+            window.app.mails.fetchNew();
+            return $(event.target).removeClass("disabled").addClass("fetch_mails").text("Check for new mail complete");
+          }
+        });
+      };
+
+      MailboxesListElement.prototype.buttonFetchMailbox = function(event) {
+        $(event.target).addClass("disabled").removeClass("fetch_mailbox").text("Loading...");
+        return this.model.fetch({
+          success: function() {
+            $(event.target).removeClass("disabled").addClass("fetch_mailbox").text("Status verified");
+            return this.render();
+          }
+        });
       };
 
       MailboxesListElement.prototype.buttonEdit = function(event) {
@@ -1150,8 +1172,13 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
         this.model.isEdit = false;
         if (this.model.isNew()) {
           return this.model.save(data, {
-            success: function() {
-              window.app.appView.viewMessageBox.renderMailboxNewSuccess();
+            success: function(modelSaved, response) {
+              $.ajax("importmailbox/" + modelSaved.id, {
+                complete: function() {
+                  console.log("importmailbox/" + modelSaved.id);
+                  return window.app.appView.viewMessageBox.renderMailboxNewSuccess();
+                }
+              });
               return _this.render();
             }
           });
@@ -2076,7 +2103,7 @@ window.require.define({"views/menu_mailboxes_list_element": function(exports, re
       }
 
       MenuMailboxListElement.prototype.events = {
-        "click": 'setupMailbox'
+        "click a.menu_choose": 'setupMailbox'
       };
 
       MenuMailboxListElement.prototype.setupMailbox = function(event) {
@@ -2772,11 +2799,17 @@ window.require.define({"views/templates/_mailbox/mailbox": function(exports, req
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<p><strong>' + escape((interp = model.get('name')) == null ? '' : interp) + '</strong>: \n<i>"' + escape((interp = model.get('SMTP_send_as')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.IMAPLastFetchedDate()) == null ? '' : interp) + ' </i><a');
-  buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') }));
+  buf.push('<p><strong>' + escape((interp = model.get('name')) == null ? '' : interp) + '</strong>: \n<i>"' + escape((interp = model.get('SMTP_send_as')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.IMAPLastFetchedDate()) == null ? '' : interp) + ' </i><div');
+  buf.push(attrs({ "class": ('btn-group') }));
+  buf.push('><a');
+  buf.push(attrs({ "class": ('fetch_mails') + ' ' + ('btn') }));
+  buf.push('>Check for new mail</a><a');
+  buf.push(attrs({ "class": ('fetch_mailbox') + ' ' + ('btn') }));
+  buf.push('>Verify status</a><a');
+  buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('btn') }));
   buf.push('>Edit</a><a');
-  buf.push(attrs({ "class": ('delete_mailbox') + ' ' + ('isntEdit') + ' ' + ('btn') + ' ' + ('btn-danger') }));
-  buf.push('>Delete</a>');
+  buf.push(attrs({ "class": ('delete_mailbox') + ' ' + ('btn') + ' ' + ('btn-danger') }));
+  buf.push('>Delete</a></div>');
   if ( model.get("status"))
   {
   buf.push('<p><i>status: ' + escape((interp = model.get('status')) == null ? '' : interp) + '</i></p>');
@@ -2932,7 +2965,7 @@ window.require.define({"views/templates/_mailbox/mailbox_menu": function(exports
   with (locals || {}) {
   var interp;
   buf.push('<a');
-  buf.push(attrs({ 'mailbox_id':(model.id), 'style':("border-left: 3px solid " + (model.color) + "; padding-left: 5px;"), "class": ('change_mailboxes_list') }));
+  buf.push(attrs({ 'style':("border-left: 3px solid " + (model.color) + "; padding-left: 5px;"), "class": ('menu_choose') + ' ' + ('change_mailboxes_list') }));
   buf.push('>');
   if ( model.checked == true)
   {

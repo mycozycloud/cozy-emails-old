@@ -15,6 +15,8 @@ if not module.parent
   Job = @kue.Job
   @jobs = @kue.createQueue()
   
+  app.jobs = @jobs
+  
   # @jobs.on "job complete", (id) ->
   #   Job.get id, (error, job) ->
   #     return if error
@@ -26,7 +28,7 @@ if not module.parent
 
 ## PERIODICAL MAIL CHECK
 
-  createCheckJob = (mailbox) =>
+  app.createCheckJob = (mailbox, callback) =>
     job = @jobs.create("check mailbox",
       mailbox: mailbox
       num: 250
@@ -35,59 +37,64 @@ if not module.parent
      
     job.on 'complete', () ->
       console.log job.data.title + " #" + job.id + " complete"
+      callback() if callback?
     job.on 'failed', () ->
       console.log job.data.title + " #" + job.id + " failed"
+      callback "error" if callback?
     job.on 'progress', (progress) ->
       console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
   
-  createCheckJobs = =>
+  app.createCheckJobs = =>
     console.log "createCheckJobs"
     Mailbox.all {where: {activated: true}}, (err, mailboxes) ->
       for mailbox in mailboxes
-        createCheckJob mailbox
-  
+        app.createCheckJob mailbox
+        
   # set-up CRON
-  setInterval createCheckJobs, 1000 * 60 * 3
-  createCheckJobs()
+  setInterval app.createCheckJobs, 1000 * 60 * 5
+  app.createCheckJobs()
   
 ## IMPORT A NEW MAILBOX
 
-  createImportJob = (mailbox) =>
-    job = @jobs.create("import mailbox",
-      mailbox: mailbox
-      title: "Import of " + mailbox.name
-    ).save()
-    #.attempts(999).save()
+  app.createImportJob = (mailbox) =>
     
-    lastProgress = 0
-    
-    job.on 'complete', () ->
-      console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
-      mailbox.updateAttributes {imported: true}, (error) ->
-        unless error
-          console.log "Import successful !"
-        else
-          console.log "Import error...."
-
-    job.on 'failed', () ->
-      console.log job.data.title + " #" + job.id + " failed at " + new Date().toUTCString()
-      mailbox.mails.destroyAll () ->
-        mailbox.updateAttributes {imported: false, importing: false, activated: false}, (error) ->
-          console.log "Import failed !"
-    
-    job.on 'progress', (progress) ->
-      if progress != lastProgress
-        console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
-        lastProgress = progress
+    if mailbox.imported == false and mailbox.importing == false
       
-  createImportJobs = =>
+      job = @jobs.create("import mailbox",
+        mailbox: mailbox
+        title: "Import of " + mailbox.name
+      ).save()
+      #.attempts(999).save()
+    
+      lastProgress = 0
+    
+      job.on 'complete', () ->
+        console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
+        mailbox.updateAttributes {imported: true}, (error) ->
+          unless error
+            console.log "Import successful !"
+          else
+            console.log "Import error...."
+
+      job.on 'failed', () ->
+        console.log job.data.title + " #" + job.id + " failed at " + new Date().toUTCString()
+        mailbox.mails.destroyAll () ->
+          mailbox.updateAttributes {imported: false, importing: false, activated: false}, (error) ->
+            console.log "Import failed !"
+    
+      job.on 'progress', (progress) ->
+        if progress != lastProgress
+          console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
+          lastProgress = progress
+      
+  app.createImportJobs = =>
     console.log "createImportJobs"
     Mailbox.all {where: {imported: false, importing: false}}, (err, mailboxes) ->
       for mailbox in mailboxes
-        createImportJob mailbox
+        app.createImportJob mailbox
 
-  setInterval createImportJobs, 1000 * 60 * 5
-  createImportJobs()
+  setInterval app.createImportJobs, 1000 * 60 * 10
+  app.createImportJobs()
         
         
   # KUE jobs
