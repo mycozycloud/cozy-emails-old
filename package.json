@@ -11,6 +11,7 @@
 , "dependencies":
   { "jade":             ">= 0"
   , "jade-ext":         ">= 0"
+  , "node-gyp"          ">= 0"
   , "iconv":            ">= 1.2.3"
   , "express":          ">= 2.5.8"
   , "connect":          ">= 1.8.6"
