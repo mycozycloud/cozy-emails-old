@@ -1697,10 +1697,10 @@ window.require.define({"views/mails_element": function(exports, require, module)
         window.app.mailtosend.set({
           mode: "forward"
         });
+        window.app.mailtosend.trigger("change_mode");
         window.app.viewAnswer.setBasic(true);
         window.app.viewAnswer.setTo(true);
         window.app.viewAnswer.setAdvanced(false);
-        window.app.mailtosend.trigger("change_mode");
         return this.scrollDown();
       };
 
