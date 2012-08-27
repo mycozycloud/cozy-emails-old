@@ -46,7 +46,7 @@ if not module.parent
         createCheckJob mailbox
   
   # set-up CRON
-  setInterval createCheckJobs, 1000 * 60 * 0.5
+  setInterval createCheckJobs, 1000 * 60 * 3
   createCheckJobs()
   
 ## IMPORT A NEW MAILBOX
@@ -55,7 +55,8 @@ if not module.parent
     job = @jobs.create("import mailbox",
       mailbox: mailbox
       title: "Import of " + mailbox.name
-    ).attempts(999).save()
+    ).save()
+    #.attempts(999).save()
     
     lastProgress = 0
     
@@ -84,7 +85,7 @@ if not module.parent
       for mailbox in mailboxes
         createImportJob mailbox
 
-  setInterval createImportJobs, 1000 * 60 * 0.5
+  setInterval createImportJobs, 1000 * 60 * 5
   createImportJobs()
         
         

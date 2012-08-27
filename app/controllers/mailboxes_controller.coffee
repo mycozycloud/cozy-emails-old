@@ -23,9 +23,9 @@ action 'index', ->
 
 # POST /mailboxes
 action 'create', ->
-  Mailbox.create req.body, (error) =>
+  Mailbox.create req.body, (error, mailbox) =>
     if !error
-      send {success: true}
+      send {success: true, mailbox: mailbox}
     else
       send 500
 

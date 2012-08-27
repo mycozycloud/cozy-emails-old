@@ -1,3 +1,10 @@
+# User defines user that can interact with the Cozy instance.
+User = define 'User', ->
+    property 'email', String, index: true
+    property 'password', String
+    property 'owner', Boolean, default: false
+    property 'activated', Boolean, default: false
+
 Mail = define 'Mail', ->
     property 'mailbox', index: true
     property 'id_remote_mailbox', index: true
@@ -19,7 +26,7 @@ Mail = define 'Mail', ->
     property 'hasAttachments', Boolean, default: false
     
 Attachment = define 'Attachment', ->
-    property 'mailId', index: true
+    property 'mail_id', index: true
     property 'cid', Number
     property 'fileName',
     property 'contentType',
@@ -27,7 +34,7 @@ Attachment = define 'Attachment', ->
     property 'checksum'
     property 'content', Text
     
-Mail.hasMany(Attachment, {as: 'attachments',  foreignKey: 'mailId'});
+Mail.hasMany(Attachment, {as: 'attachments',foreignKey: 'mail_id'});
     
 Mailbox = define 'Mailbox', ->
     property 'new_messages', default: 0
