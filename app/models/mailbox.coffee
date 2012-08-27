@@ -129,17 +129,16 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
       
   server.on "error", (error) ->
     console.log "[SERVER ERROR]: " + error.toString()
-    callback error
     mailbox.updateAttributes {status: error.toString()}, (err) ->
       console.log "Mailbox update with error status"
+      callback error
 
   server.on "close", (error) ->
     mailbox.updateAttributes {IMAP_last_sync: new Date().toJSON()}, (error) ->
       if error
         server.emit "error", error
       else
-        mailbox.updateAttributes {status: ""}, (err) ->
-          callback()
+        callback()
   
   # process.on 'uncaughtException', (err) ->
   #   console.error "uncaughtException"
@@ -253,7 +252,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                             # console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
                             updates = {
                               activated: true
-                              status: totalMailsDone / totalMailsToGo * 100 + "% complete"
+                              # status: totalMailsDone / totalMailsToGo * 100 + "% complete"
                             }
                           
                             # update last fetched element

@@ -70,7 +70,7 @@ if not module.parent
     
       job.on 'complete', () ->
         console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
-        mailbox.updateAttributes {imported: true}, (error) ->
+        mailbox.updateAttributes {imported: true, status: "Import successful !"}, (error) ->
           unless error
             console.log "Import successful !"
           else
@@ -86,6 +86,7 @@ if not module.parent
         if progress != lastProgress
           console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
           lastProgress = progress
+          mailbox.updateAttributes {status: "Import " + progress + " %"}
       
   app.createImportJobs = =>
     console.log "createImportJobs"
@@ -93,9 +94,8 @@ if not module.parent
       for mailbox in mailboxes
         app.createImportJob mailbox
 
-  setInterval app.createImportJobs, 1000 * 60 * 10
-  app.createImportJobs()
-        
+  # check for forgotten, unimported jobs every 7 minutes
+  setInterval app.createImportJobs, 1000 * 60 * 7
         
   # KUE jobs
   @jobs.process "check mailbox", 1, (job, done) ->

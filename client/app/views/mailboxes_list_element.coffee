@@ -48,11 +48,12 @@ class exports.MailboxesListElement extends Backbone.View
     
   # fetch mailbox
   buttonFetchMailbox: (event) ->
+    view = @
     $(event.target).addClass("disabled").removeClass("fetch_mailbox").text("Loading...")
     @model.fetch {
       success: ->
         $(event.target).removeClass("disabled").addClass("fetch_mailbox").text("Status verified")
-        @render()
+        view.render()
     }
 
   # enter edit mode

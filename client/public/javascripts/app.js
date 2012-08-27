@@ -1140,11 +1140,13 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
       };
 
       MailboxesListElement.prototype.buttonFetchMailbox = function(event) {
+        var view;
+        view = this;
         $(event.target).addClass("disabled").removeClass("fetch_mailbox").text("Loading...");
         return this.model.fetch({
           success: function() {
             $(event.target).removeClass("disabled").addClass("fetch_mailbox").text("Status verified");
-            return this.render();
+            return view.render();
           }
         });
       };
@@ -2809,12 +2811,11 @@ window.require.define({"views/templates/_mailbox/mailbox": function(exports, req
   buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('btn') }));
   buf.push('>Edit</a><a');
   buf.push(attrs({ "class": ('delete_mailbox') + ' ' + ('btn') + ' ' + ('btn-danger') }));
-  buf.push('>Delete</a></div>');
+  buf.push('>Delete</a></div></p>');
   if ( model.get("status"))
   {
   buf.push('<p><i>status: ' + escape((interp = model.get('status')) == null ? '' : interp) + '</i></p>');
   }
-  buf.push('</p>');
   }
   return buf.join("");
   };

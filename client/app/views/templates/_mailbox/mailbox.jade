@@ -8,6 +8,6 @@ p
     a.fetch_mailbox.btn Verify status
     a.edit_mailbox.btn Edit
     a.delete_mailbox.btn.btn-danger Delete
-  if model.get("status")
-    p
-      i  status: #{model.get('status')}
+if model.get("status")
+  p
+    i  status: #{model.get('status')}
