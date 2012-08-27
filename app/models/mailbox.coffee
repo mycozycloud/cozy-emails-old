@@ -128,13 +128,13 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
     console.log "[SERVER ALERT]" + alert
       
   server.on "error", (error) ->
-    console.log "[SERVER ERROR]" + error.toString()
+    console.log "[SERVER ERROR]: " + error.toString()
     callback error
     mailbox.updateAttributes {status: error.toString()}, (err) ->
-      console.log "Mailbox update with error status OK"
+      console.log "Mailbox update with error status"
 
   server.on "close", (error) ->
-    mailbox.updateAttributes {IMAP_last_sync: new Date().toJSON()}, (err) ->
+    mailbox.updateAttributes {IMAP_last_sync: new Date().toJSON()}, (error) ->
       if error
         server.emit "error", error
       else
@@ -226,7 +226,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                           read:         "\\Seen" in messageFlags
                           flagged:      "\\Flagged" in messageFlags
                           
-                          hasAttachments: mailParsedObject.attachments?
+                          hasAttachments: if mailParsedObject.attachments then true else false
                         
                         mailbox.mails.create mail, (err, mail) ->
             

@@ -79,11 +79,10 @@ class exports.MailsElement extends Backbone.View
     @createAnswerView()
     window.app.mailtosend.set 
       mode: "forward"
+    window.app.mailtosend.trigger "change_mode"
     window.app.viewAnswer.setBasic true
     window.app.viewAnswer.setTo true
     window.app.viewAnswer.setAdvanced false
-    
-    window.app.mailtosend.trigger "change_mode"
 
     # scroll down the view, to show the answer form
     @scrollDown()
