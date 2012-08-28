@@ -10,8 +10,8 @@ if not module.parent
   console.log "CozyMail server listening on port %d within %s environment", port, app.settings.env
   
   # setup KUE
-  #@kue = require 'kue'
-  @kue.app.listen 3003
+  @kue = require 'kue'
+  #@kue.app.listen 3003
   Job = @kue.Job
   @jobs = @kue.createQueue()
   
