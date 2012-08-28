@@ -10,7 +10,7 @@
 before ->
   Mailbox.find req.params.id, (err, box) =>
     if err or !box
-      send 403
+      send 404
     else
       @box = box
       next()
