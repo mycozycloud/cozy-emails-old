@@ -5,6 +5,7 @@
     Railwayjs controller to handle mailboxes CRUD backend plus a gateway to send mails via a mailbox.
 ###
 
+load "application"
 
 # shared functionnality : find the mailbox via its ID
 before ->

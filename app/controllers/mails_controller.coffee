@@ -5,6 +5,8 @@
     Railwayjs controller to handle mails CRUD backend and their attachments.
 ###
 
+load 'application'
+
 # shared functionnality : find the mail via its ID
 before ->
   Mail.find req.params.id, (err, box) =>
