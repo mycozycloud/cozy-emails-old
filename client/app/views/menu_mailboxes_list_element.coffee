@@ -13,7 +13,8 @@ class exports.MenuMailboxListElement extends Backbone.View
     super()
     
   events: {
-    "click" : 'setupMailbox'
+    "click a.menu_choose" : 'setupMailbox'
+    # "click" : 'setupMailbox'
   }
 
   setupMailbox: (event) ->

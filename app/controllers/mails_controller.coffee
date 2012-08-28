@@ -5,11 +5,13 @@
     Railwayjs controller to handle mails CRUD backend and their attachments.
 ###
 
+load 'application'
+
 # shared functionnality : find the mail via its ID
 before ->
   Mail.find req.params.id, (err, box) =>
     if err or !box
-      send 403
+      send 404
     else
       @box = box
       next()
@@ -71,11 +73,11 @@ action 'getnewlist', ->
 action 'getattachmentslist', ->
   Mail.find req.params.mail, (err, box) =>
     if err or !box
-      send 403
+      send 404
     else
       box.attachments (error, attachments) =>
         if error
-          send 403
+          send 500
         else
           send attachments
           
@@ -83,7 +85,7 @@ action 'getattachmentslist', ->
 action 'getattachment', ->
   Attachment.find req.params.attachment, (err, box) =>
     if err or !box
-      send 403
+      send 404
     else
       header "Content-Type", "application/force-download"
       header "Content-Disposition", 'attachment; filename="' + box.fileName + '"'

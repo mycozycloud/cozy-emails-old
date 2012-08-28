@@ -1,10 +1,13 @@
+h3 #{model.get('name')}
 p
-  strong #{model.get('name')}
-  | : 
   i "#{model.get('SMTP_send_as')}" 
   i last check at #{model.IMAPLastFetchedDate()} 
-  a.edit_mailbox.isntEdit.btn Edit
-  a.delete_mailbox.isntEdit.btn.btn-danger Delete
-  if model.get("status")
-    p
-      i  status: #{model.get('status')}
+  
+if model.get("status")
+  p
+    i  status: #{model.get('status')}
+.btn-group
+  a.fetch_mails.btn Check for new mail
+  a.fetch_mailbox.btn Verify status
+  a.edit_mailbox.btn Edit
+  a.delete_mailbox.btn.btn-danger Delete
