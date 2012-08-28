@@ -7,7 +7,7 @@ app = require('../server')
 client = new Client("http://localhost:8888/")
 
 
-describe "Test section", ->
+describe "Test of mailboxes; ", ->
 
     before (done) ->
         app.listen(8888)
@@ -34,18 +34,22 @@ describe "Test section", ->
             client.post "mailboxes/", mailbox, (error, response, body) =>
                 @response = response
                 @body = body
-                done()
+                done(error)
 
         it "Then a success is returned that contains a mailbox with an id", (done) ->
+            
+            # @body = JSON.parse @body
             should.exist @body
-            should.exist @body.mailbox.id
+            should.exist @body.id
             @response.statusCode.should.equal 200
 
-            @body.mailbox.login.should.equal "logintest"
+            @body.login.should.equal "logintest"
             
-            @idToRetrieve = @body.mailbox.id
+            @idToRetrieve = @body.id
             
             done()
+            
+    describe "Nom let's check the update; ", ->
             
         it "Once it's stored, we can retrieve it by its id (show)", (done) ->
             client.get "mailboxes/" + @idToRetrieve, (error, response, body) =>
@@ -54,7 +58,8 @@ describe "Test section", ->
                 done(error)
         
         it "And the data should be the same, as stored in the beginning", (done) ->
-            console.log "BOOOODY: " + @body + " END BODY"
+            
+            @body = JSON.parse @body
             should.exist @body
             # should.exist @body.id
 
@@ -66,17 +71,17 @@ describe "Test section", ->
             
         it "Also, it's nice to be able to update the object, via its id", (done) ->
             attrs = {
-              checked: "yes"
-              config: "128"
+              checked: false
+              config: 128
               name: "name_updated"
               login: "login_updated"
               pass: "pass_updated"
               SMTP_server: "test.smtp.server.domain"
-              SMTP_ssl: "yeah"
+              SMTP_ssl: false
               SMTP_send_as: "test_send_as"
               IMAP_server: "test.server.domain"
               IMAP_port: "123"
-              IMAP_secure: "yeah"
+              IMAP_secure: false
               color: "red hot chilli"
             }
             client.put "mailboxes/" + @idToRetrieve, attrs, (error, response, body) =>
@@ -91,20 +96,29 @@ describe "Test section", ->
                 done()
                 
         it "And all of the values are changed", (done) ->
+          
+            @body = JSON.parse @body
+          
             should.exist @body
             should.exist @body.id
 
-            @body.checked.should.equal "yes"
-            @body.config.should.equal "128"
+            @body.checked.should.equal false
+            @body.config.should.equal 128
             @body.name.should.equal "name_updated"
             @body.login.should.equal "login_updated"
             @body.pass.should.equal "pass_updated"
             @body.SMTP_server.should.equal "test.smtp.server.domain"
-            @body.SMTP_ssl.should.equal "yeah"
+            @body.SMTP_ssl.should.equal false
             @body.SMTP_send_as.should.equal "test_send_as"
             @body.IMAP_server.should.equal "test.server.domain"
             @body.IMAP_port.should.equal "123"
-            @body.IMAP_secure.should.equal "yeah"
+            @body.IMAP_secure.should.equal false
             @body.color.should.equal "red hot chilli"
 
             done()
+
+        it "Now we can delete it", (done) ->
+            client.delete "mailboxes/" + @idToRetrieve, (error, response, body) =>
+                @response = response
+                @body = body
+                done(error)

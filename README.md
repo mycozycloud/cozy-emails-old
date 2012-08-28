@@ -57,7 +57,7 @@ Basically, what You need to do is:
 * install dependencies: npm install
 * you may like to install coffee globally: npm install -g coffee
 * run the server: coffee server.coffee
-* open your browser at localhost:8001 and enjoy!
+* open your browser at localhost:8003 and enjoy!
 
 
 

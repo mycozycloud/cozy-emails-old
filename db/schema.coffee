@@ -46,7 +46,7 @@ Mailbox = define 'Mailbox', ->
     property 'createdAt', Date, default: Date
     property 'SMTP_server'
     property 'SMTP_send_as'
-    property 'SMTP_ssl'
+    property 'SMTP_ssl', Boolean, default: true
     property 'IMAP_server'
     property 'IMAP_port'
     property 'IMAP_secure', Boolean, default: true
