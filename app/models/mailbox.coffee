@@ -140,9 +140,9 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
       else
         callback()
   
-  process.on 'uncaughtException', (error) ->
-    console.error "uncaughtException"
-    server.emit "error", new Error "uncaughtException"
+  # process.on 'uncaughtException', (error) ->
+  #   console.error "uncaughtException"
+  #   server.emit "error", new Error "uncaughtException"
 
   emitOnErr = (err) ->
     if err
@@ -249,7 +249,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                             #            }
                             
             
-                            # console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
+                            console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
                             
                             updates = {
                               activated: true
@@ -277,8 +277,8 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                         messageFlags = message.flags
                         do parser.end
                                       
-                    # fetch.on "error", ->
-                    #   console.log "fetch error"
+                    fetch.on "error", (error) ->
+                      server.emit "error", error
 
                     fetch.on "end", ->
                       do server.logout

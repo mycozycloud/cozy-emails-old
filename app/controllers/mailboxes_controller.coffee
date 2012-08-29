@@ -68,12 +68,14 @@ action 'update', ->
 # DELETE /mailboxes/:id
 action 'destroy', ->
   @box.mails.destroyAll (error) =>
-    @box.destroy (error) ->
-      if !error
-        send 200
-      else
-        send 500
-      
+    if error
+      send 500
+    else
+      @box.destroy (error) ->
+        if !error
+          send 200
+        else
+          send 500
 
 # post /sendmail
 action 'sendmail', ->
