@@ -11,7 +11,9 @@ BaseModel = require("./models").BaseModel
 ###
 class exports.Mailbox extends BaseModel
 
-  @urlRoot = 'mailboxes/'
+  @urlRoot: 'mailboxes/'
+  
+  @url: 'mailboxes/'
 
   defaults:
     'checked' : true

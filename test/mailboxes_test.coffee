@@ -3,9 +3,7 @@ async = require('async')
 Client = require('../common/test/client').Client
 app = require('../server')
 
-
 client = new Client("http://localhost:8888/")
-
 
 describe "Test of mailboxes; ", ->
 

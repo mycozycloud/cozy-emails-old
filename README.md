@@ -61,6 +61,12 @@ Basically, what You need to do is:
 
 
 
+# TODO/Issues
+
+There are few things to implement yet:
+* attachments - because Cozy doesn't have it's solution to store files yet, CozyMails is waiting for that to store Your attachments,
+* displaying the attached images is mails - look above,
+
 
 
 

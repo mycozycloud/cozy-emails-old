@@ -29,6 +29,17 @@ class exports.MailboxesListElement extends Backbone.View
     super()
     @model.view = @
     
+  initialize: ->
+    view = @
+    model = @model
+    setInterval () ->
+      if not model.isEdit
+        model.url = 'mailboxes/' + model.id
+        model.fetch {
+          success: ->
+            view.render()
+        }
+    , 1000 * 10
   # updates the name of the mailbox
   updateName: (event) ->
     @model.set "name", $(event.target).val()
@@ -50,6 +61,7 @@ class exports.MailboxesListElement extends Backbone.View
   buttonFetchMailbox: (event) ->
     view = @
     $(event.target).addClass("disabled").removeClass("fetch_mailbox").text("Loading...")
+    @model.url = 'mailboxes/' + @model.id
     @model.fetch {
       success: ->
         $(event.target).removeClass("disabled").addClass("fetch_mailbox").text("Status verified")
