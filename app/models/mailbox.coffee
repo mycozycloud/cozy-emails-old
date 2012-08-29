@@ -148,8 +148,8 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
     if err
       server.emit "error", err
 
-  # TODO - socket errors on no-internet kind of situation produces an uncatched error
-  # Admittedly, it would be nice to find out why this is not being caught, wouldn't it ?
+
+
   server.connect (err) =>
   
     emitOnErr err 
@@ -276,9 +276,9 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                         messageId = message.id
                         messageFlags = message.flags
                         do parser.end
-                    
-                    fetch.on "error", ->
-                      console.log "fetch error"
+                                      
+                    # fetch.on "error", ->
+                    #   console.log "fetch error"
 
                     fetch.on "end", ->
                       do server.logout
