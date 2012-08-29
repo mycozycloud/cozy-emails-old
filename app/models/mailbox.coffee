@@ -276,6 +276,9 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                         messageId = message.id
                         messageFlags = message.flags
                         do parser.end
+                    
+                    fetch.on "error", ->
+                      console.log "fetch error"
 
                     fetch.on "end", ->
                       do server.logout
