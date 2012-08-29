@@ -1,0 +1,56 @@
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mPOST[22m [90m/mailboxes/[39m controller: [96mmailboxes[39m action: [34mcreate[39m
+[1mBody:  [22m{"name":"test.smpt.fr","login":"logintest","pass":"password","SMTP_server":"test.smpt.fr","SMTP_send_as":"mailman","SMTP_ssl":"true","IMAP_host":"localhost","IMAP_port":993,"IMAP_secure":"true"}
+Send to client: [Mailbox test.smpt.fr #503e2d84cee23c9beb000001]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mGET[22m [90m/mailboxes/503e2d84cee23c9beb000001[39m controller: [96mmailboxes[39m action: [34mshow[39m
+Send to client: [Mailbox test.smpt.fr #503e2d84cee23c9beb000001]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mPUT[22m [90m/mailboxes/503e2d84cee23c9beb000001[39m controller: [96mmailboxes[39m action: [34mupdate[39m
+[1mBody:  [22m{"checked":false,"config":128,"name":"name_updated","login":"login_updated","pass":"pass_updated","SMTP_server":"test.smtp.server.domain","SMTP_ssl":false,"SMTP_send_as":"test_send_as","IMAP_server":"test.server.domain","IMAP_port":"123","IMAP_secure":false,"color":"red hot chilli"}
+Send to client: [object Object]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mGET[22m [90m/mailboxes/503e2d84cee23c9beb000001[39m controller: [96mmailboxes[39m action: [34mshow[39m
+Send to client: [Mailbox name_updated #503e2d84cee23c9beb000001]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mDELETE[22m [90m/mailboxes/503e2d84cee23c9beb000001[39m controller: [96mmailboxes[39m action: [34mdestroy[39m
+[1mBody:  [22m{}
+Send to client: 200
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mPOST[22m [90m/mailboxes/[39m controller: [96mmailboxes[39m action: [34mcreate[39m
+[1mBody:  [22m{"name":"test","login":"logintest","pass":"passwordtest","SMTP_server":"localhost","SMTP_send_as":"test@localhost","SMTP_port":8889,"SMTP_ssl":false,"IMAP_host":"localhost","IMAP_port":8899,"IMAP_secure":false}
+Send to client: [Mailbox test #503e2d84cee23c9beb000002]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mGET[22m [90m/fetchmailboxandwait/503e2d84cee23c9beb000002[39m controller: [96mmailboxes[39m action: [34mfetchandwait[39m
+Send to client: [object Object]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m2[22m
+[1mGET[22m [90m/mailslist/1346252164350.1[39m controller: [96mmails[39m action: [34mgetlist[39m
+Send to client: [object Object]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mDELETE[22m [90m/mailboxes/503e2d84cee23c9beb000002[39m controller: [96mmailboxes[39m action: [34mdestroy[39m
+[1mBody:  [22m{}
+Send to client: 200
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mPOST[22m [90m/mailboxes/[39m controller: [96mmailboxes[39m action: [34mcreate[39m
+[1mBody:  [22m{"name":"test","login":"logintest","pass":"passwordtest","SMTP_server":"localhost","SMTP_send_as":"test@localhost","SMTP_port":8889,"SMTP_ssl":false,"IMAP_host":"localhost","IMAP_port":993,"IMAP_secure":false}
+Send to client: [Mailbox test #503e2d84cee23c9beb000004]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mPOST[22m [90m/sendmail/503e2d84cee23c9beb000004[39m controller: [96mmailboxes[39m action: [34msendmail[39m
+[1mBody:  [22m{"to":"support@mycozycloud.com","subject":"Test","html":"<br>This is html message</b>","cc":"","bcc":""}
+Send to client: [object Object]
+
+[33mWed Aug 29 2012 16:56:04 GMT+0200 (CEST)[39m [1m1[22m
+[1mDELETE[22m [90m/mailboxes/503e2d84cee23c9beb000004[39m controller: [96mmailboxes[39m action: [34mdestroy[39m
+[1mBody:  [22m{}
+Send to client: 200
