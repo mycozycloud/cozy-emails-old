@@ -1,10 +1,10 @@
 { "development":
   { "driver":   "mongoose"
-  , "url":      "mongodb://127.0.0.1/cozy-home"
+  , "url":      "mongodb://127.0.0.1/cozy-mail"
   }
 , "test":
   { "driver":   "mongoose"
-  , "url":      "mongodb://127.0.0.1/cozy-mail"
+  , "url":      "mongodb://127.0.0.1/cozy-mail-test"
   }
 , "production":
   { "driver":   "mongoose"

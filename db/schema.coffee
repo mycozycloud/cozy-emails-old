@@ -47,6 +47,7 @@ Mailbox = define 'Mailbox', ->
     property 'SMTP_server'
     property 'SMTP_send_as'
     property 'SMTP_ssl', Boolean, default: true
+    property 'SMTP_port', Number, default: 465
     property 'IMAP_server'
     property 'IMAP_port'
     property 'IMAP_secure', Boolean, default: true

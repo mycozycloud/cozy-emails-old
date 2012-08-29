@@ -28,7 +28,7 @@ Mailbox.prototype.sendMail = (data, callback) ->
   transport = nodemailer.createTransport("SMTP",
     host: @SMTP_server
     secureConnection: @SMTP_ssl
-    port: 465 # port for secure SMTP
+    port: @SMTP_port
     
     auth:
       user: @login
@@ -140,9 +140,9 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
       else
         callback()
   
-  # process.on 'uncaughtException', (err) ->
-  #   console.error "uncaughtException"
-  #   callback err
+  process.on 'uncaughtException', (error) ->
+    console.error "uncaughtException"
+    server.emit "error", new Error "uncaughtException"
 
   emitOnErr = (err) ->
     if err
@@ -250,6 +250,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                             
             
                             # console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
+                            
                             updates = {
                               activated: true
                               # status: totalMailsDone / totalMailsToGo * 100 + "% complete"
@@ -258,7 +259,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                             # update last fetched element
                             if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
                               updates.IMAP_last_fetched_id = mail.id_remote_mailbox
-                              updates.IMAPLastFetchedDate = new Date().toJSON()
+                              updates.IMAP_last_fetched_date = new Date().toJSON()
                         
                             mailbox.updateAttributes updates, (error) ->
                               unless error
@@ -268,6 +269,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order) ->
                                 callback error
 
                       message.on "data", (data) ->
+                        # console.log "DATA >> " + data.toString()
                         parser.write data.toString()
 
                       message.on "end", ->

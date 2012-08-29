@@ -713,6 +713,8 @@ window.require.define({"models/mailbox": function(exports, require, module) {
 
       Mailbox.urlRoot = 'mailboxes/';
 
+      Mailbox.url = 'mailboxes/';
+
       Mailbox.prototype.defaults = {
         'checked': true,
         'config': 0,
@@ -1121,6 +1123,22 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
         this.model.view = this;
       }
 
+      MailboxesListElement.prototype.initialize = function() {
+        var model, view;
+        view = this;
+        model = this.model;
+        return setInterval(function() {
+          if (!model.isEdit) {
+            model.url = 'mailboxes/' + model.id;
+            return model.fetch({
+              success: function() {
+                return view.render();
+              }
+            });
+          }
+        }, 1000 * 10);
+      };
+
       MailboxesListElement.prototype.updateName = function(event) {
         return this.model.set("name", $(event.target).val());
       };
@@ -1143,6 +1161,7 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
         var view;
         view = this;
         $(event.target).addClass("disabled").removeClass("fetch_mailbox").text("Loading...");
+        this.model.url = 'mailboxes/' + this.model.id;
         return this.model.fetch({
           success: function() {
             $(event.target).removeClass("disabled").addClass("fetch_mailbox").text("Status verified");
