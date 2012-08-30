@@ -15,7 +15,7 @@ before ->
     else
       @box = box
       next()
-, { only: ['show', 'update', 'destroy', 'sendmail', 'import', 'fetch'] }
+, { only: ['show', 'update', 'destroy', 'sendmail', 'import', 'fetch', 'fetchandwait'] }
 
 # GET /mailboxes
 action 'index', ->
@@ -68,12 +68,14 @@ action 'update', ->
 # DELETE /mailboxes/:id
 action 'destroy', ->
   @box.mails.destroyAll (error) =>
-    @box.destroy (error) ->
-      if !error
-        send 200
-      else
-        send 500
-      
+    if error
+      send 500
+    else
+      @box.destroy (error) ->
+        if !error
+          send 200
+        else
+          send 500
 
 # post /sendmail
 action 'sendmail', ->
@@ -115,3 +117,23 @@ action 'fetch', ->
           send {success: true}
         else
           send 500
+  
+# get /fetchmailboxandwait/:id
+action 'fetchandwait', ->
+    if !@box
+      send 500
+    else
+      job = {
+        progress: (at, from) ->
+          console.log "progress: " + at/from*100 + "%"
+        data: {
+          title: "fake job"
+          mailbox: @box
+        }
+      }
+      @box.getNewMail 1, (error) ->
+        if not error
+          send {success: true}
+        else
+          send 500
+      , job, "asc"

@@ -5211,7 +5211,7 @@ a[data-wysihtml5-command-value="blue"] {
 }body{padding-top:10px}
 .sidebar-nav{padding:9px 0}
 div.column{height:770px;overflow:auto}
-#message_box{position:absolute;top:15px;right:15px}
+#message_box{position:absolute;top:15px;right:15px;z-index:9}
 iframe{border-top-width:0;border-right-width:0;border-bottom-width:0;border-left-width:0;width:100%}
 textarea#html{width:100%}
 /* ==|== non-semantic helper classes ========================================

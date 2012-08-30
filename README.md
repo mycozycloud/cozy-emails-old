@@ -57,9 +57,15 @@ Basically, what You need to do is:
 * install dependencies: npm install
 * you may like to install coffee globally: npm install -g coffee
 * run the server: coffee server.coffee
-* open your browser at localhost:8001 and enjoy!
+* open your browser at localhost:8003 and enjoy!
 
 
+
+# TODO/Issues
+
+There are few things to implement yet:
+* attachments - because Cozy doesn't have it's solution to store files yet, CozyMails is waiting for that to store Your attachments,
+* displaying the attached images is mails - look above,
 
 
 

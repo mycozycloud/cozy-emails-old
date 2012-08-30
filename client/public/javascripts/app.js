@@ -418,7 +418,20 @@ window.require.define({"models/mail": function(exports, require, module) {
       };
 
       Mail.prototype.mailbox = function() {
-        return window.app.mailboxes.get(this.get("mailbox"));
+        if (!this.mailbox) {
+          this.mailbox = window.app.mailboxes.get(this.get("mailbox"));
+        }
+        return this.mailbox;
+      };
+
+      Mail.prototype.getColor = function() {
+        var box;
+        box = window.app.mailboxes.get(this.get("mailbox"));
+        if (box) {
+          return box.get("color");
+        } else {
+          return "white";
+        }
       };
 
       /*
@@ -713,6 +726,8 @@ window.require.define({"models/mailbox": function(exports, require, module) {
 
       Mailbox.urlRoot = 'mailboxes/';
 
+      Mailbox.url = 'mailboxes/';
+
       Mailbox.prototype.defaults = {
         'checked': true,
         'config': 0,
@@ -721,7 +736,7 @@ window.require.define({"models/mailbox": function(exports, require, module) {
         'pass': "pass",
         'SMTP_server': "smtp.gmail.com",
         'SMTP_ssl': true,
-        'SMTP_send_as': "Adam Smith",
+        'SMTP_send_as': "support@mycozycloud.com",
         'IMAP_server': "imap.gmail.com",
         'IMAP_port': 993,
         'IMAP_secure': true,
@@ -1121,6 +1136,22 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
         this.model.view = this;
       }
 
+      MailboxesListElement.prototype.initialize = function() {
+        var model, view;
+        view = this;
+        model = this.model;
+        return setInterval(function() {
+          if (!model.isEdit) {
+            model.url = 'mailboxes/' + model.id;
+            return model.fetch({
+              success: function() {
+                return view.render();
+              }
+            });
+          }
+        }, 1000 * 10);
+      };
+
       MailboxesListElement.prototype.updateName = function(event) {
         return this.model.set("name", $(event.target).val());
       };
@@ -1143,6 +1174,7 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
         var view;
         view = this;
         $(event.target).addClass("disabled").removeClass("fetch_mailbox").text("Loading...");
+        this.model.url = 'mailboxes/' + this.model.id;
         return this.model.fetch({
           success: function() {
             $(event.target).removeClass("disabled").addClass("fetch_mailbox").text("Status verified");
@@ -2651,7 +2683,7 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   if ( visible)
   {
   buf.push('<td');
-  buf.push(attrs({ 'style':('width: 5px; padding: 0; background-color: ' + (model.mailbox().get("color")) + ';') }));
+  buf.push(attrs({ 'style':('width: 5px; padding: 0; background-color: ' + model.getColor() + ';') }));
   buf.push('></td>');
   if ( active)
   {

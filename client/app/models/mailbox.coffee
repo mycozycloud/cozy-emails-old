@@ -11,7 +11,9 @@ BaseModel = require("./models").BaseModel
 ###
 class exports.Mailbox extends BaseModel
 
-  @urlRoot = 'mailboxes/'
+  @urlRoot: 'mailboxes/'
+  
+  @url: 'mailboxes/'
 
   defaults:
     'checked' : true
@@ -21,7 +23,7 @@ class exports.Mailbox extends BaseModel
     'pass' : "pass"
     'SMTP_server' : "smtp.gmail.com"
     'SMTP_ssl' : true
-    'SMTP_send_as' : "Adam Smith"
+    'SMTP_send_as' : "support@mycozycloud.com"
     'IMAP_server' : "imap.gmail.com"
     'IMAP_port' : 993
     'IMAP_secure' : true

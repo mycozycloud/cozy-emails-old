@@ -27,20 +27,20 @@ class exports.MailsList extends Backbone.View
   treatAdd: (mail) ->
 
     dateValueOf = mail.get("dateValueOf")
-    
+  
     # check if we are adding a new message, or an old one
     if dateValueOf <= window.app.mails.timestampMiddle
       # update timestamp for the list of messages
       if dateValueOf < window.app.mails.timestampOld
         window.app.mails.timestampOld = dateValueOf
-    
+  
       # add its view at the bottom of the list
       @addOne mail
     else
       # update timestamp for new messages
       if dateValueOf > window.app.mails.timestampNew
         window.app.mails.timestampNew = dateValueOf
-      
+    
       # add its view on top of the list
       @addNew mail
 

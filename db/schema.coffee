@@ -7,7 +7,7 @@ User = define 'User', ->
 
 Mail = define 'Mail', ->
     property 'mailbox', index: true
-    property 'id_remote_mailbox', index: true
+    property 'id_remote_mailbox',
     property 'createdAt', Number, default: 0, index: true
     property 'dateValueOf', Number, default: 0, index: true
     property 'date', Date, default: 0, index: true
@@ -46,7 +46,8 @@ Mailbox = define 'Mailbox', ->
     property 'createdAt', Date, default: Date
     property 'SMTP_server'
     property 'SMTP_send_as'
-    property 'SMTP_ssl'
+    property 'SMTP_ssl', Boolean, default: true
+    property 'SMTP_port', Number, default: 465
     property 'IMAP_server'
     property 'IMAP_port'
     property 'IMAP_secure', Boolean, default: true
