@@ -36,41 +36,14 @@ class exports.IMAPFake
         "A6 OK UID SEARCH Completed \r\n"
       ]
       [
-#         "* 1 FETCH (X-GM-THRID 1411578755167304621 X-GM-MSGID 1411578755167304621 X-GM-LABELS (\"\\Important\" \"\\Sent\") UID 1 INTERNALDATE \"28-Aug-2012 20:40:04 +0000\" FLAGS () BODYSTRUCTURE ((\"TEXT\" \"PLAIN\" (\"CHARSET\" \"utf-8\") NIL NIL \"QUOTED-PRINTABLE\" 4 0 NIL NIL NIL)(\"TEXT\" \"HTML\" (\"CHARSET\" \"utf-8\") NIL NIL \"QUOTED-PRINTABLE\" 4 0 NIL NIL NIL) \"ALTERNATIVE\" (\"BOUNDARY\" \"----mailcomposer-?=_1-1346186404309\") NIL NIL) BODY[] {968}\r\n
-# Return-Path: <jaime.la.viande.bovine@gmail.com>\r\n
-# Received: from ensi-vpn-2.imag.fr (ensi-vpn-2.imag.fr. [129.88.57.2])\r\n
-#         by mx.google.com with ESMTPS id k41sm64147732eep.13.2012.08.28.13.40.03\r\n
-#         (version=SSLv3 cipher=OTHER);\r\n
-#         Tue, 28 Aug 2012 13:40:04 -0700 (PDT)\r\n
-# MIME-Version: 1.0\r\n
-# X-Mailer: Nodemailer (0.3.22; +http://andris9.github.com/Nodemailer/)\r\n
-# Date: Tue, 28 Aug 2012 13:40:04 -0700 (PDT)\r\n
-# Message-Id: <1346186402417.5af634ff@Nodemailer>\r\n
-# From: jaime.la.viande.bovine22@gmail.com\r\n
-# To: jaimelaviandebovine@gmail.com\r\n
-# Subject: subject\r\n
-# Content-Type: multipart/alternative;\r\n
-#         boundary=\"----mailcomposer-?=_1-1346186404309\"\r\n
-# \r\n
-# ------mailcomposer-?=_1-1346186404309\r\n
-# Content-Type: text/plain; charset=utf-8\r\n
-# Content-Transfer-Encoding: quoted-printable\r\n
-# \r\n
-# html\r\n
-# ------mailcomposer-?=_1-1346186404309\r\n
-# Content-Type: text/html; charset=utf-8\r\n
-# Content-Transfer-Encoding: quoted-printable\r\n
-# \r\n
-# html\r\n
-# ------mailcomposer-?=_1-1346186404309--\r\n
-# )\r\n",
-        "* 1 FETCH (X-GM-THRID 1411578755167304621 X-GM-MSGID 1411578755167304621 X-GM-LABELS (\"\\Important\" \"\\Sent\") UID 1 INTERNALDATE \"28-Aug-2012 20:40:04 +0000\" FLAGS () BODYSTRUCTURE ((\"TEXT\" \"PLAIN\" (\"CHARSET\" \"utf-8\") NIL NIL \"QUOTED-PRINTABLE\" 4 0 NIL NIL NIL)(\"TEXT\" \"HTML\" (\"CHARSET\" \"utf-8\") NIL NIL \"QUOTED-PRINTABLE\" 4 0 NIL NIL NIL) \"ALTERNATIVE\" (\"BOUNDARY\" \"----mailcomposer-?=_1-1346186404309\") NIL NIL) BODY[] {794}\r\n
-Return-Path: <jaime.la.viande.bovine@gmail.com>\r\n
+        "* 1 FETCH (X-GM-THRID 12345 X-GM-MSGID 12345 X-GM-LABELS (\"\\Important\" \"\\Sent\") UID 1 INTERNALDATE \"28-Aug-2012 20:40:04 +0000\" FLAGS () BODYSTRUCTURE ((\"TEXT\" \"PLAIN\" (\"CHARSET\" \"utf-8\") NIL NIL \"QUOTED-PRINTABLE\" 4 0 NIL NIL NIL)(\"TEXT\" \"HTML\" (\"CHARSET\" \"utf-8\") NIL NIL \"QUOTED-PRINTABLE\" 4 0 NIL NIL NIL) \"ALTERNATIVE\" (\"BOUNDARY\" \"----mailcomposer-?=_1-1346186404309\") NIL NIL) BODY[] {782}\r\n
+Return-Path: <test@mycozycloud.com>\r\n
 Received: from localhost\r\n
-        Tue, 28 Aug 2012 13:40:04 -0700 (PDT)\r\n
+        Tue, 28 Aug 2012 01:02:03 -0700 (PDT)\r\n
 MIME-Version: 1.0\r\n
 X-Mailer: Nodemailer (0.3.22; +http://andris9.github.com/Nodemailer/)\r\n
-Date: Tue, 28 Aug 2012 13:40:04 -0700 (PDT)\r\n
+Date: Tue, 28 Aug 2012 01:02:03 -0700 (PDT)\r\n
+>>>>>>> 6b30f329a7da3bdab0556d42423b156ca80ec552
 Message-Id: <1346186402417.5af634ff@Nodemailer>\r\n
 From: test@mycozycloud.com\r\n
 To: support@mycozycloud.com\r\n

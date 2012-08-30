@@ -22,9 +22,16 @@ class exports.Mail extends BaseModel
     @view.render() if @view?
     
   mailbox: ->
-    window.app.mailboxes.get @get "mailbox"
-    
-    
+    if not @mailbox
+      @mailbox = window.app.mailboxes.get @get "mailbox"
+    @mailbox
+
+  getColor: ->
+    box = window.app.mailboxes.get @get "mailbox"
+    if box
+      box.get "color"
+    else
+      "white"
     
   ###
       RENDERING - these functions attr() replace @get "attr", and add some parsing logic.

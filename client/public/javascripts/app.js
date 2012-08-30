@@ -418,7 +418,20 @@ window.require.define({"models/mail": function(exports, require, module) {
       };
 
       Mail.prototype.mailbox = function() {
-        return window.app.mailboxes.get(this.get("mailbox"));
+        if (!this.mailbox) {
+          this.mailbox = window.app.mailboxes.get(this.get("mailbox"));
+        }
+        return this.mailbox;
+      };
+
+      Mail.prototype.getColor = function() {
+        var box;
+        box = window.app.mailboxes.get(this.get("mailbox"));
+        if (box) {
+          return box.get("color");
+        } else {
+          return "white";
+        }
       };
 
       /*
@@ -2670,7 +2683,7 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   if ( visible)
   {
   buf.push('<td');
-  buf.push(attrs({ 'style':('width: 5px; padding: 0; background-color: ' + (model.mailbox().get("color")) + ';') }));
+  buf.push(attrs({ 'style':('width: 5px; padding: 0; background-color: ' + model.getColor() + ';') }));
   buf.push('></td>');
   if ( active)
   {

@@ -1,5 +1,5 @@
 if visible
-  td(style='width: 5px; padding: 0; background-color: #{model.mailbox().get("color")};')
+  td(style='width: 5px; padding: 0; background-color: ' + model.getColor() + ';')
   if active
     td(style='background-color: lightgray; overflow: hidden;')
       p

@@ -7,7 +7,7 @@ User = define 'User', ->
 
 Mail = define 'Mail', ->
     property 'mailbox', index: true
-    property 'id_remote_mailbox', index: true
+    property 'id_remote_mailbox',
     property 'createdAt', Number, default: 0, index: true
     property 'dateValueOf', Number, default: 0, index: true
     property 'date', Date, default: 0, index: true
