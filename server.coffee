@@ -51,59 +51,112 @@ if not module.parent
         app.createCheckJob mailbox
         
   # set-up CRON
-  setInterval app.createCheckJobs, 1000 * 60 * 5
-  app.createCheckJobs()
+  # setInterval app.createCheckJobs, 1000 * 60 * 5
+  # app.createCheckJobs()
   
+##  - CREATEIMPORTJOB - 
 ## IMPORT A NEW MAILBOX
-
-  app.createImportJob = (mailbox) =>
+  app.createImportJob = (mailboxId) =>
     
-    if mailbox.imported == false and mailbox.importing == false
+    jobs = @jobs
+    lastProgress = -1
+    
+    # get the mailbox
+    Mailbox.find mailboxId, (error, mailbox) ->
+      if error
+        console.error "Import error.... The mailbox doesn't exist"
+      else
       
-      job = @jobs.create("import mailbox",
-        mailbox: mailbox
-        title: "Import of " + mailbox.name
-      ).save()
-      #.attempts(999).save()
+        # perform a setup
+        mailbox.setupImport (error) ->
+          
+          if error
+            mailbox.updateAttributes {imported: false, status: "Could not prepare the import."}, (error) ->
+                console.error "Could not prepare the import. Aborting."
+          else 
+          
+            job = jobs.create("import mailbox",
+              mailboxId: mailboxId
+              title: "Import of " + mailbox.name
+              waitAfterFail: 1000 * 60  # if fails, wait before next try 
+            )
+            .attempts(9999)  # on reessaie          
+            .save()
     
-      lastProgress = -1
-    
-      job.on 'complete', () ->
-        console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
-        mailbox.updateAttributes {imported: true, status: "Import successful !"}, (error) ->
-          unless error
-            console.log "Import successful !"
-          else
-            console.log "Import error...."
+            # on import complete
+            job.on 'complete', () ->
+              console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
+              # get the mailbox
+              Mailbox.find job.data.mailboxId, (error, mailbox) ->
+                if error
+                  console.error "Import error.... The mailbox doesn't exist anymore"
+                else
+                  # and update the status
+                  mailbox.updateAttributes {imported: true, status: "Import successful !"}, (error) ->
+                    unless error
+                      console.log "Import successful !"
+                    else
+                      console.error "Import error...."
 
-      job.on 'failed', () ->
-        console.log job.data.title + " #" + job.id + " failed at " + new Date().toUTCString()
-        mailbox.mails.destroyAll () ->
-          mailbox.updateAttributes {imported: false, importing: false, activated: false}, (error) ->
-            console.log "Import failed !"
+            # on import failed
+            job.on 'failed', () ->
+              console.log job.data.title + " #" + job.id + " failed at " + new Date().toUTCString()
+              # get the mailbox
+              Mailbox.find job.data.mailboxId, (error, mailbox) ->
+                if error
+                  console.error "Import error.... The mailbox doesn't exist anymore"
+                else
+                  # and update the status
+                  mailbox.updateAttributes {imported: false, importing: false, activated: false}, (error) ->
+                    console.error "Import failed !"
     
-      job.on 'progress', (progress) ->
-        if progress != lastProgress
-          console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
-          lastProgress = progress
-          mailbox.updateAttributes {status: "Import " + progress + " %"}, (error) ->
-            if error
-              console.log "Error trying to update attributes: " + error.toString()
+            # on import progress
+            job.on 'progress', (progress) ->
+              if progress != lastProgress
+                console.log job.data.title + ' #' + job.id + ' ' + progress + '% complete'
+                # get the mailbox
+                Mailbox.find job.data.mailboxId, (error, mailbox) ->
+                  if error
+                    console.log "Import error.... The mailbox doesn't exist anymore"
+                  else
+                    lastProgress = progress
+                    mailbox.updateAttributes {status: "Import " + progress + " %"}, (error) ->
+                      if error
+                        console.error "Error trying to update attributes: " + error.toString()
+
+##  - CREATEIMPORTJOB - END
       
-  app.createImportJobs = =>
-    console.log "createImportJobs"
-    Mailbox.all {where: {imported: false, importing: false}}, (err, mailboxes) ->
-      for mailbox in mailboxes
-        app.createImportJob mailbox
+  # app.createImportJobs = =>
+  #   console.log "createImportJobs"
+  #   Mailbox.all {where: {imported: false, importing: false}}, (err, mailboxes) ->
+  #     for mailbox in mailboxes
+  #       app.createImportJob mailbox.id
 
   # check for forgotten, unimported jobs every 7 minutes
-  setInterval app.createImportJobs, 1000 * 60 * 7
-        
+  # setInterval app.createImportJobs, 1000 * 60 * 7
+  
   # KUE jobs
-  @jobs.process "check mailbox", 1, (job, done) ->
-    console.log job.data.title + " #" + job.id + " job started at " + new Date().toUTCString()
-    (Mailbox job.data.mailbox).getNewMail job.data.num, done, job, "asc"
+  # @jobs.process "check mailbox", 1, (job, done) ->
+  #   console.log job.data.title + " #" + job.id + " job started at " + new Date().toUTCString()
+  #   Mailbox.all {where: {id: job.data.mailboxId}}, (error, mailbox) ->
+  #     if error
+  #       done error
+  #     else
+  #       mailbox.getNewMail job.data.num, done, job, "asc"
     
-  @jobs.process "import mailbox", 3, (job, done) ->
+  # @jobs.process "import mailbox", 1, (job, done) ->
+  #   console.log job.data.title + " #" + job.id + " job started at " + new Date().toUTCString()
+  #   Mailbox.find job.data.mailboxId, (error, mailbox) ->
+  #     if error
+  #       done error
+  #     else
+  #       mailbox.getAllMail job, done
+
+
+  @jobs.process "import mailbox", 1, (job, done) ->
     console.log job.data.title + " #" + job.id + " job started at " + new Date().toUTCString()
-    (Mailbox job.data.mailbox).getAllMail done, job
+    Mailbox.find job.data.mailboxId, (error, mailbox) ->
+      if error
+        done error
+      else
+        mailbox.doImport job, done

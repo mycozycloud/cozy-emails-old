@@ -15,12 +15,6 @@ class exports.Mail extends BaseModel
     @on "destroy", @removeView, @
     @on "change",  @redrawView, @
     
-  removeView: ->
-    @view.remove() if @view?
-
-  redrawView: ->
-    @view.render() if @view?
-    
   mailbox: ->
     if not @mailbox
       @mailbox = window.app.mailboxes.get @get "mailbox"

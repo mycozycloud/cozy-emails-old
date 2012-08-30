@@ -103,7 +103,7 @@ action 'import', ->
     if !@box
       send 500
     else
-      app.createImportJob @box
+      app.createImportJob @box.id
       send {success: true}
 
 

@@ -35,6 +35,10 @@ Attachment = define 'Attachment', ->
     property 'content', Text
     
 Mail.hasMany(Attachment, {as: 'attachments',foreignKey: 'mail_id'});
+
+MailToBe = define 'MailToBe', ->
+    property 'remoteId', Number, index: true
+    property 'mailbox', index: true
     
 Mailbox = define 'Mailbox', ->
     property 'new_messages', default: 0
@@ -54,10 +58,15 @@ Mailbox = define 'Mailbox', ->
     property 'IMAP_last_sync', Date, default: 0
     property 'IMAP_last_fetched_id', Number, default: 0
     property 'IMAP_last_fetched_date', Date, default: 0
-    property 'status'
+    
     property 'color', default: "#0099FF"
+  
+    property 'status', default: "Waiting for import"
     property 'activated', Boolean, default: false
     property 'imported', Boolean, default: false
     property 'importing', Boolean, default: false
+    property 'mailsToImport', Number, default: 0
+    property 'IMAP_first_fetched_id', Number, default: -1
     
 Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'});
+Mailbox.hasMany(MailToBe, {as: 'mailsToBe',  foreignKey: 'mailbox'});
