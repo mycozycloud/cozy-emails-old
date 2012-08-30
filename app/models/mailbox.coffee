@@ -433,7 +433,7 @@ Mailbox.prototype.doImport = (job, callback) ->
   server.on "error", (error) ->
     console.error "[ERROR]: " + error.toString()
     mailbox.updateAttributes {status: error.toString()}, (err) ->
-      console.error "Mailbox update with error status"
+      console.error "Mailbox update with error status" if debug
       callback error
 
   server.on "close", (error) ->
@@ -441,12 +441,12 @@ Mailbox.prototype.doImport = (job, callback) ->
 
   emitOnErr = (error) ->
     if error
-      server.emit "error", error
+      server.logout () ->
+        console.log "Error emitted on emitOnErr: " + error.toString() if debug
+        server.emit "error", error
   
   # lets get the ids from the database
   mailbox.mailsToBe {order: 'remoteId DESC'}, (err, mailsToBe) ->
-    
-    console.log "Mails to be: " + mailsToBe
     
     emitOnErr err 
     unless err
@@ -474,85 +474,103 @@ Mailbox.prototype.doImport = (job, callback) ->
                 
                 mailsToGo = mailsToBe.length
                 mailsDone = 0
-
+                
                 # for every ID which stays in the database
-                for mailToBe in mailsToBe
-
-                  messageId = ""
-                  messageFlags = []
-              
-                  fetch = server.fetch mailToBe.remoteId,
-                    request:
-                      body: "full"
-                      headers: false
-
-                  fetch.on "message", (message) ->
-                    parser = new mailparser.MailParser { streamAttachments: true }
-
-                    parser.on "end", (mailParsedObject) ->
-                      mail =
-                        date:         new Date(mailParsedObject.headers.date).toJSON()
-                        dateValueOf:  new Date(mailParsedObject.headers.date).valueOf()
-                        createdAt:    new Date().valueOf()
-          
-                        from:         JSON.stringify mailParsedObject.from
-                        to:           JSON.stringify mailParsedObject.to
-                        cc:           JSON.stringify mailParsedObject.cc
-                        subject:      mailParsedObject.subject
-                        priority:     mailParsedObject.priority
-          
-                        text:         mailParsedObject.text
-                        html:         mailParsedObject.html
-          
-                        id_remote_mailbox: messageId
-                        flags:        JSON.stringify messageFlags
-          
-                        headers_raw:  JSON.stringify mailParsedObject.headers
-                        # raw:          JSON.stringify mailParsedObject
+                fetchOne = (i) ->
+                  
+                  console.log "fetching one: " + i + "/" + mailsToBe.length if debug
+                  
+                  if i < mailsToBe.length
+                    
+                    mailToBe = mailsToBe[i]
+                  
+                    messageId = ""
+                    messageFlags = []
             
-                        read:         "\\Seen" in messageFlags
-                        flagged:      "\\Flagged" in messageFlags
-                        
-                        hasAttachments: if mailParsedObject.attachments then true else false
+                    fetch = server.fetch mailToBe.remoteId,
+                      request:
+                        body: "full"
+                        headers: false
+
+                    fetch.on "message", (message) ->
+                      parser = new mailparser.MailParser { streamAttachments: true }
+
+                      parser.on "end", (mailParsedObject) ->
+                        mail =
+                          date:         new Date(mailParsedObject.headers.date).toJSON()
+                          dateValueOf:  new Date(mailParsedObject.headers.date).valueOf()
+                          createdAt:    new Date().valueOf()
+        
+                          from:         JSON.stringify mailParsedObject.from
+                          to:           JSON.stringify mailParsedObject.to
+                          cc:           JSON.stringify mailParsedObject.cc
+                          subject:      mailParsedObject.subject
+                          priority:     mailParsedObject.priority
+        
+                          text:         mailParsedObject.text
+                          html:         mailParsedObject.html
+        
+                          id_remote_mailbox: messageId
+                          flags:        JSON.stringify messageFlags
+        
+                          headers_raw:  JSON.stringify mailParsedObject.headers
+                          # raw:          JSON.stringify mailParsedObject
+          
+                          read:         "\\Seen" in messageFlags
+                          flagged:      "\\Flagged" in messageFlags
                       
-                      # and now we can create a new mail on database, as a child of this mailbox
-                      mailbox.mails.create mail, (err, mail) ->
-      
-                        # ERROR
-                        emitOnErr err
-                        unless err
+                          hasAttachments: if mailParsedObject.attachments then true else false
+                    
+                        # and now we can create a new mail on database, as a child of this mailbox
+                        mailbox.mails.create mail, (err, mail) ->
+    
+                          # for now we will just skip messages which are being rejected by parser
+                          # emitOnErr err
+                          unless err
 
-                          # debug info
-                          console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug
-                          console.log "Destroying mailToBe #" + mailToBe.remoteId if debug
-                          
-                          mailToBe.destroy (error) ->
-                            unless error
-                              mailsDone++
-                              job.progress (mailbox.mailsToImport - (mailsToGo - mailsDone)), mailbox.mailsToImport
+                            # debug info
+                            console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug
+                        
+                            mailToBe.destroy (error) ->
+                              unless error
                               
-                              # when finished
-                              if mailsToGo == mailsDone
-                                callback()
+                                mailsDone++
+                                job.progress (mailbox.mailsToImport - (mailsToGo - mailsDone)), mailbox.mailsToImport
+                              
+                                # next iteration of our asynchronous for loop
+                                fetchOne(i + 1)
                                 
-                              # TODO a timeout
-                            else
-                              callback error
+                                # when finished
+                                if mailsToGo == mailsDone
+                                  callback()
+                              
+                                # TODO a timeout
+                              else
+                                callback error
+                          else
+                            console.error "Parser error - skipping this message for now"
+                            fetchOne(i + 1)
 
-                    message.on "data", (data) ->
-                      # on data, we feed the parser
-                      parser.write data.toString()
+                      message.on "data", (data) ->
+                        # on data, we feed the parser
+                        parser.write data.toString()
 
-                    message.on "end", ->
-                      # additional data to store, which is "forgotten" byt the parser
-                      # well, for now, we will store it on the parser itself
-                      messageId = message.id
-                      messageFlags = message.flags
-                      do parser.end
-                                    
-                  fetch.on "error", (error) ->
-                    # undocumented error emitted on fetch() object
-                    server.emit "error", error
+                      message.on "end", ->
+                        # additional data to store, which is "forgotten" byt the parser
+                        # well, for now, we will store it on the parser itself
+                        messageId = message.id
+                        messageFlags = message.flags
+                        do parser.end
+                                  
+                    fetch.on "error", (error) ->
+                      # undocumented error emitted on fetch() object
+                      server.logout () ->
+                        console.log "Error emitted on fetch object: " + error.toString() if debug
+                        server.emit "error", error
 
-                  fetch.on "end", ->
-                    do server.logout
+                  else
+                    # my job here is done
+                    server.logout () ->
+                      if mailsToGo != mailsDone
+                        callback new Error("Mails to import remain")
+                fetchOne(0)

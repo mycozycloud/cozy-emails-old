@@ -126,31 +126,16 @@ if not module.parent
 
 ##  - CREATEIMPORTJOB - END
       
-  # app.createImportJobs = =>
-  #   console.log "createImportJobs"
+  # app.createContinueImportJobs = =>
+  #   console.log "createContinueImportJobs"
   #   Mailbox.all {where: {imported: false, importing: false}}, (err, mailboxes) ->
   #     for mailbox in mailboxes
   #       app.createImportJob mailbox.id
 
   # check for forgotten, unimported jobs every 7 minutes
-  # setInterval app.createImportJobs, 1000 * 60 * 7
+  # setInterval app.createContinueImportJobs, 1000 * 60 * 7
   
-  # KUE jobs
-  # @jobs.process "check mailbox", 1, (job, done) ->
-  #   console.log job.data.title + " #" + job.id + " job started at " + new Date().toUTCString()
-  #   Mailbox.all {where: {id: job.data.mailboxId}}, (error, mailbox) ->
-  #     if error
-  #       done error
-  #     else
-  #       mailbox.getNewMail job.data.num, done, job, "asc"
-    
-  # @jobs.process "import mailbox", 1, (job, done) ->
-  #   console.log job.data.title + " #" + job.id + " job started at " + new Date().toUTCString()
-  #   Mailbox.find job.data.mailboxId, (error, mailbox) ->
-  #     if error
-  #       done error
-  #     else
-  #       mailbox.getAllMail job, done
+  @jobs.promote()
 
 
   @jobs.process "import mailbox", 1, (job, done) ->
