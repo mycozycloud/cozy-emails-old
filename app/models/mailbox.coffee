@@ -74,236 +74,227 @@ Mailbox.prototype.sendMail = (data, callback) ->
 
 
 ###
-  # Fetching new mail
-###
-Mailbox.prototype.getNewMail = (limit=250, callback, job, order)->
+  ## Fetching new mail from server
   
-  order = order or "asc"
-  
-  id = @IMAP_last_fetched_id + 1
-  console.log "# Fetching mail " + @ + " | UID " + id + ':' + (id + limit)
-  
-  @getMail "INBOX", [['UID', id + ':' + (id + limit)]], callback, job, order
+  # @job - kue job
+  # @callback - success callback
+  # @limit - how many new messages we want to download at max
 
+  # TODO : handle attachments - for now Cozy doesn't store BLOBs...
 ###
-  # Fetching all mail, in descending order (the newest ones first).
-  # "Flagging the milbox as "activated" when finished"
-###
-Mailbox.prototype.getAllMail = (job, callback) ->
+Mailbox.prototype.getNewMail = (job, callback, limit=250, order="asc")->
   
-  model = @
-  
-  @updateAttributes {importing: true}, (error) =>
-    console.log "# Fetching all mail from " + @
-    
-    if model.IMAP_first_fetched_id == -1
-      # on new import jobs
-      @getMail "INBOX", ['ALL'], callback, job, "desc", "import"
-    else
-      # retry an interrupted import job
-      console.log "1:" + [['UID', "1:" + (model.IMAP_first_fetched_id - 1)]]
-      @getMail "INBOX", [['UID', "1:" + (model.IMAP_first_fetched_id - 1)]], callback, job, "desc", "import"
-
-
-###
-  ## Generic function to downlaod mails from server
-  
-  # @boxname : name of the inbox, internal to the account on server
-  # @constraints : ar array of search critieria
-  # @callback : the function on complete or error
-  # [@order = "asc"] : the order of getting the messages form server - asc or desc
-
-  # TODO : handle attachements - for now, Cozy doesn't store BLOBs...
-###
-Mailbox.prototype.getMail = (boxname, constraints, callback, job, order, mode="check") ->
-
   ## dependences
   imap = require "imap"
   mailparser = require "mailparser"
 
-  mailbox = @
-
-  # let's create a connection
-  server = new imap.ImapConnection
-    username: mailbox.login
-    password: mailbox.pass
-    host:     mailbox.IMAP_server
-    port:     mailbox.IMAP_port
-    secure:   mailbox.IMAP_secure
+  # global vars
+  debug = true
   
-  
-  # set up lsiteners, handle errors and callback
-  server.on "alert", (alert) ->
-    console.log "[SERVER ALERT]" + alert
-      
-  server.on "error", (error) ->
-    console.error "[SERVER ERROR]: " + error.toString()
-    mailbox.updateAttributes {status: error.toString()}, (err) ->
-      console.error "Mailbox update with error status"
+  # reload
+  @reload (error, mailbox) ->
+    
+    if error
       callback error
-      # some some obscure reason, the following doesn't work
-      # if job.data.waitAfterFail?
-      #   console.log "Waiting until next try .."
-      #   setTimeout () ->
-      #     console.log "... next try"
-      #     callback error
-      #   , job.data.waitAfterFail
-      # else
-      #   callback error
-
-  server.on "close", (error) ->
-    mailbox.updateAttributes {IMAP_last_sync: new Date().toJSON()}, (error) ->
-      if error
-        server.emit "error", error
-      else
-        callback()
+    else
+      id = mailbox.IMAP_last_fetched_id + 1
+      console.log "Fetching mail " + mailbox + " | UID " + id + ':' + (id + limit) if debug
   
-  # process.on 'uncaughtException', (error) ->
-  #   console.error "uncaughtException"
-  #   server.emit "error", new Error "uncaughtException"
+      # let's create a connection
+      server = new imap.ImapConnection
+        username: mailbox.login
+        password: mailbox.pass
+        host:     mailbox.IMAP_server
+        port:     mailbox.IMAP_port
+        secure:   mailbox.IMAP_secure
 
-  emitOnErr = (err) ->
-    if err
-      server.emit "error", err
+      # set up listeners, handle errors and callback
+      server.on "alert", (alert) ->
+        console.log "[SERVER ALERT]" + alert
 
-  # LET THE GAMES BEGIN
-  server.connect (err) =>
-  
-    emitOnErr err
-    unless err
-    
-      server.openBox boxname, false, (err, box) ->
-    
-        emitOnErr err
+      server.on "error", (error) ->
+        console.error "[ERROR]: " + error.toString()
+        mailbox.updateAttributes {status: error.toString()}, (err) ->
+          console.error "Mailbox update with error status"
+          callback error
+
+      server.on "close", (error) ->
+        console.log "Connection closed: " + error.toString() if debug
+        
+      emitOnErr = (err) ->
+        if err
+          server.emit "error", err
+
+      # LET THE GAMES BEGIN
+      server.connect (err) =>
+
+        emitOnErr err 
         unless err
-        
-          # update number of new mails
-          mailbox.updateAttributes {new_messages: box.messages.new}, (error) ->
-      
-            # search mails on server satisfying constraints
-            server.search constraints, (err, results) =>
-        
-              emitOnErr err
-              unless err
+    
+          console.log "Connection established successfuly" if debug
 
-                # nothing to download
-                unless results.length
-                  console.log "nothing to download"
-                  server.logout()
-        
-                # mails to fetch
-                else
-                  console.log "Downloading [" + results.length + "] mails"
-                  if order.toUpperCase() == "DESC"
-                    results.sort(
-                      (a,b) ->
-                        b - a
-                    )
-                  console.log "RESULTS:"
-                  console.log results
-                                
-                  # lets check out how many mails we have to go
-                  totalMailsToGo = results.length
-                  totalMailsDone = 0
-                 
-                
-                  for id in results
-                    
-                    messageId = ""
-                    messageFlags = []
-                
-                    fetch = server.fetch id,
-                      request:
-                        body: "full"
-                        headers: false
+          server.openBox 'INBOX', false, (err, box) ->
 
-                    fetch.on "message", (message) ->
-                      parser = new mailparser.MailParser { streamAttachments: true }
-                      # parser = new mailparser.MailParser
- 
-                      parser.on "end", (mailParsedObject) ->
-                        mail =
-                          date:         new Date(mailParsedObject.headers.date).toJSON()
-                          dateValueOf:  new Date(mailParsedObject.headers.date).valueOf()
-                          createdAt:    new Date().valueOf()
-            
-                          from:         JSON.stringify mailParsedObject.from
-                          to:           JSON.stringify mailParsedObject.to
-                          cc:           JSON.stringify mailParsedObject.cc
-                          subject:      mailParsedObject.subject
-                          priority:     mailParsedObject.priority
-            
-                          text:         mailParsedObject.text
-                          html:         mailParsedObject.html
-            
-                          id_remote_mailbox: messageId
-                          flags:        JSON.stringify messageFlags
-            
-                          headers_raw:  JSON.stringify mailParsedObject.headers
-                          # raw:          JSON.stringify mailParsedObject
+            emitOnErr err
+            unless err
+        
+              console.log "INBOX opened successfuly" if debug
               
-                          read:         "\\Seen" in messageFlags
-                          flagged:      "\\Flagged" in messageFlags
-                          
-                          hasAttachments: if mailParsedObject.attachments then true else false
+              # search mails on server satisfying constraints
+              server.search [['UID', id + ':' + (id + limit)]], (err, results) =>
+
+                emitOnErr err
+                unless err
+
+                  console.log "Search query successful" if debug
+              
+                  # nothing to download
+                  unless results.length
+                    console.log "Nothing to download" if debug
+                    server.logout () ->
+                      callback()
+                  else
+                    console.log "[" + results.length + "] mails to download" if debug
+                
+                    mailsToGo = results.length
+                    mailsDone = 0
+                
+                    # for every ID, fetch the message
+                    # closure, to avoid sharing variables
+                    fetchOne = (i) ->
+                  
+                      console.log "fetching one: " + i + "/" + results.length if debug
+                  
+                      if i < results.length
+                    
+                        remoteId = results[i]
+                  
+                        messageFlags = []
+            
+                        fetch = server.fetch remoteId,
+                          request:
+                            body: "full"
+                            headers: false
+
+                        fetch.on "message", (message) ->
+                          parser = new mailparser.MailParser { streamAttachments: true }
+
+                          parser.on "end", (mailParsedObject) ->
                         
-                        # let's refresh the object from database, to make sure the attributes are fresh
-                        mailbox.reload (error, mailbox) ->
+                            # choose the right date
+                            if mailParsedObject.headers.date
+                              if mailParsedObject.headers.date.toString() == '[object Array]'
+                                # if an array pick the first date
+                                dateSent = new Date mailParsedObject.headers.date[0]
+                              else
+                                dateSent = new Date mailParsedObject.headers.date
+                            else
+                              dateSent = new Date()
+                        
+                            # compile the mail data
+                            mail =
+                              date:         dateSent.toJSON()
+                              dateValueOf:  dateSent.valueOf()
+                              createdAt:    new Date().valueOf()
+        
+                              from:         JSON.stringify mailParsedObject.from
+                              to:           JSON.stringify mailParsedObject.to
+                              cc:           JSON.stringify mailParsedObject.cc
+                              subject:      mailParsedObject.subject
+                              priority:     mailParsedObject.priority
+        
+                              text:         mailParsedObject.text
+                              html:         mailParsedObject.html
+        
+                              id_remote_mailbox: remoteId
+        
+                              headers_raw:  JSON.stringify mailParsedObject.headers
+                              # raw:          JSON.stringify mailParsedObject
                           
-                          # ERROR
-                          emitOnErr err
-                          unless err
+                              #optional parameters
+                              references:   mailParsedObject.references or ""
+                              inReplyTo:    mailParsedObject.inReplyTo or ""
+          
+                              # flags
+                              flags:        JSON.stringify messageFlags
+                              read:         "\\Seen" in messageFlags
+                              flagged:      "\\Flagged" in messageFlags
+                      
+                              hasAttachments: if mailParsedObject.attachments then true else false
                           
                             # and now we can create a new mail on database, as a child of this mailbox
                             mailbox.mails.create mail, (err, mail) ->
-            
-                              # ERROR
-                              emitOnErr err
+    
+                              # for now we will just skip messages which are being rejected by parser
+                              # emitOnErr err
                               unless err
 
-                                # just a debug info  on new mail
-                                console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from
+                                # debug info
+                                console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug
                             
-                                updates = {
-                                  activated: true
-                                }
-                          
-                                # update last fetched element
-                                if mail.id_remote_mailbox > mailbox.IMAP_last_fetched_id
-                                  updates.IMAP_last_fetched_id = mail.id_remote_mailbox
-                                  updates.IMAP_last_fetched_date = new Date().toJSON()
+                                # reload of the mailbox, in case we are not the only process to modify this
+                                # TODO: still not enough to process in parallel - we would need a transactions system or synchronisation
+                                mailbox.reload (error, mailbox) ->
                               
-                                # update first fetched element
-                                if mail.id_remote_mailbox < mailbox.IMAP_first_fetched_id or mailbox.IMAP_first_fetched_id == -1 
-                                  updates.IMAP_first_fetched_id = mail.id_remote_mailbox
-                        
-                                mailbox.updateAttributes updates, (error) ->
-                                  unless error
-                                    totalMailsDone++
-                                    if mode == "import"
-                                      job.progress mailbox.IMAP_last_fetched_id - mailbox.IMAP_first_fetched_id, box.messages.total
-                                    else
-                                      job.progress totalMailsDone, totalMailsToGo
+                                  if error
+                                    server.logout () ->
+                                      console.log "Error emitted on mailbox.reload: " + error.toString() if debug
+                                      server.emit "error", error
                                   else
-                                    callback error
+                                
+                                    # check if we need to update the last_fetch_id index in the mailbox
+                                    if mailbox.IMAP_last_fetched_id < mail.id_remote_mailbox
+                                  
+                                      mailbox.updateAttributes {IMAP_last_fetched_id: mail.id_remote_mailbox}, (error) ->
+                                    
+                                        if error
+                                          server.logout () ->
+                                            console.log "Error emitted on mailbox.update: " + error.toString() if debug
+                                            server.emit "error", error
+                                        else
+                                          console.log "New highest id saved to mailbox: " + mail.id_remote_mailbox if debug
+                                          mailsDone++
+                                          job.progress mailsDone, mailsToGo
+                                          # next iteration of our asynchronous for loop
+                                          fetchOne(i + 1)
+                                          # when finished
+                                          if mailsToGo == mailsDone
+                                            callback()
+                                    else
+                                      mailsDone++
+                                      job.progress mailsDone, mailsToGo
+                                      # next iteration of our asynchronous for loop
+                                      fetchOne(i + 1)
+                                      # when finished
+                                      if mailsToGo == mailsDone
+                                        callback()
+                              else
+                                console.error "Parser error - skipping this message for now: " + err.toString()
+                                fetchOne(i + 1)
 
-                      message.on "data", (data) ->
-                        # on data, we feed the parser
-                        parser.write data.toString()
+                          message.on "data", (data) ->
+                            # on data, we feed the parser
+                            parser.write data.toString()
 
-                      message.on "end", ->
-                        # additional data to store, which is "forgotten" byt the parser
-                        # well, for now, we will store it on the parser itself
-                        messageId = message.id
-                        messageFlags = message.flags
-                        do parser.end
-                                      
-                    fetch.on "error", (error) ->
-                      # undocumented error emitted on fetch() object
-                      server.emit "error", error
+                          message.on "end", ->
+                            # additional data to store, which is "forgotten" byt the parser
+                            # well, for now, we will store it on the parser itself
+                            messageFlags = message.flags
+                            do parser.end
+                                  
+                        fetch.on "error", (error) ->
+                          # undocumented error emitted on fetch() object
+                          server.logout () ->
+                            console.log "Error emitted on fetch object: " + error.toString() if debug
+                            server.emit "error", error
 
-                    fetch.on "end", ->
-                      do server.logout
+                      else
+                        # my job here is done
+                        server.logout () ->
+                          if mailsToGo != mailsDone
+                            server.emit "error", new Error("Could not import all the mail. Retry")
+                    # start the loop
+                    fetchOne(0)
 
 ###
   ## Specialised function to prepare a new mailbox for import and fetching new mail
@@ -380,30 +371,52 @@ Mailbox.prototype.setupImport = (callback) ->
                 
                 maxId = 0
                 
-                for id in results
+                # for every ID, fetch the message
+                # closure, to avoid sharing variables
+                fetchOne = (i) ->
                   
-                  # find the biggest ID
-                  if id > maxId
-                    maxId = id
+                  if i < results.length
+                    
+                    id = results[i]
                   
-                  mailbox.mailsToBe.create {remoteId: id}, (error, mailToBe) ->
+                    # find the biggest ID
+                    if parseInt(id) > maxId
+                      maxId = parseInt id
+                
+                    mailbox.mailsToBe.create {remoteId: id}, (error, mailToBe) ->
+                  
+                      # if an error occured, emit it on server
+                      if error
+                        server.logout () ->
+                          server.emit "error", error
+                      else
+                        console.log mailToBe.remoteId + " id saved successfully" if debug
+                        mailsDone++
+                        # job.progress mailsDone, mailsToGo
+                  
+                        # synchronise - all ids saved to the db
+                        if mailsDone == mailsToGo
+                          console.log "Finished saving ids to database; max id = " + maxId if debug
+                          mailbox.updateAttributes {mailsToImport: results.length, IMAP_last_fetched_id: maxId, activated: true, importing: true}, (err) ->
+                            server.logout () ->
+                              callback err
+                        else
+                          fetchOne(i + 1)
                     
-                    # if an error occured, emit it on server
-                    if error
-                      server.emit "error", error
-                    else
-                      console.log mailToBe.remoteId + " id saved successfully" if debug
-                      mailsDone++
-                      # job.progress mailsDone, mailsToGo
-                    
+                      # TODO - timeout for a fail job (blocked or something)
+                  else
                     # synchronise - all ids saved to the db
-                    if mailsDone == mailsToGo
-                      mailbox.updateAttributes {mailsToImport: results.length, IMAP_last_fetched_id: maxId, activated: true, importing: true}, (err) ->
-                        callback err
-                      
-                    # TODO - timeout for a fail job (blocked or something)
+                    if mailsDone != mailsToGo
+                      server.logout () ->
+                      server.emit "error", new Error "Error occured - not all ids could be stored to the database"
+                fetchOne(0)
 
 
+###
+  ## Specialised function to get as much mails as possible from ids stored previously in the database
+
+  # TODO : handle attachements - for now, Cozy doesn't store BLOBs...
+###
 
 Mailbox.prototype.doImport = (job, callback) ->
 
@@ -412,7 +425,6 @@ Mailbox.prototype.doImport = (job, callback) ->
   ## dependences
   imap = require "imap"
   mailparser = require "mailparser"
-  Step = require "step"
 
   mailbox = @
 
@@ -593,4 +605,5 @@ Mailbox.prototype.doImport = (job, callback) ->
                     server.logout () ->
                       if mailsToGo != mailsDone
                         server.emit "error", new Error("Could not import all the mail. Retry")
+                # start the loop
                 fetchOne(0)
