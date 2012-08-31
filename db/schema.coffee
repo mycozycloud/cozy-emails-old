@@ -24,6 +24,8 @@ Mail = define 'Mail', ->
     property 'read', Boolean, default: false
     property 'flagged', Boolean, default: false
     property 'hasAttachments', Boolean, default: false
+    property 'inReplyTo'
+    property 'references'
     
 Attachment = define 'Attachment', ->
     property 'mail_id', index: true

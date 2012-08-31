@@ -480,6 +480,7 @@ Mailbox.prototype.doImport = (job, callback) ->
                 mailsDone = 0
                 
                 # for every ID which stays in the database
+                # closure, to avoid sharing variables
                 fetchOne = (i) ->
                   
                   console.log "fetching one: " + i + "/" + mailsToBe.length if debug
@@ -488,7 +489,6 @@ Mailbox.prototype.doImport = (job, callback) ->
                     
                     mailToBe = mailsToBe[i]
                   
-                    messageId = ""
                     messageFlags = []
             
                     fetch = server.fetch mailToBe.remoteId,
@@ -500,9 +500,21 @@ Mailbox.prototype.doImport = (job, callback) ->
                       parser = new mailparser.MailParser { streamAttachments: true }
 
                       parser.on "end", (mailParsedObject) ->
+                        
+                        # choose the right date
+                        if mailParsedObject.headers.date
+                          if mailParsedObject.headers.date.toString() == '[object Array]'
+                            # if an array pick the first date
+                            dateSent = new Date mailParsedObject.headers.date[0]
+                          else
+                            dateSent = new Date mailParsedObject.headers.date
+                        else
+                          dateSent = new Date()
+                        
+                        # compile the mail data
                         mail =
-                          date:         new Date(mailParsedObject.headers.date).toJSON()
-                          dateValueOf:  new Date(mailParsedObject.headers.date).valueOf()
+                          date:         dateSent.toJSON()
+                          dateValueOf:  dateSent.valueOf()
                           createdAt:    new Date().valueOf()
         
                           from:         JSON.stringify mailParsedObject.from
@@ -514,17 +526,22 @@ Mailbox.prototype.doImport = (job, callback) ->
                           text:         mailParsedObject.text
                           html:         mailParsedObject.html
         
-                          id_remote_mailbox: messageId
-                          flags:        JSON.stringify messageFlags
+                          id_remote_mailbox: mailToBe.remoteId
         
                           headers_raw:  JSON.stringify mailParsedObject.headers
                           # raw:          JSON.stringify mailParsedObject
+                          
+                          #optional parameters
+                          references:   mailParsedObject.references or ""
+                          inReplyTo:    mailParsedObject.inReplyTo or ""
           
+                          # flags
+                          flags:        JSON.stringify messageFlags
                           read:         "\\Seen" in messageFlags
                           flagged:      "\\Flagged" in messageFlags
                       
                           hasAttachments: if mailParsedObject.attachments then true else false
-                    
+                          
                         # and now we can create a new mail on database, as a child of this mailbox
                         mailbox.mails.create mail, (err, mail) ->
     
@@ -562,7 +579,6 @@ Mailbox.prototype.doImport = (job, callback) ->
                       message.on "end", ->
                         # additional data to store, which is "forgotten" byt the parser
                         # well, for now, we will store it on the parser itself
-                        messageId = message.id
                         messageFlags = message.flags
                         do parser.end
                                   
