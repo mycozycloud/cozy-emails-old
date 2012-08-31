@@ -1,7 +1,12 @@
+###
+  @file: SMTP.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Small, fake SMTP server to fake interaction with CozyMail.
+
+###
 net = require("net")
 
-
-# Small, fake SMTP server to fake interaction with CozyMail.
 class exports.SMTPFake
   
   constructor: (@port) ->

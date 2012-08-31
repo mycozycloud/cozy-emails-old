@@ -26,6 +26,12 @@ class exports.Mail extends BaseModel
       box.get "color"
     else
       "white"
+      
+  redrawView: ->
+    @view.render() if @view?
+
+  removeView: ->
+    @view.remove() if @view?
     
   ###
       RENDERING - these functions attr() replace @get "attr", and add some parsing logic.

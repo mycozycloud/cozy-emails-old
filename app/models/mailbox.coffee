@@ -363,6 +363,7 @@ Mailbox.prototype.setupImport = (callback) ->
               unless results.length
                 console.log "Nothing to download" if debug
                 server.logout()
+                callback()
               else
                 console.log "[" + results.length + "] mails to download" if debug
                 
@@ -435,6 +436,7 @@ Mailbox.prototype.doImport = (job, callback) ->
     host:     mailbox.IMAP_server
     port:     mailbox.IMAP_port
     secure:   mailbox.IMAP_secure
+    # debug: console.log 
 
   # set up lsiteners, handle errors and callback
   server.on "alert", (alert) ->

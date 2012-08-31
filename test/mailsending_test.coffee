@@ -1,3 +1,10 @@
+###
+  @file: mailsending_test.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Tests set to verify CozyMail send well the messages.
+
+###
 should = require('should')
 async = require('async')
 Client = require('../common/test/client').Client

@@ -426,6 +426,14 @@ window.require.define({"models/mail": function(exports, require, module) {
         }
       };
 
+      Mail.prototype.redrawView = function() {
+        if (this.view != null) return this.view.render();
+      };
+
+      Mail.prototype.removeView = function() {
+        if (this.view != null) return this.view.remove();
+      };
+
       /*
             RENDERING - these functions attr() replace @get "attr", and add some parsing logic.
             To be used in views, to keep the maximum of logic related to mails in one place.

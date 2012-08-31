@@ -1,3 +1,10 @@
+###
+  @file: mailboxes_test.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    Tests set for mailboxes CRUD
+
+###
 should = require('should')
 async = require('async')
 Client = require('../common/test/client').Client

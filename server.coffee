@@ -1,4 +1,13 @@
 #!/usr/bin/env coffee
+
+###
+  @file: server.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The core of the application - the railwayjs server + kue jobs to import and fetch mail.
+
+###
+
 kue = require 'kue'
 jobs = kue.createQueue()
 
@@ -107,7 +116,7 @@ if not module.parent
               title: "Import of " + mailbox.name
               waitAfterFail: 1000 * 60  # if fails, wait before next try 
             )
-            .attempts(9999)  # on reessaie          
+            .attempts(9999)  # on reessaie
             .save()
     
             # on import complete
