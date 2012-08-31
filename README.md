@@ -52,7 +52,8 @@ Sure, it's free and easy. The code is open source and you can even propose an im
 
 Basically, what You need to do is:
 
-* install node.js,
+* install node.js, 
+* install and run mongodb and redis,
 * clone this repository,
 * install dependencies: npm install
 * you may like to install coffee globally: npm install -g coffee
