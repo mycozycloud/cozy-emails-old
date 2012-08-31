@@ -432,9 +432,15 @@ Mailbox.prototype.doImport = (job, callback) ->
 
   server.on "error", (error) ->
     console.error "[ERROR]: " + error.toString()
-    mailbox.updateAttributes {status: error.toString()}, (err) ->
-      console.error "Mailbox update with error status" if debug
-      callback error
+    
+    # this timeout is a walk-around for a buggy kue lib (delay doesn't work properly)
+    timeToRetry = job.data.waitAfterFail or 1000 * 30
+    console.error "Waiting " + timeToRetry + "ms before retry.... " + error.toString() if debug
+    setTimeout () ->
+      mailbox.updateAttributes {status: error.toString()}, (err) ->
+        console.error "Mailbox update with error status" if debug
+        callback error
+    , timeToRetry
 
   server.on "close", (error) ->
     console.log "Connection closed: " + error.toString() if debug
@@ -548,7 +554,7 @@ Mailbox.prototype.doImport = (job, callback) ->
                               else
                                 callback error
                           else
-                            console.error "Parser error - skipping this message for now"
+                            console.error "Parser error - skipping this message for now: " + err.toString()
                             fetchOne(i + 1)
 
                       message.on "data", (data) ->
@@ -572,5 +578,5 @@ Mailbox.prototype.doImport = (job, callback) ->
                     # my job here is done
                     server.logout () ->
                       if mailsToGo != mailsDone
-                        callback new Error("Mails to import remain")
+                        server.emit "error", new Error("Could not import all the mail. Retry")
                 fetchOne(0)
