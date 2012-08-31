@@ -43,6 +43,7 @@ Received: from localhost\r\n
 MIME-Version: 1.0\r\n
 X-Mailer: Nodemailer (0.3.22; +http://andris9.github.com/Nodemailer/)\r\n
 Date: Tue, 28 Aug 2012 01:02:03 -0700 (PDT)\r\n
+>>>>>>> 6b30f329a7da3bdab0556d42423b156ca80ec552
 Message-Id: <1346186402417.5af634ff@Nodemailer>\r\n
 From: test@mycozycloud.com\r\n
 To: support@mycozycloud.com\r\n

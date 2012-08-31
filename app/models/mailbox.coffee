@@ -169,7 +169,7 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order, mode="c
   # LET THE GAMES BEGIN
   server.connect (err) =>
   
-    emitOnErr err 
+    emitOnErr err
     unless err
     
       server.openBox boxname, false, (err, box) ->
@@ -304,8 +304,6 @@ Mailbox.prototype.getMail = (boxname, constraints, callback, job, order, mode="c
 
                     fetch.on "end", ->
                       do server.logout
-                      
-
 
 ###
   ## Specialised function to prepare a new mailbox for import and fetching new mail
