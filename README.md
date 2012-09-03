@@ -22,9 +22,6 @@ Cozy Mail will let You configure all your mailboxes via smtp+imap, synchronize t
 
 Yes, we paid much attention to make the interface easy to use, nice and lean.
 
-Future versions will allow a purchase of your own domain and remote backup in the background.
-
-
 
 # Well, great! So how it works ?
 
@@ -50,7 +47,11 @@ Because the datasystem of Cozy isn't ready yet, you can't manage attachments tho
 
 Sure, it's free and easy. The code is open source and you can even propose an improvement.
 
-Basically, what You need to do is:
+You can simply install it on your Cozy Cloud installation by clicking on the
+"add a new application" button and copy/pasting this git url in the displayed
+form: https://github.com/mycozycloud/cozy-mails.git 
+
+If you want to test it locally, what You need to do is:
 
 * install node.js, 
 * install and run mongodb and redis,
@@ -76,10 +77,12 @@ There are few things to implement yet:
 At the moment the application is being developed by Mikolaj Pawlikowski (mikolaj.pawlikowski.pl)
 
 
-
 # About Cozy
 
-Cozy Template is suited to be deployed on the Cozy platform. Cozy allow you to 
-host all your personal application in a single place you control. 
-You can manage efficiently your data while protecting your privacy.
-You will find more on our website : http://www.mycozycloud.com
+Cozy Mails is suited to be deployed on the Cozy platform. Cozy is the personal
+server for everyone. It allows you to install your every day web applications 
+easily on your server, a single place you control. This means you can manage 
+efficiently your data while protecting your privacy.
+
+More informations and hosting services on:
+http://www.mycozycloud.com
