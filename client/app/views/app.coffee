@@ -55,6 +55,7 @@ class exports.AppView extends Backbone.View
     window.app.viewMenu = new MenuMailboxesList @.$("#menu_mailboxes"), window.app.mailboxes
     
     # fetch necessary data
+    window.app.mailboxes.reset()
     window.app.mailboxes.fetch({
       success: ->
         window.app.mailboxes.updateActiveMailboxes()
@@ -80,6 +81,7 @@ class exports.AppView extends Backbone.View
     window.app.viewMailboxesNew.render()
     
     # fetch necessary data
+    window.app.mailboxes.reset()
     window.app.mailboxes.fetch({
       success: ->
         window.app.mailboxes.updateActiveMailboxes()
@@ -102,6 +104,7 @@ class exports.AppView extends Backbone.View
     window.app.viewComposeMail = new MailsCompose @.$("#compose_mail_container"), window.app.mailboxes
 
     # fetch necessary data
+    window.app.mailboxes.reset()
     window.app.mailboxes.fetch({
       success: ->
         window.app.mailboxes.updateActiveMailboxes()
@@ -129,6 +132,7 @@ class exports.AppView extends Backbone.View
     window.app.view_mail = new MailsElement @.$("#column_mail"), window.app.mails
     
     # fetch necessary data
+    window.app.mailboxes.reset()
     window.app.mailboxes.fetch({
       success: ->
         console.log "Initial mails mailboxes load OK"

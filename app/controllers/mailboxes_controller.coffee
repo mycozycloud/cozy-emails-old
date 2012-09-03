@@ -103,7 +103,7 @@ action 'import', ->
     if !@box
       send 500
     else
-      app.createImportJob @box
+      app.createImportJob @box.id
       send {success: true}
 
 
@@ -112,7 +112,7 @@ action 'fetch', ->
     if !@box
       send 500
     else
-      app.createCheckJob @box, (error) ->
+      app.createCheckJob @box.id, (error) ->
         if not error
           send {success: true}
         else
@@ -123,17 +123,17 @@ action 'fetchandwait', ->
     if !@box
       send 500
     else
+      # fake job object
       job = {
         progress: (at, from) ->
-          console.log "progress: " + at/from*100 + "%"
+          console.log "Fetch and wait progress: " + at/from*100 + "%"
         data: {
           title: "fake job"
-          mailbox: @box
+          mailboxId: @box.id
         }
       }
-      @box.getNewMail 1, (error) ->
+      @box.getNewMail job, (error) ->
         if not error
           send {success: true}
         else
           send 500
-      , job, "asc"

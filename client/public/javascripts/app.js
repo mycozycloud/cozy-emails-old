@@ -409,14 +409,6 @@ window.require.define({"models/mail": function(exports, require, module) {
         return this.on("change", this.redrawView, this);
       };
 
-      Mail.prototype.removeView = function() {
-        if (this.view != null) return this.view.remove();
-      };
-
-      Mail.prototype.redrawView = function() {
-        if (this.view != null) return this.view.render();
-      };
-
       Mail.prototype.mailbox = function() {
         if (!this.mailbox) {
           this.mailbox = window.app.mailboxes.get(this.get("mailbox"));
@@ -432,6 +424,14 @@ window.require.define({"models/mail": function(exports, require, module) {
         } else {
           return "white";
         }
+      };
+
+      Mail.prototype.redrawView = function() {
+        if (this.view != null) return this.view.render();
+      };
+
+      Mail.prototype.removeView = function() {
+        if (this.view != null) return this.view.remove();
       };
 
       /*
@@ -747,6 +747,10 @@ window.require.define({"models/mailbox": function(exports, require, module) {
         return this.on("destroy", this.removeView, this);
       };
 
+      Mailbox.prototype.redrawView = function() {
+        if (this.view != null) return this.view.render();
+      };
+
       Mailbox.prototype.removeView = function() {
         if (this.view != null) return this.view.remove();
       };
@@ -967,6 +971,7 @@ window.require.define({"views/app": function(exports, require, module) {
       AppView.prototype.setLayoutMenu = function() {
         this.containerMenu.html(require('./templates/menu'));
         window.app.viewMenu = new MenuMailboxesList(this.$("#menu_mailboxes"), window.app.mailboxes);
+        window.app.mailboxes.reset();
         return window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
@@ -983,6 +988,7 @@ window.require.define({"views/app": function(exports, require, module) {
         window.app.viewMailboxes = new MailboxesList(this.$("#mail_list_container"), window.app.mailboxes);
         window.app.viewMailboxesNew = new MailboxesListNew(this.$("#add_mail_button_container"), window.app.mailboxes);
         window.app.viewMailboxesNew.render();
+        window.app.mailboxes.reset();
         window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
@@ -996,6 +1002,7 @@ window.require.define({"views/app": function(exports, require, module) {
         this.setLayoutMenu();
         this.containerContent.html(require('./templates/_layouts/layout_compose_mail'));
         window.app.viewComposeMail = new MailsCompose(this.$("#compose_mail_container"), window.app.mailboxes);
+        window.app.mailboxes.reset();
         window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
@@ -1012,6 +1019,7 @@ window.require.define({"views/app": function(exports, require, module) {
         window.app.viewMailsList = new MailsColumn(this.$("#column_mails_list"), window.app.mails);
         window.app.viewMailsList.render();
         window.app.view_mail = new MailsElement(this.$("#column_mail"), window.app.mails);
+        window.app.mailboxes.reset();
         window.app.mailboxes.fetch({
           success: function() {
             console.log("Initial mails mailboxes load OK");
@@ -1139,17 +1147,7 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
       MailboxesListElement.prototype.initialize = function() {
         var model, view;
         view = this;
-        model = this.model;
-        return setInterval(function() {
-          if (!model.isEdit) {
-            model.url = 'mailboxes/' + model.id;
-            return model.fetch({
-              success: function() {
-                return view.render();
-              }
-            });
-          }
-        }, 1000 * 10);
+        return model = this.model;
       };
 
       MailboxesListElement.prototype.updateName = function(event) {

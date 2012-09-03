@@ -31,6 +31,24 @@ class exports.Mailbox extends BaseModel
 
   initialize: ->
     @on "destroy", @removeView, @
+    # if not in edit mode, update
+    # model = @
+    # 
+    # @intervalId = setInterval () ->
+    #   if not @isEdit
+    #     model.url = 'mailboxes/' + model.id
+    #     model.fetch {
+    #       success: ->
+    #         model.redrawView()
+    #     }
+    # , 1000 * 10
+    # 
+    # @on "destroy", () ->
+    #   clearInterval model.intervalId
+    # , @
+
+  redrawView: ->
+    @view.render() if @view?
 
   removeView: ->
     @view.remove() if @view?

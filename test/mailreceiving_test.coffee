@@ -1,3 +1,10 @@
+###
+  @file: mailreceiving_test.coffee
+  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+  @description: 
+    The set of test to receive a mail (IMAP).
+
+###
 should = require('should')
 async = require('async')
 Client = require('../common/test/client').Client

@@ -7,8 +7,6 @@ catch error
     global.secret_cookie_key = "secret"
     global.secret_session_key = "secret"
 
-
-
 passport = require 'passport'
 
 passport.serializeUser = (user, done) ->

@@ -32,14 +32,7 @@ class exports.MailboxesListElement extends Backbone.View
   initialize: ->
     view = @
     model = @model
-    setInterval () ->
-      if not model.isEdit
-        model.url = 'mailboxes/' + model.id
-        model.fetch {
-          success: ->
-            view.render()
-        }
-    , 1000 * 10
+    
   # updates the name of the mailbox
   updateName: (event) ->
     @model.set "name", $(event.target).val()
