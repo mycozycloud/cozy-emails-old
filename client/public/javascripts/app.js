@@ -8,7 +8,7 @@
   var cache = {};
 
   var has = function(object, name) {
-    return ({}).hasOwnProperty.call(object, name);
+    return hasOwnProperty.call(object, name);
   };
 
   var expand = function(root, name) {
@@ -37,7 +37,7 @@
     return function(name) {
       var dir = dirname(path);
       var absolute = expand(dir, name);
-      return globals.require(absolute);
+      return require(absolute);
     };
   };
 
@@ -243,7 +243,7 @@ window.require.define({"collections/mails": function(exports, require, module) {
       };
 
       MailsCollection.prototype.fetchOlder = function(callback) {
-        this.url = "mailslist/" + this.timestampOld + "." + this.mailsAtOnce;
+        this.url = "mailslist/" + this.timestampOld + "." + this.mailsAtOnce + "/" + this.lastIdOld;
         console.log("fetchOlder: " + this.url);
         return this.fetch({
           add: true,
@@ -252,7 +252,7 @@ window.require.define({"collections/mails": function(exports, require, module) {
       };
 
       MailsCollection.prototype.fetchNew = function() {
-        this.url = "mailsnew/" + this.timestampNew;
+        this.url = "mailsnew/" + this.timestampNew + "/" + this.lastIdNew;
         console.log("fetchNew: " + this.url);
         return this.fetch({
           add: true
@@ -1882,11 +1882,13 @@ window.require.define({"views/mails_list": function(exports, require, module) {
         if (dateValueOf <= window.app.mails.timestampMiddle) {
           if (dateValueOf < window.app.mails.timestampOld) {
             window.app.mails.timestampOld = dateValueOf;
+            window.app.mails.lastIdOld = mail.get("id");
           }
           return this.addOne(mail);
         } else {
           if (dateValueOf > window.app.mails.timestampNew) {
             window.app.mails.timestampNew = dateValueOf;
+            window.app.mails.lastIdNew = mail.get("id");
           }
           return this.addNew(mail);
         }
