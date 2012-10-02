@@ -114,3 +114,8 @@ blockquote {
   border-left: 2px solid gray;
   padding-left: 5px;
 }
+
+body.content.wysihtml5-editor blockquote
+  border-left: 5px gray solid
+  margin-left: 15px
+  padding-left: 10px

@@ -521,6 +521,10 @@ window.require.define({"models/mail": function(exports, require, module) {
         return parsed.toUTCString();
       };
 
+      Mail.prototype.respondingToText = function() {
+        return this.fromShort() + " on " + this.date() + " wrote:";
+      };
+
       Mail.prototype.subjectResponse = function(mode) {
         var subject;
         if (mode == null) mode = "answer";
@@ -577,6 +581,12 @@ window.require.define({"models/mail": function(exports, require, module) {
         return (html != null) && html !== "";
       };
 
+      Mail.prototype.hasText = function() {
+        var text;
+        text = this.get("text");
+        return (text != null) && text !== "";
+      };
+
       Mail.prototype.hasAttachments = function() {
         return this.get("hasAttachments");
       };
@@ -586,6 +596,14 @@ window.require.define({"models/mail": function(exports, require, module) {
           return this.html();
         } else {
           return this.text();
+        }
+      };
+
+      Mail.prototype.textOrHtml = function() {
+        if (this.hasText()) {
+          return this.text();
+        } else {
+          return this.html();
         }
       };
 
@@ -1801,7 +1819,7 @@ window.require.define({"views/mails_element": function(exports, require, module)
               $("#mail_content_html").contents().find("head").append('<link rel="stylesheet" href="css/reset_bootstrap.css">');
               $("#mail_content_html").contents().find("head").append('<base target="_blank">');
               return $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
-            }, 1);
+            }, 50);
             window.app.viewAttachments = new MailsAttachmentsList($("#attachments_list"), this.collection.activeMail);
           }
         }
@@ -2416,7 +2434,13 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><textarea');
   buf.push(attrs({ 'id':("html"), 'rows':(15), 'cols':(80), "class": ('content') + ' ' + ('span10') + ' ' + ('input-xlarge') }));
-  buf.push('><blockquote>' + ((interp = model.htmlOrText()) == null ? '' : interp) + '\n</blockquote></textarea><a');
+  buf.push('><br');
+  buf.push(attrs({  }));
+  buf.push('/><br');
+  buf.push(attrs({  }));
+  buf.push('/><p>' + escape((interp = model.respondingToText()) == null ? '' : interp) + '\n</p><blockquote');
+  buf.push(attrs({ 'style':("border-left: 3px lightgray solid; margin-left: 15px; padding-left: 5px; color: lightgray; font-style:italic;") }));
+  buf.push('>' + ((interp = model.htmlOrText()) == null ? '' : interp) + '\n</blockquote></textarea><a');
   buf.push(attrs({ 'id':('send_button'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
   buf.push('>Send !</a></div></div></fieldset></form>');
   }

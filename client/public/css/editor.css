@@ -5,6 +5,7 @@ html {
 body {
   margin-bottom: 25px;
   font-family: Helvetica, Arial, Verdana !important;
+  color: red;
 }
 
 h1, h2 {
@@ -123,4 +124,12 @@ li img {
 
 .wysiwyg-color-aqua {
   color: aqua;
+}
+
+body blockquote {
+  border-left: 3px gray solid;
+  margin-left: 15px;
+  padding-left: 5px;
+  color: gray;
+  font-style:italic;
 }

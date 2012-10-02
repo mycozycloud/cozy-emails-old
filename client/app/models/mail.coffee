@@ -89,6 +89,9 @@ class exports.Mail extends BaseModel
     parsed = new Date @get("date")
     parsed.toUTCString()
     
+  respondingToText: ->
+    @fromShort() + " on " + @date() + " wrote:"
+    
   subjectResponse: (mode="answer") ->
     subject = @get "subject"
     switch mode
@@ -123,6 +126,10 @@ class exports.Mail extends BaseModel
     html = @get "html"
     html? and html != ""
     
+  hasText: ->
+    text = @get "text"
+    text? and text != ""
+    
   hasAttachments: ->
     @get "hasAttachments"
 
@@ -131,6 +138,12 @@ class exports.Mail extends BaseModel
       @html()
     else
       @text()
+      
+  textOrHtml: ->
+    if @hasText()
+      @text()
+    else
+      @html()
       
   ###
     Changing mail's properties - read and flagged

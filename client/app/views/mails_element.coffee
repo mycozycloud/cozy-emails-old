@@ -133,7 +133,7 @@ class exports.MailsElement extends Backbone.View
           # adjust the height of the iframe
           $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
           
-        , 1
+        , 50
         
         window.app.viewAttachments = new MailsAttachmentsList $("#attachments_list"), @collection.activeMail
     @
