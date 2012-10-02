@@ -560,7 +560,7 @@ window.require.define({"models/mail": function(exports, require, module) {
       };
 
       Mail.prototype.text = function() {
-        return this.get("text");
+        return this.get("text").replace(/\r\n|\r|\n/g, "<br />");
       };
 
       Mail.prototype.html = function() {
@@ -582,7 +582,7 @@ window.require.define({"models/mail": function(exports, require, module) {
       };
 
       Mail.prototype.htmlOrText = function() {
-        if (this.get("html")) {
+        if (this.hasHtml()) {
           return this.html();
         } else {
           return this.text();
@@ -2480,13 +2480,13 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   {
   buf.push('<iframe');
   buf.push(attrs({ 'id':('mail_content_html'), 'id':("mail_content_html"), 'name':("mail_content_html") }));
-  buf.push('>' + ((interp = model.text()) == null ? '' : interp) + '\n</iframe>');
+  buf.push('>' + ((interp = model.html()) == null ? '' : interp) + '\n</iframe>');
   }
   else
   {
   buf.push('<div');
   buf.push(attrs({ 'id':('mail_content_text') }));
-  buf.push('>' + escape((interp = model.text()) == null ? '' : interp) + '\n</div>');
+  buf.push('>' + ((interp = model.text()) == null ? '' : interp) + '\n</div>');
   }
   buf.push('</div>');
   if ( model.hasAttachments())
