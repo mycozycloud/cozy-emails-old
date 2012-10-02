@@ -133,7 +133,17 @@ class exports.MailsElement extends Backbone.View
           # adjust the height of the iframe
           $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
           
+          if $("#mail_content_html").contents().find("html").height() > 600
+            $("#additional_bar").show()
+          
         , 50
+        
+        # this timeout is a walkaround for content, which takes a while to load
+        setTimeout () =>
+          # adjust the height of the iframe
+          $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
+          
+        , 1000
         
         window.app.viewAttachments = new MailsAttachmentsList $("#attachments_list"), @collection.activeMail
     @

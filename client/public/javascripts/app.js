@@ -1818,8 +1818,14 @@ window.require.define({"views/mails_element": function(exports, require, module)
               $("#mail_content_html").contents().find("html").html(_this.collection.activeMail.html());
               $("#mail_content_html").contents().find("head").append('<link rel="stylesheet" href="css/reset_bootstrap.css">');
               $("#mail_content_html").contents().find("head").append('<base target="_blank">');
-              return $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
+              $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
+              if ($("#mail_content_html").contents().find("html").height() > 600) {
+                return $("#additional_bar").show();
+              }
             }, 50);
+            setTimeout(function() {
+              return $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
+            }, 1000);
             window.app.viewAttachments = new MailsAttachmentsList($("#attachments_list"), this.collection.activeMail);
           }
         }
@@ -2455,7 +2461,7 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   with (locals || {}) {
   var interp;
   buf.push('<div');
-  buf.push(attrs({ "class": ('btn-toolbar') }));
+  buf.push(attrs({ 'id':('additional_bar'), 'style':("display: none;"), "class": ('btn-toolbar') }));
   buf.push('><div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
