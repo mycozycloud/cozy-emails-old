@@ -46,7 +46,7 @@ Because the datasystem of Cozy isn't ready yet, you can't manage attachments tho
 
 
 
-# So, I can try it ?!
+# Can I try it ?
 
 Sure, it's free and easy. The code is open source and you can even propose an improvement.
 
