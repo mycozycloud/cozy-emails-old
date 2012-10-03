@@ -517,10 +517,11 @@ Mailbox.prototype.doImport = (job, callback) ->
                         
                         # choose the right date
                         if mailParsedObject.headers.date
-                          if mailParsedObject.headers.date.toString() == '[object Array]'
+                          if mailParsedObject.headers.date instanceof Array
                             # if an array pick the first date
                             dateSent = new Date mailParsedObject.headers.date[0]
                           else
+                            # else take the whole thing
                             dateSent = new Date mailParsedObject.headers.date
                         else
                           dateSent = new Date()
@@ -555,7 +556,7 @@ Mailbox.prototype.doImport = (job, callback) ->
                           flagged:      "\\Flagged" in messageFlags
                       
                           hasAttachments: if mailParsedObject.attachments then true else false
-                          
+                        
                         # and now we can create a new mail on database, as a child of this mailbox
                         mailbox.mails.create mail, (err, mail) ->
     
@@ -577,6 +578,7 @@ Mailbox.prototype.doImport = (job, callback) ->
                                 
                                 # when finished
                                 if mailsToGo == mailsDone
+                                  console.log "Success"
                                   callback()
                               
                                 # TODO a timeout
