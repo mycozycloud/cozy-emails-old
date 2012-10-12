@@ -7,7 +7,7 @@
 ###
 should = require('should')
 async = require('async')
-Client = require('../common/test/client').Client
+Client = require('request-json').JsonClient
 app = require('../server')
 
 client = new Client("http://localhost:8888/")
@@ -42,8 +42,6 @@ describe "Test of mailboxes; ", ->
                 done(error)
 
         it "Then a success is returned that contains a mailbox with an id", (done) ->
-            
-            # @body = JSON.parse @body
             should.exist @body
             should.exist @body.id
             @response.statusCode.should.equal 200
@@ -63,8 +61,6 @@ describe "Test of mailboxes; ", ->
                 done(error)
         
         it "And the data should be the same, as stored in the beginning", (done) ->
-            
-            @body = JSON.parse @body
             should.exist @body
             # should.exist @body.id
 
@@ -101,9 +97,6 @@ describe "Test of mailboxes; ", ->
                 done()
                 
         it "And all of the values are changed", (done) ->
-          
-            @body = JSON.parse @body
-          
             should.exist @body
             should.exist @body.id
 
@@ -123,7 +116,7 @@ describe "Test of mailboxes; ", ->
             done()
 
         it "Now we can delete it", (done) ->
-            client.delete "mailboxes/" + @idToRetrieve, (error, response, body) =>
+            client.del "mailboxes/" + @idToRetrieve, (error, response, body) =>
                 @response = response
                 @body = body
                 done(error)

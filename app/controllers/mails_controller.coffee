@@ -51,8 +51,19 @@ action 'destroy', ->
 action 'getlist', ->
   num = parseInt req.params.num
   timestamp = parseInt req.params.timestamp
-  console.log {where : {"dateValueOf" : {lt : timestamp}}, limit : num, order: 'dateValueOf DESC'}
-  Mail.all {where : {"dateValueOf" : {lt : timestamp}}, limit : num, order: 'dateValueOf DESC'}, (error, mails) ->
+  
+  if params.id? and params.id != "undefined"
+    skip = 1
+  else
+    skip = 0
+
+  query =
+    startkey: [timestamp, params.id]
+    limit: num
+    descending: true
+    skip: skip
+
+  Mail.date query, (error, mails) ->
     if !error
       send mails
     else
@@ -60,10 +71,13 @@ action 'getlist', ->
       
 # GET '/mailsnew/:timestamp'
 action 'getnewlist', ->
-  num = parseInt req.params.num
   timestamp = parseInt req.params.timestamp
-  console.log {where : {"dateValueOf" : {gt : timestamp}}, order: 'dateValueOf ASC'}
-  Mail.all {where : {"dateValueOf" : {gt : timestamp}}, order: 'dateValueOf ASC'}, (error, mails) ->
+  query =
+      startkey: [timestamp]
+      endkey: [timestamp]
+      descending: false
+    
+  Mail.date query, (error, mails) ->
     if !error
       send mails
     else
@@ -71,11 +85,11 @@ action 'getnewlist', ->
 
 # GET '/getattachments/:mail
 action 'getattachmentslist', ->
-  Mail.find req.params.mail, (err, box) =>
-    if err or !box
+  Mail.find req.params.mail, (err, mail) =>
+    if err or !mail
       send 404
     else
-      box.attachments (error, attachments) =>
+      Attachment.fromMail key: mail.id, (error, attachments) =>
         if error
           send 500
         else

@@ -7,7 +7,7 @@
 ###
 should = require('should')
 async = require('async')
-Client = require('../common/test/client').Client
+Client = require('request-json').JsonClient
 app = require('../server')
 
 IMAPFake = require('./IMAP').IMAPFake
@@ -61,10 +61,9 @@ describe "Test of mailboxes; ", ->
       client.get "fetchmailboxandwait/" + @idToRetrieve, (error, response, body) =>
         @response = response
         @body = body
-        done(error)
+        done()
 
     it "Then a success is returned", (done) ->
-      @body = JSON.parse @body
       should.exist @body
       should.exist @body.success
       done()
@@ -79,7 +78,6 @@ describe "Test of mailboxes; ", ->
         done(error)
 
     it "Then a list is returned", (done) ->
-      @body = JSON.parse @body
       should.exist @body
       should.exist @body[0]
       
@@ -112,7 +110,7 @@ describe "Test of mailboxes; ", ->
 
   describe "Tidy up; ", ->
     it "Now we can delete it", (done) ->
-      client.delete "mailboxes/" + @idToRetrieve, (error, response, body) =>
+      client.del "mailboxes/" + @idToRetrieve, (error, response, body) =>
         @response = response
         @body = body
         done(error)

@@ -49,12 +49,12 @@ class exports.MailsCollection extends Backbone.Collection
   
   # fetches older mails (the list of mails)
   fetchOlder: (callback) ->
-    @url = "mailslist/" + @timestampOld + "." + @mailsAtOnce
+    @url = "mailslist/" + @timestampOld + "." + @mailsAtOnce + "/" + @lastIdOld
     console.log "fetchOlder: " + @url
     @fetch {add : true, success: callback}
 
   # fetches new mails from server
   fetchNew: () =>
-    @url = "mailsnew/" + @timestampNew
+    @url = "mailsnew/" + @timestampNew + "/" + @lastIdNew
     console.log "fetchNew: " + @url
     @fetch {add : true}

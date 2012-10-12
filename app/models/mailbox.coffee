@@ -12,13 +12,13 @@
 
 
 # Just to be able to recognise the mailbox in the console
-Mailbox.prototype.toString = () ->
+Mailbox::toString = () ->
   "[Mailbox " + @name + " #" + @id + "]"
 
 ###
   Generic function to send mails, using nodemailer
 ###
-Mailbox.prototype.sendMail = (data, callback) ->
+Mailbox::sendMail = (data, callback) ->
   
   # libraries
   nodemailer = require "nodemailer"
@@ -82,7 +82,7 @@ Mailbox.prototype.sendMail = (data, callback) ->
 
   # TODO : handle attachments - for now Cozy doesn't store BLOBs...
 ###
-Mailbox.prototype.getNewMail = (job, callback, limit=250, order="asc")->
+Mailbox::getNewMail = (job, callback, limit=250)->
   
   ## dependences
   imap = require "imap"
@@ -128,7 +128,7 @@ Mailbox.prototype.getNewMail = (job, callback, limit=250, order="asc")->
       # LET THE GAMES BEGIN
       server.connect (err) =>
 
-        emitOnErr err 
+        emitOnErr err
         unless err
     
           console.log "Connection established successfuly" if debug
@@ -302,7 +302,7 @@ Mailbox.prototype.getNewMail = (job, callback, limit=250, order="asc")->
   # TODO : handle attachements - for now, Cozy doesn't store BLOBs...
 ###
 
-Mailbox.prototype.setupImport = (callback) ->
+Mailbox::setupImport = (callback) ->
   
   ## dependences
   imap = require "imap"
@@ -339,7 +339,7 @@ Mailbox.prototype.setupImport = (callback) ->
   # LET THE GAMES BEGIN
   server.connect (err) =>
 
-    emitOnErr err 
+    emitOnErr err
     unless err
     
       console.log "Connection established successfuly" if debug
@@ -365,7 +365,8 @@ Mailbox.prototype.setupImport = (callback) ->
                 server.logout()
                 callback()
               else
-                console.log "[" + results.length + "] mails to download" if debug
+                if debug
+                    console.log "[" + results.length + "] mails to download"
                 
                 mailsToGo = results.length
                 mailsDone = 0
@@ -464,9 +465,10 @@ Mailbox.prototype.doImport = (job, callback) ->
         server.emit "error", error
   
   # lets get the ids from the database
-  mailbox.mailsToBe {order: 'remoteId DESC'}, (err, mailsToBe) ->
+  MailToBe.fromMailbox mailbox, (err, mailsToBe) ->
+    console.log err
     
-    emitOnErr err 
+    emitOnErr err
     unless err
 
       if not mailsToBe.length
@@ -478,7 +480,7 @@ Mailbox.prototype.doImport = (job, callback) ->
         # lets connect to the server
         server.connect (err) =>
 
-          emitOnErr err 
+          emitOnErr err
           unless err
 
             console.log "Connection established successfuly" if debug

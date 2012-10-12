@@ -7,7 +7,7 @@
 ###
 should = require('should')
 async = require('async')
-Client = require('../common/test/client').Client
+Client = require('request-json').JsonClient
 app = require('../server')
 
 SMTPFake = require('./SMTP').SMTPFake
@@ -46,8 +46,6 @@ describe "Test of mailboxes; ", ->
                 done(error)
 
         it "Then a success is returned that contains a mailbox with an id", (done) ->
-            
-            # @body = JSON.parse @body
             should.exist @body
             should.exist @body.id
             @response.statusCode.should.equal 200
@@ -73,15 +71,13 @@ describe "Test of mailboxes; ", ->
                 done(error)
 
         it "Then a success is returned", (done) ->
-
-            # @body = JSON.parse @body
             should.exist @body
             should.exist @body.success
 
             done()
     describe "Tidy up; ", ->
       it "Now we can delete it", (done) ->
-          client.delete "mailboxes/" + @idToRetrieve, (error, response, body) =>
+          client.del "mailboxes/" + @idToRetrieve, (error, response, body) =>
               @response = response
               @body = body
               done(error)
