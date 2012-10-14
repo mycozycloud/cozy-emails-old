@@ -26,9 +26,18 @@ class exports.MailsCollection extends Backbone.Collection
   
   # variable to store number of mails visible in the avtive filter
   mailsShown: 0
-  
-  zeroMailsShown: ->
+
+  calculateMailsShown: ->
+    #TODO
+    #window.app.mails.trigger "update_number_mails_shown"
+    #@model.get("mailbox") in window.app.mailboxes.activeMailboxes
     @mailsShown = 0
+    col = @
+    @each (m) =>
+      if m.get("mailbox") in window.app.mailboxes.activeMailboxes
+        col.mailsShown++
+    console.log "updated number of visible mails: "+@mailsShown
+    @trigger "updated_number_mails_shown"
   
   # comparator to sort the collection with the date
   comparator: (mail) ->
@@ -36,9 +45,8 @@ class exports.MailsCollection extends Backbone.Collection
   
   initialize: ->
     @on "change_active_mail", @navigateMail, @
+    @on "update_number_mails_shown", @calculateMailsShown, @
     setInterval @fetchNew, 0.5 * 60 * 1000
-    
-    window.app.mailboxes.on "change_active_mailboxes", @zeroMailsShown, @
 
   # sets the url to the active mail, chosen by user (for browser history to work, for example)
   navigateMail: (event) ->
@@ -48,10 +56,10 @@ class exports.MailsCollection extends Backbone.Collection
       console.error "NavigateMail without active mail"
   
   # fetches older mails (the list of mails)
-  fetchOlder: (callback) ->
+  fetchOlder: (callback, errorCallback) ->
     @url = "mailslist/" + @timestampOld + "." + @mailsAtOnce + "/" + @lastIdOld
     console.log "fetchOlder: " + @url
-    @fetch {add : true, success: callback}
+    @fetch {add : true, success: callback, error: errorCallback}
 
   # fetches new mails from server
   fetchNew: () =>

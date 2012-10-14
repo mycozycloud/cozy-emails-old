@@ -48,7 +48,7 @@ class exports.AppView extends Backbone.View
 ###################################################
         
   # layout the dynamic menu
-  setLayoutMenu: ->
+  setLayoutMenu: (callback) ->
     
     # set ut the menu view
     @containerMenu.html require('./templates/menu')
@@ -62,6 +62,8 @@ class exports.AppView extends Backbone.View
         window.app.mailboxes.trigger("change_active_mailboxes")
         console.log "Initial menu mailboxes load OK"
         window.app.viewMenu.render()
+        if callback?
+          callback()
       })
 
 ###################################################
@@ -71,22 +73,22 @@ class exports.AppView extends Backbone.View
   # put on the layout to display mailboxes:
   setLayoutMailboxes: ->
     
-    # ensure the right size
-    @setLayoutMenu()
     
     # lay the mailboxes out
     @containerContent.html require('./templates/_layouts/layout_mailboxes')
     window.app.viewMailboxes = new MailboxesList @.$("#mail_list_container"), window.app.mailboxes
     window.app.viewMailboxesNew = new MailboxesListNew @.$("#add_mail_button_container"), window.app.mailboxes
-    window.app.viewMailboxesNew.render()
     
-    # fetch necessary data
-    window.app.mailboxes.reset()
-    window.app.mailboxes.fetch({
-      success: ->
-        window.app.mailboxes.updateActiveMailboxes()
-        console.log "Initial mailbox view mailboxes load OK"
-      })
+    @setLayoutMenu ->
+      window.app.viewMailboxesNew.render()
+    
+    # # fetch necessary data
+    # window.app.mailboxes.reset()
+    # window.app.mailboxes.fetch({
+    #   success: ->
+    #     window.app.mailboxes.updateActiveMailboxes()
+    #     console.log "Initial mailbox view mailboxes load OK"
+    #   })
     
     # ensure the right size
     @resize()
@@ -96,21 +98,21 @@ class exports.AppView extends Backbone.View
   # put on the layout to display mailboxes:
   setLayoutComposeMail: ->
 
-    # ensure the right size
-    @setLayoutMenu()
-
     # lay the mailboxes out
     @containerContent.html require('./templates/_layouts/layout_compose_mail')
     window.app.viewComposeMail = new MailsCompose @.$("#compose_mail_container"), window.app.mailboxes
+    
+    @setLayoutMenu ->
+      window.app.viewComposeMail.render()
 
-    # fetch necessary data
-    window.app.mailboxes.reset()
-    window.app.mailboxes.fetch({
-      success: ->
-        window.app.mailboxes.updateActiveMailboxes()
-        console.log "Initial compose view mailboxes load OK"
-        window.app.viewComposeMail.render()
-      })
+    # # fetch necessary data
+    # window.app.mailboxes.reset()
+    # window.app.mailboxes.fetch({
+    #   success: ->
+    #     window.app.mailboxes.updateActiveMailboxes()
+    #     console.log "Initial compose view mailboxes load OK"
+    #     window.app.viewComposeMail.render()
+    #   })
 
     # ensure the right size
     @resize()
@@ -119,9 +121,6 @@ class exports.AppView extends Backbone.View
 
   # put on the layout to display mails:
   setLayoutMails: ->
-    
-    # set menu
-    @setLayoutMenu()
     
     # lay the mails out
     @containerContent.html require('./templates/_layouts/layout_mails')
@@ -132,15 +131,16 @@ class exports.AppView extends Backbone.View
     window.app.view_mail = new MailsElement @.$("#column_mail"), window.app.mails
     
     # fetch necessary data
-    window.app.mailboxes.reset()
-    window.app.mailboxes.fetch({
-      success: ->
-        console.log "Initial mails mailboxes load OK"
-        # fetch necessary data
-        window.app.mails.fetchOlder () ->
-            console.log "Initial mails mails load OK"
-            window.app.mailboxes.updateActiveMailboxes()
-      })
+    if window.app.mailboxes.length == 0
+      window.app.mailboxes.fetch({
+        success: ->
+          console.log "Initial mails mailboxes load OK"
+          if window.app.mails.length == 0
+            # fetch necessary data
+            window.app.mails.fetchOlder () ->
+                console.log "Initial mails mails load OK"
+                window.app.mailboxes.updateActiveMailboxes()
+        })
     
     # ensure the right size
     @resize()

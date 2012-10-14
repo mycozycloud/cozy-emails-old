@@ -65,7 +65,11 @@ action 'getlist', ->
 
   Mail.date query, (error, mails) ->
     if !error
-      send mails
+      # we send 204 when there is no content to send
+      if mails.length == 0
+        send 707
+      else
+        send mails
     else
       send 500
       

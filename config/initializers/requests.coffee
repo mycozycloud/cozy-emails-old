@@ -6,13 +6,18 @@ requests = require "../../common/requests"
 mailboxRequest = -> emit doc.mailbox, doc
 dateRequest = -> emit [doc.dateValueOf, doc._id], doc
 
+mailboxDateRequest = -> emit [doc.mailbox, doc.dateValueOf], doc
+
 Mail.fromMailbox = (params, callback) ->
-    Mail.request "mailbox", params, callback
+    Mail.request "mailboxDate", params, callback
 Mail.date = (params, callback) -> Mail.request "date", params, callback
 Mail.defineRequest "all", requests.all, ->
     Mail.defineRequest "date", dateRequest, ->
-        Mail.defineRequest "mailbox", mailboxRequest, requests.checkError
+        Mail.defineRequest "mailboxDate", mailboxDateRequest, ->
+            Mail.defineRequest "mailbox", mailboxRequest, requests.checkError
 
+
+        
 # MailToBe
 mailboxRequest = -> emit [doc.mailbox, doc.remoteId], doc
 MailToBe.defineRequest "all", requests.all, ->

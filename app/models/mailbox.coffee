@@ -420,7 +420,7 @@ Mailbox::setupImport = (callback) ->
   # TODO : handle attachements - for now, Cozy doesn't store BLOBs...
 ###
 
-Mailbox.prototype.doImport = (job, callback) ->
+Mailbox::doImport = (job, callback) ->
 
   debug = true
 
