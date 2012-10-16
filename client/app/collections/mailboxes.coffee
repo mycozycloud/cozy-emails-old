@@ -32,3 +32,5 @@ class exports.MailboxCollection extends Backbone.Collection
     
     console.log "update mailboxes: " + @activeMailboxes
     @trigger "change_active_mailboxes", @
+    
+    window.app.mails.trigger "update_number_mails_shown"

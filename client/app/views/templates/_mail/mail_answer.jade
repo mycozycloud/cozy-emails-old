@@ -49,7 +49,11 @@ form.well
                 a.btn.btn-mini(data-wysihtml5-dialog-action='save') OK
                 a.btn.btn-mini(data-wysihtml5-dialog-action='cancel') Cancel
       .controls
-        textarea.content.span10(id="html", rows=15, cols=80).input-xlarge 
-          blockquote
+        textarea.content.span10(id="html", rows=15, cols=80).input-xlarge
+          br
+          br
+          p
+            #{model.respondingToText()}
+          blockquote(style="border-left: 3px lightgray solid; margin-left: 15px; padding-left: 5px; color: lightgray; font-style:italic;")
             !{model.htmlOrText()}
         a#send_button.btn.btn-primary.btn-large Send !

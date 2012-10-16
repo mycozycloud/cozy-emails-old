@@ -1,4 +1,4 @@
-.btn-toolbar
+.btn-toolbar#additional_bar(style="display: none;")
   .btn-group
     a#button_answer.btn.btn-primary
       i.icon-share-alt
@@ -37,10 +37,10 @@
 
   if model.hasHtml()
     iframe#mail_content_html(id="mail_content_html", name="mail_content_html")
-      !{model.text()}
+      !{model.html()}
   else
     #mail_content_text
-      #{model.text()}
+      !{model.text()}
 if model.hasAttachments()
   #attachments_list.well
 

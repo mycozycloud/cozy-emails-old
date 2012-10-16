@@ -33,6 +33,7 @@ class exports.MailsList extends Backbone.View
       # update timestamp for the list of messages
       if dateValueOf < window.app.mails.timestampOld
         window.app.mails.timestampOld = dateValueOf
+        window.app.mails.lastIdOld = mail.get("id")
   
       # add its view at the bottom of the list
       @addOne mail
@@ -40,6 +41,7 @@ class exports.MailsList extends Backbone.View
       # update timestamp for new messages
       if dateValueOf > window.app.mails.timestampNew
         window.app.mails.timestampNew = dateValueOf
+        window.app.mails.lastIdNew = mail.get("id")
     
       # add its view on top of the list
       @addNew mail

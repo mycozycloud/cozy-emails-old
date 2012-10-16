@@ -5214,6 +5214,7 @@ div.column{height:770px;overflow:auto}
 #message_box{position:absolute;top:15px;right:15px;z-index:9}
 iframe{border-top-width:0;border-right-width:0;border-bottom-width:0;border-left-width:0;width:100%}
 textarea#html{width:100%}
+blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */

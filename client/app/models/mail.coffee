@@ -89,6 +89,9 @@ class exports.Mail extends BaseModel
     parsed = new Date @get("date")
     parsed.toUTCString()
     
+  respondingToText: ->
+    @fromShort() + " on " + @date() + " wrote:"
+    
   subjectResponse: (mode="answer") ->
     subject = @get "subject"
     switch mode
@@ -109,7 +112,7 @@ class exports.Mail extends BaseModel
       else ""
 
   text: ->
-    @get("text")
+    @get("text").replace(/\r\n|\r|\n/g, "<br />")
 
   html: ->
     expression = new RegExp("(<style>(.|\s)*?</style>)", "gi");
@@ -123,14 +126,24 @@ class exports.Mail extends BaseModel
     html = @get "html"
     html? and html != ""
     
+  hasText: ->
+    text = @get "text"
+    text? and text != ""
+    
   hasAttachments: ->
     @get "hasAttachments"
 
   htmlOrText: ->
-    if @get("html")
+    if @hasHtml()
       @html()
     else
       @text()
+      
+  textOrHtml: ->
+    if @hasText()
+      @text()
+    else
+      @html()
       
   ###
     Changing mail's properties - read and flagged

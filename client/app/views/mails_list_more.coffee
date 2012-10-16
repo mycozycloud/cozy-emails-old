@@ -17,8 +17,9 @@ class exports.MailsListMore extends Backbone.View
     super()
     
   initialize: ->
-    @collection.on('reset', @render, @)
-    @collection.on('add', @render, @)
+    @collection.on 'reset', @render, @
+    @collection.on 'add', @render, @
+    @collection.on 'updated_number_mails_shown', @render, @
     window.app.mailboxes.on "change_active_mailboxes", @render, @
 
   events: {
@@ -33,7 +34,10 @@ class exports.MailsListMore extends Backbone.View
     # if not disabled
     if @clickable
       # fetch new data
-      @collection.fetchOlder()
+      success = (collection) ->
+        window.app.mails.trigger "update_number_mails_shown"
+      
+      @collection.fetchOlder(success)
       @clickable = false
       element = @
       # in case it doesn't work, unblock after some time
@@ -42,7 +46,7 @@ class exports.MailsListMore extends Backbone.View
           element.clickable = true
           element.render()
           console.log "retry"
-        , 1000 * 10
+        , 1000 * 7
       )
   
   render: ->

@@ -11,7 +11,7 @@
 , "dependencies":
   { "jade":             ">= 0"
   , "jade-ext":         ">= 0"
-  , "iconv":            ">= 1.1.0"
+  , "iconv":            ">= 1.2.3"
   , "express":          ">= 2.5.8"
   , "connect":          ">= 1.8.6"
   , "railway":          "= 0.2.17-pre4"
@@ -20,6 +20,7 @@
   , "qs":               ">= 0.1.0"
   , "mongoose":         ">= 2.5.10"
   , "jugglingdb":       ">= 0"
+  , "jugglingdb-cozy-adapter": ">= 0"
   , "connect-redis":    ">= 0"
   , "passport":         ">= 0"
   , "async":            ">= 0"
@@ -33,7 +34,7 @@
 , "devDependencies": 
   { "should":           ">= 0"
   , "mocha":            ">= 0"
-  , "zombie":           "= 1.1.4"
+  , "request-json":     ">= 0"
   }
 , "scripts":
   { "test": "cake tests"

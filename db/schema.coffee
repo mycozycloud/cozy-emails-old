@@ -44,7 +44,7 @@ Attachment = define 'Attachment', ->
     property 'checksum'
     property 'content', Text
     
-Mail.hasMany(Attachment, {as: 'attachments',foreignKey: 'mail_id'});
+Mail.hasMany(Attachment, {as: 'attachments',foreignKey: 'mail_id'})
 
 MailToBe = define 'MailToBe', ->
     property 'remoteId', Number, index: true
@@ -90,5 +90,5 @@ Mailbox = define 'Mailbox', ->
     property 'importing', Boolean, default: false # if the import was started
     property 'mailsToImport', Number, default: 0  # number of mails for the import job
     
-Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'});
-Mailbox.hasMany(MailToBe, {as: 'mailsToBe',  foreignKey: 'mailbox'});
+Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'})
+Mailbox.hasMany(MailToBe, {as: 'mailsToBe',  foreignKey: 'mailbox'})
