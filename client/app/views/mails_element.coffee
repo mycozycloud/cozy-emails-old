@@ -145,5 +145,6 @@ class exports.MailsElement extends Backbone.View
           
         , 1000
         
-        window.app.viewAttachments = new MailsAttachmentsList $("#attachments_list"), @collection.activeMail
+        if @collection.activeMail.get "hasAttachments"
+          window.app.viewAttachments = new MailsAttachmentsList $("#attachments_list"), @collection.activeMail
     @

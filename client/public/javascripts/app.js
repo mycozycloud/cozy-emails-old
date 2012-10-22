@@ -1831,7 +1831,9 @@ window.require.define({"views/mails_element": function(exports, require, module)
             setTimeout(function() {
               return $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
             }, 1000);
-            window.app.viewAttachments = new MailsAttachmentsList($("#attachments_list"), this.collection.activeMail);
+            if (this.collection.activeMail.get("hasAttachments")) {
+              window.app.viewAttachments = new MailsAttachmentsList($("#attachments_list"), this.collection.activeMail);
+            }
           }
         }
         return this;
