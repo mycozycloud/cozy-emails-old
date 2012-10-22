@@ -86,6 +86,8 @@ if not module.parent
         
   # set-up CRON
   setInterval app.createCheckJobs, 1000 * 60 * 5
+  # launch on startup
+  app.createCheckJobs()
 
 ##  - CREATECHECKJOB - END
 
