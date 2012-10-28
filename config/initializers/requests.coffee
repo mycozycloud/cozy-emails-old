@@ -15,8 +15,6 @@ Mail.defineRequest "all", requests.all, ->
     Mail.defineRequest "date", dateRequest, ->
         Mail.defineRequest "mailboxDate", mailboxDateRequest, ->
             Mail.defineRequest "mailbox", mailboxRequest, requests.checkError
-
-
         
 # MailToBe
 mailboxRequest = -> emit [doc.mailbox, doc.remoteId], doc
@@ -38,3 +36,6 @@ mailRequest = -> emit doc.mail_id, doc
 Attachment.defineRequest "byMail", mailRequest, requests.checkError
 Attachment.fromMail = (params, callback) ->
     Mailbox.request "byMail", params, callback
+
+#logmessage
+LogMessage.defineRequest "all", requests.all, requests.checkError
