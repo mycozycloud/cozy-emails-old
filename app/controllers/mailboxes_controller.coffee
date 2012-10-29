@@ -87,13 +87,26 @@ action 'sendmail', ->
     "cc",
     "bcc"
   ]
+
+  data.createdAt = new Date().valueOf()
   
   for attr in attrs
     data[attr] = req.body[attr]
     
   @box.sendMail data, (error) =>
+
     if !error
-      send {success: true}
+
+      # complete the data
+      data.mailbox = @box.id
+      data.sentAt = new Date().valueOf()
+      data.from = @box.SMTP_send_as
+
+      MailSent.create data, (error) =>
+        if !error
+          send {success: true}
+        else
+          send 500
     else
       send 500
       
