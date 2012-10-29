@@ -87,14 +87,12 @@ class exports.MailboxesListElement extends Backbone.View
           $.ajax "importmailbox/" + modelSaved.id, {
             complete: () ->
               console.log "importmailbox/" + modelSaved.id
-              window.app.appView.viewMessageBox.renderMailboxNewSuccess()
           }
           @render()
       }
     else
       @model.save data, {
         success: () =>
-          window.app.appView.viewMessageBox.renderMailboxUpdateSuccess()
           @render()
       }
     

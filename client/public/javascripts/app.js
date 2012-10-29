@@ -1315,8 +1315,7 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
             success: function(modelSaved, response) {
               $.ajax("importmailbox/" + modelSaved.id, {
                 complete: function() {
-                  console.log("importmailbox/" + modelSaved.id);
-                  return window.app.appView.viewMessageBox.renderMailboxNewSuccess();
+                  return console.log("importmailbox/" + modelSaved.id);
                 }
               });
               return _this.render();
@@ -1325,7 +1324,6 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
         } else {
           return this.model.save(data, {
             success: function() {
-              window.app.appView.viewMessageBox.renderMailboxUpdateSuccess();
               return _this.render();
             }
           });
@@ -1462,12 +1460,10 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
         this.mailtosend.save(data, {
           success: function() {
             console.log("sent!");
-            $(el).html(require('./templates/_mail/mail_sent'));
-            return window.app.appView.viewMessageBox.renderMessageSentSuccess();
+            return $(el).html(require('./templates/_mail/mail_sent'));
           },
           error: function() {
-            console.log("error!");
-            return window.app.appView.viewMessageBox.renderMessageSentError();
+            return console.log("error!");
           }
         });
         return console.log("sending mail: " + this.mailtosend);
@@ -1735,12 +1731,10 @@ window.require.define({"views/mails_compose": function(exports, require, module)
         this.mailtosend.save(data, {
           success: function() {
             console.log("sent!");
-            $(el).html(require('./templates/_mail/mail_sent'));
-            return window.app.appView.viewMessageBox.renderMessageSentSuccess();
+            return $(el).html(require('./templates/_mail/mail_sent'));
           },
           error: function() {
-            console.log("error!");
-            return window.app.appView.viewMessageBox.renderMessageSentError();
+            return console.log("error!");
           }
         });
         return console.log("sending mail: " + this.mailtosend);

@@ -45,12 +45,12 @@ class exports.MailsAnswer extends Backbone.View
         console.log "sent!"
         $(el).html require('./templates/_mail/mail_sent')
         # message box
-        window.app.appView.viewMessageBox.renderMessageSentSuccess()
+        # TODO
       error: ->
         # success, let's render it
         console.log "error!"
         # message box
-        window.app.appView.viewMessageBox.renderMessageSentError()
+        # TODO
     )
     
     console.log "sending mail: " + @mailtosend
