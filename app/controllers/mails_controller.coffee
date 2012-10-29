@@ -63,7 +63,7 @@ action 'getlist', ->
     descending: true
     skip: skip
 
-  Mail.date query, (error, mails) ->
+  Mail.dateId query, (error, mails) ->
     if !error
       # we send 204 when there is no content to send
       if mails.length == 0
@@ -87,7 +87,7 @@ action 'getnewlist', ->
       skip: skip
       descending: false
     
-  Mail.date query, (error, mails) ->
+  Mail.dateId query, (error, mails) ->
     console.log mails
     console.log query
     if !error
