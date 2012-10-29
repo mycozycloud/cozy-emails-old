@@ -50,9 +50,13 @@ action 'discard', ->
     else
       send 500
           
-# GET '/getlogs/'
+# GET '/getlogs/:createdAt'
 action 'getactivelogs', ->
-  LogMessage.request "all", null, (err, logs) =>
+  params =
+    startkey: Number req.params.createdAt
+    descending: false
+    
+  LogMessage.request "date", params, (err, logs) =>
     if err
       send 500
     else

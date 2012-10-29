@@ -20,7 +20,10 @@ class exports.MessageBox extends Backbone.View
   # Add a mailbox at the bottom of the list
   addOne: (logmessage) ->
     box = new MessageBoxElement logmessage, @collection
-    $(@el).append box.render().el    
+    $(@el).prepend box.render().el
+    if Number(logmessage.get "createdAt") > Number(@collection.lastCreatedAt)
+        console.log "update createdAt message"
+        @collection.lastCreatedAt = Number(logmessage.get "createdAt") + 1
 
   render: ->
     $(@el).html ""

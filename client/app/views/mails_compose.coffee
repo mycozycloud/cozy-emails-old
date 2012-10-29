@@ -43,12 +43,12 @@ class exports.MailsCompose extends Backbone.View
         console.log "sent!"
         $(el).html require('./templates/_mail/mail_sent')
         # message box
-        window.app.logmessages.add {"type": "success", "text": "Message was saved in cozy, and will be sent as soon as possible.", "createdAt": new Date().valueOf, "timeout": 5}
+        window.app.logmessages.add {"type": "success", "text": "Message was saved in cozy, and will be sent as soon as possible.", "createdAt": new Date().valueOf(), "timeout": 5}
       error: ->
         # success, let's render it
         console.log "error!"
         # message box
-        window.app.logmessages.create {"type": "error", "text": "Message could not be sent. Check your mailbox settings", "createdAt": new Date().valueOf, "timeout": 0}
+        window.app.logmessages.create {"type": "error", "text": "Message could not be sent. Check your mailbox settings", "createdAt": new Date().valueOf(), "timeout": 0}
     )
     
     console.log "sending mail: " + @mailtosend

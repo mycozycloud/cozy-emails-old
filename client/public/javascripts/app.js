@@ -147,6 +147,8 @@ window.require.define({"collections/logmessages": function(exports, require, mod
 
       LogMessagesCollection.prototype.model = LogMessage;
 
+      LogMessagesCollection.prototype.lastCreatedAt = 0;
+
       LogMessagesCollection.prototype.url = 'getlogs';
 
       LogMessagesCollection.prototype.comparator = function(msg) {
@@ -155,12 +157,14 @@ window.require.define({"collections/logmessages": function(exports, require, mod
 
       LogMessagesCollection.prototype.initialize = function() {
         this.fetchNew();
-        return setInterval(this.fetchNew, 0.5 * 60 * 1000);
+        return setInterval(this.fetchNew, 5 * 1000);
       };
 
       LogMessagesCollection.prototype.fetchNew = function() {
-        console.log("fetchNewLogMessages: " + this.url);
-        return this.fetch();
+        return this.fetch({
+          add: true,
+          url: 'getlogs/' + this.lastCreatedAt
+        });
       };
 
       return LogMessagesCollection;
@@ -1735,7 +1739,7 @@ window.require.define({"views/mails_compose": function(exports, require, module)
             return window.app.logmessages.add({
               "type": "success",
               "text": "Message was saved in cozy, and will be sent as soon as possible.",
-              "createdAt": new Date().valueOf,
+              "createdAt": new Date().valueOf(),
               "timeout": 5
             });
           },
@@ -1744,7 +1748,7 @@ window.require.define({"views/mails_compose": function(exports, require, module)
             return window.app.logmessages.create({
               "type": "error",
               "text": "Message could not be sent. Check your mailbox settings",
-              "createdAt": new Date().valueOf,
+              "createdAt": new Date().valueOf(),
               "timeout": 0
             });
           }
@@ -2322,7 +2326,11 @@ window.require.define({"views/message_box": function(exports, require, module) {
       MessageBox.prototype.addOne = function(logmessage) {
         var box;
         box = new MessageBoxElement(logmessage, this.collection);
-        return $(this.el).append(box.render().el);
+        $(this.el).prepend(box.render().el);
+        if (Number(logmessage.get("createdAt")) > Number(this.collection.lastCreatedAt)) {
+          console.log("update createdAt message");
+          return this.collection.lastCreatedAt = Number(logmessage.get("createdAt")) + 1;
+        }
       };
 
       MessageBox.prototype.render = function() {
@@ -3228,7 +3236,7 @@ window.require.define({"views/templates/_message/message_error": function(export
   buf.push(attrs({ "class": ('alert') + ' ' + ('alert-error') }));
   buf.push('><button');
   buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
-  buf.push('>x</button><strong>Oh, snap !\n</strong><p>' + escape((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
+  buf.push('>x</button><strong>Oh, snap !\n</strong><p>' + ((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
   }
   return buf.join("");
   };
@@ -3244,7 +3252,7 @@ window.require.define({"views/templates/_message/message_info": function(exports
   buf.push(attrs({ "class": ('alert') + ' ' + ('alert-info') }));
   buf.push('><button');
   buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
-  buf.push('>x</button><strong>Heads up!\n</strong><p>' + escape((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
+  buf.push('>x</button><strong>Heads up!\n</strong><p>' + ((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
   }
   return buf.join("");
   };
@@ -3260,7 +3268,7 @@ window.require.define({"views/templates/_message/message_success": function(expo
   buf.push(attrs({ "class": ('alert') + ' ' + ('alert-success') }));
   buf.push('><button');
   buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
-  buf.push('>x</button><strong>Well done !\n</strong><p>' + escape((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
+  buf.push('>x</button><strong>Well done !\n</strong><p>' + ((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
   }
   return buf.join("");
   };
@@ -3276,7 +3284,7 @@ window.require.define({"views/templates/_message/message_warning": function(expo
   buf.push(attrs({ "class": ('alert') }));
   buf.push('><button');
   buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
-  buf.push('>x</button><strong>Warning !\n</strong><p>' + escape((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
+  buf.push('>x</button><strong>Warning !\n</strong><p>' + ((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
   }
   return buf.join("");
   };

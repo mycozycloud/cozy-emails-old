@@ -10,6 +10,7 @@
 class exports.LogMessagesCollection extends Backbone.Collection
     
   model: LogMessage
+  lastCreatedAt: 0
   url: 'getlogs'
 
   comparator: (msg) ->
@@ -17,10 +18,8 @@ class exports.LogMessagesCollection extends Backbone.Collection
     
   initialize: ->
     @fetchNew()
-    setInterval @fetchNew, 0.5 * 60 * 1000
+    setInterval @fetchNew, 5 * 1000
 
   # fetches new log messages from server
   fetchNew: () =>
-    console.log "fetchNewLogMessages: " + @url
-    #@fetch {add : true}
-    @fetch()
+    @fetch {add : true, url: 'getlogs/' + @lastCreatedAt}

@@ -452,6 +452,7 @@ Mailbox::doImport = (job, callback) ->
     setTimeout () ->
       mailbox.updateAttributes {status: error.toString()}, (err) ->
         console.error "Mailbox update with error status" if debug
+        LogMessage.create {"type": "error", "text": "Error importing mail: "+error.toString(), "createdAt": new Date().valueOf(), "timeout": 0}, null
         callback error
     , timeToRetry
 
