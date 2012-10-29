@@ -17,4 +17,5 @@ exports.routes = (map) ->
     map.get '/getattachment/:attachment', 'mails#getattachment'
     
     map.get '/getlogs', 'logs#getactivelogs'
+    map.post '/getlogs', 'logs#savelog'
     map.delete '/getlogs/:id', 'logs#discard'

@@ -16,6 +16,30 @@ before ->
       @box = box
       next()
 , { only: ['discard'] }
+  
+
+# POST '/getlogs'
+action 'savelog', ->
+  
+  data = {}
+  attrs = [
+    "type",
+    "text",
+    "createdAt",
+    "timeout"
+  ]
+  
+  for attr in attrs
+    data[attr] = req.body[attr]
+    
+  if data["timeout"] == 0    
+    LogMessage.create data, (err, box) =>
+      if err or !box
+        send 500
+      else
+        send 200
+  else
+    send 200
 
 
 # DELETE '/getlogs/:id'
@@ -36,5 +60,4 @@ action 'getactivelogs', ->
       # remove those for which timeout > 0
       for log in logs
         if log.timeout != 0
-          log
-          #log.destroy()
+          log.destroy()

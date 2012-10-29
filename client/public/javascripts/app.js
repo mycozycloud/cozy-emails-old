@@ -1731,10 +1731,22 @@ window.require.define({"views/mails_compose": function(exports, require, module)
         this.mailtosend.save(data, {
           success: function() {
             console.log("sent!");
-            return $(el).html(require('./templates/_mail/mail_sent'));
+            $(el).html(require('./templates/_mail/mail_sent'));
+            return window.app.logmessages.add({
+              "type": "success",
+              "text": "Message was saved in cozy, and will be sent as soon as possible.",
+              "createdAt": new Date().valueOf,
+              "timeout": 5
+            });
           },
           error: function() {
-            return console.log("error!");
+            console.log("error!");
+            return window.app.logmessages.create({
+              "type": "error",
+              "text": "Message could not be sent. Check your mailbox settings",
+              "createdAt": new Date().valueOf,
+              "timeout": 0
+            });
           }
         });
         return console.log("sending mail: " + this.mailtosend);
