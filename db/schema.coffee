@@ -46,6 +46,17 @@ Attachment = define 'Attachment', ->
     
 Mail.hasMany(Attachment, {as: 'attachments',foreignKey: 'mail_id'})
 
+MailSent = define 'MailSent', ->
+    property 'mailbox', index: true
+    property 'createdAt', Number, default: 0, index: true
+    property 'sentAt', Number, default: 0, index: true
+    property 'subject',
+    property 'from',
+    property 'to',
+    property 'cc',
+    property 'bcc',
+    property 'html', Text
+    
 MailToBe = define 'MailToBe', ->
     property 'remoteId', Number, index: true
     property 'mailbox', index: true
@@ -92,3 +103,22 @@ Mailbox = define 'Mailbox', ->
     
 Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'})
 Mailbox.hasMany(MailToBe, {as: 'mailsToBe',  foreignKey: 'mailbox'})
+
+
+# logs managment
+LogMessage = define 'LogMessage', ->
+    
+    # type:
+    #   "info" - standard message
+    #   "success" - success message
+    #   "warning" - warning message
+    #   "error" - error message
+    property 'type', String, default: "info"
+    
+    # timeout:
+    #   0 - message will be displayed until user click OK to discard it
+    #   > 0 - message will be displayed only once, and will disappear after x seconds
+    property 'timeout', Number, default: 5 * 60
+    
+    property 'text',
+    property 'createdAt', Number

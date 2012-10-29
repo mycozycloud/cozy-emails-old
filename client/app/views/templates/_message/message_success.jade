@@ -1,6 +1,6 @@
 .alert.alert-success
   button.close(type="button", data-dismiss="alert") x
   strong
-    | Success !
+    | Well done !
   p
-    | Your message has been sent successfully !
+    !{model.get("text")}

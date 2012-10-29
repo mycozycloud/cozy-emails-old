@@ -4,24 +4,25 @@ requests = require "../../common/requests"
 
 # Mails
 mailboxRequest = -> emit doc.mailbox, doc
-dateRequest = -> emit [doc.dateValueOf, doc._id], doc
+dateIdRequest = -> emit [doc.dateValueOf, doc._id], doc
+dateRequest = -> emit doc.dateValueOf, doc
 
-mailboxDateRequest = -> emit [doc.mailbox, doc.dateValueOf], doc
+Mail.defineRequest "all", requests.all, ->
+    Mail.defineRequest "date", dateRequest, ->
+        Mail.defineRequest "dateId", dateIdRequest, ->
+            Mail.defineRequest "mailbox", mailboxRequest, requests.checkError
 
 Mail.fromMailbox = (params, callback) ->
     Mail.request "mailboxDate", params, callback
-Mail.date = (params, callback) -> Mail.request "date", params, callback
-Mail.defineRequest "all", requests.all, ->
-    Mail.defineRequest "date", dateRequest, ->
-        Mail.defineRequest "mailboxDate", mailboxDateRequest, ->
-            Mail.defineRequest "mailbox", mailboxRequest, requests.checkError
-
-
+Mail.dateId = (params, callback) ->
+    Mail.request "dateId", params, callback
         
 # MailToBe
 mailboxRequest = -> emit [doc.mailbox, doc.remoteId], doc
+
 MailToBe.defineRequest "all", requests.all, ->
     MailToBe.defineRequest "byMailbox", mailboxRequest, requests.checkError
+
 MailToBe.fromMailbox = (mailbox, callback) ->
     params =
         startkey: [mailbox.id + "0"]
@@ -38,3 +39,8 @@ mailRequest = -> emit doc.mail_id, doc
 Attachment.defineRequest "byMail", mailRequest, requests.checkError
 Attachment.fromMail = (params, callback) ->
     Mailbox.request "byMail", params, callback
+
+#logmessage
+dateRequestLog = -> emit doc.createdAt, doc
+LogMessage.defineRequest "all", requests.all, ->
+    LogMessage.defineRequest "date", dateRequestLog, requests.checkError

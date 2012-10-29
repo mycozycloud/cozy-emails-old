@@ -97,7 +97,7 @@ Mailbox::getNewMail = (job, callback, limit=250)->
     if error
       callback error
     else
-      id = mailbox.IMAP_last_fetched_id + 1
+      id = Number(mailbox.IMAP_last_fetched_id) + 1
       console.log "Fetching mail " + mailbox + " | UID " + id + ':' + (id + limit) if debug
   
       # let's create a connection
@@ -452,6 +452,7 @@ Mailbox::doImport = (job, callback) ->
     setTimeout () ->
       mailbox.updateAttributes {status: error.toString()}, (err) ->
         console.error "Mailbox update with error status" if debug
+        LogMessage.create {"type": "error", "text": "Error importing mail: "+error.toString(), "createdAt": new Date().valueOf(), "timeout": 0}, null
         callback error
     , timeToRetry
 

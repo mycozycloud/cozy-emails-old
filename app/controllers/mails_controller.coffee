@@ -63,7 +63,7 @@ action 'getlist', ->
     descending: true
     skip: skip
 
-  Mail.date query, (error, mails) ->
+  Mail.dateId query, (error, mails) ->
     if !error
       # we send 204 when there is no content to send
       if mails.length == 0
@@ -76,12 +76,20 @@ action 'getlist', ->
 # GET '/mailsnew/:timestamp'
 action 'getnewlist', ->
   timestamp = parseInt req.params.timestamp
+  if params.id? and params.id != "undefined"
+    skip = 1
+  else
+    skip = 0
+    
   query =
       startkey: [timestamp]
-      endkey: [timestamp]
+      # endkey: [timestamp]
+      skip: skip
       descending: false
     
-  Mail.date query, (error, mails) ->
+  Mail.dateId query, (error, mails) ->
+    console.log mails
+    console.log query
     if !error
       send mails
     else
