@@ -29,25 +29,25 @@ class exports.MailsList extends Backbone.View
     dateValueOf = mail.get("dateValueOf")
   
     # check if we are adding a new message, or an old one
-    if dateValueOf <= window.app.mails.timestampMiddle
+    if dateValueOf <= @collection.timestampMiddle
       # update timestamp for the list of messages
-      if dateValueOf < window.app.mails.timestampOld
-        window.app.mails.timestampOld = dateValueOf
-        window.app.mails.lastIdOld = mail.get("id")
+      if dateValueOf < @collection.timestampOld
+        @collection.timestampOld = dateValueOf
+        @collection.lastIdOld = mail.get("id")
   
       # add its view at the bottom of the list
       @addOne mail
     else
       # update timestamp for new messages
-      if dateValueOf > window.app.mails.timestampNew
-        window.app.mails.timestampNew = dateValueOf
-        window.app.mails.lastIdNew = mail.get("id")
+      if dateValueOf > @collection.timestampNew
+        @collection.timestampNew = dateValueOf
+        @collection.lastIdNew = mail.get("id")
     
       # add its view on top of the list
       @addNew mail
 
   addOne: (mail) ->
-    box = new MailsListElement mail, window.app.mails
+    box = new MailsListElement mail, @collection
     $(@el).append box.render().el
       
   addNew: (mail) ->

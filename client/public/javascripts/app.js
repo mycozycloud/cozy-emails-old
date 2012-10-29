@@ -505,8 +505,6 @@ window.require.define({"models/mail": function(exports, require, module) {
         Mail.__super__.constructor.apply(this, arguments);
       }
 
-      Mail.prototype.url = "mails";
-
       Mail.prototype.initialize = function() {
         this.on("destroy", this.removeView, this);
         return this.on("change", this.redrawView, this);
@@ -1981,16 +1979,16 @@ window.require.define({"views/mails_list": function(exports, require, module) {
       MailsList.prototype.treatAdd = function(mail) {
         var dateValueOf;
         dateValueOf = mail.get("dateValueOf");
-        if (dateValueOf <= window.app.mails.timestampMiddle) {
-          if (dateValueOf < window.app.mails.timestampOld) {
-            window.app.mails.timestampOld = dateValueOf;
-            window.app.mails.lastIdOld = mail.get("id");
+        if (dateValueOf <= this.collection.timestampMiddle) {
+          if (dateValueOf < this.collection.timestampOld) {
+            this.collection.timestampOld = dateValueOf;
+            this.collection.lastIdOld = mail.get("id");
           }
           return this.addOne(mail);
         } else {
-          if (dateValueOf > window.app.mails.timestampNew) {
-            window.app.mails.timestampNew = dateValueOf;
-            window.app.mails.lastIdNew = mail.get("id");
+          if (dateValueOf > this.collection.timestampNew) {
+            this.collection.timestampNew = dateValueOf;
+            this.collection.lastIdNew = mail.get("id");
           }
           return this.addNew(mail);
         }
@@ -1998,7 +1996,7 @@ window.require.define({"views/mails_list": function(exports, require, module) {
 
       MailsList.prototype.addOne = function(mail) {
         var box;
-        box = new MailsListElement(mail, window.app.mails);
+        box = new MailsListElement(mail, this.collection);
         return $(this.el).append(box.render().el);
       };
 
