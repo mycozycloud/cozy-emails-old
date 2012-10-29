@@ -120,6 +120,57 @@ window.require.define({"collections/attachments": function(exports, require, mod
   
 }});
 
+window.require.define({"collections/logmessages": function(exports, require, module) {
+  (function() {
+    var LogMessage,
+      __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    LogMessage = require("../models/logmessage").LogMessage;
+
+    /*
+      @file: logmessages.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description: 
+        Backbone collection for holding log messages objects.
+    */
+
+    exports.LogMessagesCollection = (function(_super) {
+
+      __extends(LogMessagesCollection, _super);
+
+      function LogMessagesCollection() {
+        this.fetchNew = __bind(this.fetchNew, this);
+        LogMessagesCollection.__super__.constructor.apply(this, arguments);
+      }
+
+      LogMessagesCollection.prototype.model = LogMessage;
+
+      LogMessagesCollection.prototype.url = 'getlogs';
+
+      LogMessagesCollection.prototype.comparator = function(msg) {
+        return msg.get("createdAt");
+      };
+
+      LogMessagesCollection.prototype.initialize = function() {
+        this.fetchNew();
+        return setInterval(this.fetchNew, 0.5 * 60 * 1000);
+      };
+
+      LogMessagesCollection.prototype.fetchNew = function() {
+        console.log("fetchNewLogMessages: " + this.url);
+        return this.fetch();
+      };
+
+      return LogMessagesCollection;
+
+    })(Backbone.Collection);
+
+  }).call(this);
+  
+}});
+
 window.require.define({"collections/mailboxes": function(exports, require, module) {
   (function() {
     var Mailbox,
@@ -316,7 +367,7 @@ window.require.define({"initialize": function(exports, require, module) {
   */
 
   (function() {
-    var AppView, AttachmentsCollection, BrunchApplication, MailNew, MailboxCollection, MailsCollection, MainRouter,
+    var AppView, AttachmentsCollection, BrunchApplication, LogMessagesCollection, MailNew, MailboxCollection, MailsCollection, MainRouter,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -328,7 +379,9 @@ window.require.define({"initialize": function(exports, require, module) {
 
     MailsCollection = require('collections/mails').MailsCollection;
 
-    AttachmentsCollection = require("collections/attachments").AttachmentsCollection;
+    AttachmentsCollection = require('collections/attachments').AttachmentsCollection;
+
+    LogMessagesCollection = require('collections/logmessages').LogMessagesCollection;
 
     AppView = require('views/app').AppView;
 
@@ -346,6 +399,7 @@ window.require.define({"initialize": function(exports, require, module) {
         this.mailboxes = new MailboxCollection;
         this.mails = new MailsCollection;
         this.attachments = new AttachmentsCollection;
+        this.logmessages = new LogMessagesCollection;
         this.router = new MainRouter;
         this.appView = new AppView;
         return this.mailtosend = new MailNew;
@@ -385,6 +439,37 @@ window.require.define({"models/attachment": function(exports, require, module) {
       }
 
       return Attachment;
+
+    })(BaseModel);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"models/logmessage": function(exports, require, module) {
+  (function() {
+    var BaseModel,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    BaseModel = require("./models").BaseModel;
+
+    /*
+      @file: logmessage.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description: 
+        Model which represents a log message - displayed to user
+    */
+
+    exports.LogMessage = (function(_super) {
+
+      __extends(LogMessage, _super);
+
+      function LogMessage() {
+        LogMessage.__super__.constructor.apply(this, arguments);
+      }
+
+      return LogMessage;
 
     })(BaseModel);
 
@@ -979,7 +1064,7 @@ window.require.define({"views/app": function(exports, require, module) {
         $(this.el).html(require('./templates/app'));
         this.containerMenu = this.$("#menu_container");
         this.containerContent = this.$("#content");
-        this.viewMessageBox = new MessageBox(this.$("#message_box"), window.app.mailboxes, window.app.mails);
+        this.viewMessageBox = new MessageBox(this.$("#message_box"), window.app.logmessages);
         return this.setLayoutMenu();
       };
 
@@ -2200,78 +2285,123 @@ window.require.define({"views/menu_mailboxes_list_element": function(exports, re
 
 window.require.define({"views/message_box": function(exports, require, module) {
   (function() {
-    var Mail, Mailbox,
+    var MessageBoxElement,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-    Mailbox = require("../models/mailbox").Mailbox;
-
-    Mail = require("../models/mail").Mail;
+    MessageBoxElement = require("./message_box_element").MessageBoxElement;
 
     /*
       @file: message_box.coffee
       @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
       @description: 
         Serves a place to display messages which are meant to be seen by user.
-        
-        Has a set of preconfigured render methods, used by other views.
     */
 
     exports.MessageBox = (function(_super) {
 
       __extends(MessageBox, _super);
 
-      function MessageBox(el, mailboxes, mails) {
+      function MessageBox(el, collection) {
         this.el = el;
-        this.mailboxes = mailboxes;
-        this.mails = mails;
+        this.collection = collection;
         MessageBox.__super__.constructor.call(this);
       }
 
-      MessageBox.prototype.initialize = function() {};
+      MessageBox.prototype.initialize = function() {
+        this.collection.on("add", this.addOne, this);
+        return this.collection.on("reset", this.render, this);
+      };
 
-      MessageBox.prototype.addOne = function(mail) {
+      MessageBox.prototype.addOne = function(logmessage) {
         var box;
-        box = new MailboxesListElement(mail, mail.collection);
+        box = new MessageBoxElement(logmessage, this.collection);
         return $(this.el).append(box.render().el);
       };
 
       MessageBox.prototype.render = function() {
-        var template;
-        template = require('./templates/_message/normal');
-        $(this.el).html(template());
-        return this;
-      };
-
-      MessageBox.prototype.renderMessageSentSuccess = function() {
-        var template;
-        template = require('./templates/_message/message_sent');
-        $(this.el).html(template());
-        return this;
-      };
-
-      MessageBox.prototype.renderMessageSentError = function() {
-        var template;
-        template = require('./templates/_message/message_error');
-        $(this.el).html(template());
-        return this;
-      };
-
-      MessageBox.prototype.renderMailboxNewSuccess = function() {
-        var template;
-        template = require('./templates/_message/mailbox_new');
-        $(this.el).html(template());
-        return this;
-      };
-
-      MessageBox.prototype.renderMailboxUpdateSuccess = function() {
-        var template;
-        template = require('./templates/_message/mailbox_update');
-        $(this.el).html(template());
+        var col,
+          _this = this;
+        $(this.el).html("");
+        col = this.collection;
+        this.collection.each(function(m) {
+          return _this.addOne(m);
+        });
         return this;
       };
 
       return MessageBox;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/message_box_element": function(exports, require, module) {
+  
+  /*
+    @file: message_box_element.coffee
+    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+    @description: 
+      Serves a single message to user
+  */
+
+  (function() {
+    var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    exports.MessageBoxElement = (function(_super) {
+
+      __extends(MessageBoxElement, _super);
+
+      function MessageBoxElement(model, collection) {
+        this.model = model;
+        this.collection = collection;
+        this.remove = __bind(this.remove, this);
+        this.buttonClose = __bind(this.buttonClose, this);
+        MessageBoxElement.__super__.constructor.call(this);
+        this.model.view = this;
+      }
+
+      MessageBoxElement.prototype.events = {
+        "click button.close": 'buttonClose'
+      };
+
+      MessageBoxElement.prototype.buttonClose = function() {
+        if (this.model.get("timeout") === 0) {
+          this.model.destroy();
+          return this.remove();
+        }
+      };
+
+      MessageBoxElement.prototype.remove = function() {
+        return $(this.el).remove();
+      };
+
+      MessageBoxElement.prototype.render = function() {
+        var template, type;
+        if (this.model.get("timeout") !== 0) {
+          setTimeout(this.remove, this.model.get("timeout") * 1000);
+        }
+        type = this.model.get("type");
+        if (type === "error") {
+          template = require('./templates/_message/message_error');
+        } else if (type === "success") {
+          template = require('./templates/_message/message_success');
+        } else if (type === "warning") {
+          template = require('./templates/_message/message_warning');
+        } else {
+          template = require('./templates/_message/message_info');
+        }
+        $(this.el).html(template({
+          'model': this.model
+        }));
+        return this;
+      };
+
+      return MessageBoxElement;
 
     })(Backbone.View);
 
@@ -3082,38 +3212,6 @@ window.require.define({"views/templates/_mailbox/mailbox_new": function(exports,
   };
 }});
 
-window.require.define({"views/templates/_message/mailbox_new": function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow) {
-  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<div');
-  buf.push(attrs({ "class": ('alert') + ' ' + ('alert-success') }));
-  buf.push('><button');
-  buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
-  buf.push('>x</button><strong>Success !\n</strong><p>Your brand new mailbox has been saved. Give us now some time to import Your mail.\n</p></div>');
-  }
-  return buf.join("");
-  };
-}});
-
-window.require.define({"views/templates/_message/mailbox_update": function(exports, require, module) {
-  module.exports = function anonymous(locals, attrs, escape, rethrow) {
-  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
-  var buf = [];
-  with (locals || {}) {
-  var interp;
-  buf.push('<div');
-  buf.push(attrs({ "class": ('alert') + ' ' + ('alert-success') }));
-  buf.push('><button');
-  buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
-  buf.push('>x</button><strong>Success !\n</strong><p>Changes to your mailbox have been saved.\n</p></div>');
-  }
-  return buf.join("");
-  };
-}});
-
 window.require.define({"views/templates/_message/message_error": function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
@@ -3124,13 +3222,29 @@ window.require.define({"views/templates/_message/message_error": function(export
   buf.push(attrs({ "class": ('alert') + ' ' + ('alert-error') }));
   buf.push('><button');
   buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
-  buf.push('>x</button><strong>Error !\n</strong><p>Your message could not be sent!\n</p><p>Please verify Your mailbox settings!\n</p></div>');
+  buf.push('>x</button><strong>Oh, snap !\n</strong><p>' + escape((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
   }
   return buf.join("");
   };
 }});
 
-window.require.define({"views/templates/_message/message_sent": function(exports, require, module) {
+window.require.define({"views/templates/_message/message_info": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div');
+  buf.push(attrs({ "class": ('alert') + ' ' + ('alert-info') }));
+  buf.push('><button');
+  buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
+  buf.push('>x</button><strong>Heads up!\n</strong><p>' + escape((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_message/message_success": function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3140,7 +3254,23 @@ window.require.define({"views/templates/_message/message_sent": function(exports
   buf.push(attrs({ "class": ('alert') + ' ' + ('alert-success') }));
   buf.push('><button');
   buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
-  buf.push('>x</button><strong>Success !\n</strong><p>Your message has been sent successfully !\n</p></div>');
+  buf.push('>x</button><strong>Well done !\n</strong><p>' + escape((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
+  }
+  return buf.join("");
+  };
+}});
+
+window.require.define({"views/templates/_message/message_warning": function(exports, require, module) {
+  module.exports = function anonymous(locals, attrs, escape, rethrow) {
+  var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
+  var buf = [];
+  with (locals || {}) {
+  var interp;
+  buf.push('<div');
+  buf.push(attrs({ "class": ('alert') }));
+  buf.push('><button');
+  buf.push(attrs({ 'type':("button"), 'data-dismiss':("alert"), "class": ('close') }));
+  buf.push('>x</button><strong>Warning !\n</strong><p>' + escape((interp = model.get("text")) == null ? '' : interp) + '\n</p></div>');
   }
   return buf.join("");
   };

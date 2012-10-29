@@ -26,7 +26,7 @@ class exports.AppView extends Backbone.View
     $(@el).html require('./templates/app')
     @containerMenu = @.$("#menu_container")
     @containerContent = @.$("#content")
-    @viewMessageBox = new MessageBox @.$("#message_box"), window.app.mailboxes, window.app.mails
+    @viewMessageBox = new MessageBox @.$("#message_box"), window.app.logmessages
     @setLayoutMenu()
   
   # making sure the view takes 100% height of the viewport.

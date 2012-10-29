@@ -2,7 +2,7 @@
   @file: logs_controller.coffee
   @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
   @description: 
-    Railwayjs controller to logs system - displaying system information in the interface
+    Railwayjs controller for logs system - displaying system information in the interface
 ###
 
 load 'application'
@@ -36,4 +36,5 @@ action 'getactivelogs', ->
       # remove those for which timeout > 0
       for log in logs
         if log.timeout != 0
-          log.destroy()
+          log
+          #log.destroy()
