@@ -297,7 +297,7 @@ window.require.define({"collections/mails": function(exports, require, module) {
       MailsCollection.prototype.initialize = function() {
         this.on("change_active_mail", this.navigateMail, this);
         this.on("update_number_mails_shown", this.calculateMailsShown, this);
-        return setInterval(this.fetchNew, 1000 * 30);
+        return setInterval(this.fetchNew, 1000 * 15);
       };
 
       MailsCollection.prototype.navigateMail = function(event) {
@@ -322,9 +322,11 @@ window.require.define({"collections/mails": function(exports, require, module) {
       };
 
       MailsCollection.prototype.fetchNew = function(callback, errorCallback) {
-        window.app.mails.url = "mailsnew/" + this.timestampNew + "/" + this.lastIdNew;
-        console.log("fetchNew: " + window.app.mails.url);
-        return window.app.mails.fetch({
+        var mails;
+        mails = window.app.mails.url;
+        mails = "mailsnew/" + mails.timestampNew + "/" + mails.lastIdNew;
+        console.log("fetchNew: " + mails.url);
+        return mails.fetch({
           add: true,
           success: callback,
           error: errorCallback
