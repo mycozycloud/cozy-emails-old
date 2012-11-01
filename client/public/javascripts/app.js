@@ -323,8 +323,8 @@ window.require.define({"collections/mails": function(exports, require, module) {
 
       MailsCollection.prototype.fetchNew = function(callback, errorCallback) {
         var mails;
-        mails = window.app.mails.url;
-        mails = "mailsnew/" + mails.timestampNew + "/" + mails.lastIdNew;
+        mails = window.app.mails;
+        mails.url = "mailsnew/" + mails.timestampNew + "/" + mails.lastIdNew;
         console.log("fetchNew: " + mails.url);
         return mails.fetch({
           add: true,
