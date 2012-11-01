@@ -104,7 +104,7 @@ if not module.parent
         app.createCheckJob mailbox.id
         
   # set-up CRON
-  setInterval app.createCheckJobs, 1000 * 60 * 5
+  setInterval app.createCheckJobs, 1000 * 60 * 4 # check every 4 minutes
   # launch on startup
   app.createCheckJobs()
 

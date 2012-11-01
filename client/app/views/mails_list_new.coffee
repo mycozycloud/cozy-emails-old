@@ -25,6 +25,8 @@ class exports.MailsListNew extends Backbone.View
   # when user clicks on "more mails" button
   loadNewMails: () ->
 
+    element = @
+
     # if not disabled
     if @clickable
 
@@ -40,13 +42,23 @@ class exports.MailsListNew extends Backbone.View
       #      $("#get_new_mails").removeClass("disabled").text("Check completed!")
       # }
 
-      element = @
+      window.app.mails.fetchNew ->
+        element.clickable = true
+        date = new Date()
+        dateString = date.getHours() + ":"
+        if date.getMinutes() < 10
+          dateString += "0" + date.getMinutes()
+        else
+          dateString += date.getMinutes()
+        $("#get_new_mails").removeClass("disabled").text("Last check at " + dateString)
+
+      
       # in case it doesn't work, unblock after some time
       setTimeout(
         () ->
           element.clickable = true
-          element.render()
-        , 1000 * 45
+          $("#get_new_mails").removeClass("disabled")
+        , 1000 * 4
       )
   
   render: ->

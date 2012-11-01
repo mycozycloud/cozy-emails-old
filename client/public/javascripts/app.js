@@ -2232,14 +2232,26 @@ window.require.define({"views/mails_list_new": function(exports, require, module
 
       MailsListNew.prototype.loadNewMails = function() {
         var element;
+        element = this;
         if (this.clickable) {
           this.clickable = false;
           $("#get_new_mails").addClass("disabled").text("Checking for new mail...");
-          element = this;
+          window.app.mails.fetchNew(function() {
+            var date, dateString;
+            element.clickable = true;
+            date = new Date();
+            dateString = date.getHours() + ":";
+            if (date.getMinutes() < 10) {
+              dateString += "0" + date.getMinutes();
+            } else {
+              dateString += date.getMinutes();
+            }
+            return $("#get_new_mails").removeClass("disabled").text("Last check at " + dateString);
+          });
           return setTimeout(function() {
             element.clickable = true;
-            return element.render();
-          }, 1000 * 45);
+            return $("#get_new_mails").removeClass("disabled");
+          }, 1000 * 4);
         }
       };
 
