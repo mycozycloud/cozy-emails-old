@@ -75,8 +75,11 @@ action 'getlist', ->
       
 # GET '/mailsnew/:timestamp'
 action 'getnewlist', ->
+  # schedule un check
+  # app.createCheckJobs()
+
   timestamp = parseInt req.params.timestamp
-  
+
   if params.id? and params.id != "undefined"
     skip = 1
   else
