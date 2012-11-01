@@ -2,6 +2,7 @@
 
 {MailsList} = require "../views/mails_list"
 {MailsListMore} = require "../views/mails_list_more"
+{MailsListNew} = require "../views/mails_list_new"
 
 ###
   @file: mails_column.coffee
@@ -20,8 +21,14 @@ class exports.MailsColumn extends Backbone.View
 
   render: ->
     $(@el).html require('./templates/_mail/mails')
+    # the button to check for new mail
+    @viewMailsListNew = new MailsListNew @.$("#button_get_new_mails"), @collection
+    # thea actual list of mails
     @viewMailsList = new MailsList @.$("#mails_list_container"), @collection
+    # the button to load older mail
     @viewMailsListMore = new MailsListMore @.$("#button_load_more_mails"), @collection
+
+    @viewMailsListNew.render()
     @viewMailsList.render()
     @viewMailsListMore.render()
     @

@@ -54,7 +54,7 @@ if not module.parent
         #  "timeout": 3
         #  }
 
-        # on import complete
+        # on check complete
         job.on 'complete', () ->
           console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
           mailbox.updateAttributes {IMAP_last_fetched_date: new Date()}, (error) ->
@@ -64,7 +64,7 @@ if not module.parent
                 "type": "info",
                 "text": "Check for new mail in <strong>" + mailbox.name + "</strong> finished at " + new Date().toUTCString(),
                 "createdAt": new Date().valueOf(),
-                "timeout": 3
+                "timeout": 5
                 }
             else
               console.error "Check error...."
