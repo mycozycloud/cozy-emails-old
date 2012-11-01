@@ -3,6 +3,30 @@
 	{
 		"selected_items":
 		[
+			[
+				"dae",
+				"dateString"
+			],
+			[
+				"da",
+				"date"
+			],
+			[
+				"date",
+				"dateString"
+			],
+			[
+				"fet",
+				"fetchNew"
+			],
+			[
+				"re",
+				"request"
+			],
+			[
+				"creat",
+				"createdAt"
+			]
 		]
 	},
 	"buffers":
@@ -11,11 +35,19 @@
 	"build_system": "",
 	"command_palette":
 	{
-		"height": 0.0,
+		"height": 327.0,
 		"selected_items":
 		[
+			[
+				"packa",
+				"Package Control: Install Package"
+			],
+			[
+				"pac",
+				"Package Control: Add Repository"
+			]
 		],
-		"width": 0.0
+		"width": 449.0
 	},
 	"console":
 	{
@@ -32,10 +64,31 @@
 	},
 	"file_history":
 	[
+		"/Users/mickey/github/cozy-mails/client/app/views/mails_list_new.coffee",
+		"/Users/mickey/github/cozy-mails/client/app/views/templates/_mail/mails.jade",
+		"/Users/mickey/github/cozy-mails/client/app/views/mails_list_more.coffee",
+		"/Users/mickey/github/cozy-mails/client/app/collections/mails.coffee",
+		"/Users/mickey/github/cozy-mails/app/controllers/mailboxes_controller.coffee",
+		"/Users/mickey/github/cozy-mails/app/controllers/mails_controller.coffee",
+		"/Users/mickey/github/cozy-mails/server.coffee",
+		"/Users/mickey/github/cozy-mails/client/public/javascripts/app.js",
+		"/Users/mickey/github/cozy-mails/app/models/mailbox.coffee",
+		"/Users/mickey/github/cozy-mails/client/app/views/templates/_mail/mail_new.jade",
+		"/Users/mickey/github/cozy-mails/client/app/views/mails_column.coffee",
+		"/Users/mickey/github/cozy-mails/db/schema.coffee",
+		"/Users/mickey/github/cozy-mails/client/app/views/mails_list.coffee",
+		"/Users/mickey/github/cozy-mails/config/initializers/requests.coffee",
+		"/Users/mickey/github/cozy-mails/client/app/models/mail.coffee",
+		"/Users/mickey/github/cozy-mails/client/app/views/menu_mailboxes_list.coffee",
+		"/Users/mickey/github/cozy-mails/client/app/views/app.coffee",
+		"/Users/mickey/github/cozy-mails/client/app/views/templates/menu.jade",
+		"/Users/mickey/github/cozy-mails/client/app/views/templates/app.jade",
+		"/Users/mickey/github/cozy-mails/.gitmodules",
+		"/Users/mickey/github/cozy-mails/app/controllers/logs_controller.coffee"
 	],
 	"find":
 	{
-		"height": 0.0
+		"height": 35.0
 	},
 	"find_in_files":
 	{
@@ -49,6 +102,12 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"strin",
+			"boxes",
+			"window.app.mails",
+			"window",
+			"skip",
+			"mails"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -77,7 +136,7 @@
 	},
 	"input":
 	{
-		"height": 0.0
+		"height": 31.0
 	},
 	"layout":
 	{
