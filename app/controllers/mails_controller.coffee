@@ -76,6 +76,7 @@ action 'getlist', ->
 # GET '/mailsnew/:timestamp'
 action 'getnewlist', ->
   timestamp = parseInt req.params.timestamp
+  
   if params.id? and params.id != "undefined"
     skip = 1
   else
