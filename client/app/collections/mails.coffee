@@ -46,7 +46,7 @@ class exports.MailsCollection extends Backbone.Collection
   initialize: ->
     @on "change_active_mail", @navigateMail, @
     @on "update_number_mails_shown", @calculateMailsShown, @
-    setInterval @fetchNew, 0.5 * 60 * 1000
+    setInterval @fetchNew, 1000 * 30
 
   # sets the url to the active mail, chosen by user (for browser history to work, for example)
   navigateMail: (event) ->
@@ -59,10 +59,12 @@ class exports.MailsCollection extends Backbone.Collection
   fetchOlder: (callback, errorCallback) ->
     @url = "mailslist/" + @timestampOld + "." + @mailsAtOnce + "/" + @lastIdOld
     console.log "fetchOlder: " + @url
+    errorCallback = (error) ->
+      console.log error
     @fetch {add : true, success: callback, error: errorCallback}
 
   # fetches new mails from server
-  fetchNew: () =>
-    @url = "mailsnew/" + @timestampNew + "/" + @lastIdNew
-    console.log "fetchNew: " + @url
-    @fetch {add : true}
+  fetchNew: (callback, errorCallback) ->
+    window.app.mails.url = "mailsnew/" + @timestampNew + "/" + @lastIdNew
+    console.log "fetchNew: " + window.app.mails.url
+    window.app.mails.fetch {add : true, success: callback, error: errorCallback}
