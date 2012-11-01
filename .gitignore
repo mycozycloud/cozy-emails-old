@@ -18,3 +18,5 @@ npm-debug.log
 *.komodoproject
 
 *.tmproj
+
+*.sublime-workspace
