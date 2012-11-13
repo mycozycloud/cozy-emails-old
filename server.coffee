@@ -14,7 +14,7 @@ jobs = kue.createQueue()
 app = module.exports = require('railway').createServer()
 
 if not module.parent
-  port = process.env.PORT or 8003
+  port = process.env.PORT or 9203, "127.0.0.1"
   app.listen port
   console.log "CozyMail server listening on port %d within %s environment", port, app.settings.env
   
