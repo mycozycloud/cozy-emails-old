@@ -16,6 +16,7 @@ class exports.MainRouter extends Backbone.Router
     '' : 'home'
     'inbox' : 'home'
     'new-mail' : 'new'
+    'sent' : 'sent'
     'config-mailboxes' : 'configMailboxes'
 
   # routes that need regexp.
@@ -36,6 +37,14 @@ class exports.MainRouter extends Backbone.Router
     app.appView.setLayoutComposeMail()
     $(".menu_option").removeClass("active")
     $("#newmailbutton").addClass("active")
+
+
+################################################################
+############## SENT 
+  sent : ->
+    app.appView.setLayoutMailsSent()
+    $(".menu_option").removeClass("active")
+    $("#sentbutton").addClass("active")
 
 
 ################################################################

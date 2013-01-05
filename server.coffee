@@ -91,14 +91,14 @@ if not module.parent
   @jobs.process "check mailbox", 1, (job, done) ->
     console.log job.data.title + " #" + job.id + " job started at " + new Date().toUTCString()
     Mailbox.find job.data.mailboxId, (error, mailbox) ->
-      if error
+      if error or not mailbox
         done error
       else
         mailbox.getNewMail job, done
 
   # CRON job
   app.createCheckJobs = =>
-    console.log "Creating check jobs"
+    console.log "Creating check jobs..."
     Mailbox.all {where: {activated: true}}, (err, mailboxes) ->
       for mailbox in mailboxes
         app.createCheckJob mailbox.id
@@ -231,6 +231,3 @@ if not module.parent
         mailbox.doImport job, done
 
 ##  - CREATEIMPORTJOB - END
-
-  # debug
-  @jobs.promote()
