@@ -1016,7 +1016,6 @@ window.require.define({"models/mail_sent": function(exports, require, module) {
       MailSent.prototype.toShort = function() {
         var obj, out, parsed, _i, _len;
         out = "";
-        console.log(JSON.stringify(this.get("to")));
         if (this.get("to")) {
           parsed = JSON.parse(this.get("to"));
           for (_i = 0, _len = parsed.length; _i < _len; _i++) {

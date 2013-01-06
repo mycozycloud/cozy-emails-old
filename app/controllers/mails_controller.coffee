@@ -66,7 +66,6 @@ action 'getlist', ->
   Mail.dateId query, (error, mails) ->
     if !error
       # we send 204 when there is no content to send
-      console.log mails
       if mails.length == 0
         send 499
       else

@@ -188,6 +188,7 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                             headers: false
 
                         fetch.on "message", (message) ->
+                          # parser = new mailparser.MailParser { streamAttachments: true }
                           parser = new mailparser.MailParser { streamAttachments: true }
 
                           parser.on "end", (mailParsedObject) ->
@@ -239,6 +240,20 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                               # for now we will just skip messages which are being rejected by parser
                               # emitOnErr err
                               unless err
+                              
+                                # attachements
+                                if mailParsedObject.attachments?
+                                  for attachment in mailParsedObject.attachments
+                                    console.log "Attachment: " + attachment.fileName
+
+                                    mail.attachments.create {
+                                      cid:       attachment.contentId
+                                      fileName:  attachment.fileName
+                                      contentType: attachment.contentType
+                                      length:    attachment.length
+                                      checksum:  attachment.checksum
+                                      # content64: attachment.content
+                                    }
 
                                 # debug info
                                 console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug

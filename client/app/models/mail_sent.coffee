@@ -62,7 +62,6 @@ class exports.MailSent extends BaseModel
 
   toShort: ->
     out = ""
-    console.log JSON.stringify @get "to"
     if @get "to"
       parsed = JSON.parse @get "to"
       for obj in parsed
