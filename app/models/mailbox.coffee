@@ -267,13 +267,13 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                                       unless error
                                         console.log attach
                                         
-                                        Client = require('request-json').JsonClient
-                                        client = new Client("http://localhost:9101/")
-                                        req = client.post "data/#{attachment.id}/attachments/", null, (status) ->
-                                          console.log status
-                                        form = req.form()
-                                        form.append 'name', attachment.fileName
-                                        form.append 'file', attachment.stream
+                                        #Client = require('request-json').JsonClient
+                                        #client = new Client("http://localhost:9101/")
+                                        #req = client.post "data/#{attachment.id}/attachments/", null, (status) ->
+                                        #  console.log status
+                                        #form = req.form()
+                                        #form.append 'name', attachment.fileName
+                                        #form.append 'file', attachment.stream
 
                                 # debug info
                                 console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug
