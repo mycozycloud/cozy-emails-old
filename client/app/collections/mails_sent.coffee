@@ -35,7 +35,7 @@ class exports.MailsSentCollection extends Backbone.Collection
     @each (m) =>
       if m.get("mailbox") in window.app.mailboxes.activeMailboxes
         col.mailsShown++
-    console.log "updated number of visible mails: " + @mailsShown
+    console.log "updated number of visible sent mails: " + @mailsShown
     @trigger "updated_number_mails_shown"
   
   # comparator to sort the collection with the date
@@ -57,7 +57,5 @@ class exports.MailsSentCollection extends Backbone.Collection
   fetchOlder: (callback, errorCallback) ->
     @url = "mailssentlist/" + @timestampOld + "." + @mailsAtOnce + "/" + @lastIdOld
     console.log "fetchOlder: " + @url
-    errorCallback = (error) ->
-      console.log error
     @fetch {add : true, success: callback, error: errorCallback}
     

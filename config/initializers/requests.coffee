@@ -47,10 +47,10 @@ LogMessage.defineRequest "all", requests.all, ->
 
 # Mails Sent
 dateRequestSent = -> emit doc.createdAt, doc
-dateIdRequest = -> emit [doc.createdAt, doc._id], doc
+dateIdRequestSent = -> emit [doc.createdAt, doc._id], doc
 
 MailSent.defineRequest "all", requests.all, ->
-    MailSent.defineRequest "dateId", dateIdRequest, ->
+    MailSent.defineRequest "dateId", dateIdRequestSent, ->
         MailSent.defineRequest "date", dateRequestSent, requests.checkError
 
 MailSent.date = (params, callback) ->

@@ -1,7 +1,5 @@
-{Mail} = require "../models/mail"
-
 {MailsSentList} = require "../views/mailssent_list"
-{MailsListMore} = require "../views/mails_list_more"
+{MailsSentListMore} = require "../views/mailssent_list_more"
 
 ###
   @file: mailssent_column.coffee
@@ -12,7 +10,7 @@
 ###
 
 class exports.MailsSentColumn extends Backbone.View
-  id: "mailslist"
+  id: "mailssentlist"
   className: "mails"
 
   constructor: (@el, @collection) ->
@@ -23,8 +21,8 @@ class exports.MailsSentColumn extends Backbone.View
     # the actual list of mails
     @viewMailsSentList = new MailsSentList @.$("#mails_list_container"), @collection
     # the button to load older mail
-    @viewMailsListMore = new MailsListMore @.$("#button_load_more_mails"), @collection
+    @viewMailsSentListMore = new MailsSentListMore @.$("#button_load_more_mails"), @collection
 
     @viewMailsSentList.render()
-    @viewMailsListMore.render()
+    @viewMailsSentListMore.render()
     @

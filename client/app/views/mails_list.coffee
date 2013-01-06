@@ -18,7 +18,7 @@ class exports.MailsList extends Backbone.View
     @collection.view = @
 
   initialize: ->
-    @collection.on('reset', @render, @)
+    @collection.on 'reset', @render, @
     @collection.on "add", @treatAdd, @
 
 

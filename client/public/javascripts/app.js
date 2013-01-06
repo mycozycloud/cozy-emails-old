@@ -225,7 +225,8 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
         });
         console.log("update mailboxes: " + this.activeMailboxes);
         this.trigger("change_active_mailboxes", this);
-        return window.app.mails.trigger("update_number_mails_shown");
+        window.app.mails.trigger("update_number_mails_shown");
+        return window.app.mailssent.trigger("update_number_mails_shown");
       };
 
       return MailboxCollection;
@@ -309,11 +310,10 @@ window.require.define({"collections/mails": function(exports, require, module) {
       };
 
       MailsCollection.prototype.fetchOlder = function(callback, errorCallback) {
-        this.url = "mailslist/" + this.timestampOld + "." + this.mailsAtOnce + "/" + this.lastIdOld;
+        var mails;
+        mails = window.app.mails;
+        this.url = "mailslist/" + mails.timestampOld + "." + mails.mailsAtOnce + "/" + mails.lastIdOld;
         console.log("fetchOlder: " + this.url);
-        errorCallback = function(error) {
-          return console.log(error);
-        };
         return this.fetch({
           add: true,
           success: callback,
@@ -392,7 +392,7 @@ window.require.define({"collections/mails_sent": function(exports, require, modu
             return col.mailsShown++;
           }
         });
-        console.log("updated number of visible mails: " + this.mailsShown);
+        console.log("updated number of visible sent mails: " + this.mailsShown);
         return this.trigger("updated_number_mails_shown");
       };
 
@@ -416,9 +416,6 @@ window.require.define({"collections/mails_sent": function(exports, require, modu
       MailsSentCollection.prototype.fetchOlder = function(callback, errorCallback) {
         this.url = "mailssentlist/" + this.timestampOld + "." + this.mailsAtOnce + "/" + this.lastIdOld;
         console.log("fetchOlder: " + this.url);
-        errorCallback = function(error) {
-          return console.log(error);
-        };
         return this.fetch({
           add: true,
           success: callback,
@@ -2453,6 +2450,8 @@ window.require.define({"views/mails_list_more": function(exports, require, modul
 
       MailsListMore.prototype.clickable = true;
 
+      MailsListMore.prototype.disabled = false;
+
       function MailsListMore(el, collection) {
         this.el = el;
         this.collection = collection;
@@ -2471,13 +2470,20 @@ window.require.define({"views/mails_list_more": function(exports, require, modul
       };
 
       MailsListMore.prototype.loadOlderMails = function() {
-        var element, success;
+        var element, error, success,
+          _this = this;
         $("#add_more_mails").addClass("disabled");
         if (this.clickable) {
           success = function(collection) {
             return window.app.mails.trigger("update_number_mails_shown");
           };
-          this.collection.fetchOlder(success);
+          error = function(collection, error) {
+            if (error.status === 499) {
+              _this.disabled = true;
+              return _this.render();
+            }
+          };
+          this.collection.fetchOlder(success, error);
           this.clickable = false;
           element = this;
           return setTimeout(function() {
@@ -2493,7 +2499,8 @@ window.require.define({"views/mails_list_more": function(exports, require, modul
         this.clickable = true;
         template = require("./templates/_mail/mails_more");
         $(this.el).html(template({
-          "collection": this.collection
+          "collection": this.collection,
+          "disabled": this.disabled
         }));
         return this;
       };
@@ -2586,15 +2593,13 @@ window.require.define({"views/mails_list_new": function(exports, require, module
 
 window.require.define({"views/mailssent_column": function(exports, require, module) {
   (function() {
-    var Mail, MailsListMore, MailsSentList,
+    var MailsSentList, MailsSentListMore,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
-    Mail = require("../models/mail").Mail;
-
     MailsSentList = require("../views/mailssent_list").MailsSentList;
 
-    MailsListMore = require("../views/mails_list_more").MailsListMore;
+    MailsSentListMore = require("../views/mailssent_list_more").MailsSentListMore;
 
     /*
       @file: mailssent_column.coffee
@@ -2607,7 +2612,7 @@ window.require.define({"views/mailssent_column": function(exports, require, modu
 
       __extends(MailsSentColumn, _super);
 
-      MailsSentColumn.prototype.id = "mailslist";
+      MailsSentColumn.prototype.id = "mailssentlist";
 
       MailsSentColumn.prototype.className = "mails";
 
@@ -2620,9 +2625,9 @@ window.require.define({"views/mailssent_column": function(exports, require, modu
       MailsSentColumn.prototype.render = function() {
         $(this.el).html(require('./templates/_mail/mails'));
         this.viewMailsSentList = new MailsSentList(this.$("#mails_list_container"), this.collection);
-        this.viewMailsListMore = new MailsListMore(this.$("#button_load_more_mails"), this.collection);
+        this.viewMailsSentListMore = new MailsSentListMore(this.$("#button_load_more_mails"), this.collection);
         this.viewMailsSentList.render();
-        this.viewMailsListMore.render();
+        this.viewMailsSentListMore.render();
         return this;
       };
 
@@ -2703,11 +2708,9 @@ window.require.define({"views/mailssent_element": function(exports, require, mod
 
 window.require.define({"views/mailssent_list": function(exports, require, module) {
   (function() {
-    var Mail, MailsSentListElement,
+    var MailsSentListElement,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    Mail = require("../models/mail").Mail;
 
     MailsSentListElement = require("./mailssent_list_element").MailsSentListElement;
 
@@ -2723,7 +2726,7 @@ window.require.define({"views/mailssent_list": function(exports, require, module
 
       __extends(MailsSentList, _super);
 
-      MailsSentList.prototype.id = "mails_list";
+      MailsSentList.prototype.id = "mailssent_list";
 
       function MailsSentList(el, collection) {
         this.el = el;
@@ -2840,6 +2843,91 @@ window.require.define({"views/mailssent_list_element": function(exports, require
       };
 
       return MailsSentListElement;
+
+    })(Backbone.View);
+
+  }).call(this);
+  
+}});
+
+window.require.define({"views/mailssent_list_more": function(exports, require, module) {
+  (function() {
+    var MailSent,
+      __hasProp = Object.prototype.hasOwnProperty,
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
+
+    MailSent = require("../models/mail_sent").MailSent;
+
+    /*
+      @file: mailssent_list_more.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description: 
+        The view with the "load more" button.
+        Also displays info on how many messages are visible in this filer, and how many are effectiveley downloaded.
+    */
+
+    exports.MailsSentListMore = (function(_super) {
+
+      __extends(MailsSentListMore, _super);
+
+      MailsSentListMore.prototype.clickable = true;
+
+      MailsSentListMore.prototype.disabled = false;
+
+      function MailsSentListMore(el, collection) {
+        this.el = el;
+        this.collection = collection;
+        MailsSentListMore.__super__.constructor.call(this);
+      }
+
+      MailsSentListMore.prototype.initialize = function() {
+        this.collection.on('reset', this.render, this);
+        this.collection.on('add', this.render, this);
+        this.collection.on('updated_number_mails_shown', this.render, this);
+        return window.app.mailboxes.on("change_active_mailboxes", this.render, this);
+      };
+
+      MailsSentListMore.prototype.events = {
+        "click #add_more_mails": 'loadOlderMails'
+      };
+
+      MailsSentListMore.prototype.loadOlderMails = function() {
+        var element, error, success,
+          _this = this;
+        $("#add_more_mails").addClass("disabled");
+        if (this.clickable) {
+          success = function(collection) {
+            return window.app.mailssent.trigger("update_number_mails_shown");
+          };
+          error = function(collection, error) {
+            if (error.status === 499) {
+              _this.disabled = true;
+              return _this.render();
+            }
+          };
+          this.collection.fetchOlder(success, error);
+          this.clickable = false;
+          element = this;
+          return setTimeout(function() {
+            element.clickable = true;
+            element.render();
+            return console.log("retry");
+          }, 1000 * 7);
+        }
+      };
+
+      MailsSentListMore.prototype.render = function() {
+        var template;
+        this.clickable = true;
+        template = require("./templates/_mail/mails_more");
+        $(this.el).html(template({
+          "collection": this.collection,
+          "disabled": this.disabled
+        }));
+        return this;
+      };
+
+      return MailsSentListMore;
 
     })(Backbone.View);
 
@@ -3678,6 +3766,8 @@ window.require.define({"views/templates/_mail/mails_more": function(exports, req
   buf.push(attrs({ 'href':("#config-mailboxes") }));
   buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div>');
   }
+  if ( !disabled)
+  {
   buf.push('<div');
   buf.push(attrs({ 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
@@ -3685,6 +3775,11 @@ window.require.define({"views/templates/_mail/mails_more": function(exports, req
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-plus') }));
   buf.push('></i> Load up to ' + escape((interp = collection.mailsAtOnce) == null ? '' : interp) + ' messages more\n</a></div><p><i>Showing ' + escape((interp = collection.mailsShown) == null ? '' : interp) + ' of ' + escape((interp = collection.length) == null ? '' : interp) + ' messages downloaded</i></p>');
+  }
+  else
+  {
+  buf.push('<p><i>All messages loaded, showing ' + escape((interp = collection.mailsShown) == null ? '' : interp) + ' out of ' + escape((interp = collection.length) == null ? '' : interp) + '</i></p>');
+  }
   }
   return buf.join("");
   };

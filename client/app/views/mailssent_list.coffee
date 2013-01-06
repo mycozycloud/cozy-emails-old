@@ -1,4 +1,3 @@
-{Mail} = require "../models/mail"
 {MailsSentListElement} = require "./mailssent_list_element"
 
 ###
@@ -11,7 +10,7 @@
 ###
 
 class exports.MailsSentList extends Backbone.View
-  id: "mails_list"
+  id: "mailssent_list"
 
   constructor: (@el, @collection) ->
     super()
