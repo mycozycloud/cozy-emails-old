@@ -98,6 +98,12 @@ action 'sendmail', ->
     if !error
 
       # complete the data
+      mimelib = require "mimelib"
+      
+      data.to = JSON.stringify mimelib.parseAddresses data.to
+      data.bcc = JSON.stringify mimelib.parseAddresses data.bcc
+      data.cc = JSON.stringify mimelib.parseAddresses data.cc
+      
       data.mailbox = @box.id
       data.sentAt = new Date().valueOf()
       data.from = @box.SMTP_send_as

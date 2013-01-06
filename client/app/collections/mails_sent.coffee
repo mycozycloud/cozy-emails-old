@@ -1,4 +1,4 @@
-{Mail} = require "../models/mail"
+{MailSent} = require "../models/mail_sent"
 
 ###
   @file: mails_sent.coffee
@@ -10,7 +10,7 @@
 ###
 class exports.MailsSentCollection extends Backbone.Collection
     
-  model: Mail
+  model: MailSent
   url: 'mails/'
   
   # timestamps:
@@ -22,6 +22,9 @@ class exports.MailsSentCollection extends Backbone.Collection
   
   # variable to store number of mails visible in the avtive filter
   mailsShown: 0
+  
+  resetTimestamp: ->
+    timestampOld = new Date().valueOf()
 
   calculateMailsShown: ->
     #TODO
@@ -46,7 +49,7 @@ class exports.MailsSentCollection extends Backbone.Collection
   # sets the url to the active mail, chosen by user (for browser history to work, for example)
   navigateMail: (event) ->
     if @activeMail?
-      window.app.router.navigate "mail/" + @activeMail.id
+      window.app.router.navigate "mailsent/" + @activeMail.id
     else
       console.error "NavigateMail without active mail"
   

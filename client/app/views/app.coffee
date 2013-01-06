@@ -4,6 +4,7 @@
 {MailsColumn} = require '../views/mails_column'
 {MailsSentColumn} = require '../views/mailssent_column'
 {MailsElement} = require '../views/mails_element'
+{MailsSentElement} = require '../views/mailssent_element'
 {MailsCompose} = require '../views/mails_compose'
 {MessageBox} = require 'views/message_box'
 
@@ -142,6 +143,12 @@ class exports.AppView extends Backbone.View
                 console.log "Initial mails mails load OK"
                 window.app.mailboxes.updateActiveMailboxes()
         })
+        
+    else if window.app.mails.length == 0
+      # fetch necessary data
+      window.app.mails.fetchOlder () ->
+          console.log "Initial mails mails load OK"
+          window.app.mailboxes.updateActiveMailboxes()
     
     # ensure the right size
     @resize()
@@ -155,19 +162,24 @@ class exports.AppView extends Backbone.View
     # create views for the columns
     window.app.viewMailsSentList = new MailsSentColumn @.$("#column_mails_list"), window.app.mailssent
     window.app.viewMailsSentList.render()
-    window.app.view_mailsent = new MailsElement @.$("#column_mail"), window.app.mailssent
+    window.app.view_mailsent = new MailsSentElement @.$("#column_mail"), window.app.mailssent
 
     # fetch necessary data
     if window.app.mailboxes.length == 0
       window.app.mailboxes.fetch({
         success: ->
-          console.log "Initial mails mailboxes load OK"
-          if window.app.mails.length == 0
+          console.log "Initial mails sent mailboxes load OK"
+          if window.app.mailssent.length == 0
             # fetch necessary data
-            window.app.mails.fetchOlder () ->
-                console.log "Initial mails mails load OK"
+            window.app.mailssent.fetchOlder () ->
+                console.log "Initial mails sent mails load OK"
                 window.app.mailboxes.updateActiveMailboxes()
         })
+    else if window.app.mailssent.length == 0
+      # fetch necessary data
+      window.app.mailssent.fetchOlder () ->
+        console.log "Initial mails sent mails load OK"
+        window.app.mailboxes.updateActiveMailboxes()
 
     # ensure the right size
     @resize()

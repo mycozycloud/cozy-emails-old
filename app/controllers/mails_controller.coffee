@@ -73,6 +73,32 @@ action 'getlist', ->
     else
       send 500
       
+# GET '/mailssentlist/:timestamp.:num'
+action 'getlistsent', ->
+  num = parseInt req.params.num
+  timestamp = parseInt req.params.timestamp
+
+  if params.id? and params.id != "undefined"
+    skip = 1
+  else
+    skip = 0
+
+  query =
+    startkey: [timestamp, params.id]
+    limit: num
+    descending: true
+    skip: skip
+
+  MailSent.dateId query, (error, mails) ->
+    if !error
+      # we send 204 when there is no content to send
+      if mails.length == 0
+        send 707
+      else
+        send mails
+    else
+      send 500
+      
 # GET '/mailsnew/:timestamp'
 action 'getnewlist', ->
   # schedule un check
