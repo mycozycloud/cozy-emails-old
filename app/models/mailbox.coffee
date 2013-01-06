@@ -190,7 +190,12 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                         fetch.on "message", (message) ->
                           # parser = new mailparser.MailParser { streamAttachments: true }
                           parser = new mailparser.MailParser { streamAttachments: true }
-
+                          
+                          attachments_all = []
+                          
+                          parser.on "attachment", (attachment) ->
+                            attachments_all.push attachment
+                          
                           parser.on "end", (mailParsedObject) ->
                         
                             # choose the right date
@@ -243,22 +248,32 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                               # emitOnErr err
                               unless err
                               
-                                console.log mail
-                              
                                 # attachements
-                                if mailParsedObject.attachments?
-                                  for attachment in mailParsedObject.attachments
+                                if attachments_all?
+                                  for attachment in attachments_all
                                     console.log "Attachment: " + attachment.fileName + "/" + mail.id
-
-                                    Attachment.create {
+                                    
+                                    params = {
                                       cid:       attachment.contentId
                                       fileName:  attachment.fileName
                                       contentType: attachment.contentType
                                       length:    attachment.length
                                       checksum:  attachment.checksum
                                       mail_id: mail.id
-                                      # content64: attachment.content
-                                    }
+                                    }  
+                                    
+                                    Attachment.create params, (error, attach) ->
+                                      
+                                      unless error
+                                        console.log attach
+                                        
+                                        Client = require('request-json').JsonClient
+                                        client = new Client("http://localhost:9101/")
+                                        req = client.post "data/#{attachment.id}/attachments/", null, (status) ->
+                                          console.log status
+                                        form = req.form()
+                                        form.append 'name', attachment.fileName
+                                        form.append 'file', attachment.stream
 
                                 # debug info
                                 console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug

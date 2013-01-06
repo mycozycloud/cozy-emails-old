@@ -28,6 +28,7 @@
   , "kue":              "= 0.4.1"
   , "cluster":          "= 0.7.7"
   , "mimelib":			">= 0"
+  , "request-json":     ">= 0"
   }
 , "devDependencies": 
   { "should":           "= 1.2.0"
