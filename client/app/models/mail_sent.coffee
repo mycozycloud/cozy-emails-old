@@ -35,6 +35,9 @@ class exports.MailSent extends BaseModel
       RENDERING - these functions attr() replace @get "attr", and add some parsing logic.
       To be used in views, to keep the maximum of logic related to mails in one place.
   ###
+  
+  hasCC: ->
+    @get("cc") and JSON.parse(@get("cc")).length > 0
 
   cc: ->
     out = ""
@@ -48,6 +51,25 @@ class exports.MailSent extends BaseModel
     out = ""
     if @get "cc"
       parsed = JSON.parse @get "cc"
+      for obj in parsed
+        out += obj.name + " "
+    out
+    
+  hasBCC: ->
+    @get("bcc") and JSON.parse(@get("bcc")).length > 0
+
+  bcc: ->
+    out = ""
+    if @get "bcc"
+      parsed = JSON.parse @get "bcc"
+      for obj in parsed
+        out += obj.name + " <" + obj.address + ">, "
+    out
+
+  bccShort: ->
+    out = ""
+    if @get "bcc"
+      parsed = JSON.parse @get "bcc"
       for obj in parsed
         out += obj.name + " "
     out

@@ -974,6 +974,10 @@ window.require.define({"models/mail_sent": function(exports, require, module) {
             To be used in views, to keep the maximum of logic related to mails in one place.
       */
 
+      MailSent.prototype.hasCC = function() {
+        return this.get("cc") && JSON.parse(this.get("cc")).length > 0;
+      };
+
       MailSent.prototype.cc = function() {
         var obj, out, parsed, _i, _len;
         out = "";
@@ -992,6 +996,36 @@ window.require.define({"models/mail_sent": function(exports, require, module) {
         out = "";
         if (this.get("cc")) {
           parsed = JSON.parse(this.get("cc"));
+          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+            obj = parsed[_i];
+            out += obj.name + " ";
+          }
+        }
+        return out;
+      };
+
+      MailSent.prototype.hasBCC = function() {
+        return this.get("bcc") && JSON.parse(this.get("bcc")).length > 0;
+      };
+
+      MailSent.prototype.bcc = function() {
+        var obj, out, parsed, _i, _len;
+        out = "";
+        if (this.get("bcc")) {
+          parsed = JSON.parse(this.get("bcc"));
+          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+            obj = parsed[_i];
+            out += obj.name + " <" + obj.address + ">, ";
+          }
+        }
+        return out;
+      };
+
+      MailSent.prototype.bccShort = function() {
+        var obj, out, parsed, _i, _len;
+        out = "";
+        if (this.get("bcc")) {
+          parsed = JSON.parse(this.get("bcc"));
           for (_i = 0, _len = parsed.length; _i < _len; _i++) {
             obj = parsed[_i];
             out += obj.name + " ";
@@ -4008,9 +4042,13 @@ window.require.define({"views/templates/_mailsent/mailsent_big": function(export
   buf.push('<div');
   buf.push(attrs({ "class": ('well') }));
   buf.push('><p>To: ' + escape((interp = model.to()) == null ? '' : interp) + '\n');
-  if ( model.get("cc"))
+  if ( model.hasCC())
   {
-  buf.push('<p>CC:  ' + escape((interp = model.cc()) == null ? '' : interp) + '\n</p>');
+  buf.push('<p>Cc:  ' + escape((interp = model.cc()) == null ? '' : interp) + '\n</p>');
+  }
+  if ( model.hasBCC())
+  {
+  buf.push('<p>Bcc:  ' + escape((interp = model.bcc()) == null ? '' : interp) + '\n</p>');
   }
   buf.push('</p><p><i');
   buf.push(attrs({ 'style':('color: lightgray;') }));

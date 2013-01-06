@@ -1,9 +1,12 @@
 .well
   p
     | To: #{model.to()}
-    if model.get("cc")
+    if model.hasCC()
       p
-        | CC:  #{model.cc()}
+        | Cc:  #{model.cc()}
+    if model.hasBCC()
+      p
+        | Bcc:  #{model.bcc()}
   p
     i(style='color: lightgray;') sent #{model.date()}
     br
