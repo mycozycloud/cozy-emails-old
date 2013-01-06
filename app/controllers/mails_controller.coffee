@@ -15,7 +15,7 @@ before ->
     else
       @box = box
       next()
-, { only: ['show', 'update', 'destroy'] }
+, { only: ['show', 'update', 'destroy', 'getattachmentslist'] }
 
 # GET /mails/:id
 action 'show', ->
@@ -125,17 +125,18 @@ action 'getnewlist', ->
     else
       send 500
 
-# GET '/getattachments/:mail
+# GET '/getattachments/:id
 action 'getattachmentslist', ->
-  Mail.find req.params.mail, (err, mail) =>
-    if err or !mail
-      send 404
+  query =
+      key: @box.id
+  console.log query
+  Attachment.fromMail query, (error, attachments) ->
+    if error
+      console.log error
+      console.log attachments
+      send 500
     else
-      Attachment.fromMail key: mail.id, (error, attachments) =>
-        if error
-          send 500
-        else
-          send attachments
+      send attachments
           
 # GET '/getattachment/:attachment'
 action 'getattachment', ->

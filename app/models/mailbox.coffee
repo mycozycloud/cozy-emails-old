@@ -205,6 +205,8 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                         
                             # compile the mail data
                             mail =
+                              mailbox:      mailbox.id
+                              
                               date:         dateSent.toJSON()
                               dateValueOf:  dateSent.valueOf()
                               createdAt:    new Date().valueOf()
@@ -235,11 +237,13 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                               hasAttachments: if mailParsedObject.attachments then true else false
                           
                             # and now we can create a new mail on database, as a child of this mailbox
-                            mailbox.mails.create mail, (err, mail) ->
+                            Mail.create mail, (err, mail) ->
     
                               # for now we will just skip messages which are being rejected by parser
                               # emitOnErr err
                               unless err
+                              
+                                console.log mail
                               
                                 # attachements
                                 if mailParsedObject.attachments?
