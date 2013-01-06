@@ -244,14 +244,15 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                                 # attachements
                                 if mailParsedObject.attachments?
                                   for attachment in mailParsedObject.attachments
-                                    console.log "Attachment: " + attachment.fileName
+                                    console.log "Attachment: " + attachment.fileName + "/" + mail.id
 
-                                    mail.attachments.create {
+                                    Attachment.create {
                                       cid:       attachment.contentId
                                       fileName:  attachment.fileName
                                       contentType: attachment.contentType
                                       length:    attachment.length
                                       checksum:  attachment.checksum
+                                      mail_id: mail.id
                                       # content64: attachment.content
                                     }
 
