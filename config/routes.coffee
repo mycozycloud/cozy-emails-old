@@ -6,6 +6,8 @@ exports.routes = (map) ->
     map.get '/mailslist/:timestamp.:num/:id', 'mails#getlist'
     map.get '/mailsnew/:timestamp/:id', 'mails#getnewlist'
     
+    map.get '/mailssentlist/:timestamp.:num/:id', 'mails#getlistsent'
+    
     map.put '/sendmail/:id', 'mailboxes#sendmail'
     map.post '/sendmail/:id', 'mailboxes#sendmail'
     

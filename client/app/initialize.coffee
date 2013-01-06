@@ -10,6 +10,7 @@
 {MainRouter} = require 'routers/main_router'
 {MailboxCollection} = require 'collections/mailboxes'
 {MailsCollection} = require 'collections/mails'
+{MailsSentCollection} = require 'collections/mails_sent'
 {AttachmentsCollection} = require 'collections/attachments'
 {LogMessagesCollection} = require 'collections/logmessages'
 {AppView} = require 'views/app'
@@ -23,6 +24,7 @@ class exports.Application extends BrunchApplication
   initialize: ->
     @mailboxes = new MailboxCollection
     @mails = new MailsCollection
+    @mailssent = new MailsSentCollection
     @attachments = new AttachmentsCollection
     @logmessages = new LogMessagesCollection
     @router = new MainRouter

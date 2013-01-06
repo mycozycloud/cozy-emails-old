@@ -13,8 +13,8 @@
 ###
 
 class exports.MailsColumn extends Backbone.View
-  id: "mailboxeslist"
-  className: "mailboxes"
+  id: "mailslist"
+  className: "mails"
 
   constructor: (@el, @collection) ->
     super()

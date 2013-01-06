@@ -1,14 +1,14 @@
-{Mail} = require "../models/mail"
+{MailSent} = require "../models/mail_sent"
 
 ###
-  @file: mails_list_more.coffee
+  @file: mailssent_list_more.coffee
   @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
   @description: 
     The view with the "load more" button.
     Also displays info on how many messages are visible in this filer, and how many are effectiveley downloaded.
 
 ###
-class exports.MailsListMore extends Backbone.View
+class exports.MailsSentListMore extends Backbone.View
   
   # variable to avoid multiple requests with the same params
   clickable: true
@@ -36,7 +36,7 @@ class exports.MailsListMore extends Backbone.View
     if @clickable
       # fetch new data
       success = (collection) ->
-        window.app.mails.trigger "update_number_mails_shown"
+        window.app.mailssent.trigger "update_number_mails_shown"
       
       error = (collection, error) =>
         if error.status == 499

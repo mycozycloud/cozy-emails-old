@@ -4,6 +4,7 @@ server = require './server'
 
 Mail.destroyAll ->
     MailToBe.destroyAll ->
-        Attachment.destroyAll ->
-            Mailbox.destroyAll ->
-                process.exit(0)
+        MailSent.destroyAll ->
+            Attachment.destroyAll ->
+                Mailbox.destroyAll ->
+                    process.exit(0)
