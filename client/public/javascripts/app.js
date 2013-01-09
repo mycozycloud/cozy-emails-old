@@ -376,9 +376,11 @@ window.require.define({"collections/mails_sent": function(exports, require, modu
 
       MailsSentCollection.prototype.mailsShown = 0;
 
-      MailsSentCollection.prototype.resetTimestamp = function() {
-        var timestampOld;
-        return timestampOld = new Date().valueOf();
+      MailsSentCollection.prototype.resetAndFetch = function(callback, errorcallback) {
+        this.timestampOld = new Date().valueOf();
+        this.lastIdOld = void 0;
+        this.reset();
+        return this.fetchOlder(callback, errorcallback);
       };
 
       MailsSentCollection.prototype.calculateMailsShown = function() {
@@ -2082,6 +2084,7 @@ window.require.define({"views/mails_compose": function(exports, require, module)
         el = this.el;
         this.mailtosend.save(data, {
           success: function() {
+            window.app.mailssent.resetAndFetch();
             console.log("sent!");
             $(el).html(require('./templates/_mail/mail_sent'));
             return window.app.logmessages.add({

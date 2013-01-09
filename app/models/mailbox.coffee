@@ -376,7 +376,7 @@ Mailbox::setupImport = (callback) ->
       callback error
 
   server.on "close", (error) ->
-    console.log "Connection closed: " + error.toString() if debug
+    console.log "Connection closed (error: " + error.toString() + ")" if debug
         
   emitOnErr = (err) ->
     if err
@@ -503,7 +503,7 @@ Mailbox::doImport = (job, callback) ->
     , timeToRetry
 
   server.on "close", (error) ->
-    console.log "Connection closed: " + error.toString() if debug
+    console.log "Connection closed (error: " + error.toString() + ")" if debug
 
   emitOnErr = (error) ->
     if error

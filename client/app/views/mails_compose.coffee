@@ -39,6 +39,10 @@ class exports.MailsCompose extends Backbone.View
     # send, and collect the server's response
     @mailtosend.save(data,
       success: ->
+        
+        #try to get the mail from server
+        window.app.mailssent.resetAndFetch()
+        
         # success, let's render it
         console.log "sent!"
         $(el).html require('./templates/_mail/mail_sent')

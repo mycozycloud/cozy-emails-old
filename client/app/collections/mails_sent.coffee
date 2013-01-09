@@ -23,8 +23,11 @@ class exports.MailsSentCollection extends Backbone.Collection
   # variable to store number of mails visible in the avtive filter
   mailsShown: 0
   
-  resetTimestamp: ->
-    timestampOld = new Date().valueOf()
+  resetAndFetch: (callback, errorcallback) ->
+    @timestampOld = new Date().valueOf()
+    @lastIdOld = undefined
+    @reset()
+    @fetchOlder callback, errorcallback
 
   calculateMailsShown: ->
     #TODO
