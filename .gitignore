@@ -20,3 +20,4 @@ npm-debug.log
 *.tmproj
 
 *.sublime-workspace
+*.sublime-project

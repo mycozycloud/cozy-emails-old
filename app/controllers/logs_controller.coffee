@@ -32,7 +32,7 @@ action 'savelog', ->
   for attr in attrs
     data[attr] = req.body[attr]
     
-  if data["timeout"] == 0    
+  if data["timeout"] == 0
     LogMessage.create data, (err, box) =>
       if err or !box
         send 500

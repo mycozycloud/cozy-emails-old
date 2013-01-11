@@ -1,5 +1,5 @@
 exports.routes = (map) ->
-    map.get '/', 'templates#index'
+    map.get '/', 'mails#index'
       
     map.resources 'mailboxes'
     map.resources 'mails'

@@ -7,6 +7,10 @@
 
 load 'application'
 
+action 'index', ->
+  render
+    title: "CozyMails"
+
 # shared functionnality : find the mail via its ID
 before ->
   Mail.find req.params.id, (err, box) =>
