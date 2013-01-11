@@ -54,7 +54,7 @@ if not module.parent
         #  "timeout": 3
         #  }
 
-        # on import complete
+        # on check complete
         job.on 'complete', () ->
           console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
           mailbox.updateAttributes {IMAP_last_fetched_date: new Date()}, (error) ->
@@ -64,7 +64,7 @@ if not module.parent
                 "type": "info",
                 "text": "Check for new mail in <strong>" + mailbox.name + "</strong> finished at " + new Date().toUTCString(),
                 "createdAt": new Date().valueOf(),
-                "timeout": 3
+                "timeout": 5
                 }
             else
               console.error "Check error...."
@@ -91,20 +91,20 @@ if not module.parent
   @jobs.process "check mailbox", 1, (job, done) ->
     console.log job.data.title + " #" + job.id + " job started at " + new Date().toUTCString()
     Mailbox.find job.data.mailboxId, (error, mailbox) ->
-      if error
+      if error or not mailbox
         done error
       else
         mailbox.getNewMail job, done
 
   # CRON job
   app.createCheckJobs = =>
-    console.log "Creating check jobs"
+    console.log "Creating check jobs..."
     Mailbox.all {where: {activated: true}}, (err, mailboxes) ->
       for mailbox in mailboxes
         app.createCheckJob mailbox.id
         
   # set-up CRON
-  setInterval app.createCheckJobs, 1000 * 60 * 5
+  setInterval app.createCheckJobs, 1000 * 60 * 4 # check every 4 minutes
   # launch on startup
   app.createCheckJobs()
 
@@ -231,6 +231,3 @@ if not module.parent
         mailbox.doImport job, done
 
 ##  - CREATEIMPORTJOB - END
-
-  # debug
-  @jobs.promote()

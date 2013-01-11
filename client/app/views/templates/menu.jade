@@ -6,6 +6,9 @@ ul.nav.nav-list
   li#inboxbutton.menu_option
     a(href='#')
       | Inbox 
+  li#sentbutton.menu_option
+    a(href='#sent')
+      | Sent
       //- i.icon-refresh
   //- li
   //-   a(href='#') Sent
@@ -14,12 +17,14 @@ ul.nav.nav-list
   //- li
   //-   a(href='#') Bin
   li.divider
-  li.nav-header Mailboxes 
+  li.nav-header Mailboxes
 ul#menu_mailboxes.nav.nav-list
 ul.nav.nav-list
-  li#mailboxesbutton
+  li#mailboxesbutton.menu_option
     a(href='#config-mailboxes')
       | add/modify
+  // a#check_new_mail_button()
+  //    | check for new mail
   //- li.divider
   //- li.nav-header Filters
   //- li

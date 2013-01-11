@@ -103,6 +103,7 @@ Mailbox = define 'Mailbox', ->
     
 Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'})
 Mailbox.hasMany(MailToBe, {as: 'mailsToBe',  foreignKey: 'mailbox'})
+Mailbox.hasMany(MailSent, {as: 'mailsSent',  foreignKey: 'mailbox'})
 
 
 # logs managment

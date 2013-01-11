@@ -1,0 +1,20 @@
+.well
+  p
+    | To: #{model.to()}
+    if model.hasCC()
+      p
+        | Cc:  #{model.cc()}
+    if model.hasBCC()
+      p
+        | Bcc:  #{model.bcc()}
+  p
+    i(style='color: lightgray;') sent #{model.date()}
+    br
+
+  h3 #{model.get("subject")}
+  br
+
+  iframe#mail_content_html(id="mail_content_html", name="mail_content_html")
+    !{model.html()}
+if model.hasAttachments()
+  #attachments_list.well

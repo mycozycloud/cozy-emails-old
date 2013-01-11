@@ -38,9 +38,23 @@ Mailbox.defineRequest "all", requests.all, requests.checkError
 mailRequest = -> emit doc.mail_id, doc
 Attachment.defineRequest "byMail", mailRequest, requests.checkError
 Attachment.fromMail = (params, callback) ->
-    Mailbox.request "byMail", params, callback
+    Attachment.request "byMail", params, callback
 
-#logmessage
+# Log messages
 dateRequestLog = -> emit doc.createdAt, doc
 LogMessage.defineRequest "all", requests.all, ->
     LogMessage.defineRequest "date", dateRequestLog, requests.checkError
+
+# Mails Sent
+dateRequestSent = -> emit doc.createdAt, doc
+dateIdRequestSent = -> emit [doc.createdAt, doc._id], doc
+
+MailSent.defineRequest "all", requests.all, ->
+    MailSent.defineRequest "dateId", dateIdRequestSent, ->
+        MailSent.defineRequest "date", dateRequestSent, requests.checkError
+
+MailSent.date = (params, callback) ->
+    MailSent.request "date", params, callback
+    
+MailSent.dateId = (params, callback) ->
+    MailSent.request "dateId", params, callback

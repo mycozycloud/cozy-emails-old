@@ -15,7 +15,7 @@ before ->
     else
       @box = box
       next()
-, { only: ['show', 'update', 'destroy'] }
+, { only: ['show', 'update', 'destroy', 'getattachmentslist'] }
 
 # GET /mails/:id
 action 'show', ->
@@ -67,7 +67,33 @@ action 'getlist', ->
     if !error
       # we send 204 when there is no content to send
       if mails.length == 0
-        send 707
+        send 499
+      else
+        send mails
+    else
+      send 500
+      
+# GET '/mailssentlist/:timestamp.:num'
+action 'getlistsent', ->
+  num = parseInt req.params.num
+  timestamp = parseInt req.params.timestamp
+
+  if params.id? and params.id != "undefined"
+    skip = 1
+  else
+    skip = 0
+
+  query =
+    startkey: [timestamp, params.id]
+    limit: num
+    descending: true
+    skip: skip
+
+  MailSent.dateId query, (error, mails) ->
+    if !error
+      # we send 204 when there is no content to send
+      if mails.length == 0
+        send 499
       else
         send mails
     else
@@ -75,7 +101,11 @@ action 'getlist', ->
       
 # GET '/mailsnew/:timestamp'
 action 'getnewlist', ->
+  # schedule un check
+  # app.createCheckJobs()
+
   timestamp = parseInt req.params.timestamp
+
   if params.id? and params.id != "undefined"
     skip = 1
   else
@@ -95,17 +125,18 @@ action 'getnewlist', ->
     else
       send 500
 
-# GET '/getattachments/:mail
+# GET '/getattachments/:id
 action 'getattachmentslist', ->
-  Mail.find req.params.mail, (err, mail) =>
-    if err or !mail
-      send 404
+  query =
+      key: @box.id
+  console.log query
+  Attachment.fromMail query, (error, attachments) ->
+    if error
+      console.log error
+      console.log attachments
+      send 500
     else
-      Attachment.fromMail key: mail.id, (error, attachments) =>
-        if error
-          send 500
-        else
-          send attachments
+      send attachments
           
 # GET '/getattachment/:attachment'
 action 'getattachment', ->

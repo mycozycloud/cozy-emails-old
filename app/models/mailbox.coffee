@@ -155,6 +155,17 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                       callback()
                   else
                     console.log "[" + results.length + "] mails to download" if debug
+
+                    mail_text = "mail"
+                    if results.length > 1
+                      mail_text = "mails"
+
+                    LogMessage.create {
+                      "type": "info",
+                      "text": "Downloading <strong>" + results.length + "</strong> " + mail_text + " from <strong>" + mailbox.name + "</strong> ",
+                      "createdAt": new Date().valueOf(),
+                      "timeout": 30
+                      }
                 
                     mailsToGo = results.length
                     mailsDone = 0
@@ -177,8 +188,14 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                             headers: false
 
                         fetch.on "message", (message) ->
+                          # parser = new mailparser.MailParser { streamAttachments: true }
                           parser = new mailparser.MailParser { streamAttachments: true }
-
+                          
+                          attachments_all = []
+                          
+                          parser.on "attachment", (attachment) ->
+                            attachments_all.push attachment
+                          
                           parser.on "end", (mailParsedObject) ->
                         
                             # choose the right date
@@ -193,6 +210,8 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                         
                             # compile the mail data
                             mail =
+                              mailbox:      mailbox.id
+                              
                               date:         dateSent.toJSON()
                               dateValueOf:  dateSent.valueOf()
                               createdAt:    new Date().valueOf()
@@ -223,11 +242,38 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                               hasAttachments: if mailParsedObject.attachments then true else false
                           
                             # and now we can create a new mail on database, as a child of this mailbox
-                            mailbox.mails.create mail, (err, mail) ->
+                            Mail.create mail, (err, mail) ->
     
                               # for now we will just skip messages which are being rejected by parser
                               # emitOnErr err
                               unless err
+                              
+                                # attachements
+                                if attachments_all?
+                                  for attachment in attachments_all
+                                    console.log "Attachment: " + attachment.fileName + "/" + mail.id
+                                    
+                                    params = {
+                                      cid:       attachment.contentId
+                                      fileName:  attachment.fileName
+                                      contentType: attachment.contentType
+                                      length:    attachment.length
+                                      checksum:  attachment.checksum
+                                      mail_id: mail.id
+                                    }  
+                                    
+                                    Attachment.create params, (error, attach) ->
+                                      
+                                      unless error
+                                        console.log attach
+                                        
+                                        #Client = require('request-json').JsonClient
+                                        #client = new Client("http://localhost:9101/")
+                                        #req = client.post "data/#{attachment.id}/attachments/", null, (status) ->
+                                        #  console.log status
+                                        #form = req.form()
+                                        #form.append 'name', attachment.fileName
+                                        #form.append 'file', attachment.stream
 
                                 # debug info
                                 console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug
@@ -330,7 +376,7 @@ Mailbox::setupImport = (callback) ->
       callback error
 
   server.on "close", (error) ->
-    console.log "Connection closed: " + error.toString() if debug
+    console.log "Connection closed (error: " + error.toString() + ")" if debug
         
   emitOnErr = (err) ->
     if err
@@ -457,7 +503,7 @@ Mailbox::doImport = (job, callback) ->
     , timeToRetry
 
   server.on "close", (error) ->
-    console.log "Connection closed: " + error.toString() if debug
+    console.log "Connection closed (error: " + error.toString() + ")" if debug
 
   emitOnErr = (error) ->
     if error
