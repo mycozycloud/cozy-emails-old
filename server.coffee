@@ -20,7 +20,7 @@ if not module.parent
   
   # setup KUE
   @kue = require 'kue'
-  @kue.app.listen 3003
+  #@kue.app.listen 3003
   Job = @kue.Job
   @jobs = @kue.createQueue()
   
