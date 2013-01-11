@@ -428,10 +428,11 @@ Mailbox::setupImport = (callback) ->
                     id = results[i]
                   
                     # find the biggest ID
-                    if parseInt(id) > maxId
-                      maxId = parseInt id
+                    idInt = parseInt id
+                    if idInt > maxId
+                      maxId = idInt
                 
-                    mailbox.mailsToBe.create {remoteId: id}, (error, mailToBe) ->
+                    mailbox.mailsToBe.create {remoteId: idInt}, (error, mailToBe) ->
                   
                       # if an error occured, emit it on server
                       if error
