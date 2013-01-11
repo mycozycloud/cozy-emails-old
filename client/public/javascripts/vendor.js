@@ -61,16 +61,21 @@
     throw new Error('Cannot find module "' + name + '"');
   };
 
-  var define = function(bundle) {
-    for (var key in bundle) {
-      if (has(bundle, key)) {
-        modules[key] = bundle[key];
+  var define = function(bundle, fn) {
+    if (typeof bundle === 'object') {
+      for (var key in bundle) {
+        if (has(bundle, key)) {
+          modules[key] = bundle[key];
+        }
       }
+    } else {
+      modules[bundle] = fn;
     }
-  }
+  };
 
   globals.require = require;
   globals.require.define = define;
+  globals.require.register = define;
   globals.require.brunch = true;
 })();
 
@@ -86,7 +91,6 @@
   }
 })(window.console = window.console || {});
 ;
-
 /*!
  * jQuery JavaScript Library v1.7.1
  * http://jquery.com/
@@ -9353,7 +9357,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
 
 })( window );;
-
 //     Underscore.js 1.3.1
 //     (c) 2009-2012 Jeremy Ashkenas, DocumentCloud Inc.
 //     Underscore is freely distributable under the MIT license.
@@ -10354,7 +10357,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 
 }).call(this);
 ;
-
 //     Backbone.js 0.9.1
 
 //     (c) 2010-2012 Jeremy Ashkenas, DocumentCloud Inc.
@@ -11645,7 +11647,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   };
 
 }).call(this);;
-
 /* ===================================================
  * bootstrap-transition.js v2.0.4
  * http://twitter.github.com/bootstrap/javascript.html#transitions
@@ -13471,7 +13472,6 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
   })
 
 }(window.jQuery);;
-
 /*
  wysihtml5 v0.3.0
  https://github.com/xing/wysihtml5
@@ -13734,7 +13734,6 @@ function(){this.synchronizer=new b.views.Synchronizer(this,this.textarea,this.co
 this.currentView.setValue(a,b);return this},focus:function(a){this.currentView.focus(a);return this},disable:function(){this.currentView.disable();return this},enable:function(){this.currentView.enable();return this},isEmpty:function(){return this.currentView.isEmpty()},hasPlaceholderSet:function(){return this.currentView.hasPlaceholderSet()},parse:function(a){var c=this.config.parser(a,this.config.parserRules,this.composer.sandbox.getDocument(),!0);"object"===typeof a&&b.quirks.redraw(a);return c},
 _initParser:function(){this.observe("paste:composer",function(){var a=this;a.composer.selection.executeAndRestore(function(){b.quirks.cleanPastedHTML(a.composer.element);a.parse(a.composer.element)},!0)});this.observe("paste:textarea",function(){this.textarea.setValue(this.parse(this.textarea.getValue()))})}})})(wysihtml5);
 ;
-
 /**
  * Full HTML5 compatibility rule set
  * These rules define which tags and css classes are supported and which tags should be specially treated.
@@ -14287,7 +14286,6 @@ var wysihtml5ParserRules = {
     }
 };;
 
-
 var jade = (function(exports){
 /*!
  * Jade - runtime
@@ -14410,4 +14408,3 @@ exports.rethrow = function rethrow(err, filename, lineno){
   return exports;
 
 })({});;
-

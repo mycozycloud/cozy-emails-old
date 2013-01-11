@@ -61,20 +61,25 @@
     throw new Error('Cannot find module "' + name + '"');
   };
 
-  var define = function(bundle) {
-    for (var key in bundle) {
-      if (has(bundle, key)) {
-        modules[key] = bundle[key];
+  var define = function(bundle, fn) {
+    if (typeof bundle === 'object') {
+      for (var key in bundle) {
+        if (has(bundle, key)) {
+          modules[key] = bundle[key];
+        }
       }
+    } else {
+      modules[bundle] = fn;
     }
-  }
+  };
 
   globals.require = require;
   globals.require.define = define;
+  globals.require.register = define;
   globals.require.brunch = true;
 })();
 
-window.require.define({"collections/attachments": function(exports, require, module) {
+window.require.register("collections/attachments", function(exports, require, module) {
   (function() {
     var Attachment,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -118,9 +123,8 @@ window.require.define({"collections/attachments": function(exports, require, mod
 
   }).call(this);
   
-}});
-
-window.require.define({"collections/logmessages": function(exports, require, module) {
+});
+window.require.register("collections/logmessages", function(exports, require, module) {
   (function() {
     var LogMessage,
       __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -173,9 +177,8 @@ window.require.define({"collections/logmessages": function(exports, require, mod
 
   }).call(this);
   
-}});
-
-window.require.define({"collections/mailboxes": function(exports, require, module) {
+});
+window.require.register("collections/mailboxes", function(exports, require, module) {
   (function() {
     var Mailbox,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -235,9 +238,8 @@ window.require.define({"collections/mailboxes": function(exports, require, modul
 
   }).call(this);
   
-}});
-
-window.require.define({"collections/mails": function(exports, require, module) {
+});
+window.require.register("collections/mails", function(exports, require, module) {
   (function() {
     var Mail,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -339,9 +341,8 @@ window.require.define({"collections/mails": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"collections/mails_sent": function(exports, require, module) {
+});
+window.require.register("collections/mails_sent", function(exports, require, module) {
   (function() {
     var MailSent,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -431,9 +432,8 @@ window.require.define({"collections/mails_sent": function(exports, require, modu
 
   }).call(this);
   
-}});
-
-window.require.define({"helpers": function(exports, require, module) {
+});
+window.require.register("helpers", function(exports, require, module) {
   (function() {
 
     exports.BrunchApplication = (function() {
@@ -456,9 +456,8 @@ window.require.define({"helpers": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"initialize": function(exports, require, module) {
+});
+window.require.register("initialize", function(exports, require, module) {
   
   /*
     @file: initialize.coffee
@@ -517,9 +516,8 @@ window.require.define({"initialize": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"models/attachment": function(exports, require, module) {
+});
+window.require.register("models/attachment", function(exports, require, module) {
   (function() {
     var BaseModel,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -548,9 +546,8 @@ window.require.define({"models/attachment": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"models/logmessage": function(exports, require, module) {
+});
+window.require.register("models/logmessage", function(exports, require, module) {
   (function() {
     var BaseModel,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -579,9 +576,8 @@ window.require.define({"models/logmessage": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"models/mail": function(exports, require, module) {
+});
+window.require.register("models/mail", function(exports, require, module) {
   (function() {
     var BaseModel,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -881,9 +877,8 @@ window.require.define({"models/mail": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"models/mail_new": function(exports, require, module) {
+});
+window.require.register("models/mail_new", function(exports, require, module) {
   (function() {
     var BaseModel,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -916,9 +911,8 @@ window.require.define({"models/mail_new": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"models/mail_sent": function(exports, require, module) {
+});
+window.require.register("models/mail_sent", function(exports, require, module) {
   (function() {
     var BaseModel,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -1122,9 +1116,8 @@ window.require.define({"models/mail_sent": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"models/mailbox": function(exports, require, module) {
+});
+window.require.register("models/mailbox", function(exports, require, module) {
   (function() {
     var BaseModel,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -1192,9 +1185,8 @@ window.require.define({"models/mailbox": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"models/models": function(exports, require, module) {
+});
+window.require.register("models/models", function(exports, require, module) {
   
   /*
     @file: models.coffee
@@ -1249,9 +1241,8 @@ window.require.define({"models/models": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"routers/main_router": function(exports, require, module) {
+});
+window.require.register("routers/main_router", function(exports, require, module) {
   (function() {
     var Mail,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -1335,9 +1326,8 @@ window.require.define({"routers/main_router": function(exports, require, module)
 
   }).call(this);
   
-}});
-
-window.require.define({"views/app": function(exports, require, module) {
+});
+window.require.register("views/app", function(exports, require, module) {
   (function() {
     var MailboxesList, MailboxesListNew, MailsColumn, MailsCompose, MailsElement, MailsSentColumn, MailsSentElement, MenuMailboxesList, MessageBox,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -1496,9 +1486,8 @@ window.require.define({"views/app": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mailboxes_list": function(exports, require, module) {
+});
+window.require.register("views/mailboxes_list", function(exports, require, module) {
   (function() {
     var Mailbox, MailboxesListElement,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -1556,9 +1545,8 @@ window.require.define({"views/mailboxes_list": function(exports, require, module
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mailboxes_list_element": function(exports, require, module) {
+});
+window.require.register("views/mailboxes_list_element", function(exports, require, module) {
   (function() {
     var Mailbox,
       __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
@@ -1704,9 +1692,8 @@ window.require.define({"views/mailboxes_list_element": function(exports, require
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mailboxes_list_new": function(exports, require, module) {
+});
+window.require.register("views/mailboxes_list_new", function(exports, require, module) {
   (function() {
     var Mailbox,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -1759,9 +1746,8 @@ window.require.define({"views/mailboxes_list_new": function(exports, require, mo
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_answer": function(exports, require, module) {
+});
+window.require.register("views/mails_answer", function(exports, require, module) {
   (function() {
     var Mail, MailNew,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -1881,9 +1867,8 @@ window.require.define({"views/mails_answer": function(exports, require, module) 
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_attachments_list": function(exports, require, module) {
+});
+window.require.register("views/mails_attachments_list", function(exports, require, module) {
   (function() {
     var Attachment, AttachmentsCollection, MailsAttachmentsListElement,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -1939,9 +1924,8 @@ window.require.define({"views/mails_attachments_list": function(exports, require
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_attachments_list_element": function(exports, require, module) {
+});
+window.require.register("views/mails_attachments_list_element", function(exports, require, module) {
   
   /*
     @file: mails_attachments_list_element.coffee
@@ -1981,9 +1965,8 @@ window.require.define({"views/mails_attachments_list_element": function(exports,
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_column": function(exports, require, module) {
+});
+window.require.register("views/mails_column", function(exports, require, module) {
   (function() {
     var Mail, MailsList, MailsListMore, MailsListNew,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2035,9 +2018,8 @@ window.require.define({"views/mails_column": function(exports, require, module) 
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_compose": function(exports, require, module) {
+});
+window.require.register("views/mails_compose", function(exports, require, module) {
   (function() {
     var Mail, MailNew, MailsAnswer,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2130,9 +2112,8 @@ window.require.define({"views/mails_compose": function(exports, require, module)
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_element": function(exports, require, module) {
+});
+window.require.register("views/mails_element", function(exports, require, module) {
   (function() {
     var Mail, MailNew, MailsAnswer, MailsAttachmentsList,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2291,9 +2272,8 @@ window.require.define({"views/mails_element": function(exports, require, module)
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_list": function(exports, require, module) {
+});
+window.require.register("views/mails_list", function(exports, require, module) {
   (function() {
     var Mail, MailsListElement,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2376,9 +2356,8 @@ window.require.define({"views/mails_list": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_list_element": function(exports, require, module) {
+});
+window.require.register("views/mails_list_element", function(exports, require, module) {
   (function() {
     var Mail,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2462,9 +2441,8 @@ window.require.define({"views/mails_list_element": function(exports, require, mo
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_list_more": function(exports, require, module) {
+});
+window.require.register("views/mails_list_more", function(exports, require, module) {
   (function() {
     var Mail,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2547,9 +2525,8 @@ window.require.define({"views/mails_list_more": function(exports, require, modul
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mails_list_new": function(exports, require, module) {
+});
+window.require.register("views/mails_list_new", function(exports, require, module) {
   (function() {
     var Mail,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2625,9 +2602,8 @@ window.require.define({"views/mails_list_new": function(exports, require, module
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mailssent_column": function(exports, require, module) {
+});
+window.require.register("views/mailssent_column", function(exports, require, module) {
   (function() {
     var MailsSentList, MailsSentListMore,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2673,9 +2649,8 @@ window.require.define({"views/mailssent_column": function(exports, require, modu
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mailssent_element": function(exports, require, module) {
+});
+window.require.register("views/mailssent_element", function(exports, require, module) {
   (function() {
     var MailSent, MailsAttachmentsList,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2740,9 +2715,8 @@ window.require.define({"views/mailssent_element": function(exports, require, mod
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mailssent_list": function(exports, require, module) {
+});
+window.require.register("views/mailssent_list", function(exports, require, module) {
   (function() {
     var MailsSentListElement,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2803,9 +2777,8 @@ window.require.define({"views/mailssent_list": function(exports, require, module
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mailssent_list_element": function(exports, require, module) {
+});
+window.require.register("views/mailssent_list_element", function(exports, require, module) {
   (function() {
     var MailSent,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2884,9 +2857,8 @@ window.require.define({"views/mailssent_list_element": function(exports, require
 
   }).call(this);
   
-}});
-
-window.require.define({"views/mailssent_list_more": function(exports, require, module) {
+});
+window.require.register("views/mailssent_list_more", function(exports, require, module) {
   (function() {
     var MailSent,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -2969,9 +2941,8 @@ window.require.define({"views/mailssent_list_more": function(exports, require, m
 
   }).call(this);
   
-}});
-
-window.require.define({"views/menu_mailboxes_list": function(exports, require, module) {
+});
+window.require.register("views/menu_mailboxes_list", function(exports, require, module) {
   (function() {
     var MenuMailboxListElement,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -3022,9 +2993,8 @@ window.require.define({"views/menu_mailboxes_list": function(exports, require, m
 
   }).call(this);
   
-}});
-
-window.require.define({"views/menu_mailboxes_list_element": function(exports, require, module) {
+});
+window.require.register("views/menu_mailboxes_list_element", function(exports, require, module) {
   
   /*
     @file: menu_mailboxes_list_element.coffee
@@ -3074,9 +3044,8 @@ window.require.define({"views/menu_mailboxes_list_element": function(exports, re
 
   }).call(this);
   
-}});
-
-window.require.define({"views/message_box": function(exports, require, module) {
+});
+window.require.register("views/message_box", function(exports, require, module) {
   (function() {
     var MessageBoxElement,
       __hasProp = Object.prototype.hasOwnProperty,
@@ -3133,9 +3102,8 @@ window.require.define({"views/message_box": function(exports, require, module) {
 
   }).call(this);
   
-}});
-
-window.require.define({"views/message_box_element": function(exports, require, module) {
+});
+window.require.register("views/message_box_element", function(exports, require, module) {
   
   /*
     @file: message_box_element.coffee
@@ -3204,9 +3172,8 @@ window.require.define({"views/message_box_element": function(exports, require, m
 
   }).call(this);
   
-}});
-
-window.require.define({"views/templates/_attachment/attachment_element": function(exports, require, module) {
+});
+window.require.register("views/templates/_attachment/attachment_element", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3220,9 +3187,8 @@ window.require.define({"views/templates/_attachment/attachment_element": functio
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_layouts/layout_compose_mail": function(exports, require, module) {
+});
+window.require.register("views/templates/_layouts/layout_compose_mail", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3236,9 +3202,8 @@ window.require.define({"views/templates/_layouts/layout_compose_mail": function(
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_layouts/layout_mailboxes": function(exports, require, module) {
+});
+window.require.register("views/templates/_layouts/layout_mailboxes", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3256,9 +3221,8 @@ window.require.define({"views/templates/_layouts/layout_mailboxes": function(exp
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_layouts/layout_mails": function(exports, require, module) {
+});
+window.require.register("views/templates/_layouts/layout_mails", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3274,9 +3238,8 @@ window.require.define({"views/templates/_layouts/layout_mails": function(exports
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mail/mail_answer": function(exports, require, module) {
+});
+window.require.register("views/templates/_mail/mail_answer", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3391,9 +3354,8 @@ window.require.define({"views/templates/_mail/mail_answer": function(exports, re
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mail/mail_big": function(exports, require, module) {
+});
+window.require.register("views/templates/_mail/mail_big", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3502,9 +3464,8 @@ window.require.define({"views/templates/_mail/mail_big": function(exports, requi
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mail/mail_compose": function(exports, require, module) {
+});
+window.require.register("views/templates/_mail/mail_compose", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3639,9 +3600,8 @@ window.require.define({"views/templates/_mail/mail_compose": function(exports, r
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mail/mail_list": function(exports, require, module) {
+});
+window.require.register("views/templates/_mail/mail_list", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3734,9 +3694,8 @@ window.require.define({"views/templates/_mail/mail_list": function(exports, requ
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mail/mail_new": function(exports, require, module) {
+});
+window.require.register("views/templates/_mail/mail_new", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3752,9 +3711,8 @@ window.require.define({"views/templates/_mail/mail_new": function(exports, requi
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mail/mail_sent": function(exports, require, module) {
+});
+window.require.register("views/templates/_mail/mail_sent", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3766,9 +3724,8 @@ window.require.define({"views/templates/_mail/mail_sent": function(exports, requ
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mail/mails": function(exports, require, module) {
+});
+window.require.register("views/templates/_mail/mails", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3786,9 +3743,8 @@ window.require.define({"views/templates/_mail/mails": function(exports, require,
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mail/mails_more": function(exports, require, module) {
+});
+window.require.register("views/templates/_mail/mails_more", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3819,9 +3775,8 @@ window.require.define({"views/templates/_mail/mails_more": function(exports, req
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mailbox/mailbox": function(exports, require, module) {
+});
+window.require.register("views/templates/_mailbox/mailbox", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3846,9 +3801,8 @@ window.require.define({"views/templates/_mailbox/mailbox": function(exports, req
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mailbox/mailbox_edit": function(exports, require, module) {
+});
+window.require.register("views/templates/_mailbox/mailbox_edit", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -3984,9 +3938,8 @@ window.require.define({"views/templates/_mailbox/mailbox_edit": function(exports
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mailbox/mailbox_menu": function(exports, require, module) {
+});
+window.require.register("views/templates/_mailbox/mailbox_menu", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4018,9 +3971,8 @@ window.require.define({"views/templates/_mailbox/mailbox_menu": function(exports
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mailbox/mailbox_new": function(exports, require, module) {
+});
+window.require.register("views/templates/_mailbox/mailbox_new", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4034,9 +3986,8 @@ window.require.define({"views/templates/_mailbox/mailbox_new": function(exports,
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mailsent/mailsent_big": function(exports, require, module) {
+});
+window.require.register("views/templates/_mailsent/mailsent_big", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4071,9 +4022,8 @@ window.require.define({"views/templates/_mailsent/mailsent_big": function(export
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_mailsent/mailsent_list": function(exports, require, module) {
+});
+window.require.register("views/templates/_mailsent/mailsent_list", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4120,9 +4070,8 @@ window.require.define({"views/templates/_mailsent/mailsent_list": function(expor
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_message/message_error": function(exports, require, module) {
+});
+window.require.register("views/templates/_message/message_error", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4136,9 +4085,8 @@ window.require.define({"views/templates/_message/message_error": function(export
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_message/message_info": function(exports, require, module) {
+});
+window.require.register("views/templates/_message/message_info", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4152,9 +4100,8 @@ window.require.define({"views/templates/_message/message_info": function(exports
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_message/message_success": function(exports, require, module) {
+});
+window.require.register("views/templates/_message/message_success", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4168,9 +4115,8 @@ window.require.define({"views/templates/_message/message_success": function(expo
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_message/message_warning": function(exports, require, module) {
+});
+window.require.register("views/templates/_message/message_warning", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4184,9 +4130,8 @@ window.require.define({"views/templates/_message/message_warning": function(expo
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/_message/normal": function(exports, require, module) {
+});
+window.require.register("views/templates/_message/normal", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4198,9 +4143,8 @@ window.require.define({"views/templates/_message/normal": function(exports, requ
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/app": function(exports, require, module) {
+});
+window.require.register("views/templates/app", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4222,9 +4166,8 @@ window.require.define({"views/templates/app": function(exports, require, module)
   }
   return buf.join("");
   };
-}});
-
-window.require.define({"views/templates/menu": function(exports, require, module) {
+});
+window.require.register("views/templates/menu", function(exports, require, module) {
   module.exports = function anonymous(locals, attrs, escape, rethrow) {
   var attrs = jade.attrs, escape = jade.escape, rethrow = jade.rethrow;
   var buf = [];
@@ -4262,5 +4205,4 @@ window.require.define({"views/templates/menu": function(exports, require, module
   }
   return buf.join("");
   };
-}});
-
+});
