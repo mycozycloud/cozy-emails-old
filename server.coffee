@@ -143,7 +143,7 @@ if not module.parent
                 if error
                   console.error "Import error.... The mailbox doesn't exist anymore"
                 else
-                  LogMessage.createImportEndedInfo mailbox
+                  LogMessage.createImportSuccess mailbox
                     
                   # and update the status
                   mailbox.updateAttributes {imported: true, status: "Import successful !"}, (error) ->
