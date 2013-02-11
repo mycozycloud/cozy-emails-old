@@ -60,12 +60,7 @@ if not module.parent
           mailbox.updateAttributes {IMAP_last_fetched_date: new Date()}, (error) ->
             unless error
               console.log "Check successful !"
-              LogMessage.create {
-                "type": "info",
-                "text": "Check for new mail in <strong>" + mailbox.name + "</strong> finished at " + new Date().toUTCString(),
-                "createdAt": new Date().valueOf(),
-                "timeout": 5
-                }
+              LogMessage.createNewMailInfo mailbox
             else
               console.error "Check error...."
 
@@ -74,12 +69,7 @@ if not module.parent
           console.log job.data.title + " #" + job.id + " failed at " + new Date().toUTCString()
           mailbox.updateAttributes {status: "Mail check failed."}, (error) ->
             console.error "Mail check failed."
-            LogMessage.create {
-              "type": "error",
-              "text": "Checking for new mail of <strong>" + mailbox.name + "</strong> failed. Please verify its settings.",
-              "createdAt": new Date().valueOf(),
-              "timeout": 3600
-              }
+            LogMessage.createChechMailError mailbox
 
         # on import progress
         job.on 'progress', (progress) ->
@@ -131,13 +121,9 @@ if not module.parent
           if error
             mailbox.updateAttributes {imported: false, status: "Could not prepare the import."}, (error) ->
                 console.error "Could not prepare the import. Aborting."
-                LogMessage.create {
-                    "type": "error",
-                    "text": "Could not prepare the import of <strong>" + mailbox.name + "</strong>. Please verify its settings.",
-                    "createdAt": new Date().valueOf(),
-                    "timeout": 0
-                    }
-          else 
+                LogMessage.createImportPreparationError mailbox
+
+          else
           
             job = jobs.create("import mailbox",
               mailboxId: mailboxId
@@ -147,12 +133,7 @@ if not module.parent
             .attempts(9999)  # on reessaie
             .save()
             
-            LogMessage.create {
-              "type": "info",
-              "text": "Import of <strong>" + mailbox.name + "</strong> started.",
-              "createdAt": new Date().valueOf(),
-              "timeout": 30
-              }
+            LogMessage.createImportStartedInfo mailbox
     
             # on import complete
             job.on 'complete', () ->
@@ -162,12 +143,7 @@ if not module.parent
                 if error
                   console.error "Import error.... The mailbox doesn't exist anymore"
                 else
-                  LogMessage.create {
-                    "type": "success",
-                    "text": "Import of <strong>" + mailbox.name + "</strong> complete !",
-                    "createdAt": new Date().valueOf(),
-                    "timeout": 0
-                    }
+                  LogMessage.createImportEndedInfo mailbox
                     
                   # and update the status
                   mailbox.updateAttributes {imported: true, status: "Import successful !"}, (error) ->
@@ -184,12 +160,7 @@ if not module.parent
                 if error
                   console.error "Import error.... The mailbox doesn't exist anymore"
                 else
-                  LogMessage.create {
-                    "type": "error",
-                    "text": "Import of <strong>" + mailbox.name + "</strong> failed. Please verify its settings.",
-                    "createdAt": new Date().valueOf(),
-                    "timeout": 0
-                    }
+                  LogMessage.createBoxImportError mailbox
 
                   # and update the status
                   mailbox.updateAttributes {imported: false, importing: false, activated: false}, (error) ->
@@ -207,14 +178,9 @@ if not module.parent
                     lastProgress = progress
                     
                     if progress > lastTenProgress + 10
-                      
                       lastTenProgress += 10
-                      LogMessage.create {
-                        "type": "info",
-                        "text": "Import of <strong>" + mailbox.name + "</strong> " + progress + "% complete",
-                        "createdAt": new Date().valueOf(),
-                        "timeout": 10
-                        }
+
+                      LogMessage.createImportProgressInfo mailbox, progress
                         
                     mailbox.updateAttributes {status: "Import " + progress + " %"}, (error) ->
                       if error

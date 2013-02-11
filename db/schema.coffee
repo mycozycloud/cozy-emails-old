@@ -115,6 +115,7 @@ LogMessage = define 'LogMessage', ->
     #   "warning" - warning message
     #   "error" - error message
     property 'type', String, default: "info"
+    property 'subtype', String, default: "info"
     
     # timeout:
     #   0 - message will be displayed until user click OK to discard it

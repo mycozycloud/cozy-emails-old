@@ -155,18 +155,8 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                       callback()
                   else
                     console.log "[" + results.length + "] mails to download" if debug
+                    LogMessage.createImportNotification results, mailbox
 
-                    mail_text = "mail"
-                    if results.length > 1
-                      mail_text = "mails"
-
-                    LogMessage.create {
-                      "type": "info",
-                      "text": "Downloading <strong>" + results.length + "</strong> " + mail_text + " from <strong>" + mailbox.name + "</strong> ",
-                      "createdAt": new Date().valueOf(),
-                      "timeout": 30
-                      }
-                
                     mailsToGo = results.length
                     mailsDone = 0
                 
@@ -499,7 +489,7 @@ Mailbox::doImport = (job, callback) ->
     setTimeout () ->
       mailbox.updateAttributes {status: error.toString()}, (err) ->
         console.error "Mailbox update with error status" if debug
-        LogMessage.create {"type": "error", "text": "Error importing mail: "+error.toString(), "createdAt": new Date().valueOf(), "timeout": 0}, null
+        LogMessage.createImportError error
         callback error
     , timeToRetry
 
