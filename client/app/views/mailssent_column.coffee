@@ -19,9 +19,11 @@ class exports.MailsSentColumn extends Backbone.View
   render: ->
     $(@el).html require('./templates/_mail/mails')
     # the actual list of mails
-    @viewMailsSentList = new MailsSentList @.$("#mails_list_container"), @collection
+    @viewMailsSentList =
+        new MailsSentList @.$("#mails_list_container"), @collection
     # the button to load older mail
-    @viewMailsSentListMore = new MailsSentListMore @.$("#button_load_more_mails"), @collection
+    @viewMailsSentListMore =
+        new MailsSentListMore @.$("#button_load_more_mails"), @collection
 
     @viewMailsSentList.render()
     @viewMailsSentListMore.render()

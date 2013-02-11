@@ -66,9 +66,8 @@ class exports.MainRouter extends Backbone.Router
       app.mails.trigger "change_active_mail"
     # otherwise, download it
     else
-      app.mails.activeMail = new Mail {id: path}
+      app.mails.activeMail = new Mail id: path
       app.mails.activeMail.url = "mails/" + path
-      app.mails.activeMail.fetch({
+      app.mails.activeMail.fetch
         success : ->
           app.mails.trigger "change_active_mail"
-      })

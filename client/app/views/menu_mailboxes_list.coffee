@@ -13,15 +13,15 @@ class exports.MenuMailboxesList extends Backbone.View
   total_inbox: 0
   
   constructor: (@el, @collection) ->
-    super() 
+    super()
     @collection.viewMenu_mailboxes = @
-    @collection.on('reset', @render, @)
-    @collection.on('add', @render, @)
-    @collection.on('remove', @render, @)
-    @collection.on('change', @render, @)
+    @collection.on 'reset', @render, @
+    @collection.on 'add', @render, @
+    @collection.on 'remove', @render, @
+    @collection.on 'change', @render, @
 
   render: ->
-    $(@el).html("")
+    $(@el).html ""
     @total_inbox = 0
     @collection.each (mailbox) =>
       box = new MenuMailboxListElement mailbox, @collection

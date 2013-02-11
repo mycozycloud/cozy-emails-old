@@ -165,9 +165,13 @@ window.require.register("collections/logmessages", function(exports, require, mo
       };
 
       LogMessagesCollection.prototype.fetchNew = function() {
+        var _this = this;
         return this.fetch({
           add: true,
-          url: 'getlogs/' + this.lastCreatedAt
+          url: 'getlogs/' + this.lastCreatedAt,
+          success: function() {
+            return _this.reset();
+          }
         });
       };
 
@@ -3033,7 +3037,7 @@ window.require.register("views/menu_mailboxes_list_element", function(exports, r
         var template;
         template = require('./templates/_mailbox/mailbox_menu');
         $(this.el).html(template({
-          "model": this.model.toJSON()
+          model: this.model.toJSON()
         }));
         return this;
       };
@@ -3047,22 +3051,26 @@ window.require.register("views/menu_mailboxes_list_element", function(exports, r
 });
 window.require.register("views/message_box", function(exports, require, module) {
   (function() {
-    var MessageBoxElement,
+    var LogMessage, MessageBoxElement,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     MessageBoxElement = require("./message_box_element").MessageBoxElement;
 
+    LogMessage = require("../models/logmessage").LogMessage;
+
     /*
-      @file: message_box.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        Serves a place to display messages which are meant to be seen by user.
+            @file: message_box.coffee
+            @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+            @description: 
+                Serves a place to display messages which are meant to be seen by user.
     */
 
     exports.MessageBox = (function(_super) {
 
       __extends(MessageBox, _super);
+
+      MessageBox.prototype.id = "message_box";
 
       function MessageBox(el, collection) {
         this.el = el;
@@ -3071,27 +3079,28 @@ window.require.register("views/message_box", function(exports, require, module) 
       }
 
       MessageBox.prototype.initialize = function() {
-        this.collection.on("add", this.addOne, this);
+        this.collection.on("add", this.renderOne, this);
         return this.collection.on("reset", this.render, this);
       };
 
-      MessageBox.prototype.addOne = function(logmessage) {
+      MessageBox.prototype.renderOne = function(logmessage) {
         var box;
         box = new MessageBoxElement(logmessage, this.collection);
-        $(this.el).prepend(box.render().el);
+        this.$el.prepend(box.render().el);
         if (Number(logmessage.get("createdAt")) > Number(this.collection.lastCreatedAt)) {
-          console.log("update createdAt message");
           return this.collection.lastCreatedAt = Number(logmessage.get("createdAt")) + 1;
         }
       };
 
       MessageBox.prototype.render = function() {
-        var col,
-          _this = this;
-        $(this.el).html("");
-        col = this.collection;
-        this.collection.each(function(m) {
-          return _this.addOne(m);
+        var _this = this;
+        console.log("render message box");
+        this.collection.add(new LogMessage({
+          text: "toto"
+        }));
+        this.collection.each(function(message) {
+          console.log(message.get("text"));
+          return _this.renderOne(message);
         });
         return this;
       };
@@ -3137,12 +3146,13 @@ window.require.register("views/message_box_element", function(exports, require, 
       MessageBoxElement.prototype.buttonClose = function() {
         if (this.model.get("timeout") === 0) {
           this.model.destroy();
+          this.$el.fadeOut();
           return this.remove();
         }
       };
 
       MessageBoxElement.prototype.remove = function() {
-        return $(this.el).remove();
+        return this.$el.remove();
       };
 
       MessageBoxElement.prototype.render = function() {
@@ -3160,8 +3170,8 @@ window.require.register("views/message_box_element", function(exports, require, 
         } else {
           template = require('./templates/_message/message_info');
         }
-        $(this.el).html(template({
-          'model': this.model
+        this.$el.html(template({
+          model: this.model
         }));
         return this;
       };
