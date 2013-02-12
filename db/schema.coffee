@@ -124,3 +124,5 @@ LogMessage = define 'LogMessage', ->
     
     property 'text',
     property 'createdAt', Number
+    property 'mailobx', String
+    property 'counter', Number
