@@ -8,3 +8,8 @@ BaseModel = require("./models").BaseModel
 
 ###
 class exports.LogMessage extends BaseModel
+
+    rootUrl: "getlogs/"
+
+    initialize: ->
+        @url = @rootUrl + @get "id"

@@ -574,6 +574,12 @@ window.require.register("models/logmessage", function(exports, require, module) 
         LogMessage.__super__.constructor.apply(this, arguments);
       }
 
+      LogMessage.prototype.rootUrl = "getlogs/";
+
+      LogMessage.prototype.initialize = function() {
+        return this.url = this.rootUrl + this.get("id");
+      };
+
       return LogMessage;
 
     })(BaseModel);
@@ -2595,7 +2601,7 @@ window.require.register("views/mails_list_new", function(exports, require, modul
         this.clickable = true;
         template = require("./templates/_mail/mail_new");
         $(this.el).html(template({
-          "collection": this.collection
+          collection: this.collection
         }));
         return this;
       };
@@ -3094,12 +3100,7 @@ window.require.register("views/message_box", function(exports, require, module) 
 
       MessageBox.prototype.render = function() {
         var _this = this;
-        console.log("render message box");
-        this.collection.add(new LogMessage({
-          text: "toto"
-        }));
         this.collection.each(function(message) {
-          console.log(message.get("text"));
           return _this.renderOne(message);
         });
         return this;
