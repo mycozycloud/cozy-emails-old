@@ -4,10 +4,6 @@ LogMessage.orderedByDate = (params, callback) ->
     callback = params if typeof(params) is "function"
     LogMessage.request "date", descending: true, callback
 
-LogMessage.destroyAll = (params, callback) ->
-     callback = params if typeof(params) is "function"
-     LogMessage.requestDestroy "all", params, callback
-
 # Errors
 
 # todo: update date if error is still present
@@ -37,7 +33,7 @@ LogMessage.createImportError = (error, callback) ->
         text: "Error importing mail: #{error.toString()}"
     LogMessage.createError data, callback
 
-LogMessage.createCheckhMailError = (mailbox, callback) ->
+LogMessage.createCheckMailError = (mailbox, callback) ->
     msg =  "Checking for new mail of <strong>#{mailbox.name}</strong> failed. "
     msg += "Please verify its settings."
     data =
@@ -87,7 +83,7 @@ LogMessage.createImportInfo = (results, mailbox, callback) ->
     data =
         subtype: "download"
         text: msg
-        timeout: 5
+        timeout: 0
         mailbox: mailbox.id
         counter: results.length
 
@@ -112,15 +108,15 @@ LogMessage.createNewMailInfo = (mailbox, callback) ->
     data =
         subtype: "check"
         text: msg
-        timeout: 5
+        timeout: 0
         mailbox: mailbox.id
     LogMessage.createInfo data, callback
 
 LogMessage.createImportStartedInfo = (mailbox, callback) ->
     data =
         subtype: "start"
-        text: "Import of <strong>" + mailbox.name + "</strong> started."
-        timeout: 5
+        text: "Import of <strong>#{mailbox.name}</strong> started."
+        timeout: 0
         mailbox: mailbox.id
     LogMessage.createInfo data, callback
 
@@ -128,9 +124,9 @@ LogMessage.createBoxProgressInfo = (mailbox, progress, callback) ->
     data =
         type: "info",
         subtype: "progress"
-        text: "Import of <strong>" + mailbox.name + "</strong> " + progress + "% complete",
+        text: "Import of <strong>#{mailbox.name}</strong> #{progress}% complete"
         createdAt: new Date().valueOf(),
-        timeout: 10
+        timeout: 0
         mailbox: mailbox.id
     LogMessage.create data, callback
 
@@ -141,8 +137,8 @@ LogMessage.createImportSuccess = (mailbox, callback) ->
     data =
         type: "success"
         subtype: "end"
-        text: "Import of <strong>" + mailbox.name + "</strong> complete !"
+        text: "Import of <strong>#{mailbox.name}</strong> complete !"
         createdAt: new Date().valueOf()
-        timeout: 5
+        timeout: 0
         mailbox: mailbox.id
     LogMessage.create data, callback

@@ -10,6 +10,36 @@
       * flagging mail on remote servers (not yet implemented)
 ###
 
+fs = require 'fs'
+async = require 'async'
+
+saveAttachments = (mail, attachments, callback) ->
+    if attachments?
+        attachFuncs = []
+        for attachment in attachments
+            console.log "Attachment: " + attachment.fileName + "/" + mail.id
+            console.log mail
+            
+                            
+            params =
+                cid: attachment.contentId
+                fileName: attachment.fileName
+                contentType: attachment.contentType
+                length: attachment.length
+                mail_id: mail.id
+                checksum: attachment.checksum
+
+            attachFunc = (callback) ->
+                Attachment.create params, (error, attach) ->
+                    fs.writeFile "/tmp/#{attachment.fileName}", attachment.content, ->
+                        attach.attachFile "/tmp/#{attachment.fileName}", callback
+            attachFuncs.push attachFunc
+        async.series attachFuncs, callback
+            
+    else
+        callback()
+
+
 
 # Just to be able to recognise the mailbox in the console
 Mailbox::toString = () ->
@@ -48,18 +78,6 @@ Mailbox::sendMail = (data, callback) ->
     
     # TODO : handle attachements
     
-    # attachments: [
-    #   # String attachment
-    #   fileName: "notes.txt"
-    #   contents: "Some notes about this e-mail"
-    #   contentType: "text/plain" # optional, would be detected from the filename
-    # ,
-    #   # Binary Buffer attachment
-    #   fileName: "image.png"
-    #   contents: new Buffer("iVBORw0KGgoAAAANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD/" + "//+l2Z/dAAAAM0lEQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4U" + "g9C9zwz3gVLMDA/A6P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC", "base64")
-    #   cid: "note@node" # should be as unique as possible
-    # ]
-
   console.log "Sending Mail"
   transport.sendMail message, (error) ->
     if error
@@ -155,7 +173,7 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                       callback()
                   else
                     console.log "[" + results.length + "] mails to download" if debug
-                    LogMessage.createImportNotification results, mailbox
+                    LogMessage.createImportInfo results, mailbox
 
                     mailsToGo = results.length
                     mailsDone = 0
@@ -177,14 +195,18 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                             body: "full"
                             headers: false
 
+                        console.log "let's go fetching"
+                        
                         fetch.on "message", (message) ->
-                          # parser = new mailparser.MailParser { streamAttachments: true }
-                          parser = new mailparser.MailParser { streamAttachments: true }
-                          
-                          attachments_all = []
+                          parser = new mailparser.MailParser()
+                          #streamAttachments: true
                           
                           parser.on "attachment", (attachment) ->
-                            attachments_all.push attachment
+                            #attachments_all.push attachment
+                            console.log "attachment found!!!"
+                            
+                            console.log attachment
+                            
                           
                           parser.on "end", (mailParsedObject) ->
                         
@@ -231,6 +253,11 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                       
                               hasAttachments: if mailParsedObject.attachments then true else false
                           
+                            console.log "attachments ***********"
+                            attachments = mailParsedObject.attachments
+                            console.log attachments
+                            
+
                             # and now we can create a new mail on database, as a child of this mailbox
                             Mail.create mail, (err, mail) ->
     
@@ -239,56 +266,35 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                               unless err
                               
                                 # attachements
-                                if attachments_all?
-                                  for attachment in attachments_all
-                                    console.log "Attachment: " + attachment.fileName + "/" + mail.id
-                                    
-                                    params = {
-                                      cid:       attachment.contentId
-                                      fileName:  attachment.fileName
-                                      contentType: attachment.contentType
-                                      length:    attachment.length
-                                      checksum:  attachment.checksum
-                                      mail_id: mail.id
-                                    }  
-                                    
-                                    Attachment.create params, (error, attach) ->
-                                      
-                                      unless error
-                                        console.log attach
-                                        
-                                        #Client = require('request-json').JsonClient
-                                        #client = new Client("http://localhost:9101/")
-                                        #req = client.post "data/#{attachment.id}/attachments/", null, (status) ->
-                                        #  console.log status
-                                        #form = req.form()
-                                        #form.append 'name', attachment.fileName
-                                        #form.append 'file', attachment.stream
+                                saveAttachments mail, attachments, ->
 
-                                # debug info
-                                console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug
-                            
-                                # reload of the mailbox, in case we are not the only process to modify this
-                                # TODO: still not enough to process in parallel - we would need a transactions system or synchronisation
-                                mailbox.reload (error, mailbox) ->
-                              
-                                  if error
-                                    server.logout () ->
-                                      console.log "Error emitted on mailbox.reload: " + error.toString() if debug
-                                      server.emit "error", error
-                                  else
-                                
-                                    # check if we need to update the last_fetch_id index in the mailbox
-                                    if mailbox.IMAP_last_fetched_id < mail.id_remote_mailbox
+                                    mailbox.reload (error, mailbox) ->
                                   
-                                      mailbox.updateAttributes {IMAP_last_fetched_id: mail.id_remote_mailbox}, (error) ->
+                                      if error
+                                        server.logout () ->
+                                          console.log "Error emitted on mailbox.reload: " + error.toString() if debug
+                                          server.emit "error", error
+                                      else
                                     
-                                        if error
-                                          server.logout () ->
-                                            console.log "Error emitted on mailbox.update: " + error.toString() if debug
-                                            server.emit "error", error
+                                        # check if we need to update the last_fetch_id index in the mailbox
+                                        if mailbox.IMAP_last_fetched_id < mail.id_remote_mailbox
+                                      
+                                          mailbox.updateAttributes {IMAP_last_fetched_id: mail.id_remote_mailbox}, (error) ->
+                                        
+                                            if error
+                                              server.logout () ->
+                                                console.log "Error emitted on mailbox.update: " + error.toString() if debug
+                                                server.emit "error", error
+                                            else
+                                              console.log "New highest id saved to mailbox: " + mail.id_remote_mailbox if debug
+                                              mailsDone++
+                                              job.progress mailsDone, mailsToGo
+                                              # next iteration of our asynchronous for loop
+                                              fetchOne(i + 1)
+                                              # when finished
+                                              if mailsToGo == mailsDone
+                                                callback()
                                         else
-                                          console.log "New highest id saved to mailbox: " + mail.id_remote_mailbox if debug
                                           mailsDone++
                                           job.progress mailsDone, mailsToGo
                                           # next iteration of our asynchronous for loop
@@ -296,14 +302,6 @@ Mailbox::getNewMail = (job, callback, limit=250)->
                                           # when finished
                                           if mailsToGo == mailsDone
                                             callback()
-                                    else
-                                      mailsDone++
-                                      job.progress mailsDone, mailsToGo
-                                      # next iteration of our asynchronous for loop
-                                      fetchOne(i + 1)
-                                      # when finished
-                                      if mailsToGo == mailsDone
-                                        callback()
                               else
                                 console.error "Parser error - skipping this message for now: " + err.toString()
                                 fetchOne(i + 1)
@@ -551,7 +549,7 @@ Mailbox::doImport = (job, callback) ->
                         headers: false
 
                     fetch.on "message", (message) ->
-                      parser = new mailparser.MailParser { streamAttachments: true }
+                      parser = new mailparser.MailParser()
 
                       parser.on "end", (mailParsedObject) ->
                         
@@ -568,6 +566,8 @@ Mailbox::doImport = (job, callback) ->
                         
                         # compile the mail data
                         mail =
+                          mailbox:      mailbox.id
+                              
                           date:         dateSent.toJSON()
                           dateValueOf:  dateSent.valueOf()
                           createdAt:    new Date().valueOf()
@@ -596,9 +596,11 @@ Mailbox::doImport = (job, callback) ->
                           flagged:      "\\Flagged" in messageFlags
                       
                           hasAttachments: if mailParsedObject.attachments then true else false
+
+                        attachments = mailParsedObject.attachments
                         
                         # and now we can create a new mail on database, as a child of this mailbox
-                        mailbox.mails.create mail, (err, mail) ->
+                        Mail.create mail, (err, mail) ->
     
                           # for now we will just skip messages which are being rejected by parser
                           # emitOnErr err
@@ -607,23 +609,22 @@ Mailbox::doImport = (job, callback) ->
                             # debug info
                             console.log "New mail created : #" + mail.id_remote_mailbox + " " + mail.id + " [" + mail.subject + "] from " + JSON.stringify mail.from if debug
                         
-                            mailToBe.destroy (error) ->
-                              unless error
+                            saveAttachments mail, attachments, ->
+                              mailToBe.destroy (error) ->
+                                unless error
                               
-                                mailsDone++
-                                job.progress (mailbox.mailsToImport - (mailsToGo - mailsDone)), mailbox.mailsToImport
+                                  mailsDone++
+                                  job.progress (mailbox.mailsToImport - (mailsToGo - mailsDone)), mailbox.mailsToImport
                               
-                                # next iteration of our asynchronous for loop
-                                fetchOne(i + 1)
+                                  # next iteration of our asynchronous for loop
+                                  fetchOne(i + 1)
                                 
-                                # when finished
-                                if mailsToGo == mailsDone
-                                  console.log "Success"
-                                  callback()
-                              
-                                # TODO a timeout
-                              else
-                                callback error
+                                  # when finished
+                                  if mailsToGo == mailsDone
+                                    console.log "Success"
+                                    callback()
+                                else
+                                  callback error
                           else
                             console.error "Parser error - skipping this message for now: " + err.toString()
                             fetchOne(i + 1)

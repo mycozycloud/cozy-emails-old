@@ -7,4 +7,5 @@ Mail.destroyAll ->
         MailSent.destroyAll ->
             Attachment.destroyAll ->
                 Mailbox.destroyAll ->
-                    process.exit(0)
+                    LogMessage.destroyAll ->
+                        process.exit(0)

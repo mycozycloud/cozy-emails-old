@@ -20,7 +20,7 @@ if not module.parent
   
   # setup KUE
   @kue = require 'kue'
-  #@kue.app.listen 3003
+  @kue.app.listen 3003
   Job = @kue.Job
   @jobs = @kue.createQueue()
   
@@ -47,13 +47,6 @@ if not module.parent
         # callback - job saved (a priori)
         callback() if callback?
         
-        #LogMessage.create {
-        #  "type": "info",
-        #  "text": "Check for new mail in " + mailbox.name + " started at " + new Date().toUTCString(),
-        #  "createdAt": new Date().valueOf(),
-        #  "timeout": 3
-        #  }
-
         # on check complete
         job.on 'complete', () ->
           console.log job.data.title + " #" + job.id + " complete at " + new Date().toUTCString()
@@ -69,7 +62,7 @@ if not module.parent
           console.log job.data.title + " #" + job.id + " failed at " + new Date().toUTCString()
           mailbox.updateAttributes {status: "Mail check failed."}, (error) ->
             console.error "Mail check failed."
-            LogMessage.createChechMailError mailbox
+            LogMessage.createCheckMailError mailbox
 
         # on import progress
         job.on 'progress', (progress) ->
@@ -158,7 +151,7 @@ if not module.parent
               # get the mailbox
               Mailbox.find job.data.mailboxId, (error, mailbox) ->
                 if error
-                  console.error "Import error.... The mailbox doesn't exist anymore"
+                  console.error "Import error... The mailbox doesn't exist anymore"
                 else
                   LogMessage.createBoxImportError mailbox
 
@@ -173,7 +166,7 @@ if not module.parent
                 # get the mailbox
                 Mailbox.find job.data.mailboxId, (error, mailbox) ->
                   if error
-                    console.log "Import error.... The mailbox doesn't exist anymore"
+                    console.log "Import error... The mailbox doesn't exist anymore"
                   else
                     lastProgress = progress
                     
