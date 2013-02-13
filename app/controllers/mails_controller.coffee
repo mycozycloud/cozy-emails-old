@@ -102,7 +102,7 @@ action 'getlistsent', ->
                 send mails
         else
             send 500
-            
+
 # GET '/mailsnew/:timestamp'
 action 'getnewlist', ->
     timestamp = parseInt req.params.timestamp
@@ -137,9 +137,9 @@ action 'getattachmentslist', ->
         else
             send attachments
                     
-# GET '/getattachment/:attachment'
+# GET '/attachments/:id'
 action 'getattachment', ->
-    Attachment.find req.params.attachment, (err, attachment) =>
+    Attachment.find req.params.id, (err, attachment) =>
         if err or not attachment
             send 404
         else

@@ -109,7 +109,7 @@ window.require.register("collections/attachments", function(exports, require, mo
 
       AttachmentsCollection.prototype.setModel = function(areAttachmentsOf) {
         this.areAttachmentsOf = areAttachmentsOf;
-        this.url = 'getattachments/' + this.areAttachmentsOf.get("id");
+        this.url = "mails/" + (this.areAttachmentsOf.get("id")) + "/attachments";
         return this.fetch();
       };
 
@@ -3193,7 +3193,7 @@ window.require.register("views/templates/_attachment/attachment_element", functi
   buf.push('<i');
   buf.push(attrs({ "class": ('icon-file') }));
   buf.push('></i><a');
-  buf.push(attrs({ 'href':("getattachment/" + attachment.get("id")), 'target':("_blank") }));
+  buf.push(attrs({ 'href':("attachments/" + attachment.get("id") + "/" + attachment.get("fileName")), 'target':("_blank") }));
   buf.push('>' + escape((interp = attachment.get("fileName")) == null ? '' : interp) + '</a>');
   }
   return buf.join("");
