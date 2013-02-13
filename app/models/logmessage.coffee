@@ -110,7 +110,17 @@ LogMessage.createNewMailInfo = (mailbox, callback) ->
         text: msg
         timeout: 0
         mailbox: mailbox.id
-    LogMessage.createInfo data, callback
+    LogMessage.orderedByDate limit: 1, (err, logMessages) ->
+        if logMessages.length > 0 and
+            logMessages[0].subtype is data.subtype and
+            logMessages[0].mailbox is data.mailbox
+                logMessage = logMessages[0]
+                logMessage.createdAt = new Date().valueOf()
+                msg = "Check for new mail in <strong>#{mailbox.name}</strong> "
+                msg += "finished at #{new Date().toUTCString()}"
+                logMessage.save callback
+        else
+            LogMessage.createInfo data, callback
 
 LogMessage.createImportStartedInfo = (mailbox, callback) ->
     data =
