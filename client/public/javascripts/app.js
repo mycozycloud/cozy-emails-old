@@ -4195,7 +4195,7 @@ window.require.register("views/templates/menu", function(exports, require, modul
   buf.push('>Compose a new mail\n</a></li><li');
   buf.push(attrs({ 'id':('inboxbutton'), "class": ('menu_option') }));
   buf.push('><a');
-  buf.push(attrs({ 'href':('#') }));
+  buf.push(attrs({ 'href':('#inbox') }));
   buf.push('>Inbox \n</a></li><li');
   buf.push(attrs({ 'id':('sentbutton'), "class": ('menu_option') }));
   buf.push('><a');
