@@ -15,8 +15,8 @@ exports.routes = (map) ->
     map.get '/fetchmailbox/:id', 'mailboxes#fetch'
     map.get '/fetchmailboxandwait/:id', 'mailboxes#fetchandwait'
 
-    map.get '/getattachments/:id', 'mails#getattachmentslist'
-    map.get '/getattachment/:attachment', 'mails#getattachment'
+    map.get '/mails/:id/attachments', 'mails#getattachmentslist'
+    map.get '/attachments/:id/:filename', 'mails#getattachment'
     
     map.get '/getlogs/:createdAt', 'logs#getactivelogs'
     map.post '/getlogs', 'logs#savelog'

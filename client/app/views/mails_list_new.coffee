@@ -18,9 +18,8 @@ class exports.MailsListNew extends Backbone.View
   initialize: ->
     @collection.on 'reset', @render, @
 
-  events: {
-     "click #get_new_mails" : 'loadNewMails',
-  }
+  events:
+     "click #get_new_mails": 'loadNewMails',
   
   # when user clicks on "more mails" button
   loadNewMails: () ->
@@ -54,16 +53,14 @@ class exports.MailsListNew extends Backbone.View
 
       
       # in case it doesn't work, unblock after some time
-      setTimeout(
-        () ->
+      setTimeout( ->
           element.clickable = true
           $("#get_new_mails").removeClass("disabled")
-        , 1000 * 4
-      )
+      , 1000 * 4)
   
   render: ->
     # unblock the button
     @clickable = true
     template = require "./templates/_mail/mail_new"
-    $(@el).html template({"collection" : @collection})
+    $(@el).html template(collection: @collection)
     @

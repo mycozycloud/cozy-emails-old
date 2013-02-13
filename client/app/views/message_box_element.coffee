@@ -17,27 +17,28 @@ class exports.MessageBoxElement extends Backbone.View
     "click button.close" : 'buttonClose'
     
   buttonClose: =>
-    if @model.get("timeout") == 0
+    if @model.get("timeout") is 0
        @model.destroy()
+       @$el.fadeOut()
        @remove()
     
   remove: =>
-    $(@el).remove()
+    @$el.remove()
 
   render: ->
-    if @model.get("timeout") != 0
+    if @model.get("timeout") isnt 0
        setTimeout @remove, @model.get("timeout") * 1000
     
     type = @model.get("type")
     
-    if type == "error"
+    if type is "error"
         template = require('./templates/_message/message_error')
-    else if type == "success"
+    else if type is "success"
         template = require('./templates/_message/message_success')
-    else if type == "warning"
+    else if type is "warning"
         template = require('./templates/_message/message_warning')
     else
         template = require('./templates/_message/message_info')
         
-    $(@el).html template('model': @model)
+    @$el.html template model: @model
     @

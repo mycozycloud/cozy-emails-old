@@ -14,15 +14,14 @@ class exports.MenuMailboxListElement extends Backbone.View
     
   events: {
     "click a.menu_choose" : 'setupMailbox'
-    # "click" : 'setupMailbox'
   }
 
   setupMailbox: (event) ->
-    @model.set("checked", not @model.get("checked"))
+    @model.set "checked", not @model.get("checked")
     @model.save()
     @collection.updateActiveMailboxes()
 
   render: ->
     template = require('./templates/_mailbox/mailbox_menu')
-    $(@el).html template("model": @model.toJSON())
+    $(@el).html template model: @model.toJSON()
     @

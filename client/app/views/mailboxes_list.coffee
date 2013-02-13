@@ -23,7 +23,7 @@ class exports.MailboxesList extends Backbone.View
   # Add a mailbox at the bottom of the list
   addOne: (mail) ->
     box = new MailboxesListElement mail, mail.collection
-    $(@el).append box.render().el    
+    $(@el).append box.render().el
 
   render: ->
     $(@el).html ""

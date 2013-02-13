@@ -24,10 +24,10 @@
   , "request":          "= 2.11.4"
   , "nodemailer":       "= 0.3.29"
   , "imap":             "= 0.6.1"
-  , "mailparser":       "= 0.2.30"
+  , "mailparser":       "= 0.2.31"
   , "kue":              "= 0.4.1"
   , "cluster":          "= 0.7.7"
-  , "mimelib":			">= 0"
+  , "mimelib":		">= 0"
   , "request-json":     ">= 0"
   }
 , "devDependencies": 
