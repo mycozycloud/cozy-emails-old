@@ -16,6 +16,18 @@ nodemailer = require "nodemailer"
 Mailbox::toString = () ->
     "[Mailbox " + @name + " #" + @id + "]"
 
+
+Mailbox::fetchFinished = (callback) ->
+    @updateAttributes {IMAP_last_fetched_date: new Date()}, (error) ->
+        unless error
+            LogMessage.createNewMailInfo @
+            callback null
+        else
+            callback error
+            
+Mailbox::fetchFailed = (callback) ->
+    mailbox.updateAttributes {status: "Mail check failed."}, (error) ->
+        LogMessage.createCheckMailError @
 ###
     Generic function to send mails, using nodemailer
 ###

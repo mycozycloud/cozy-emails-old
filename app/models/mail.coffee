@@ -6,6 +6,7 @@ async = require 'async'
 Mail::saveAttachments = (attachments, callback) ->
     if attachments?
         attachFuncs = []
+
         for attachment in attachments
             params =
                 cid: attachment.contentId
@@ -17,12 +18,14 @@ Mail::saveAttachments = (attachments, callback) ->
 
             attachFunc = (callback) ->
                 Attachment.create params, (error, attach) ->
-                    fs.writeFile "/tmp/#{attachment.fileName}", attachment.content, ->
-                        attach.attachFile "/tmp/#{attachment.fileName}", callback
+                    fileName =  "/tmp/#{attachment.fileName}"
+                    fs.writeFile fileName, attachment.content, ->
+                        attach.attachFile fileName, callback
+                            fs.unlink fileName, callback
+
             attachFuncs.push attachFunc
+
         async.series attachFuncs, callback
             
     else
         callback()
-
-
