@@ -3327,7 +3327,9 @@ window.require.register("views/templates/_mail/mail_answer", function(exports, r
   buf.push(attrs({ 'data-wysihtml5-command':('italic'), "class": ('btn') + ' ' + ('btn-mini') }));
   buf.push('>italic</a><a');
   buf.push(attrs({ 'data-wysihtml5-command':('underline'), "class": ('btn') + ' ' + ('btn-mini') }));
-  buf.push('>underline</a></div><div');
+  buf.push('>underline</a><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('insertUnorderedList'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>list</a></div><div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
   buf.push(attrs({ 'data-wysihtml5-command':('foreColor'), 'data-wysihtml5-command-value':('red'), "class": ('btn') + ' ' + ('btn-mini') }));
@@ -3570,7 +3572,9 @@ window.require.register("views/templates/_mail/mail_compose", function(exports, 
   buf.push(attrs({ 'data-wysihtml5-command':('italic'), "class": ('btn') + ' ' + ('btn-mini') }));
   buf.push('>italic</a><a');
   buf.push(attrs({ 'data-wysihtml5-command':('underline'), "class": ('btn') + ' ' + ('btn-mini') }));
-  buf.push('>underline</a></div><div');
+  buf.push('>underline</a><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('insertUnorderedList'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>list</a></div><div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
   buf.push(attrs({ 'data-wysihtml5-command':('foreColor'), 'data-wysihtml5-command-value':('red'), "class": ('btn') + ' ' + ('btn-mini') }));
