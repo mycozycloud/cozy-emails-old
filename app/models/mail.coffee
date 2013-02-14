@@ -19,8 +19,8 @@ Mail::saveAttachments = (attachments, callback) ->
             attachFunc = (callback) ->
                 Attachment.create params, (error, attach) ->
                     fileName =  "/tmp/#{attachment.fileName}"
-                    fs.writeFile fileName, attachment.content, ->
-                        attach.attachFile fileName, callback
+                    fs.writeFile fileName, attachment.content, (error) ->
+                        attach.attachFile fileName, (error) ->
                             fs.unlink fileName, callback
 
             attachFuncs.push attachFunc

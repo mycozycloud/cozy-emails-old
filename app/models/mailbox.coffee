@@ -13,21 +13,67 @@
 nodemailer = require "nodemailer"
 
 # Just to be able to recognise the mailbox in the console
-Mailbox::toString = () ->
+Mailbox::toString = ->
     "[Mailbox " + @name + " #" + @id + "]"
 
-
 Mailbox::fetchFinished = (callback) ->
-    @updateAttributes {IMAP_last_fetched_date: new Date()}, (error) ->
-        unless error
-            LogMessage.createNewMailInfo @
-            callback null
-        else
+    @updateAttributes IMAP_last_fetched_date: new Date(), (error) ->
+        if error
             callback error
+        else
+            LogMessage.createNewMailInfo @, callback
             
 Mailbox::fetchFailed = (callback) ->
-    mailbox.updateAttributes {status: "Mail check failed."}, (error) ->
-        LogMessage.createCheckMailError @
+    data =
+        status: "Mail check failed."
+
+    mailbox.updateAttributes data, (error) ->
+        if error
+            callback error
+        else
+            LogMessage.createCheckMailError @, callback
+
+Mailbox::importError = (callback) ->
+    data =
+        imported: false
+        status: "Could not prepare the import."
+
+    mailbox.updateAttributes data, (error) ->
+        if error
+            callback error
+        else
+            LogMessage.createImportPreparationError mailbox, callaback
+
+Mailbox::importSuccessfull = (callback) ->
+    data =
+        imported: true
+        status: "Import successful !"
+
+    mailbox.updateAttributes data, (error) ->
+        if error
+            callback error
+        else
+            LogMessage.createImportSuccess mailbox, callback
+
+Mailbox::importFailed = (callback) ->
+    data =
+        imported: false
+        importing: false
+        activated: false
+
+    mailbox.updateAttributes data, (error) ->
+        if error
+            callback error
+        else
+            LogMessage.createBoxImportError mailbox
+
+Mailbox::progress = (progress, callback) ->
+    data =
+        status: "Import #{progress} %"
+
+    mailbox.updateAttributes data, (error) ->
+        LogMessage.createImportProgressInfo mailbox, progress, callback
+
 ###
     Generic function to send mails, using nodemailer
 ###
@@ -305,11 +351,11 @@ Mailbox::setupImport = (callback) ->
     
     # let's create a connection
     server = new imap.ImapConnection
-        username: mailbox.login
-        password: mailbox.pass
-        host:         mailbox.IMAP_server
-        port:         mailbox.IMAP_port
-        secure:     mailbox.IMAP_secure
+        username: @login
+        password: @pass
+        host: @IMAP_server
+        port: @IMAP_port
+        secure: @IMAP_secure
 
     # set up lsiteners, handle errors and callback
     server.on "alert", (alert) ->
@@ -322,11 +368,10 @@ Mailbox::setupImport = (callback) ->
             callback error
 
     server.on "close", (error) ->
-        console.log "Connection closed (error: " + error.toString() + ")" if debug
+        console.log "Connection closed (error: #{error.toString()})" if debug
                 
     emitOnErr = (err) ->
-        if err
-            server.emit "error", err
+        server.emit("error", err) if err
 
     # LET THE GAMES BEGIN
     server.connect (err) =>
