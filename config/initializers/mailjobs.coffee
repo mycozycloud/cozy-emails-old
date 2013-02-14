@@ -28,10 +28,12 @@ logProgress = (job, progress) ->
     msg += "#{progress} % complete"
     console.log msg
 
+
 ## JOB 1 : check for new mails for given mailbox
+
 # Define Job
 @jobs.process "check mailbox", 1, (job, done) ->
-    logStarted()
+    logStarted job
 
     Mailbox.find job.data.mailboxId, (error, mailbox) ->
         if error or not mailbox
@@ -85,11 +87,11 @@ setInterval app.createCheckJobs, 1000 * 60 * 4 # check every 4 minutes
 app.createCheckJobs()
 
 
-
 ## JOB 2 : import a whole box
+
 # Define Job
 @jobs.process "import mailbox", 1, (job, done) ->
-    logStarted()
+    logStarted job
 
     Mailbox.find job.data.mailboxId, (error, mailbox) ->
         if error
@@ -109,8 +111,8 @@ app.createImportJob = (mailboxId) =>
             mailboxId: mailboxId
             title: "Import of " + mailbox.name
             waitAfterFail: 1000 * 60
-        .attempts 9999 # on reessaie
         .save()
+        .attempts(9999)
         
         LogMessage.createImportStartedInfo mailbox
 
@@ -148,6 +150,3 @@ app.createImportJob = (mailboxId) =>
                         console.error "Could not prepare the import. Aborting."
                 else
                     createJobs mailbox, mailboxId
-
-## - CREATEIMPORTJOB - JOB PROCESS
-# - CREATEIMPORTJOB - END

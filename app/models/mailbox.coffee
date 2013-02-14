@@ -17,7 +17,7 @@ Mailbox::toString = ->
     "[Mailbox " + @name + " #" + @id + "]"
 
 Mailbox::fetchFinished = (callback) ->
-    @updateAttributes IMAP_last_fetched_date: new Date(), (error) ->
+    @updateAttributes IMAP_last_fetched_date: new Date(), (error) =>
         if error
             callback error
         else
@@ -27,7 +27,7 @@ Mailbox::fetchFailed = (callback) ->
     data =
         status: "Mail check failed."
 
-    mailbox.updateAttributes data, (error) ->
+    @updateAttributes data, (error) =>
         if error
             callback error
         else
@@ -38,22 +38,22 @@ Mailbox::importError = (callback) ->
         imported: false
         status: "Could not prepare the import."
 
-    mailbox.updateAttributes data, (error) ->
+    @updateAttributes data, (error) =>
         if error
             callback error
         else
-            LogMessage.createImportPreparationError mailbox, callaback
+            LogMessage.createImportPreparationError @, callaback
 
 Mailbox::importSuccessfull = (callback) ->
     data =
         imported: true
         status: "Import successful !"
 
-    mailbox.updateAttributes data, (error) ->
+    @updateAttributes data, (error) =>
         if error
             callback error
         else
-            LogMessage.createImportSuccess mailbox, callback
+            LogMessage.createImportSuccess @, callback
 
 Mailbox::importFailed = (callback) ->
     data =
@@ -61,18 +61,18 @@ Mailbox::importFailed = (callback) ->
         importing: false
         activated: false
 
-    mailbox.updateAttributes data, (error) ->
+    @updateAttributes data, (error) =>
         if error
             callback error
         else
-            LogMessage.createBoxImportError mailbox
+            LogMessage.createBoxImportError @
 
 Mailbox::progress = (progress, callback) ->
     data =
         status: "Import #{progress} %"
 
-    mailbox.updateAttributes data, (error) ->
-        LogMessage.createImportProgressInfo mailbox, progress, callback
+    @updateAttributes data, (error) =>
+        LogMessage.createImportProgressInfo @, progress, callback
 
 ###
     Generic function to send mails, using nodemailer
@@ -120,7 +120,6 @@ Mailbox::sendMail = (data, callback) ->
     # @callback - success callback
     # @limit - how many new messages we want to download at max
 
-    # TODO : handle attachments - for now Cozy doesn't store BLOBs...
 ###
 Mailbox::getNewMail = (job, callback, limit=250)->
     
@@ -359,11 +358,11 @@ Mailbox::setupImport = (callback) ->
 
     # set up lsiteners, handle errors and callback
     server.on "alert", (alert) ->
-        console.log "[SERVER ALERT]" + alert
+        console.log "[SERVER ALERT] #{alert}"
 
     server.on "error", (error) ->
-        console.error "[ERROR]: " + error.toString()
-        mailbox.updateAttributes {status: error.toString()}, (err) ->
+        console.error "[ERROR]: #{error.toString()}"
+        mailbox.updateAttributes status: error.toString(), (err) ->
             console.error "Mailbox update with error status"
             callback error
 
@@ -371,7 +370,7 @@ Mailbox::setupImport = (callback) ->
         console.log "Connection closed (error: #{error.toString()})" if debug
                 
     emitOnErr = (err) ->
-        server.emit("error", err) if err
+        server.emit "error", err  if err
 
     # LET THE GAMES BEGIN
     server.connect (err) =>
