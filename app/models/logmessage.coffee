@@ -26,7 +26,6 @@ LogMessage.createError = (data, callback) ->
                 timeout: 0
             LogMessage.create attributes, callback
 
-
 LogMessage.createImportError = (error, callback) ->
     data =
         subtype: "import"
