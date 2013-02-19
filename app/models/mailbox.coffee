@@ -29,6 +29,12 @@ getDateSent = (mailParsedObject) ->
     else
         dateSent = new Date()
 
+
+# Destroy helpers
+
+Mailbox::destroyMails = (callback) ->
+    Mail.requestDestroy "mailbox", key: @id, callback
+
 # Just to be able to recognise the mailbox in the console
 Mailbox::toString = ->
     "[Mailbox " + @name + " #" + @id + "]"
@@ -191,7 +197,7 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
 
     messageFlags = []
     fetch.on 'message', (message) =>
-                
+ 
         parser = new mailparser.MailParser()
 
         parser.on "end", (mailParsedObject) =>
@@ -217,7 +223,7 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
                 read: "\\Seen" in messageFlags
                 flagged: "\\Flagged" in messageFlags
                 hasAttachments: if mailParsedObject.attachments then true else false
-            
+
             Mail.create mail, (err, mail) ->
                 if err
                     callback err
@@ -243,14 +249,14 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
             messageFlags = message.flags
             do parser.end
      
-            fetch.on 'error', (error) ->
-                server.logout () ->
-                    console.log 'Error emitted on fetch object'
-                    console.log error
-                    server.emit 'error', error
+    fetch.on 'error', (error) ->
+        server.logout () ->
+            console.log 'Error emitted on fetch object'
+            console.log error
+            server.emit 'error', error
 
 
-Mailbox::getNewMail = (job, callback, limit=250)->
+Mailbox::getNewMail = (job, callback, limit=250) ->
     
     ## dependences
     imap = require "imap"
