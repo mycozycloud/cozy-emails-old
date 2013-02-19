@@ -9,7 +9,7 @@ load 'application'
 
 action 'index', ->
     render
-        title: "CozyMails"
+        title: "Cozy Mails"
 
 # shared functionnality : find the mail via its ID
 before ->

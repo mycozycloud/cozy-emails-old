@@ -26,7 +26,6 @@ LogMessage.createError = (data, callback) ->
                 timeout: 0
             LogMessage.create attributes, callback
 
-
 LogMessage.createImportError = (error, callback) ->
     data =
         subtype: "import"
@@ -130,7 +129,7 @@ LogMessage.createImportStartedInfo = (mailbox, callback) ->
         mailbox: mailbox.id
     LogMessage.createInfo data, callback
 
-LogMessage.createBoxProgressInfo = (mailbox, progress, callback) ->
+LogMessage.createImportProgressInfo = (mailbox, progress, callback) ->
     data =
         type: "info",
         subtype: "progress"
