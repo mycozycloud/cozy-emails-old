@@ -43,6 +43,7 @@ Attachment = define 'Attachment', ->
     property 'length', Number
     property 'checksum'
     property 'content', Text
+    property 'mailbox',
     
 Mail.hasMany(Attachment, {as: 'attachments',foreignKey: 'mail_id'})
 
