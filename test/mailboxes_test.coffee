@@ -12,17 +12,19 @@ app = require('../server')
 
 client = new Client("http://localhost:8888/")
 
-describe "Test of mailboxes; ", ->
+ 
+describe "Test of mailboxes", ->
 
     before (done) ->
         app.listen(8888)
-        done()
+        Mailbox.destroyAll done
 
     after (done) ->
         app.close()
         done()
 
-    describe "Creation and update of a mailbox; ", ->
+    describe "Creation and update of a mailbox", ->
+
         it "When I send data for a mailbox creation", (done) ->
             mailbox =
                 name: "test.smpt.fr"
@@ -52,17 +54,15 @@ describe "Test of mailboxes; ", ->
             
             done()
             
-    describe "Nom let's check the update; ", ->
+    describe "Now let's check the update", ->
             
         it "Once it's stored, we can retrieve it by its id (show)", (done) ->
-            client.get "mailboxes/" + @idToRetrieve, (error, response, body) =>
-                @response = response
-                @body = body
-                done(error)
+                client.get "mailboxes/" + @idToRetrieve, (error, response, body) =>
+                    @body = body
+                    done()
         
         it "And the data should be the same, as stored in the beginning", (done) ->
             should.exist @body
-            # should.exist @body.id
 
             @body.login.should.equal "logintest"
             @body.SMTP_server.should.equal "test.smpt.fr"
@@ -120,3 +120,83 @@ describe "Test of mailboxes; ", ->
                 @response = response
                 @body = body
                 done(error)
+
+
+    describe "Deletion of a mailbox and related ", ->
+
+        before (done) ->
+            Mailbox.destroyAll ->
+                Mail.destroyAll ->
+                    MailToBe.destroyAll ->
+                        Attachment.destroyAll ->
+                            done()
+
+        it "Given there is a mailbox", (done) ->
+            Mailbox.create name: "test mailbox", (err, mailbox) =>
+                should.not.exist err
+                @mailbox = mailbox
+                done()
+
+        it "And 40 mails linked to this mailbox", (done) ->
+            mails = []
+            data = (i) =>
+                text: "test mail #{i}"
+                mailbox: @mailbox.id
+            mails.push data(i) for i in [1..40]
+            createFunc = (mail, callback) -> Mail.create mail, callback
+            async.forEachSeries mails, createFunc, (err) ->
+                should.not.exist err
+                done()
+
+        it "And 40 mailtobe linked to this mailbox", (done) ->
+            mailtobes = []
+            data = (i) =>
+                remoteId: "#{i}"
+                mailbox: @mailbox.id
+            mailtobes.push data(i) for i in [1..40]
+            createFunc = (mailToBe, callback) ->
+                MailToBe.create mailToBe, callback
+            async.forEachSeries mailtobes, createFunc, (err) ->
+                should.not.exist err
+                done()
+
+        it "And 40 attachments linked to this mailbox", (done) ->
+            attachments = []
+            data = (i) =>
+                fileName: "fileName #{i}"
+                mailbox: @mailbox.id
+            attachments.push data(i) for i in [1..40]
+            createFunc = (attachment, callback) ->
+                Attachment.create attachment, callback
+            async.forEachSeries attachments, createFunc, (err) ->
+                should.not.exist err
+                done()
+
+        it "When I delete the mailbox", (done) ->
+            client.del "mailboxes/#{@mailbox.id}", (err, res, body) ->
+                should.not.exist err
+                res.statusCode.should.equal 204
+                done()
+
+        it "Then there is no mailbox anymore", (done) ->
+            Mailbox.all (err, mailboxes) ->
+                mailboxes.length.should.equal 0
+                done()
+
+        it "And no mails related to this box", (done) ->
+            Mail.fromMailbox key: @mailbox.id, (err, mails) ->
+                mails.length.should.equal 0
+                done()
+                
+        it "And no mailToBes related to this box", (done) ->
+            params =
+                startKey: @mailbox.id
+                endKey: @mailbox.id + "0"
+            MailToBe.fromMailbox params, (err, mailtobes) ->
+                mailtobes.length.should.equal 0
+                done()
+
+        it "And no attachements related to this box", (done) ->
+            Attachment.fromMailbox key: @mailbox.id, (err, attachments) ->
+                attachments.length.should.equal 0
+                done()
