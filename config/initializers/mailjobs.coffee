@@ -78,7 +78,8 @@ app.createCheckJob = (mailboxId, callback) =>
 app.createCheckJobs = =>
     console.log "Creating check jobs..."
     Mailbox.all (err, mailboxes) ->
-        app.createCheckJob(mailbox.id) for mailbox in mailboxes
+        if mailboxes?.length
+            app.createCheckJob(mailbox.id) for mailbox in mailboxes
             
 # set-up CRON
 setInterval app.createCheckJobs, 1000 * 60 * 4 # check every 4 minutes
