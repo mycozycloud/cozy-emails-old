@@ -109,8 +109,7 @@ window.require.register("collections/attachments", function(exports, require, mo
 
       AttachmentsCollection.prototype.setModel = function(areAttachmentsOf) {
         this.areAttachmentsOf = areAttachmentsOf;
-        this.url = "mails/" + (this.areAttachmentsOf.get("id")) + "/attachments";
-        return this.fetch();
+        return this.url = "mails/" + (this.areAttachmentsOf.get("id")) + "/attachments";
       };
 
       AttachmentsCollection.prototype.comparator = function(attachment) {
@@ -450,6 +449,57 @@ window.require.register("helpers", function(exports, require, module) {
         });
       }
 
+      BrunchApplication.prototype.initializeJQueryExtensions = function() {
+        return $.fn.spin = function(opts, color) {
+          var presets;
+          presets = {
+            tiny: {
+              lines: 8,
+              length: 2,
+              width: 1,
+              radius: 3
+            },
+            small: {
+              lines: 10,
+              length: 2,
+              width: 3,
+              radius: 5
+            },
+            large: {
+              lines: 10,
+              length: 8,
+              width: 4,
+              radius: 8
+            }
+          };
+          if (Spinner) {
+            return this.each(function() {
+              var $this, spinner;
+              $this = $(this);
+              spinner = $this.data("spinner");
+              if (spinner != null) {
+                spinner.stop();
+                return $this.data("spinner", null);
+              } else if (opts !== false) {
+                if (typeof opts === "string") {
+                  if (opts in presets) {
+                    opts = presets[opts];
+                  } else {
+                    opts = {};
+                  }
+                  if (color) opts.color = color;
+                }
+                spinner = new Spinner($.extend({
+                  color: $this.css("color")
+                }, opts));
+                spinner.spin(this);
+                return $this.data("spinner", spinner);
+              }
+            });
+          }
+        };
+      };
+
       BrunchApplication.prototype.initialize = function() {
         return null;
       };
@@ -464,10 +514,10 @@ window.require.register("helpers", function(exports, require, module) {
 window.require.register("initialize", function(exports, require, module) {
   
   /*
-    @file: initialize.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
-      Building object used all over the place - collections, AppView, etc
+      @file: initialize.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description: 
+          Building object used all over the place - collections, AppView, etc
   */
 
   (function() {
@@ -502,6 +552,7 @@ window.require.register("initialize", function(exports, require, module) {
       }
 
       Application.prototype.initialize = function() {
+        this.initializeJQueryExtensions();
         this.mailboxes = new MailboxCollection;
         this.mails = new MailsCollection;
         this.mailssent = new MailsSentCollection;
@@ -1405,15 +1456,18 @@ window.require.register("views/app", function(exports, require, module) {
       };
 
       AppView.prototype.setLayoutMenu = function(callback) {
+        var _this = this;
         this.containerMenu.html(require('./templates/menu'));
         window.app.viewMenu = new MenuMailboxesList(this.$("#menu_mailboxes"), window.app.mailboxes);
+        window.app.viewMenu.render();
         window.app.mailboxes.reset();
+        this.$("#menu_mailboxes").html("loading...");
+        this.$("#menu_mailboxes").spin("small");
         return window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
             window.app.mailboxes.trigger("change_active_mailboxes");
-            console.log("Initial menu mailboxes load OK");
-            window.app.viewMenu.render();
+            window.app.viewMenu.hideLoading();
             if (callback != null) return callback();
           }
         });
@@ -1446,18 +1500,23 @@ window.require.register("views/app", function(exports, require, module) {
         if (window.app.mailboxes.length === 0) {
           window.app.mailboxes.fetch({
             success: function() {
-              console.log("Initial mails mailboxes load OK");
               if (window.app.mails.length === 0) {
+                this.$("#column_mails_list tbody").prepend("<span>loading...</span>");
+                this.$("#column_mails_list tbody").spin("small");
                 return window.app.mails.fetchOlder(function() {
-                  console.log("Initial mails mails load OK");
+                  this.$("#column_mails_list tbody").spin();
+                  this.$("#column_mails_list tbody span").remove();
                   return window.app.mailboxes.updateActiveMailboxes();
                 });
               }
             }
           });
         } else if (window.app.mails.length === 0) {
+          this.$("#column_mails_list tbody").prepend("<span>loading...</span>");
+          this.$("#column_mails_list tbody").spin("small");
           window.app.mails.fetchOlder(function() {
-            console.log("Initial mails mails load OK");
+            this.$("#column_mails_list tbody").spin();
+            this.$("#column_mails_list tbody span").remove();
             return window.app.mailboxes.updateActiveMailboxes();
           });
         }
@@ -1910,7 +1969,10 @@ window.require.register("views/mails_attachments_list", function(exports, requir
       MailsAttachmentsList.prototype.initialize = function() {
         window.app.attachments.on('reset', this.render, this);
         window.app.attachments.on('add', this.addOne, this);
-        return window.app.attachments.setModel(this.model);
+        window.app.attachments.setModel(this.model);
+        this.$el.html("loading...");
+        this.$el.spin("small");
+        return window.app.attachments.fetch();
       };
 
       MailsAttachmentsList.prototype.addOne = function(attachment) {
@@ -2419,7 +2481,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
         this.collection.activeMail.setRead();
         this.collection.activeMail.url = "mails/" + this.collection.activeMail.get("id");
         this.collection.activeMail.save({
-          "read": true
+          read: true
         });
         return this.collection.trigger("change_active_mail");
       };
@@ -2437,7 +2499,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
         var template, _ref;
         this.visible = (_ref = this.model.get("mailbox"), __indexOf.call(window.app.mailboxes.activeMailboxes, _ref) >= 0);
         template = require('./templates/_mail/mail_list');
-        $(this.el).html(template({
+        this.$el.html(template({
           "model": this.model,
           "active": this.active,
           "visible": this.visible
@@ -2961,10 +3023,10 @@ window.require.register("views/menu_mailboxes_list", function(exports, require, 
     MenuMailboxListElement = require("./menu_mailboxes_list_element").MenuMailboxListElement;
 
     /*
-      @file: menu_mailboxes_list.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The list of mailboxes in the menu
+        @file: menu_mailboxes_list.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The list of mailboxes in the menu
     */
 
     exports.MenuMailboxesList = (function(_super) {
@@ -2986,15 +3048,23 @@ window.require.register("views/menu_mailboxes_list", function(exports, require, 
 
       MenuMailboxesList.prototype.render = function() {
         var _this = this;
-        $(this.el).html("");
+        this.$el.html("");
         this.total_inbox = 0;
         this.collection.each(function(mailbox) {
           var box;
           box = new MenuMailboxListElement(mailbox, _this.collection);
-          $(_this.el).append(box.render().el);
+          _this.$el.append(box.render().el);
           return _this.total_inbox += Number(mailbox.get("new_messages"));
         });
         return this;
+      };
+
+      MenuMailboxesList.prototype.showLoading = function() {
+        return this.$el.spin();
+      };
+
+      MenuMailboxesList.prototype.hideLoading = function() {
+        return this.$el.spin();
       };
 
       return MenuMailboxesList;

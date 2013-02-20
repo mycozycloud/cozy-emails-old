@@ -55,16 +55,18 @@ class exports.AppView extends Backbone.View
     # set ut the menu view
     @containerMenu.html require('./templates/menu')
     window.app.viewMenu =
-        new MenuMailboxesList @.$("#menu_mailboxes"), window.app.mailboxes
+        new MenuMailboxesList @$("#menu_mailboxes"), window.app.mailboxes
     
     # fetch necessary data
+    window.app.viewMenu.render()
     window.app.mailboxes.reset()
+    @$("#menu_mailboxes").html "loading..."
+    @$("#menu_mailboxes").spin "small"
     window.app.mailboxes.fetch
-      success: ->
+      success: =>
         window.app.mailboxes.updateActiveMailboxes()
         window.app.mailboxes.trigger("change_active_mailboxes")
-        console.log "Initial menu mailboxes load OK"
-        window.app.viewMenu.render()
+        window.app.viewMenu.hideLoading()
         callback() if callback?
       
 
@@ -111,26 +113,31 @@ class exports.AppView extends Backbone.View
     
     # create views for the columns
     window.app.viewMailsList =
-        new MailsColumn @.$("#column_mails_list"), window.app.mails
+        new MailsColumn @$("#column_mails_list"), window.app.mails
     window.app.viewMailsList.render()
     window.app.view_mail =
-        new MailsElement @.$("#column_mail"), window.app.mails
+        new MailsElement @$("#column_mail"), window.app.mails
     
     # fetch necessary data
     if window.app.mailboxes.length is 0
       window.app.mailboxes.fetch
         success: ->
-          console.log "Initial mails mailboxes load OK"
           if window.app.mails.length is 0
             # fetch necessary data
+            @$("#column_mails_list tbody").prepend "<span>loading...</span>"
+            @$("#column_mails_list tbody").spin "small"
             window.app.mails.fetchOlder () ->
-                console.log "Initial mails mails load OK"
+                @$("#column_mails_list tbody").spin()
+                @$("#column_mails_list tbody span").remove()
                 window.app.mailboxes.updateActiveMailboxes()
         
     else if window.app.mails.length is 0
       # fetch necessary data
+      @$("#column_mails_list tbody").prepend "<span>loading...</span>"
+      @$("#column_mails_list tbody").spin "small"
       window.app.mails.fetchOlder () ->
-          console.log "Initial mails mails load OK"
+          @$("#column_mails_list tbody").spin()
+          @$("#column_mails_list tbody span").remove()
           window.app.mailboxes.updateActiveMailboxes()
     
     # ensure the right size
@@ -143,7 +150,7 @@ class exports.AppView extends Backbone.View
     @containerContent.html require('./templates/_layouts/layout_mails')
 
     # create views for the columns
-    window.app.viewMailsSentList = new MailsSentColumn @.$("#column_mails_list"), window.app.mailssent
+    window.app.viewMailsSentList = new MailsSentColumn @$("#column_mails_list"), window.app.mailssent
     window.app.viewMailsSentList.render()
     window.app.view_mailsent = new MailsSentElement @.$("#column_mail"), window.app.mailssent
 
