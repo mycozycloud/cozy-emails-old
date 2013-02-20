@@ -67,15 +67,14 @@ action 'update', ->
 
 # DELETE /mailboxes/:id
 action 'destroy', ->
-  @box.mails.destroyAll (error) =>
-    if error
-      send 500
-    else
-      @box.destroy (error) ->
-        if !error
-          send 200
-        else
-          send 500
+    @box.destroyMails (err) =>
+        console.log "destroy mails: #{err}" if err
+        @box.destroyAttachments (err) =>
+            console.log "destroy attachments: #{err}" if err
+            @box.destroyMailsToBe (err) =>
+                console.log "destroy mailstobe: #{err}" if err
+                @box.destroy (err) ->
+                    send 204
 
 # post /sendmail
 action 'sendmail', ->
