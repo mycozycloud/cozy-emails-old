@@ -1,6 +1,12 @@
 fs = require 'fs'
 async = require 'async'
 
+Mail.fromMailbox = (params, callback) ->
+    Mail.request "byMailbox", params, callback
+
+Mail.dateId = (params, callback) ->
+    Mail.request "dateId", params, callback
+
 # Get attachments returned by mailparser as parameter. Save them as couchdb
 # attachments wrapped in a dedicated model.
 Mail::saveAttachments = (attachments, callback) ->
