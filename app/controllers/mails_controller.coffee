@@ -148,7 +148,7 @@ action 'getattachment', ->
                     send 500
                 else if res.statusCode is 404
                     send 'File not found', 404
-                else if res.statusCode != 200
+                else if res.statusCode isnt 200
                     send 500
                 else
                     send 200
