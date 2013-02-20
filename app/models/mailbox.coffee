@@ -33,11 +33,20 @@ getDateSent = (mailParsedObject) ->
 # Destroy helpers
 
 Mailbox::destroyMails = (callback) ->
-    Mail.requestDestroy "mailbox", key: @id, callback
+    Mail.requestDestroy "bymailbox", key: @id, callback
+
+Mailbox::destroyMailsToBe = (callback) ->
+    params =
+        startkey: [@id]
+        endkey: [@id + "0"]
+    MailToBe.requestDestroy "bymailbox", params, callback
+
+Mailbox::destroyAttachments = (callback) ->
+    Attachment.requestDestroy "bymailbox", key: @id, callback
 
 # Just to be able to recognise the mailbox in the console
 Mailbox::toString = ->
-    "[Mailbox " + @name + " #" + @id + "]"
+    "[Mailbox #{@name} #{@id}]"
 
 Mailbox::fetchFinished = (callback) ->
     @updateAttributes IMAP_last_fetched_date: new Date(), (error) =>
@@ -244,11 +253,11 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
                         return callback(err) if err
 
                         if typeof mailToBe is "string"
-                            callback mail
+                            callback null, mail
                         else
                             mailToBe.destroy (error) ->
                                 return callback(err) if err
-                                callback mail
+                                callback null, mail
 
         message.on "data", (data) ->
             # on data, we feed the parser
@@ -315,14 +324,14 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
                                 mailsDone++
                                 job.progress mailsDone, results.length
 
-                                if mailsToGo is mailsDone
+                                if mailsDone is results.length
                                     callback()
                                 else
                                     fetchOne(server, i + 1, results, mailsDone)
 
         else
             server.logout ->
-                if mailsToGo isnt mailsDone
+                if mailsDone isnt results.length
                     msg = "Could not import all the mail. Retry"
                     server.emit "error", new Error(msg)
 
@@ -351,7 +360,7 @@ Mailbox::setupImport = (callback) ->
             console.log error
             server.emit "error", error if server?
 
-    loadInboxMails = (server) ->
+    loadInboxMails = (server) =>
         server.search ['ALL'], (err, results) =>
             if err
                 emitOnErr server, err
@@ -363,7 +372,8 @@ Mailbox::setupImport = (callback) ->
                     server.logout()
                     callback()
                 else
-                    console.log "[" + results.length + "] mails to download"
+                    console.log "[#{@name}] #{results.length} mails to download"
+                    console.log "[#{@name}] Start grabing mail ids"
                     fetchOne server, results, 0, 0, results.length, 0
 
             
@@ -382,7 +392,7 @@ Mailbox::setupImport = (callback) ->
                 if error
                     server.logout -> server.emit "error", error
                 else
-                    console.log "#{mailToBe.remoteId} id saved successfully"
+                    #console.log "#{mailToBe.remoteId} id saved successfully"
                     mailsDone++
         
                     if mailsDone is mailsToGo
@@ -394,8 +404,9 @@ Mailbox::setupImport = (callback) ->
                             activated: true
                             importing: true
 
-                        @updateAttributes data, (err) ->
-                            server.logout () ->
+                        @updateAttributes data, (err) =>
+                            server.logout () =>
+                                console.log "[#{@name}] All mail ids collected"
                                 callback err
                     else
                         fetchOne server, results, i + 1, mailsDone, mailsToGo, maxId
@@ -415,10 +426,10 @@ Mailbox::setupImport = (callback) ->
 Mailbox::doImport = (job, callback) ->
 
     emitOnErr = (server, error) ->
-        if error
+        if error and server?
             server.logout () ->
                 console.log error
-                server.emit "error", error if server?
+                server.emit "error", error
   
     @connectImapServer (err, server) =>
         return emitOnErr server, err if err
