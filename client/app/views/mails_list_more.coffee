@@ -23,9 +23,8 @@ class exports.MailsListMore extends Backbone.View
     @collection.on 'updated_number_mails_shown', @render, @
     window.app.mailboxes.on "change_active_mailboxes", @render, @
 
-  events: {
+  events:
      "click #add_more_mails" : 'loadOlderMails',
-  }
   
   # when user clicks on "more mails" button
   loadOlderMails: () ->
@@ -59,5 +58,5 @@ class exports.MailsListMore extends Backbone.View
     # unblock the button
     @clickable = true
     template = require "./templates/_mail/mails_more"
-    $(@el).html template({"collection" : @collection, "disabled": @disabled})
+    $(@el).html template(collection: @collection, disabled: @disabled)
     @

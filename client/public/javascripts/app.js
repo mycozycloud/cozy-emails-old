@@ -1413,10 +1413,10 @@ window.require.register("views/app", function(exports, require, module) {
     MessageBox = require('views/message_box').MessageBox;
 
     /*
-      @file: app.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The application's main view - creates other views, lays things out.
+        @file: app.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The application's main view - creates other views, lays things out.
     */
 
     exports.AppView = (function(_super) {
@@ -1462,13 +1462,16 @@ window.require.register("views/app", function(exports, require, module) {
         window.app.viewMenu.render();
         window.app.mailboxes.reset();
         this.$("#menu_mailboxes").html("loading...");
-        this.$("#menu_mailboxes").spin("small");
+        this.$("#menu_mailboxes").spin("tiny");
         return window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
             window.app.mailboxes.trigger("change_active_mailboxes");
             window.app.viewMenu.hideLoading();
             if (callback != null) return callback();
+          },
+          error: function() {
+            return _this.$("#menu_mailboxes").html("");
           }
         });
       };
@@ -1506,7 +1509,22 @@ window.require.register("views/app", function(exports, require, module) {
                 return window.app.mails.fetchOlder(function() {
                   this.$("#column_mails_list tbody").spin();
                   this.$("#column_mails_list tbody span").remove();
-                  return window.app.mailboxes.updateActiveMailboxes();
+                  window.app.mailboxes.updateActiveMailboxes();
+                  if (window.app.mails.length === 0) {
+                    this.$("#more-button").hide();
+                    return this.$("#button_get_new_mails").hide();
+                  } else {
+                    return this.$("#no-mails-message").hide();
+                  }
+                }, function() {
+                  if (window.app.mails.length === 0) {
+                    this.$("#more-button").hide();
+                    this.$("#button_get_new_mails").hide();
+                  } else {
+                    this.$("#no-mails-message").hide();
+                  }
+                  this.$("#column_mails_list tbody").spin();
+                  return this.$("#column_mails_list tbody span").remove();
                 });
               }
             }
@@ -1517,7 +1535,13 @@ window.require.register("views/app", function(exports, require, module) {
           window.app.mails.fetchOlder(function() {
             this.$("#column_mails_list tbody").spin();
             this.$("#column_mails_list tbody span").remove();
-            return window.app.mailboxes.updateActiveMailboxes();
+            window.app.mailboxes.updateActiveMailboxes();
+            if (window.app.mails.length === 0) {
+              this.$("#more-button").hide();
+              return this.$("#button_get_new_mails").hide();
+            } else {
+              return this.$("#no-mails-message").hide();
+            }
           });
         }
         return this.resize();
@@ -2585,8 +2609,8 @@ window.require.register("views/mails_list_more", function(exports, require, modu
         this.clickable = true;
         template = require("./templates/_mail/mails_more");
         $(this.el).html(template({
-          "collection": this.collection,
-          "disabled": this.disabled
+          collection: this.collection,
+          disabled: this.disabled
         }));
         return this;
       };
@@ -3835,28 +3859,17 @@ window.require.register("views/templates/_mail/mails_more", function(exports, re
   var buf = [];
   with (locals || {}) {
   var interp;
-  if ( collection.length == 0)
-  {
   buf.push('<div');
-  buf.push(attrs({ "class": ('well') }));
+  buf.push(attrs({ 'id':('no-mails-message'), "class": ('well') }));
   buf.push('><h3>Hey !\n</h3><p>It looks like there are no mails to show.\n</p><p>If you\'re here for the first time, just click \n<a');
   buf.push(attrs({ 'href':("#config-mailboxes") }));
-  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div>');
-  }
-  if ( !disabled)
-  {
-  buf.push('<div');
-  buf.push(attrs({ 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
+  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div><div');
+  buf.push(attrs({ 'id':('more-button'), 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
   buf.push(attrs({ 'id':('add_more_mails'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-plus') }));
-  buf.push('></i> Load up to ' + escape((interp = collection.mailsAtOnce) == null ? '' : interp) + ' messages more\n</a></div><p><i>Showing ' + escape((interp = collection.mailsShown) == null ? '' : interp) + ' of ' + escape((interp = collection.length) == null ? '' : interp) + ' messages downloaded</i></p>');
-  }
-  else
-  {
-  buf.push('<p><i>All messages loaded, showing ' + escape((interp = collection.mailsShown) == null ? '' : interp) + ' out of ' + escape((interp = collection.length) == null ? '' : interp) + '</i></p>');
-  }
+  buf.push('></i> more messages\n</a></div>');
   }
   return buf.join("");
   };
@@ -3875,8 +3888,6 @@ window.require.register("views/templates/_mailbox/mailbox", function(exports, re
   buf.push('<div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
-  buf.push(attrs({ "class": ('fetch_mails') + ' ' + ('btn') }));
-  buf.push('>Check for new mail</a><a');
   buf.push(attrs({ "class": ('fetch_mailbox') + ' ' + ('btn') }));
   buf.push('>Verify status</a><a');
   buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('btn') }));

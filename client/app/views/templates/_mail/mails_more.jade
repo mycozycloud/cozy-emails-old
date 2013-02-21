@@ -1,5 +1,4 @@
-if collection.length == 0
-  .well
+#no-mails-message.well
     h3 
       | Hey !
     p
@@ -11,13 +10,7 @@ if collection.length == 0
     p
       | If You just did it, and still see no messages, you may need to wait for us to download them for you.
       | Enjoy  :)
-if !disabled
-  .btn-group.center(style="margin-bottom: 50px; margin-top: 50px;")
+#more-button.btn-group.center(style="margin-bottom: 50px; margin-top: 50px;")
     a#add_more_mails.btn.btn-primary.btn-large
       i.icon-plus
-      |  Load up to #{collection.mailsAtOnce} messages more
-  p
-    i Showing #{collection.mailsShown} of #{collection.length} messages downloaded
-else
-  p
-    i All messages loaded, showing #{collection.mailsShown} out of #{collection.length}
+      |  more messages
