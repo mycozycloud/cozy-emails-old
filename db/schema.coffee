@@ -8,17 +8,17 @@
 
 # User defines user that can interact with the Cozy instance.
 User = define 'User', ->
-    property 'email', String, index: true
+    property 'email', String
     property 'password', String
     property 'owner', Boolean, default: false
     property 'activated', Boolean, default: false
 
 Mail = define 'Mail', ->
-    property 'mailbox', index: true
+    property 'mailbox'
     property 'id_remote_mailbox',
-    property 'createdAt', Number, default: 0, index: true
-    property 'dateValueOf', Number, default: 0, index: true
-    property 'date', Date, default: 0, index: true
+    property 'createdAt', Number, default: 0
+    property 'dateValueOf', Number, default: 0
+    property 'date', Date, default: 0
     property 'headers_raw', Text
     property 'raw', Text
     property 'priority',
@@ -36,7 +36,7 @@ Mail = define 'Mail', ->
     property 'references'
     
 Attachment = define 'Attachment', ->
-    property 'mail_id', index: true
+    property 'mail_id'
     property 'cid', Number
     property 'fileName',
     property 'contentType',
@@ -45,12 +45,12 @@ Attachment = define 'Attachment', ->
     property 'content', Text
     property 'mailbox',
     
-Mail.hasMany(Attachment, {as: 'attachments',foreignKey: 'mail_id'})
+Mail.hasMany Attachment, {as: 'attachments', foreignKey: 'mail_id'}
 
 MailSent = define 'MailSent', ->
-    property 'mailbox', index: true
-    property 'createdAt', Number, default: 0, index: true
-    property 'sentAt', Number, default: 0, index: true
+    property 'mailbox'
+    property 'createdAt', Number, default: 0
+    property 'sentAt', Number, default: 0
     property 'subject',
     property 'from',
     property 'to',
@@ -59,18 +59,18 @@ MailSent = define 'MailSent', ->
     property 'html', Text
     
 MailToBe = define 'MailToBe', ->
-    property 'remoteId', Number, index: true
-    property 'mailbox', index: true
+    property 'remoteId', Number
+    property 'mailbox'
   
 # Mailbox object to store the information on connections to remote servers
 # and have attached mails
 Mailbox = define 'Mailbox', ->
   
     # identification
-    property 'name'                             # the name used in the interface, doesn't have to be unique
-    property 'config', Number, default: 0       # for predefined configurations
-    property 'new_messages', default: 0         # number of new messages for a mailbox
-    property 'createdAt', Date, default: Date   # mailbox created at
+    property 'name'
+    property 'config', Number, default: 0
+    property 'new_messages', default: 0
+    property 'createdAt', Date, default: Date
     
     # shared credentails for in and out bound
     property 'login'
@@ -92,19 +92,20 @@ Mailbox = define 'Mailbox', ->
     property 'IMAP_last_fetched_id', Number, default: 0
 
     # data regarding the interface
-    property 'checked', Boolean, default: true        # if the mailbox is to be included in the list of mails
-    property 'color', default: "#0099FF"              # color of the mailbox in the list
-    property 'status', default: "Waiting for import"  # status visible for user
+    property 'checked', Boolean, default: true
+    property 'color', default: "#0099FF" # color of the mailbox in the list
+    property 'status', default: "Waiting for import" # status visible for user
     
     # data for import
-    property 'activated', Boolean, default: false # ready to be fetched for new mail
-    property 'imported', Boolean, default: false  # if the import was finished
-    property 'importing', Boolean, default: false # if the import was started
-    property 'mailsToImport', Number, default: 0  # number of mails for the import job
+    # ready to be fetched for new mail
+    property 'activated', Boolean, default: false
+    property 'imported', Boolean, default: false
+    property 'importing', Boolean, default: false
+    property 'mailsToImport', Number, default: 0
     
-Mailbox.hasMany(Mail, {as: 'mails',  foreignKey: 'mailbox'})
-Mailbox.hasMany(MailToBe, {as: 'mailsToBe',  foreignKey: 'mailbox'})
-Mailbox.hasMany(MailSent, {as: 'mailsSent',  foreignKey: 'mailbox'})
+Mailbox.hasMany Mail, {as: 'mails',  foreignKey: 'mailbox'}
+Mailbox.hasMany MailToBe, {as: 'mailsToBe', foreignKey: 'mailbox'}
+Mailbox.hasMany MailSent, {as: 'mailsSent', foreignKey: 'mailbox'}
 
 
 # logs managment
@@ -122,7 +123,6 @@ LogMessage = define 'LogMessage', ->
     #   0 - message will be displayed until user click OK to discard it
     #   > 0 - message will be displayed only once, and will disappear after x seconds
     property 'timeout', Number, default: 5 * 60
-    
     property 'text',
     property 'createdAt', Number
     property 'mailobx', String

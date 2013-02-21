@@ -15,12 +15,11 @@ before ->
         else
             @logMessage = logMessage
             next()
-, { only: ['discard'] }
+, only: ['discard']
     
 
-# POST '/getlogs'
+# POST '/logs' Create a new log.
 action 'savelog', ->
-    
     data = {}
     attrs = [
         "type",
@@ -30,27 +29,28 @@ action 'savelog', ->
     ]
     
     for attr in attrs
-        data[attr] = req.body[attr]
+        data.attr = body.attr
         
-    if data["timeout"] == 0
+    if data["timeout"] is 0
         LogMessage.create data, (err, logMessage) =>
-            if err or !logMessage
+            if err or not logMessage
                 send 500
             else
-                send 200
+                send 201
     else
         send 200
 
 
-# DELETE '/getlogs/:id'
+# DELETE '/logs/:id' Delete given log.
 action 'discard', ->
     @logMessage.destroy (error) =>
-        if !error
+        if not error
             send 200
         else
             send 500
                     
-# GET '/getlogs/:createdAt'
+
+# GET '/logs/:createdAt' Get logs from given date
 action 'getactivelogs', ->
     params =
         startkey: Number req.params.createdAt
@@ -60,7 +60,6 @@ action 'getactivelogs', ->
         if err
             send 500
         else
-            # remove those for which timeout > 0
             for log in logs
                 log.destroy() if log.timeout isnt 0
 
