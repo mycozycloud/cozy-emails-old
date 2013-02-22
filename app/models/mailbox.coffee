@@ -286,18 +286,18 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
     # reload
     id = Number(@ImapLastFetchedId) + 1
     console.log "Fetching mail #{@} | UID #{id}:#{id + limit})"
-
-    @connectImapServer (err, server) =>
-        return emitOnErr(server, err) if err
-        @loadInbox server, (err) =>
-            return emitOnErr server, err if err
-            loadNewMails(server, id)
                             
     emitOnErr = (server, err) ->
         if err
             console.log err
             server.emit "error", err if server?
 
+    @connectImapServer (err, server) =>
+        return emitOnErr(server, err) if err
+        @loadInbox server, (err) =>
+            return emitOnErr server, err if err
+            loadNewMails(server, id)
+            
     loadNewMails = (server, id) =>
         range = "#{id}:#{id + limit}"
         server.search [['UID', range]], (err, results) =>
