@@ -53,7 +53,7 @@ Mailbox::log = (msg) ->
 
 
 Mailbox::fetchFinished = (callback) ->
-    @updateAttributes IMAP_last_fetched_date: new Date(), (error) =>
+    @updateAttributes ImapLastFetchedDate: new Date(), (error) =>
         if error
             callback error
         else
@@ -129,16 +129,16 @@ Mailbox::sendMail = (data, callback) ->
     # create the connection - transport object, 
     # and configure it with our mialbox's data
     transport = nodemailer.createTransport "SMTP",
-        host: @SMTP_server
-        secureConnection: @SMTP_ssl
-        port: @SMTP_port
+        host: @SmtpServer
+        secureConnection: @SmtpSsl
+        port: @SmtpPort
         auth:
             user: @login
             pass: @pass
 
     # configure the message object to send
     message =
-        from: @SMTP_send_as
+        from: @SmtpSendAs
         to: data.to
         cc: data.cc if data.cc?
         bcc: data.bcc if data.bcc?
@@ -174,9 +174,9 @@ Mailbox::connectImapServer = (callback) ->
     server = new imap.ImapConnection
         username: @login
         password: @pass
-        host: @IMAP_server
-        port: @IMAP_port
-        secure: @IMAP_secure
+        host: @ImapServer
+        port: @ImapPort
+        secure: @ImapSecure
 
     # set up lsiteners, handle errors and callback
     server.on "alert", (alert) =>
@@ -235,8 +235,8 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
                 priority: mailParsedObject.priority
                 text: mailParsedObject.text
                 html: mailParsedObject.html
-                id_remote_mailbox: remoteId
-                headers_raw: JSON.stringify mailParsedObject.headers
+                idRemoteMailbox: remoteId
+                headersRaw: JSON.stringify mailParsedObject.headers
                 references: mailParsedObject.references or ""
                 inReplyTo: mailParsedObject.inReplyTo or ""
                 flags: JSON.stringify messageFlags
@@ -248,7 +248,7 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
                 if err
                     callback err
                 else
-                    msg = "New mail created: #{mail.id_remote_mailbox}"
+                    msg = "New mail created: #{mail.idRemoteMailbox}"
                     msg += " #{mail.id} [#{mail.subject}] "
                     msg += JSON.stringify mail.from
                     @log msg
@@ -280,7 +280,7 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
     debug = true
     
     # reload
-    id = Number(@IMAP_last_fetched_id) + 1
+    id = Number(@ImapLastFetchedId) + 1
     console.log "Fetching mail #{@} | UID #{id}:#{id + limit})"
 
     @connectImapServer (err, server) =>
@@ -319,8 +319,8 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
                 if err
                     emitOnErr server, err
                 else
-                    if @IMAP_last_fetched_id < mail.id_remote_mailbox
-                        data = IMAP_last_fetched_id: mail.id_remote_mailbox
+                    if @ImapLastFetchedId < mail.idRemoteMailbox
+                        data = ImapLastFetchedId: mail.idRemoteMailbox
                         @updateAttributes data, (err) ->
                             if err
                                 emitOnErr server, err
@@ -400,7 +400,7 @@ Mailbox::setupImport = (callback) ->
                         @log "max id = #{maxId}"
                         data =
                             mailsToImport: results.length
-                            IMAP_last_fetched_id: maxId
+                            ImapLastFetchedId: maxId
                             activated: true
                             importing: true
 

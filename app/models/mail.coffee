@@ -18,7 +18,7 @@ Mail::saveAttachments = (attachments, callback) ->
             fileName: attachment.fileName
             contentType: attachment.contentType
             length: attachment.length
-            mail_id: @id
+            mailId: @id
             checksum: attachment.checksum
             mailbox: @mailbox
         Attachment.create params, (error, attach) =>

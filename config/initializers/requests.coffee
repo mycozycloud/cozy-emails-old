@@ -15,7 +15,7 @@ Mail.defineRequest "byMailbox", mailboxRequest, requests.checkError
 
 
 # Attachments
-mailRequest = -> emit doc.mail_id, doc
+mailRequest = -> emit doc.mailId, doc
 mailboxRequest = -> emit doc.mailbox, doc
 
 Attachment.defineRequest "all", requests.all, requests.checkError

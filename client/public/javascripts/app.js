@@ -881,7 +881,7 @@ window.require.register("models/mail", function(exports, require, module) {
             flags.push("\\Seen");
             box = window.app.mailboxes.get(this.get("mailbox"));
             if (box != null) {
-              box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) - 1);
+              box.set("newMessages", (parseInt(box != null ? box.get("newMessages") : void 0)) - 1);
             }
           }
           this.set({
@@ -895,7 +895,7 @@ window.require.register("models/mail", function(exports, require, module) {
           if (flagsPrev !== flags.length) {
             box = window.app.mailboxes.get(this.get("mailbox"));
             if (box != null) {
-              box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) + 1);
+              box.set("newMessages", (parseInt(box != null ? box.get("newMessages") : void 0)) + 1);
             }
           }
           this.set({
@@ -1206,18 +1206,18 @@ window.require.register("models/mailbox", function(exports, require, module) {
       Mailbox.url = 'mailboxes/';
 
       Mailbox.prototype.defaults = {
-        'checked': true,
-        'config': 0,
-        'name': "box",
-        'login': "login",
-        'pass': "pass",
-        'SMTP_server': "smtp.gmail.com",
-        'SMTP_ssl': true,
-        'SMTP_send_as': "support@mycozycloud.com",
-        'IMAP_server': "imap.gmail.com",
-        'IMAP_port': 993,
-        'IMAP_secure': true,
-        'color': "orange"
+        checked: true,
+        config: 0,
+        name: "box",
+        login: "login",
+        pass: "pass",
+        SmtpServer: "smtp.gmail.com",
+        SmtpSsl: true,
+        SmtpSendAs: "support@mycozycloud.com",
+        ImapServer: "imap.gmail.com",
+        ImapPort: 993,
+        ImapSecure: true,
+        color: "orange"
       };
 
       Mailbox.prototype.initialize = function() {
@@ -1234,7 +1234,7 @@ window.require.register("models/mailbox", function(exports, require, module) {
 
       Mailbox.prototype.IMAPLastFetchedDate = function() {
         var parsed;
-        parsed = new Date(this.get("IMAP_last_fetched_date"));
+        parsed = new Date(this.get("IMapLastFetchedDate"));
         return parsed.toUTCString();
       };
 
@@ -3899,7 +3899,7 @@ window.require.register("views/templates/_mailbox/mailbox", function(exports, re
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<h3>' + escape((interp = model.get('name')) == null ? '' : interp) + '</h3><p><i>"' + escape((interp = model.get('SMTP_send_as')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.IMAPLastFetchedDate()) == null ? '' : interp) + ' </i></p>');
+  buf.push('<h3>' + escape((interp = model.get('name')) == null ? '' : interp) + '</h3><p><i>"' + escape((interp = model.get('SmtpSendAs')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.IMAPLastFetchedDate()) == null ? '' : interp) + ' </i></p>');
   if ( model.get("status"))
   {
   buf.push('<p><i>status: ' + escape((interp = model.get('status')) == null ? '' : interp) + '</i></p>');
@@ -3938,16 +3938,16 @@ window.require.register("views/templates/_mailbox/mailbox_edit", function(export
   buf.push('>Name your mailbox to identify it easily.</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("SMTP_send_as"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("SmtpSendAs"), "class": ('control-label') }));
   buf.push('>Your address</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("SMTP_send_as"), 'type':("text"), 'value':(model.get("SMTP_send_as")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("SmtpSendAs"), 'type':("text"), 'value':(model.get("SmtpSendAs")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>This adress will be visible to people to whom you send mail.</p><p');
   buf.push(attrs({ "class": ('help-block') }));
-  buf.push('>Like "johny@mnemonic.com" or "Mickey Mouse <mickey@domain.com>".</p></div></div><div');
+  buf.push('>Like "johny@cozycloud.cc" or "Mickey Mouse <mickey@domain.com>".</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
   buf.push(attrs({ 'for':("login"), "class": ('control-label') }));
@@ -3996,51 +3996,51 @@ window.require.register("views/templates/_mailbox/mailbox_edit", function(export
   buf.push('>The color to mark mails from this inbox. Enjoy!</p></div></div></fieldset><fieldset><legend>Server data</legend><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("SMTP_server"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("SmtpServer"), "class": ('control-label') }));
   buf.push('>SMTP host</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("SMTP_server"), 'type':("text"), 'value':(model.get("SMTP_server")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("SmtpServer"), 'type':("text"), 'value':(model.get("SmtpServer")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>The address of your server. Like smtp.gmail.com</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("SMTP_ssl"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("SmtpSsl"), "class": ('control-label') }));
   buf.push('>SMTP ssl</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("SMTP_ssl"), 'type':("text"), 'value':(model.get("SMTP_ssl").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("SmtpSsl"), 'type':("text"), 'value':(model.get("SmtpSsl").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>Everybody wants it, but some servers may not have it. Leave it "true" :)</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("IMAP_server"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("ImapServer"), "class": ('control-label') }));
   buf.push('>IMAP host</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("IMAP_server"), 'type':("text"), 'value':(model.get("IMAP_server")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("ImapServer"), 'type':("text"), 'value':(model.get("ImapServer")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>The inbound server address. Say imap.gmail.com ..</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("IMAP_port"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("ImapPort"), "class": ('control-label') }));
   buf.push('>IMAP port</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("IMAP_port"), 'type':("text"), 'value':(model.get("IMAP_port")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("ImapPort"), 'type':("text"), 'value':(model.get("ImapPort")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>Usually 993.</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("IMAP_secure"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("ImapSecure"), "class": ('control-label') }));
   buf.push('>IMAP secure</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("IMAP_secure"), 'type':("text"), 'value':(model.get("IMAP_secure").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("ImapSecure"), 'type':("text"), 'value':(model.get("ImapSecure").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>Everybody wants it, but some servers may not have it. Leave it "true" :)</p></div></div></fieldset><div');
@@ -4076,11 +4076,11 @@ window.require.register("views/templates/_mailbox/mailbox_menu", function(export
   buf.push('/>');
   }
   buf.push(' ' + escape((interp = model.name) == null ? '' : interp) + '\n');
-  if ( model.new_messages > 0)
+  if ( model.newMessages > 0)
   {
   buf.push('<span');
   buf.push(attrs({ "class": ('badge') + ' ' + ('badge-warning') }));
-  buf.push('>' + escape((interp = model.new_messages) == null ? '' : interp) + '</span>');
+  buf.push('>' + escape((interp = model.newMessages) == null ? '' : interp) + '</span>');
   }
   buf.push('</a>');
   }

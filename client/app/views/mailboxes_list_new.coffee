@@ -14,9 +14,8 @@ class exports.MailboxesListNew extends Backbone.View
   id: "mailboxeslist_new"
   className: "mailboxes_new"
 
-  events: {
+  events:
      "click #add_mailbox" : 'addMailbox',
-  }
 
   constructor: (@el, @collection) ->
     super()

@@ -16,23 +16,23 @@ class exports.Mailbox extends BaseModel
   @url: 'mailboxes/'
 
   defaults:
-    'checked' : true
-    'config' : 0
-    'name' : "box"
-    'login' : "login"
-    'pass' : "pass"
-    'SMTP_server' : "smtp.gmail.com"
-    'SMTP_ssl' : true
-    'SMTP_send_as' : "support@mycozycloud.com"
-    'IMAP_server' : "imap.gmail.com"
-    'IMAP_port' : 993
-    'IMAP_secure' : true
-    'color' : "orange"
+    checked: true
+    config: 0
+    name: "box"
+    login: "login"
+    pass: "pass"
+    SmtpServer: "smtp.gmail.com"
+    SmtpSsl: true
+    SmtpSendAs: "support@mycozycloud.com"
+    ImapServer: "imap.gmail.com"
+    ImapPort: 993
+    ImapSecure: true
+    color: "orange"
 
   initialize: ->
     @on "destroy", @removeView, @
-    # if not in edit mode, update
     # model = @
+    # if not in edit mode, update
     # 
     # @intervalId = setInterval () ->
     #   if not @isEdit
@@ -54,5 +54,5 @@ class exports.Mailbox extends BaseModel
     @view.remove() if @view?
     
   IMAPLastFetchedDate: ->
-    parsed = new Date @get("IMAP_last_fetched_date")
+    parsed = new Date @get("IMapLastFetchedDate")
     parsed.toUTCString()

@@ -15,11 +15,11 @@ User = define 'User', ->
 
 Mail = define 'Mail', ->
     property 'mailbox'
-    property 'id_remote_mailbox',
+    property 'idRemoteMailbox',
     property 'createdAt', Number, default: 0
     property 'dateValueOf', Number, default: 0
     property 'date', Date, default: 0
-    property 'headers_raw', Text
+    property 'headersRaw', Text
     property 'raw', Text
     property 'priority',
     property 'subject',
@@ -36,7 +36,7 @@ Mail = define 'Mail', ->
     property 'references'
     
 Attachment = define 'Attachment', ->
-    property 'mail_id'
+    property 'mailId'
     property 'cid', Number
     property 'fileName',
     property 'contentType',
@@ -69,7 +69,7 @@ Mailbox = define 'Mailbox', ->
     # identification
     property 'name'
     property 'config', Number, default: 0
-    property 'new_messages', default: 0
+    property 'newMessages', default: 0
     property 'createdAt', Date, default: Date
     
     # shared credentails for in and out bound
@@ -77,19 +77,19 @@ Mailbox = define 'Mailbox', ->
     property 'pass'
 
     # data for outbound mails - SMTP
-    property 'SMTP_server'
-    property 'SMTP_send_as'
-    property 'SMTP_ssl', Boolean, default: true
-    property 'SMTP_port', Number, default: 465
+    property 'SmtpSserver'
+    property 'SmtpSendAs'
+    property 'SmtpSsl', Boolean, default: true
+    property 'SmtpPort', Number, default: 465
 
     # data for inbound mails - IMAP
-    property 'IMAP_server'
-    property 'IMAP_port'
-    property 'IMAP_secure', Boolean, default: true
-    property 'IMAP_last_sync', Date, default: 0
-    property 'IMAP_last_fetched_date', Date, default: 0
+    property 'ImapServer'
+    property 'ImapPort'
+    property 'ImapSecure', Boolean, default: true
+    property 'ImapLastSync', Date, default: 0
+    property 'ImapLastFectechDate', Date, default: 0
     # this one is used to build the query to fetch new mails
-    property 'IMAP_last_fetched_id', Number, default: 0
+    property 'ImapLastFetchedId', Number, default: 0
 
     # data regarding the interface
     property 'checked', Boolean, default: true
