@@ -50,7 +50,7 @@ app.createCheckJob = (mailboxId, callback) =>
     
     Mailbox.find mailboxId, (error, mailbox) ->
         if error
-            console.error "Check error.... The mailbox doesn't exist"
+            console.error "Check error... The mailbox doesn't exist"
         else
             job = jobs.create "check mailbox",
                 mailboxId: mailboxId
@@ -63,14 +63,14 @@ app.createCheckJob = (mailboxId, callback) =>
                 logComplete job
                 mailbox.fetchFinished (error) ->
                     if error
-                        console.error "Check error...."
+                        mailbox.log "Check error..."
                     else
-                        console.log "Check successful !"
+                        mailbox.log "Check successful !"
 
             job.on 'failed', () ->
                 logFailed job
                 mailbox.fetchFailed (error) ->
-                    console.error "Mail check failed."
+                    mailbox.log "Mail check failed."
 
             job.on 'progress', (progress) ->
                 logProgress job, progress if progress isnt lastProgress
@@ -121,14 +121,14 @@ app.createImportJob = (mailboxId) =>
             logComplete job
             mailbox.importSuccessfull (error) ->
                 if error
-                    console.error "Import error...."
+                    mailbox.log "Import error..."
                 else
-                    console.log "Import successful !"
+                    mailbox.log "Import successful !"
 
         job.on 'failed', () ->
             logFailed job
             mailbox.importFailed (error) ->
-                console.error "Import failed...."
+                mailbox.log "Import failed...."
 
         job.on 'progress', (progress) ->
             if progress isnt lastProgress
@@ -143,11 +143,11 @@ app.createImportJob = (mailboxId) =>
 
     Mailbox.find mailboxId, (error, mailbox) ->
         if error
-            console.error "Import error.... The mailbox doesn't exist"
+            console.error "Import error... The mailbox doesn't exist"
         else
             mailbox.setupImport (error) ->
                 if error
                     mailbox.importError ->
-                        console.error "Could not prepare the import. Aborting."
+                        mailbox.log "Could not prepare the import. Aborting."
                 else
                     createJobs mailbox, mailboxId
