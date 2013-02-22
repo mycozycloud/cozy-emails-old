@@ -61,13 +61,11 @@ class exports.AppView extends Backbone.View
         # fetch necessary data
         window.app.viewMenu.render()
         window.app.mailboxes.reset()
-        @$("#menu_mailboxes").html "loading..."
-        @$("#menu_mailboxes").spin "tiny"
+        window.app.viewMenu.showLoading()
         window.app.mailboxes.fetch
             success: =>
                 window.app.mailboxes.updateActiveMailboxes()
                 window.app.mailboxes.trigger("change_active_mailboxes")
-                window.app.viewMenu.hideLoading()
                 callback() if callback?
             error: =>
                 @$("#menu_mailboxes").html ""
@@ -129,8 +127,8 @@ class exports.AppView extends Backbone.View
         window.app.viewMailsList.render()
         window.app.view_mail =
             new MailsElement @$("#column_mail"), window.app.mails
-        @$("#no-mails-message").hide()
         
+        @$("#no-mails-message").hide()
         # fetch necessary data
         if window.app.mailboxes.length is 0
             window.app.mailboxes.fetch
@@ -145,9 +143,9 @@ class exports.AppView extends Backbone.View
                             window.app.mailboxes.updateActiveMailboxes()
                             @showMailList()
                         , =>
-                            @showMailList()
                             @$("#column_mails_list tbody").spin()
                             @$("#column_mails_list tbody span").remove()
+                            @showMailList()
 
                 
         else if window.app.mails.length is 0

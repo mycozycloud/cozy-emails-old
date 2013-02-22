@@ -30,7 +30,8 @@ class exports.MenuMailboxesList extends Backbone.View
         @
 
     showLoading: ->
-        @$el.spin()
+        @$el.html 'loading...'
+        @$el.spin 'tiny'
 
     hideLoading: ->
         @$el.spin()

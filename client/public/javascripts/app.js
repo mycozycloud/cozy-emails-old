@@ -1459,13 +1459,11 @@ window.require.register("views/app", function(exports, require, module) {
         window.app.viewMenu = new MenuMailboxesList(this.$("#menu_mailboxes"), window.app.mailboxes);
         window.app.viewMenu.render();
         window.app.mailboxes.reset();
-        this.$("#menu_mailboxes").html("loading...");
-        this.$("#menu_mailboxes").spin("tiny");
+        window.app.viewMenu.showLoading();
         return window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
             window.app.mailboxes.trigger("change_active_mailboxes");
-            window.app.viewMenu.hideLoading();
             if (callback != null) return callback();
           },
           error: function() {
@@ -1522,9 +1520,9 @@ window.require.register("views/app", function(exports, require, module) {
                   window.app.mailboxes.updateActiveMailboxes();
                   return _this.showMailList();
                 }, function() {
-                  _this.showMailList();
                   _this.$("#column_mails_list tbody").spin();
-                  return _this.$("#column_mails_list tbody span").remove();
+                  _this.$("#column_mails_list tbody span").remove();
+                  return _this.showMailList();
                 });
               }
             }
@@ -3089,7 +3087,8 @@ window.require.register("views/menu_mailboxes_list", function(exports, require, 
       };
 
       MenuMailboxesList.prototype.showLoading = function() {
-        return this.$el.spin();
+        this.$el.html('loading...');
+        return this.$el.spin('tiny');
       };
 
       MenuMailboxesList.prototype.hideLoading = function() {
