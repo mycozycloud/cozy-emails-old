@@ -191,15 +191,15 @@ Mailbox::connectImapServer = (callback) ->
         if err
             @log "Connection closed (error: #{err.toString()})"
         else
-            @log "Server connectiion Connection closed."
+            @log "Server connection closed."
      
     server.connect (err) =>
         callback err, server
              
 Mailbox::loadInbox = (server, callback) ->
-    @log "Connection established successfuly"
+    @log "Connection established successfully"
     server.openBox 'INBOX', false, (err, box) =>
-        @log "INBOX opened successfuly"
+        @log "INBOX opened successfully"
         callback err, server
  
 Mailbox::fetchMessage = (server, mailToBe, callback) ->
