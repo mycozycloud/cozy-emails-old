@@ -24,23 +24,25 @@ class exports.MailsListMore extends Backbone.View
     window.app.mailboxes.on "change_active_mailboxes", @render, @
 
   events:
-     "click #add_more_mails" : 'loadOlderMails',
+     "click #add_more_mails": 'loadOlderMails',
   
   # when user clicks on "more mails" button
   loadOlderMails: () ->
     # disable the button
     $("#add_more_mails").addClass("disabled")
+    $("#add_more_mails").text("Loading...")
     
     # if not disabled
     if @clickable
       # fetch new data
       success = (collection) ->
         window.app.mails.trigger "update_number_mails_shown"
+        $("#add_more_mails").text("more messages")
       
       error = (collection, error) =>
-        if error.status == 499
-          @disabled = true
-          @render()
+        $("#add_more_mails").text("more messages")
+        @disabled = true
+        @render()
       
       @collection.fetchOlder(success, error)
       @clickable = false

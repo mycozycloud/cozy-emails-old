@@ -21,10 +21,11 @@ class exports.MessageBox extends Backbone.View
 
     # Add a mailbox at the bottom of the list
     renderOne: (logmessage) ->
-        if logmessage.get("subtype") is "check"
-        and logmessage.get "type"  is "info"
+        if logmessage.get("subtype") is "check" and
+        logmessage.get("type") is "info"
             date = new Date logmessage.get 'createdAt'
-            window.app.viewMailsList.viewMailsListNew.changeGetNewMailLabel date
+            mailsList = window.app.viewMailsList
+            mailsList.viewMailsListNew.changeGetNewMailLabel date if mailsList?
             if @previousCheckMessage?
                 @collection.remove @previousCheckMessage
                 @previousCheckMessage.destroy()

@@ -134,7 +134,8 @@ class exports.MailsElement extends Backbone.View
           $("#mail_content_html").height $("#mail_content_html").contents().find("html").height()
           
           if $("#mail_content_html").contents().find("html").height() > 600
-            $("#additional_bar").show()
+            $("#additional_bar").hide()
+            #$("#additional_bar").show()
           
         , 50
         

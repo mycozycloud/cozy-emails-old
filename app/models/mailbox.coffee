@@ -185,7 +185,8 @@ Mailbox::connectImapServer = (callback) ->
     server.on "error", (error) =>
         @log "[ERROR]: #{error.toString()}"
         @updateAttributes status: error.toString(), (err) ->
-            callback error
+            LogMessage.createBoxImportError ->
+                callback error
 
     server.on "close", (err) =>
         if err

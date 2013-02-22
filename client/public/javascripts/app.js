@@ -1493,36 +1493,38 @@ window.require.register("views/app", function(exports, require, module) {
         return this.resize();
       };
 
+      AppView.prototype.showMailList = function() {
+        if (window.app.mails.length === 0) {
+          this.$("#more-button").hide();
+          this.$("#button_get_new_mails").hide();
+          return this.$("#no-mails-message").show();
+        } else {
+          return this.$("#no-mails-message").hide();
+        }
+      };
+
       AppView.prototype.setLayoutMails = function() {
+        var _this = this;
         this.containerContent.html(require('./templates/_layouts/layout_mails'));
         window.app.viewMailsList = new MailsColumn(this.$("#column_mails_list"), window.app.mails);
         window.app.viewMailsList.render();
         window.app.view_mail = new MailsElement(this.$("#column_mail"), window.app.mails);
+        this.$("#no-mails-message").hide();
         if (window.app.mailboxes.length === 0) {
           window.app.mailboxes.fetch({
             success: function() {
               if (window.app.mails.length === 0) {
-                this.$("#column_mails_list tbody").prepend("<span>loading...</span>");
-                this.$("#column_mails_list tbody").spin("small");
+                _this.$("#column_mails_list tbody").prepend("<span>loading...</span>");
+                _this.$("#column_mails_list tbody").spin("small");
                 return window.app.mails.fetchOlder(function() {
-                  this.$("#column_mails_list tbody").spin();
-                  this.$("#column_mails_list tbody span").remove();
+                  _this.$("#column_mails_list tbody").spin();
+                  _this.$("#column_mails_list tbody span").remove();
                   window.app.mailboxes.updateActiveMailboxes();
-                  if (window.app.mails.length === 0) {
-                    this.$("#more-button").hide();
-                    return this.$("#button_get_new_mails").hide();
-                  } else {
-                    return this.$("#no-mails-message").hide();
-                  }
+                  return _this.showMailList();
                 }, function() {
-                  if (window.app.mails.length === 0) {
-                    this.$("#more-button").hide();
-                    this.$("#button_get_new_mails").hide();
-                  } else {
-                    this.$("#no-mails-message").hide();
-                  }
-                  this.$("#column_mails_list tbody").spin();
-                  return this.$("#column_mails_list tbody span").remove();
+                  _this.showMailList();
+                  _this.$("#column_mails_list tbody").spin();
+                  return _this.$("#column_mails_list tbody span").remove();
                 });
               }
             }
@@ -1531,16 +1533,13 @@ window.require.register("views/app", function(exports, require, module) {
           this.$("#column_mails_list tbody").prepend("<span>loading...</span>");
           this.$("#column_mails_list tbody").spin("small");
           window.app.mails.fetchOlder(function() {
-            this.$("#column_mails_list tbody").spin();
-            this.$("#column_mails_list tbody span").remove();
+            _this.$("#column_mails_list tbody").spin();
+            _this.$("#column_mails_list tbody span").remove();
             window.app.mailboxes.updateActiveMailboxes();
-            if (window.app.mails.length === 0) {
-              this.$("#more-button").hide();
-              return this.$("#button_get_new_mails").hide();
-            } else {
-              return this.$("#no-mails-message").hide();
-            }
+            return _this.showMailList();
           });
+        } else {
+          this.$("#no-mails-message").hide();
         }
         return this.resize();
       };
@@ -2346,7 +2345,7 @@ window.require.register("views/mails_element", function(exports, require, module
               $("#mail_content_html").contents().find("head").append('<base target="_blank">');
               $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
               if ($("#mail_content_html").contents().find("html").height() > 600) {
-                return $("#additional_bar").show();
+                return $("#additional_bar").hide();
               }
             }, 50);
             setTimeout(function() {
@@ -2581,15 +2580,16 @@ window.require.register("views/mails_list_more", function(exports, require, modu
         var element, error, success,
           _this = this;
         $("#add_more_mails").addClass("disabled");
+        $("#add_more_mails").text("Loading...");
         if (this.clickable) {
           success = function(collection) {
-            return window.app.mails.trigger("update_number_mails_shown");
+            window.app.mails.trigger("update_number_mails_shown");
+            return $("#add_more_mails").text("more messages");
           };
           error = function(collection, error) {
-            if (error.status === 499) {
-              _this.disabled = true;
-              return _this.render();
-            }
+            $("#add_more_mails").text("more messages");
+            _this.disabled = true;
+            return _this.render();
           };
           this.collection.fetchOlder(success, error);
           this.clickable = false;
@@ -3189,10 +3189,13 @@ window.require.register("views/message_box", function(exports, require, module) 
       };
 
       MessageBox.prototype.renderOne = function(logmessage) {
-        var date;
-        if (logmessage.get("subtype") === "check") {
+        var date, mailsList;
+        if (logmessage.get("subtype") === "check" && logmessage.get("type") === "info") {
           date = new Date(logmessage.get('createdAt'));
-          window.app.viewMailsList.viewMailsListNew.changeGetNewMailLabel(date);
+          mailsList = window.app.viewMailsList;
+          if (mailsList != null) {
+            mailsList.viewMailsListNew.changeGetNewMailLabel(date);
+          }
           if (this.previousCheckMessage != null) {
             this.collection.remove(this.previousCheckMessage);
             this.previousCheckMessage.destroy();
@@ -3866,6 +3869,10 @@ window.require.register("views/templates/_mail/mails", function(exports, require
   buf.push('><tbody');
   buf.push(attrs({ 'id':('mails_list_container') }));
   buf.push('></tbody></table><div');
+  buf.push(attrs({ 'id':('no-mails-message'), "class": ('well') }));
+  buf.push('><h3>Hey !\n</h3><p>It looks like there are no mails to show.\n</p><p>If you\'re here for the first time, just click \n<a');
+  buf.push(attrs({ 'href':("#config-mailboxes") }));
+  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div><div');
   buf.push(attrs({ 'id':('button_load_more_mails') }));
   buf.push('></div>');
   }
@@ -3879,10 +3886,6 @@ window.require.register("views/templates/_mail/mails_more", function(exports, re
   with (locals || {}) {
   var interp;
   buf.push('<div');
-  buf.push(attrs({ 'id':('no-mails-message'), "class": ('well') }));
-  buf.push('><h3>Hey !\n</h3><p>It looks like there are no mails to show.\n</p><p>If you\'re here for the first time, just click \n<a');
-  buf.push(attrs({ 'href':("#config-mailboxes") }));
-  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div><div');
   buf.push(attrs({ 'id':('more-button'), 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
   buf.push(attrs({ 'id':('add_more_mails'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));

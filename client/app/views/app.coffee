@@ -28,7 +28,8 @@ class exports.AppView extends Backbone.View
         $(@el).html require('./templates/app')
         @containerMenu = @$("#menu_container")
         @containerContent = @$("#content")
-        @viewMessageBox = new MessageBox @$("#message_box"), window.app.logmessages
+        @viewMessageBox =
+            new MessageBox @$("#message_box"), window.app.logmessages
         @setLayoutMenu()
     
     # making sure the view takes 100% height of the viewport.
@@ -55,7 +56,7 @@ class exports.AppView extends Backbone.View
         # set ut the menu view
         @containerMenu.html require('./templates/menu')
         window.app.viewMenu =
-                new MenuMailboxesList @$("#menu_mailboxes"), window.app.mailboxes
+            new MenuMailboxesList @$("#menu_mailboxes"), window.app.mailboxes
         
         # fetch necessary data
         window.app.viewMenu.render()
@@ -106,6 +107,15 @@ class exports.AppView extends Backbone.View
         # ensure the right size
         @resize()
 
+    # Depending on mail number it displays the mail list or an informative
+    # message explaining why the mail list is empty and what to do to fill it.
+    showMailList: ->
+        if window.app.mails.length is 0
+            @$("#more-button").hide()
+            @$("#button_get_new_mails").hide()
+            @$("#no-mails-message").show()
+        else
+            @$("#no-mails-message").hide()
 
     # put on the layout to display mails:
     setLayoutMails: ->
@@ -119,30 +129,23 @@ class exports.AppView extends Backbone.View
         window.app.viewMailsList.render()
         window.app.view_mail =
             new MailsElement @$("#column_mail"), window.app.mails
+        @$("#no-mails-message").hide()
         
         # fetch necessary data
         if window.app.mailboxes.length is 0
             window.app.mailboxes.fetch
-                success: ->
+                success: =>
                     if window.app.mails.length is 0
                         # fetch necessary data
                         @$("#column_mails_list tbody").prepend "<span>loading...</span>"
                         @$("#column_mails_list tbody").spin "small"
-                        window.app.mails.fetchOlder ->
+                        window.app.mails.fetchOlder =>
                             @$("#column_mails_list tbody").spin()
                             @$("#column_mails_list tbody span").remove()
                             window.app.mailboxes.updateActiveMailboxes()
-                            if window.app.mails.length is 0
-                                @$("#more-button").hide()
-                                @$("#button_get_new_mails").hide()
-                            else
-                                @$("#no-mails-message").hide()
-                        , ->
-                            if window.app.mails.length is 0
-                                @$("#more-button").hide()
-                                @$("#button_get_new_mails").hide()
-                            else
-                                @$("#no-mails-message").hide()
+                            @showMailList()
+                        , =>
+                            @showMailList()
                             @$("#column_mails_list tbody").spin()
                             @$("#column_mails_list tbody span").remove()
 
@@ -151,15 +154,13 @@ class exports.AppView extends Backbone.View
             # fetch necessary data
             @$("#column_mails_list tbody").prepend "<span>loading...</span>"
             @$("#column_mails_list tbody").spin "small"
-            window.app.mails.fetchOlder () ->
+            window.app.mails.fetchOlder () =>
                 @$("#column_mails_list tbody").spin()
                 @$("#column_mails_list tbody span").remove()
                 window.app.mailboxes.updateActiveMailboxes()
-                if window.app.mails.length is 0
-                    @$("#more-button").hide()
-                    @$("#button_get_new_mails").hide()
-                else
-                    @$("#no-mails-message").hide()
+                @showMailList()
+        else
+            @$("#no-mails-message").hide()
         
         # ensure the right size
         @resize()
