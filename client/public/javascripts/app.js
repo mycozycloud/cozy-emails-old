@@ -436,6 +436,81 @@ window.require.register("collections/mails_sent", function(exports, require, mod
   }).call(this);
   
 });
+window.require.register("helpers", function(exports, require, module) {
+  (function() {
+
+    exports.BrunchApplication = (function() {
+
+      function BrunchApplication() {
+        var _this = this;
+        $(function() {
+          _this.initialize(_this);
+          return Backbone.history.start();
+        });
+      }
+
+      BrunchApplication.prototype.initializeJQueryExtensions = function() {
+        return $.fn.spin = function(opts, color) {
+          var presets;
+          presets = {
+            tiny: {
+              lines: 8,
+              length: 2,
+              width: 1,
+              radius: 3
+            },
+            small: {
+              lines: 10,
+              length: 2,
+              width: 3,
+              radius: 5
+            },
+            large: {
+              lines: 10,
+              length: 8,
+              width: 4,
+              radius: 8
+            }
+          };
+          if (Spinner) {
+            return this.each(function() {
+              var $this, spinner;
+              $this = $(this);
+              spinner = $this.data("spinner");
+              if (spinner != null) {
+                spinner.stop();
+                return $this.data("spinner", null);
+              } else if (opts !== false) {
+                if (typeof opts === "string") {
+                  if (opts in presets) {
+                    opts = presets[opts];
+                  } else {
+                    opts = {};
+                  }
+                  if (color) opts.color = color;
+                }
+                spinner = new Spinner($.extend({
+                  color: $this.css("color")
+                }, opts));
+                spinner.spin(this);
+                return $this.data("spinner", spinner);
+              }
+            });
+          }
+        };
+      };
+
+      BrunchApplication.prototype.initialize = function() {
+        return null;
+      };
+
+      return BrunchApplication;
+
+    })();
+
+  }).call(this);
+  
+});
 window.require.register("initialize", function(exports, require, module) {
   
   /*
