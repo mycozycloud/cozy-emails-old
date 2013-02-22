@@ -199,6 +199,7 @@ Mailbox::connectImapServer = (callback) ->
             callback err, server
     else
         @log 'No host defined'
+        callback new Error 'No host defined'
              
 Mailbox::loadInbox = (server, callback) ->
     @log "Connection established successfully"
