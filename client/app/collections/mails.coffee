@@ -65,6 +65,6 @@ class exports.MailsCollection extends Backbone.Collection
   # fetches new mails from server
   fetchNew: (callback, errorCallback) ->
     mails = window.app.mails
-    mails.url = "mailsnew/" + mails.timestampNew + "/" + mails.lastIdNew
+    mails.url = "mails/new/" + mails.timestampNew + "/" + mails.lastIdNew
     console.log "fetchNew: " + mails.url
     mails.fetch {add : true, success: callback, error: errorCallback}

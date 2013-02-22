@@ -11,7 +11,7 @@ class exports.LogMessagesCollection extends Backbone.Collection
     
   model: LogMessage
   lastCreatedAt: 0
-  url: 'getlogs'
+  urlRoot: 'logs'
 
   comparator: (msg) ->
     msg.get "createdAt"
@@ -24,6 +24,6 @@ class exports.LogMessagesCollection extends Backbone.Collection
   fetchNew: () =>
     @fetch
         add : true
-        url: 'getlogs/' + @lastCreatedAt
+        url: "#{@urlRoot}/#{@lastCreatedAt}"
         success: =>
             @reset()

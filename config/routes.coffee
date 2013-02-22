@@ -4,7 +4,7 @@ exports.routes = (map) ->
     map.resources 'mailboxes'
     map.resources 'mails'
     map.get '/mailslist/:timestamp.:num/:id', 'mails#getlist'
-    map.get '/mailsnew/:timestamp/:id', 'mails#getnewlist'
+    map.get '/mails/new/:timestamp/:id', 'mails#getnewlist'
     
     map.get '/mailssentlist/:timestamp.:num/:id', 'mails#getlistsent'
     

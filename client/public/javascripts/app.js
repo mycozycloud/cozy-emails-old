@@ -152,7 +152,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
 
       LogMessagesCollection.prototype.lastCreatedAt = 0;
 
-      LogMessagesCollection.prototype.url = 'getlogs';
+      LogMessagesCollection.prototype.urlRoot = 'logs';
 
       LogMessagesCollection.prototype.comparator = function(msg) {
         return msg.get("createdAt");
@@ -167,7 +167,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
         var _this = this;
         return this.fetch({
           add: true,
-          url: 'getlogs/' + this.lastCreatedAt,
+          url: "" + this.urlRoot + "/" + this.lastCreatedAt,
           success: function() {
             return _this.reset();
           }
@@ -329,7 +329,7 @@ window.require.register("collections/mails", function(exports, require, module) 
       MailsCollection.prototype.fetchNew = function(callback, errorCallback) {
         var mails;
         mails = window.app.mails;
-        mails.url = "mailsnew/" + mails.timestampNew + "/" + mails.lastIdNew;
+        mails.url = "mails/new/" + mails.timestampNew + "/" + mails.lastIdNew;
         console.log("fetchNew: " + mails.url);
         return mails.fetch({
           add: true,
@@ -625,11 +625,9 @@ window.require.register("models/logmessage", function(exports, require, module) 
         LogMessage.__super__.constructor.apply(this, arguments);
       }
 
-      LogMessage.prototype.rootUrl = "getlogs/";
+      LogMessage.prototype.urlRoot = "logs/";
 
-      LogMessage.prototype.initialize = function() {
-        return this.url = this.rootUrl + this.get("id");
-      };
+      LogMessage.prototype.idAttribute = "id";
 
       return LogMessage;
 
@@ -2658,28 +2656,35 @@ window.require.register("views/mails_list_new", function(exports, require, modul
       };
 
       MailsListNew.prototype.loadNewMails = function() {
-        var element;
+        var element,
+          _this = this;
         element = this;
         if (this.clickable) {
           this.clickable = false;
           $("#get_new_mails").addClass("disabled").text("Checking for new mail...");
           window.app.mails.fetchNew(function() {
-            var date, dateString;
+            var date;
             element.clickable = true;
             date = new Date();
-            dateString = date.getHours() + ":";
-            if (date.getMinutes() < 10) {
-              dateString += "0" + date.getMinutes();
-            } else {
-              dateString += date.getMinutes();
-            }
-            return $("#get_new_mails").removeClass("disabled").text("Last check at " + dateString);
+            return _this.changeGetNewMailLabel(date);
           });
           return setTimeout(function() {
             element.clickable = true;
             return $("#get_new_mails").removeClass("disabled");
           }, 1000 * 4);
         }
+      };
+
+      MailsListNew.prototype.changeGetNewMailLabel = function(date) {
+        var dateString;
+        dateString = date.getHours() + ":";
+        if (date.getMinutes() < 10) {
+          dateString += "0" + date.getMinutes();
+        } else {
+          dateString += date.getMinutes();
+        }
+        this.$("#get_new_mails").removeClass("disabled");
+        return this.$("#get_new_mails").text("Check for new mail (Last check at " + dateString + ")");
       };
 
       MailsListNew.prototype.render = function() {
@@ -3184,6 +3189,21 @@ window.require.register("views/message_box", function(exports, require, module) 
       };
 
       MessageBox.prototype.renderOne = function(logmessage) {
+        var date;
+        if (logmessage.get("subtype") === "check") {
+          date = new Date(logmessage.get('createdAt'));
+          window.app.viewMailsList.viewMailsListNew.changeGetNewMailLabel(date);
+          if (this.previousCheckMessage != null) {
+            this.collection.remove(this.previousCheckMessage);
+            this.previousCheckMessage.destroy();
+          }
+          return this.previousCheckMessage = logmessage;
+        } else {
+          return this.addNewBox(logmessage);
+        }
+      };
+
+      MessageBox.prototype.addNewBox = function(logmessage) {
         var box;
         box = new MessageBoxElement(logmessage, this.collection);
         this.$el.prepend(box.render().el);
@@ -3194,6 +3214,7 @@ window.require.register("views/message_box", function(exports, require, module) 
 
       MessageBox.prototype.render = function() {
         var _this = this;
+        this.previousCheckMessage = null;
         this.collection.each(function(message) {
           return _this.renderOne(message);
         });
@@ -3814,9 +3835,7 @@ window.require.register("views/templates/_mail/mail_new", function(exports, requ
   buf.push(attrs({ 'style':("margin-bottom: 10px; margin-top: 0px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
   buf.push(attrs({ 'id':('get_new_mails'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
-  buf.push('><i');
-  buf.push(attrs({ "class": ('icon-download-alt') }));
-  buf.push('></i> Check for new mail\n</a></div>');
+  buf.push('> Check for new mail\n</a></div>');
   }
   return buf.join("");
   };
@@ -3867,9 +3886,7 @@ window.require.register("views/templates/_mail/mails_more", function(exports, re
   buf.push(attrs({ 'id':('more-button'), 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
   buf.push(attrs({ 'id':('add_more_mails'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
-  buf.push('><i');
-  buf.push(attrs({ "class": ('icon-plus') }));
-  buf.push('></i> more messages\n</a></div>');
+  buf.push('> more messages\n</a></div>');
   }
   return buf.join("");
   };
