@@ -161,7 +161,7 @@ class exports.Mail extends BaseModel
         flags.push("\\Seen")
         # decrement number of read messages in the mailbox
         box = window.app.mailboxes.get @get("mailbox")
-        box?.set "new_messages", ((parseInt box?.get "new_messages") - 1)
+        box?.set "newMessages", ((parseInt box?.get "newMessages") - 1)
       # attribute
       @set({"read" : true})
     else
@@ -173,7 +173,7 @@ class exports.Mail extends BaseModel
       unless flagsPrev == flags.length
         # increment the number of unread messages in the mailbox
         box = window.app.mailboxes.get @get("mailbox")
-        box?.set "new_messages", ((parseInt box?.get "new_messages") + 1)
+        box?.set "newMessages", ((parseInt box?.get "newMessages") + 1)
       # attribute
       @set({"read" : false})
     @set({"flags" : JSON.stringify flags})

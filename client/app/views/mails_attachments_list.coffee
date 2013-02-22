@@ -18,6 +18,9 @@ class exports.MailsAttachmentsList extends Backbone.View
     window.app.attachments.on 'reset', @render, @
     window.app.attachments.on 'add', @addOne, @
     window.app.attachments.setModel @model
+    @$el.html "loading..."
+    @$el.spin "small"
+    window.app.attachments.fetch()
   
   addOne: (attachment) ->
     box = new MailsAttachmentsListElement attachment, @collection

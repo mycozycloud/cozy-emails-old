@@ -109,8 +109,7 @@ window.require.register("collections/attachments", function(exports, require, mo
 
       AttachmentsCollection.prototype.setModel = function(areAttachmentsOf) {
         this.areAttachmentsOf = areAttachmentsOf;
-        this.url = "mails/" + (this.areAttachmentsOf.get("id")) + "/attachments";
-        return this.fetch();
+        return this.url = "mails/" + (this.areAttachmentsOf.get("id")) + "/attachments";
       };
 
       AttachmentsCollection.prototype.comparator = function(attachment) {
@@ -153,7 +152,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
 
       LogMessagesCollection.prototype.lastCreatedAt = 0;
 
-      LogMessagesCollection.prototype.url = 'getlogs';
+      LogMessagesCollection.prototype.urlRoot = 'logs';
 
       LogMessagesCollection.prototype.comparator = function(msg) {
         return msg.get("createdAt");
@@ -168,7 +167,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
         var _this = this;
         return this.fetch({
           add: true,
-          url: 'getlogs/' + this.lastCreatedAt,
+          url: "" + this.urlRoot + "/" + this.lastCreatedAt,
           success: function() {
             return _this.reset();
           }
@@ -330,7 +329,7 @@ window.require.register("collections/mails", function(exports, require, module) 
       MailsCollection.prototype.fetchNew = function(callback, errorCallback) {
         var mails;
         mails = window.app.mails;
-        mails.url = "mailsnew/" + mails.timestampNew + "/" + mails.lastIdNew;
+        mails.url = "mails/new/" + mails.timestampNew + "/" + mails.lastIdNew;
         console.log("fetchNew: " + mails.url);
         return mails.fetch({
           add: true,
@@ -450,6 +449,57 @@ window.require.register("helpers", function(exports, require, module) {
         });
       }
 
+      BrunchApplication.prototype.initializeJQueryExtensions = function() {
+        return $.fn.spin = function(opts, color) {
+          var presets;
+          presets = {
+            tiny: {
+              lines: 8,
+              length: 2,
+              width: 1,
+              radius: 3
+            },
+            small: {
+              lines: 10,
+              length: 2,
+              width: 3,
+              radius: 5
+            },
+            large: {
+              lines: 10,
+              length: 8,
+              width: 4,
+              radius: 8
+            }
+          };
+          if (Spinner) {
+            return this.each(function() {
+              var $this, spinner;
+              $this = $(this);
+              spinner = $this.data("spinner");
+              if (spinner != null) {
+                spinner.stop();
+                return $this.data("spinner", null);
+              } else if (opts !== false) {
+                if (typeof opts === "string") {
+                  if (opts in presets) {
+                    opts = presets[opts];
+                  } else {
+                    opts = {};
+                  }
+                  if (color) opts.color = color;
+                }
+                spinner = new Spinner($.extend({
+                  color: $this.css("color")
+                }, opts));
+                spinner.spin(this);
+                return $this.data("spinner", spinner);
+              }
+            });
+          }
+        };
+      };
+
       BrunchApplication.prototype.initialize = function() {
         return null;
       };
@@ -464,10 +514,10 @@ window.require.register("helpers", function(exports, require, module) {
 window.require.register("initialize", function(exports, require, module) {
   
   /*
-    @file: initialize.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
-      Building object used all over the place - collections, AppView, etc
+      @file: initialize.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description: 
+          Building object used all over the place - collections, AppView, etc
   */
 
   (function() {
@@ -502,6 +552,7 @@ window.require.register("initialize", function(exports, require, module) {
       }
 
       Application.prototype.initialize = function() {
+        this.initializeJQueryExtensions();
         this.mailboxes = new MailboxCollection;
         this.mails = new MailsCollection;
         this.mailssent = new MailsSentCollection;
@@ -574,11 +625,9 @@ window.require.register("models/logmessage", function(exports, require, module) 
         LogMessage.__super__.constructor.apply(this, arguments);
       }
 
-      LogMessage.prototype.rootUrl = "getlogs/";
+      LogMessage.prototype.urlRoot = "logs/";
 
-      LogMessage.prototype.initialize = function() {
-        return this.url = this.rootUrl + this.get("id");
-      };
+      LogMessage.prototype.idAttribute = "id";
 
       return LogMessage;
 
@@ -832,7 +881,7 @@ window.require.register("models/mail", function(exports, require, module) {
             flags.push("\\Seen");
             box = window.app.mailboxes.get(this.get("mailbox"));
             if (box != null) {
-              box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) - 1);
+              box.set("newMessages", (parseInt(box != null ? box.get("newMessages") : void 0)) - 1);
             }
           }
           this.set({
@@ -846,7 +895,7 @@ window.require.register("models/mail", function(exports, require, module) {
           if (flagsPrev !== flags.length) {
             box = window.app.mailboxes.get(this.get("mailbox"));
             if (box != null) {
-              box.set("new_messages", (parseInt(box != null ? box.get("new_messages") : void 0)) + 1);
+              box.set("newMessages", (parseInt(box != null ? box.get("newMessages") : void 0)) + 1);
             }
           }
           this.set({
@@ -1157,18 +1206,18 @@ window.require.register("models/mailbox", function(exports, require, module) {
       Mailbox.url = 'mailboxes/';
 
       Mailbox.prototype.defaults = {
-        'checked': true,
-        'config': 0,
-        'name': "box",
-        'login': "login",
-        'pass': "pass",
-        'SMTP_server': "smtp.gmail.com",
-        'SMTP_ssl': true,
-        'SMTP_send_as': "support@mycozycloud.com",
-        'IMAP_server': "imap.gmail.com",
-        'IMAP_port': 993,
-        'IMAP_secure': true,
-        'color': "orange"
+        checked: true,
+        config: 0,
+        name: "box",
+        login: "login",
+        pass: "pass",
+        SmtpServer: "smtp.gmail.com",
+        SmtpSsl: true,
+        SmtpSendAs: "support@mycozycloud.com",
+        ImapServer: "imap.gmail.com",
+        ImapPort: 993,
+        ImapSecure: true,
+        color: "orange"
       };
 
       Mailbox.prototype.initialize = function() {
@@ -1185,7 +1234,7 @@ window.require.register("models/mailbox", function(exports, require, module) {
 
       Mailbox.prototype.IMAPLastFetchedDate = function() {
         var parsed;
-        parsed = new Date(this.get("IMAP_last_fetched_date"));
+        parsed = new Date(this.get("IMapLastFetchedDate"));
         return parsed.toUTCString();
       };
 
@@ -1362,10 +1411,10 @@ window.require.register("views/app", function(exports, require, module) {
     MessageBox = require('views/message_box').MessageBox;
 
     /*
-      @file: app.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The application's main view - creates other views, lays things out.
+        @file: app.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The application's main view - creates other views, lays things out.
     */
 
     exports.AppView = (function(_super) {
@@ -1405,16 +1454,20 @@ window.require.register("views/app", function(exports, require, module) {
       };
 
       AppView.prototype.setLayoutMenu = function(callback) {
+        var _this = this;
         this.containerMenu.html(require('./templates/menu'));
         window.app.viewMenu = new MenuMailboxesList(this.$("#menu_mailboxes"), window.app.mailboxes);
+        window.app.viewMenu.render();
         window.app.mailboxes.reset();
+        window.app.viewMenu.showLoading();
         return window.app.mailboxes.fetch({
           success: function() {
             window.app.mailboxes.updateActiveMailboxes();
             window.app.mailboxes.trigger("change_active_mailboxes");
-            console.log("Initial menu mailboxes load OK");
-            window.app.viewMenu.render();
             if (callback != null) return callback();
+          },
+          error: function() {
+            return _this.$("#menu_mailboxes").html("");
           }
         });
       };
@@ -1438,28 +1491,53 @@ window.require.register("views/app", function(exports, require, module) {
         return this.resize();
       };
 
+      AppView.prototype.showMailList = function() {
+        if (window.app.mails.length === 0) {
+          this.$("#more-button").hide();
+          this.$("#button_get_new_mails").hide();
+          return this.$("#no-mails-message").show();
+        } else {
+          return this.$("#no-mails-message").hide();
+        }
+      };
+
       AppView.prototype.setLayoutMails = function() {
+        var _this = this;
         this.containerContent.html(require('./templates/_layouts/layout_mails'));
         window.app.viewMailsList = new MailsColumn(this.$("#column_mails_list"), window.app.mails);
         window.app.viewMailsList.render();
         window.app.view_mail = new MailsElement(this.$("#column_mail"), window.app.mails);
+        this.$("#no-mails-message").hide();
         if (window.app.mailboxes.length === 0) {
           window.app.mailboxes.fetch({
             success: function() {
-              console.log("Initial mails mailboxes load OK");
               if (window.app.mails.length === 0) {
+                _this.$("#column_mails_list tbody").prepend("<span>loading...</span>");
+                _this.$("#column_mails_list tbody").spin("small");
                 return window.app.mails.fetchOlder(function() {
-                  console.log("Initial mails mails load OK");
-                  return window.app.mailboxes.updateActiveMailboxes();
+                  _this.$("#column_mails_list tbody").spin();
+                  _this.$("#column_mails_list tbody span").remove();
+                  window.app.mailboxes.updateActiveMailboxes();
+                  return _this.showMailList();
+                }, function() {
+                  _this.$("#column_mails_list tbody").spin();
+                  _this.$("#column_mails_list tbody span").remove();
+                  return _this.showMailList();
                 });
               }
             }
           });
         } else if (window.app.mails.length === 0) {
+          this.$("#column_mails_list tbody").prepend("<span>loading...</span>");
+          this.$("#column_mails_list tbody").spin("small");
           window.app.mails.fetchOlder(function() {
-            console.log("Initial mails mails load OK");
-            return window.app.mailboxes.updateActiveMailboxes();
+            _this.$("#column_mails_list tbody").spin();
+            _this.$("#column_mails_list tbody span").remove();
+            window.app.mailboxes.updateActiveMailboxes();
+            return _this.showMailList();
           });
+        } else {
+          this.$("#no-mails-message").hide();
         }
         return this.resize();
       };
@@ -1910,7 +1988,10 @@ window.require.register("views/mails_attachments_list", function(exports, requir
       MailsAttachmentsList.prototype.initialize = function() {
         window.app.attachments.on('reset', this.render, this);
         window.app.attachments.on('add', this.addOne, this);
-        return window.app.attachments.setModel(this.model);
+        window.app.attachments.setModel(this.model);
+        this.$el.html("loading...");
+        this.$el.spin("small");
+        return window.app.attachments.fetch();
       };
 
       MailsAttachmentsList.prototype.addOne = function(attachment) {
@@ -2262,7 +2343,7 @@ window.require.register("views/mails_element", function(exports, require, module
               $("#mail_content_html").contents().find("head").append('<base target="_blank">');
               $("#mail_content_html").height($("#mail_content_html").contents().find("html").height());
               if ($("#mail_content_html").contents().find("html").height() > 600) {
-                return $("#additional_bar").show();
+                return $("#additional_bar").hide();
               }
             }, 50);
             setTimeout(function() {
@@ -2419,7 +2500,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
         this.collection.activeMail.setRead();
         this.collection.activeMail.url = "mails/" + this.collection.activeMail.get("id");
         this.collection.activeMail.save({
-          "read": true
+          read: true
         });
         return this.collection.trigger("change_active_mail");
       };
@@ -2437,7 +2518,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
         var template, _ref;
         this.visible = (_ref = this.model.get("mailbox"), __indexOf.call(window.app.mailboxes.activeMailboxes, _ref) >= 0);
         template = require('./templates/_mail/mail_list');
-        $(this.el).html(template({
+        this.$el.html(template({
           "model": this.model,
           "active": this.active,
           "visible": this.visible
@@ -2497,15 +2578,16 @@ window.require.register("views/mails_list_more", function(exports, require, modu
         var element, error, success,
           _this = this;
         $("#add_more_mails").addClass("disabled");
+        $("#add_more_mails").text("Loading...");
         if (this.clickable) {
           success = function(collection) {
-            return window.app.mails.trigger("update_number_mails_shown");
+            window.app.mails.trigger("update_number_mails_shown");
+            return $("#add_more_mails").text("more messages");
           };
           error = function(collection, error) {
-            if (error.status === 499) {
-              _this.disabled = true;
-              return _this.render();
-            }
+            $("#add_more_mails").text("more messages");
+            _this.disabled = true;
+            return _this.render();
           };
           this.collection.fetchOlder(success, error);
           this.clickable = false;
@@ -2523,8 +2605,8 @@ window.require.register("views/mails_list_more", function(exports, require, modu
         this.clickable = true;
         template = require("./templates/_mail/mails_more");
         $(this.el).html(template({
-          "collection": this.collection,
-          "disabled": this.disabled
+          collection: this.collection,
+          disabled: this.disabled
         }));
         return this;
       };
@@ -2572,28 +2654,35 @@ window.require.register("views/mails_list_new", function(exports, require, modul
       };
 
       MailsListNew.prototype.loadNewMails = function() {
-        var element;
+        var element,
+          _this = this;
         element = this;
         if (this.clickable) {
           this.clickable = false;
           $("#get_new_mails").addClass("disabled").text("Checking for new mail...");
           window.app.mails.fetchNew(function() {
-            var date, dateString;
+            var date;
             element.clickable = true;
             date = new Date();
-            dateString = date.getHours() + ":";
-            if (date.getMinutes() < 10) {
-              dateString += "0" + date.getMinutes();
-            } else {
-              dateString += date.getMinutes();
-            }
-            return $("#get_new_mails").removeClass("disabled").text("Last check at " + dateString);
+            return _this.changeGetNewMailLabel(date);
           });
           return setTimeout(function() {
             element.clickable = true;
             return $("#get_new_mails").removeClass("disabled");
           }, 1000 * 4);
         }
+      };
+
+      MailsListNew.prototype.changeGetNewMailLabel = function(date) {
+        var dateString;
+        dateString = date.getHours() + ":";
+        if (date.getMinutes() < 10) {
+          dateString += "0" + date.getMinutes();
+        } else {
+          dateString += date.getMinutes();
+        }
+        this.$("#get_new_mails").removeClass("disabled");
+        return this.$("#get_new_mails").text("Check for new mail (Last check at " + dateString + ")");
       };
 
       MailsListNew.prototype.render = function() {
@@ -2961,10 +3050,10 @@ window.require.register("views/menu_mailboxes_list", function(exports, require, 
     MenuMailboxListElement = require("./menu_mailboxes_list_element").MenuMailboxListElement;
 
     /*
-      @file: menu_mailboxes_list.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The list of mailboxes in the menu
+        @file: menu_mailboxes_list.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The list of mailboxes in the menu
     */
 
     exports.MenuMailboxesList = (function(_super) {
@@ -2986,15 +3075,24 @@ window.require.register("views/menu_mailboxes_list", function(exports, require, 
 
       MenuMailboxesList.prototype.render = function() {
         var _this = this;
-        $(this.el).html("");
+        this.$el.html("");
         this.total_inbox = 0;
         this.collection.each(function(mailbox) {
           var box;
           box = new MenuMailboxListElement(mailbox, _this.collection);
-          $(_this.el).append(box.render().el);
+          _this.$el.append(box.render().el);
           return _this.total_inbox += Number(mailbox.get("new_messages"));
         });
         return this;
+      };
+
+      MenuMailboxesList.prototype.showLoading = function() {
+        this.$el.html('loading...');
+        return this.$el.spin('tiny');
+      };
+
+      MenuMailboxesList.prototype.hideLoading = function() {
+        return this.$el.spin();
       };
 
       return MenuMailboxesList;
@@ -3090,6 +3188,24 @@ window.require.register("views/message_box", function(exports, require, module) 
       };
 
       MessageBox.prototype.renderOne = function(logmessage) {
+        var date, mailsList;
+        if (logmessage.get("subtype") === "check" && logmessage.get("type") === "info") {
+          date = new Date(logmessage.get('createdAt'));
+          mailsList = window.app.viewMailsList;
+          if (mailsList != null) {
+            mailsList.viewMailsListNew.changeGetNewMailLabel(date);
+          }
+          if (this.previousCheckMessage != null) {
+            this.collection.remove(this.previousCheckMessage);
+            this.previousCheckMessage.destroy();
+          }
+          return this.previousCheckMessage = logmessage;
+        } else {
+          return this.addNewBox(logmessage);
+        }
+      };
+
+      MessageBox.prototype.addNewBox = function(logmessage) {
         var box;
         box = new MessageBoxElement(logmessage, this.collection);
         this.$el.prepend(box.render().el);
@@ -3100,6 +3216,7 @@ window.require.register("views/message_box", function(exports, require, module) 
 
       MessageBox.prototype.render = function() {
         var _this = this;
+        this.previousCheckMessage = null;
         this.collection.each(function(message) {
           return _this.renderOne(message);
         });
@@ -3327,7 +3444,9 @@ window.require.register("views/templates/_mail/mail_answer", function(exports, r
   buf.push(attrs({ 'data-wysihtml5-command':('italic'), "class": ('btn') + ' ' + ('btn-mini') }));
   buf.push('>italic</a><a');
   buf.push(attrs({ 'data-wysihtml5-command':('underline'), "class": ('btn') + ' ' + ('btn-mini') }));
-  buf.push('>underline</a></div><div');
+  buf.push('>underline</a><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('insertUnorderedList'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>list</a></div><div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
   buf.push(attrs({ 'data-wysihtml5-command':('foreColor'), 'data-wysihtml5-command-value':('red'), "class": ('btn') + ' ' + ('btn-mini') }));
@@ -3570,7 +3689,9 @@ window.require.register("views/templates/_mail/mail_compose", function(exports, 
   buf.push(attrs({ 'data-wysihtml5-command':('italic'), "class": ('btn') + ' ' + ('btn-mini') }));
   buf.push('>italic</a><a');
   buf.push(attrs({ 'data-wysihtml5-command':('underline'), "class": ('btn') + ' ' + ('btn-mini') }));
-  buf.push('>underline</a></div><div');
+  buf.push('>underline</a><a');
+  buf.push(attrs({ 'data-wysihtml5-command':('insertUnorderedList'), "class": ('btn') + ' ' + ('btn-mini') }));
+  buf.push('>list</a></div><div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
   buf.push(attrs({ 'data-wysihtml5-command':('foreColor'), 'data-wysihtml5-command-value':('red'), "class": ('btn') + ' ' + ('btn-mini') }));
@@ -3716,9 +3837,7 @@ window.require.register("views/templates/_mail/mail_new", function(exports, requ
   buf.push(attrs({ 'style':("margin-bottom: 10px; margin-top: 0px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
   buf.push(attrs({ 'id':('get_new_mails'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
-  buf.push('><i');
-  buf.push(attrs({ "class": ('icon-download-alt') }));
-  buf.push('></i> Check for new mail\n</a></div>');
+  buf.push('> Check for new mail\n</a></div>');
   }
   return buf.join("");
   };
@@ -3749,6 +3868,10 @@ window.require.register("views/templates/_mail/mails", function(exports, require
   buf.push('><tbody');
   buf.push(attrs({ 'id':('mails_list_container') }));
   buf.push('></tbody></table><div');
+  buf.push(attrs({ 'id':('no-mails-message'), "class": ('well') }));
+  buf.push('><h3>Hey !\n</h3><p>It looks like there are no mails to show.\n</p><p>If you\'re here for the first time, just click \n<a');
+  buf.push(attrs({ 'href':("#config-mailboxes") }));
+  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div><div');
   buf.push(attrs({ 'id':('button_load_more_mails') }));
   buf.push('></div>');
   }
@@ -3761,28 +3884,11 @@ window.require.register("views/templates/_mail/mails_more", function(exports, re
   var buf = [];
   with (locals || {}) {
   var interp;
-  if ( collection.length == 0)
-  {
   buf.push('<div');
-  buf.push(attrs({ "class": ('well') }));
-  buf.push('><h3>Hey !\n</h3><p>It looks like there are no mails to show.\n</p><p>If you\'re here for the first time, just click \n<a');
-  buf.push(attrs({ 'href':("#config-mailboxes") }));
-  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div>');
-  }
-  if ( !disabled)
-  {
-  buf.push('<div');
-  buf.push(attrs({ 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
+  buf.push(attrs({ 'id':('more-button'), 'style':("margin-bottom: 50px; margin-top: 50px;"), "class": ('btn-group') + ' ' + ('center') }));
   buf.push('><a');
   buf.push(attrs({ 'id':('add_more_mails'), "class": ('btn') + ' ' + ('btn-primary') + ' ' + ('btn-large') }));
-  buf.push('><i');
-  buf.push(attrs({ "class": ('icon-plus') }));
-  buf.push('></i> Load up to ' + escape((interp = collection.mailsAtOnce) == null ? '' : interp) + ' messages more\n</a></div><p><i>Showing ' + escape((interp = collection.mailsShown) == null ? '' : interp) + ' of ' + escape((interp = collection.length) == null ? '' : interp) + ' messages downloaded</i></p>');
-  }
-  else
-  {
-  buf.push('<p><i>All messages loaded, showing ' + escape((interp = collection.mailsShown) == null ? '' : interp) + ' out of ' + escape((interp = collection.length) == null ? '' : interp) + '</i></p>');
-  }
+  buf.push('> more messages\n</a></div>');
   }
   return buf.join("");
   };
@@ -3793,7 +3899,7 @@ window.require.register("views/templates/_mailbox/mailbox", function(exports, re
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<h3>' + escape((interp = model.get('name')) == null ? '' : interp) + '</h3><p><i>"' + escape((interp = model.get('SMTP_send_as')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.IMAPLastFetchedDate()) == null ? '' : interp) + ' </i></p>');
+  buf.push('<h3>' + escape((interp = model.get('name')) == null ? '' : interp) + '</h3><p><i>"' + escape((interp = model.get('SmtpSendAs')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.IMAPLastFetchedDate()) == null ? '' : interp) + ' </i></p>');
   if ( model.get("status"))
   {
   buf.push('<p><i>status: ' + escape((interp = model.get('status')) == null ? '' : interp) + '</i></p>');
@@ -3801,8 +3907,6 @@ window.require.register("views/templates/_mailbox/mailbox", function(exports, re
   buf.push('<div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
-  buf.push(attrs({ "class": ('fetch_mails') + ' ' + ('btn') }));
-  buf.push('>Check for new mail</a><a');
   buf.push(attrs({ "class": ('fetch_mailbox') + ' ' + ('btn') }));
   buf.push('>Verify status</a><a');
   buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('btn') }));
@@ -3834,16 +3938,16 @@ window.require.register("views/templates/_mailbox/mailbox_edit", function(export
   buf.push('>Name your mailbox to identify it easily.</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("SMTP_send_as"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("SmtpSendAs"), "class": ('control-label') }));
   buf.push('>Your address</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("SMTP_send_as"), 'type':("text"), 'value':(model.get("SMTP_send_as")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("SmtpSendAs"), 'type':("text"), 'value':(model.get("SmtpSendAs")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>This adress will be visible to people to whom you send mail.</p><p');
   buf.push(attrs({ "class": ('help-block') }));
-  buf.push('>Like "johny@mnemonic.com" or "Mickey Mouse <mickey@domain.com>".</p></div></div><div');
+  buf.push('>Like "johny@cozycloud.cc" or "Mickey Mouse <mickey@domain.com>".</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
   buf.push(attrs({ 'for':("login"), "class": ('control-label') }));
@@ -3892,51 +3996,51 @@ window.require.register("views/templates/_mailbox/mailbox_edit", function(export
   buf.push('>The color to mark mails from this inbox. Enjoy!</p></div></div></fieldset><fieldset><legend>Server data</legend><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("SMTP_server"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("SmtpServer"), "class": ('control-label') }));
   buf.push('>SMTP host</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("SMTP_server"), 'type':("text"), 'value':(model.get("SMTP_server")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("SmtpServer"), 'type':("text"), 'value':(model.get("SmtpServer")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>The address of your server. Like smtp.gmail.com</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("SMTP_ssl"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("SmtpSsl"), "class": ('control-label') }));
   buf.push('>SMTP ssl</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("SMTP_ssl"), 'type':("text"), 'value':(model.get("SMTP_ssl").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("SmtpSsl"), 'type':("text"), 'value':(model.get("SmtpSsl").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>Everybody wants it, but some servers may not have it. Leave it "true" :)</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("IMAP_server"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("ImapServer"), "class": ('control-label') }));
   buf.push('>IMAP host</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("IMAP_server"), 'type':("text"), 'value':(model.get("IMAP_server")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("ImapServer"), 'type':("text"), 'value':(model.get("ImapServer")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>The inbound server address. Say imap.gmail.com ..</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("IMAP_port"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("ImapPort"), "class": ('control-label') }));
   buf.push('>IMAP port</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("IMAP_port"), 'type':("text"), 'value':(model.get("IMAP_port")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("ImapPort"), 'type':("text"), 'value':(model.get("ImapPort")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>Usually 993.</p></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("IMAP_secure"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("ImapSecure"), "class": ('control-label') }));
   buf.push('>IMAP secure</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("IMAP_secure"), 'type':("text"), 'value':(model.get("IMAP_secure").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("ImapSecure"), 'type':("text"), 'value':(model.get("ImapSecure").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>Everybody wants it, but some servers may not have it. Leave it "true" :)</p></div></div></fieldset><div');
@@ -3972,11 +4076,11 @@ window.require.register("views/templates/_mailbox/mailbox_menu", function(export
   buf.push('/>');
   }
   buf.push(' ' + escape((interp = model.name) == null ? '' : interp) + '\n');
-  if ( model.new_messages > 0)
+  if ( model.newMessages > 0)
   {
   buf.push('<span');
   buf.push(attrs({ "class": ('badge') + ' ' + ('badge-warning') }));
-  buf.push('>' + escape((interp = model.new_messages) == null ? '' : interp) + '</span>');
+  buf.push('>' + escape((interp = model.newMessages) == null ? '' : interp) + '</span>');
   }
   buf.push('</a>');
   }

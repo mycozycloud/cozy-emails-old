@@ -33,23 +33,10 @@ class exports.MailsListNew extends Backbone.View
       @clickable = false
       $("#get_new_mails").addClass("disabled").text("Checking for new mail...")
 
-      # fetch new data
-      # $.ajax "fetchandwait/" + @model.id, {
-      #  complete: () ->
-      #    window.app.mails.fetchNew ->
-      #
-      #      $("#get_new_mails").removeClass("disabled").text("Check completed!")
-      # }
-
-      window.app.mails.fetchNew ->
+      window.app.mails.fetchNew =>
         element.clickable = true
         date = new Date()
-        dateString = date.getHours() + ":"
-        if date.getMinutes() < 10
-          dateString += "0" + date.getMinutes()
-        else
-          dateString += date.getMinutes()
-        $("#get_new_mails").removeClass("disabled").text("Last check at " + dateString)
+        @changeGetNewMailLabel date
 
       
       # in case it doesn't work, unblock after some time
@@ -58,8 +45,18 @@ class exports.MailsListNew extends Backbone.View
           $("#get_new_mails").removeClass("disabled")
       , 1000 * 4)
   
+   
+  changeGetNewMailLabel: (date) ->
+    dateString = date.getHours() + ":"
+    if date.getMinutes() < 10
+      dateString += "0" + date.getMinutes()
+    else
+      dateString += date.getMinutes()
+
+    @$("#get_new_mails").removeClass "disabled"
+    @$("#get_new_mails").text "Check for new mail (Last check at #{dateString})"
+
   render: ->
-    # unblock the button
     @clickable = true
     template = require "./templates/_mail/mail_new"
     $(@el).html template(collection: @collection)

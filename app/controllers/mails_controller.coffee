@@ -7,9 +7,6 @@
 
 load 'application'
 
-action 'index', ->
-    render
-        title: "CozyMails"
 
 # shared functionnality : find the mail via its ID
 before ->
@@ -21,42 +18,42 @@ before ->
             next()
 , { only: ['show', 'update', 'destroy', 'getattachmentslist'] }
 
+
+# App entry point
+action 'index', ->
+    render
+        title: "Cozy Mails"
+
+
 # GET /mails/:id
 action 'show', ->
     send @box
 
+
 # PUT /mails/:id
 action 'update', ->
-    data = {}
-    attrs = [
-        "flags",
-        "flagged",
-        "read"
-    ]
-    
-    for attr in attrs
-        data[attr] = req.body[attr]
-        
-    @box.updateAttributes data, (error) =>
-        if !error
-            send 200
-        else
+    @box.updateAttributes body, (err) =>
+        if err
             send 500
+        else
+            send 200
+
 
 # DELETE /mails/:id
 action 'destroy', ->
-    @box.destroy (error) =>
-        if !error
-            send 200
-        else
+    @box.destroy (err) =>
+        if err
             send 500
+        else
+            send 204
             
+
 # GET '/mailslist/:timestamp.:num'
 action 'getlist', ->
     num = parseInt req.params.num
     timestamp = parseInt req.params.timestamp
     
-    if params.id? and params.id != "undefined"
+    if params.id? and params.id isnt "undefined"
         skip = 1
     else
         skip = 0
@@ -67,22 +64,22 @@ action 'getlist', ->
         descending: true
         skip: skip
 
-    Mail.dateId query, (error, mails) ->
-        if !error
-            # we send 204 when there is no content to send
-            if mails.length == 0
-                send 499
+    Mail.dateId query, (err, mails) ->
+        if err
+            send 500
+        else
+            if mails.length is 0
+                send []
             else
                 send mails
-        else
-            send 500
             
+
 # GET '/mailssentlist/:timestamp.:num'
 action 'getlistsent', ->
-    num = parseInt req.params.num
-    timestamp = parseInt req.params.timestamp
+    num = parseInt params.num
+    timestamp = parseInt params.timestamp
 
-    if params.id? and params.id != "undefined"
+    if params.id? and params.id isnt "undefined"
         skip = 1
     else
         skip = 0
@@ -93,21 +90,17 @@ action 'getlistsent', ->
         descending: true
         skip: skip
 
-    MailSent.dateId query, (error, mails) ->
-        if !error
-            # we send 204 when there is no content to send
-            if mails.length == 0
-                send 499
-            else
-                send mails
-        else
+    MailSent.dateId query, (err, mails) ->
+        if err
             send 500
+        else
+            send mails
 
 # GET '/mailsnew/:timestamp'
 action 'getnewlist', ->
-    timestamp = parseInt req.params.timestamp
+    timestamp = parseInt params.timestamp
 
-    if params.id? and params.id != "undefined"
+    if params.id? and params.id isnt "undefined"
         skip = 1
     else
         skip = 0
@@ -117,22 +110,19 @@ action 'getnewlist', ->
         skip: skip
         descending: false
         
-    Mail.dateId query, (error, mails) ->
-        console.log mails
-        console.log query
-        if !error
-            send mails
-        else
+    Mail.dateId query, (err, mails) ->
+        if err
             send 500
+        else
+            send mails
 
 # GET '/getattachments/:id
 action 'getattachmentslist', ->
     query =
         key: @box.id
-    Attachment.fromMail query, (error, attachments) ->
-        if error
-            console.log error
-            console.log attachments
+
+    Attachment.fromMail query, (err, attachments) ->
+        if err
             send 500
         else
             send attachments
@@ -140,15 +130,17 @@ action 'getattachmentslist', ->
 # GET '/attachments/:id'
 action 'getattachment', ->
     Attachment.find req.params.id, (err, attachment) =>
-        if err or not attachment
-            send 404
+        if err
+            send 500
+        else if not attachment
+            send 400
         else
             attachment.getFile attachment.fileName, (err, res, body) ->
                 if err or not res?
                     send 500
                 else if res.statusCode is 404
                     send 'File not found', 404
-                else if res.statusCode != 200
+                else if res.statusCode isnt 200
                     send 500
                 else
                     send 200

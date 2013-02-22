@@ -21,6 +21,20 @@ class exports.MessageBox extends Backbone.View
 
     # Add a mailbox at the bottom of the list
     renderOne: (logmessage) ->
+        if logmessage.get("subtype") is "check" and
+        logmessage.get("type") is "info"
+            date = new Date logmessage.get 'createdAt'
+            mailsList = window.app.viewMailsList
+            mailsList.viewMailsListNew.changeGetNewMailLabel date if mailsList?
+            if @previousCheckMessage?
+                @collection.remove @previousCheckMessage
+                @previousCheckMessage.destroy()
+            @previousCheckMessage = logmessage
+        else
+            @addNewBox logmessage
+            
+
+    addNewBox: (logmessage) ->
         box = new MessageBoxElement logmessage, @collection
 
         @$el.prepend box.render().el
@@ -28,6 +42,7 @@ class exports.MessageBox extends Backbone.View
             @collection.lastCreatedAt = Number(logmessage.get "createdAt") + 1
 
     render: ->
+        @previousCheckMessage = null
         @collection.each (message) =>
             @renderOne message
         @

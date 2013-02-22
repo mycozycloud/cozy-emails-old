@@ -26,7 +26,6 @@ LogMessage.createError = (data, callback) ->
                 timeout: 0
             LogMessage.create attributes, callback
 
-
 LogMessage.createImportError = (error, callback) ->
     data =
         subtype: "import"
@@ -98,6 +97,7 @@ LogMessage.createImportInfo = (results, mailbox, callback) ->
             
             msg = "Downloading <strong>#{logMessage.counter}</strong>"
             msg += " #{mail_text} from "
+            logMessage.text = msg
             logMessage.save callback
         else
             LogMessage.createInfo data, callback
@@ -106,6 +106,7 @@ LogMessage.createNewMailInfo = (mailbox, callback) ->
     msg = "Check for new mail in <strong>#{mailbox.name}</strong> finished at "
     msg += new Date().toUTCString()
     data =
+        type: "info"
         subtype: "check"
         text: msg
         timeout: 0
@@ -118,6 +119,7 @@ LogMessage.createNewMailInfo = (mailbox, callback) ->
                 logMessage.createdAt = new Date().valueOf()
                 msg = "Check for new mail in <strong>#{mailbox.name}</strong> "
                 msg += "finished at #{new Date().toUTCString()}"
+                logMessage.text = msg
                 logMessage.save callback
         else
             LogMessage.createInfo data, callback
@@ -130,7 +132,7 @@ LogMessage.createImportStartedInfo = (mailbox, callback) ->
         mailbox: mailbox.id
     LogMessage.createInfo data, callback
 
-LogMessage.createBoxProgressInfo = (mailbox, progress, callback) ->
+LogMessage.createImportProgressInfo = (mailbox, progress, callback) ->
     data =
         type: "info",
         subtype: "progress"

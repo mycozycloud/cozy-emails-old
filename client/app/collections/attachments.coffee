@@ -15,7 +15,6 @@ class exports.AttachmentsCollection extends Backbone.Collection
   
   setModel: (@areAttachmentsOf) ->
     @url = "mails/#{@areAttachmentsOf.get "id"}/attachments"
-    @fetch()
   
   comparator: (attachment) ->
     attachment.get("fileName")

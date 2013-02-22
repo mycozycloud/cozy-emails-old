@@ -33,7 +33,7 @@ class exports.MailsListElement extends Backbone.View
     # set read and save to server
     @collection.activeMail.setRead()
     @collection.activeMail.url = "mails/" + @collection.activeMail.get("id")
-    @collection.activeMail.save({"read" : true})
+    @collection.activeMail.save read: true
     # trigger global event
     @collection.trigger "change_active_mail"
   
@@ -46,5 +46,5 @@ class exports.MailsListElement extends Backbone.View
   render: ->
     @visible = @model.get("mailbox") in window.app.mailboxes.activeMailboxes
     template = require('./templates/_mail/mail_list')
-    $(@el).html template({"model" : @model, "active" : @active, "visible" : @visible})
+    @$el.html template({"model" : @model, "active" : @active, "visible" : @visible})
     @
