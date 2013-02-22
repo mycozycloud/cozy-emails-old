@@ -48,6 +48,10 @@ Mailbox::destroyAttachments = (callback) ->
 Mailbox::toString = ->
     "[Mailbox #{@name} #{@id}]"
 
+Mailbox::log = (msg) ->
+    console.info "#{@} #{msg}"
+
+
 Mailbox::fetchFinished = (callback) ->
     @updateAttributes IMAP_last_fetched_date: new Date(), (error) =>
         if error
@@ -143,14 +147,13 @@ Mailbox::sendMail = (data, callback) ->
         html: data.html
         generateTextFromHTML: true
         
-    console.log "Sending Mail"
+    @log "Sending Mail"
     transport.sendMail message, (error) ->
         if error
-            console.error "Error occured"
-            console.error error.message
+            console.log error
             callback error
         else
-            console.log "Message sent successfully!"
+            @log "Message sent successfully!"
             callback()
 
     transport.close()
@@ -176,27 +179,27 @@ Mailbox::connectImapServer = (callback) ->
         secure: @IMAP_secure
 
     # set up lsiteners, handle errors and callback
-    server.on "alert", (alert) ->
-        console.log "[SERVER ALERT] #{alert}"
+    server.on "alert", (alert) =>
+        @log "[SERVER ALERT] #{alert}"
 
     server.on "error", (error) =>
-        console.error "[ERROR]: #{error.toString()}"
+        @log "[ERROR]: #{error.toString()}"
         @updateAttributes status: error.toString(), (err) ->
             callback error
 
-    server.on "close", (error) ->
-        if error
-            console.log "Connection closed (error: #{error.toString()})"
+    server.on "close", (err) =>
+        if err
+            @log "Connection closed (error: #{err.toString()})"
         else
-            console.log "Server connectiion Connection closed."
+            @log "Server connectiion Connection closed."
      
     server.connect (err) =>
         callback err, server
              
 Mailbox::loadInbox = (server, callback) ->
-    console.log "[#{@name}] Connection established successfuly"
+    @log "Connection established successfuly"
     server.openBox 'INBOX', false, (err, box) =>
-        console.log "[#{@name}] INBOX opened successfuly"
+        @log "INBOX opened successfuly"
         callback err, server
  
 Mailbox::fetchMessage = (server, mailToBe, callback) ->
@@ -240,14 +243,14 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
                 flagged: "\\Flagged" in messageFlags
                 hasAttachments: if mailParsedObject.attachments then true else false
 
-            Mail.create mail, (err, mail) ->
+            Mail.create mail, (err, mail) =>
                 if err
                     callback err
                 else
                     msg = "New mail created: #{mail.id_remote_mailbox}"
                     msg += " #{mail.id} [#{mail.subject}] "
                     msg += JSON.stringify mail.from
-                    console.log msg
+                    @log msg
                     
                     mail.saveAttachments attachments, (err) ->
                         return callback(err) if err
@@ -285,10 +288,10 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
             return emitOnErr server, err if err
             loadNewMails(server, id)
                             
-    emitOnErr = (server, error) ->
-        if error
-            console.log error
-            server.emit "error", error if server?
+    emitOnErr = (server, err) ->
+        if err
+            console.log err
+            server.emit "error", err if server?
 
     loadNewMails = (server, id) =>
         range = "#{id}:#{id + limit}"
@@ -296,16 +299,16 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
             return emitOnErr(server, err) if err
 
             unless results.length
-                console.log "Nothing to download"
+                @log "Nothing to download"
                 server.logout ->
                     callback()
             else
-                console.log "#{results.length} mails to download"
+                @log "#{results.length} mails to download"
                 LogMessage.createImportInfo results, @, ->
                     fetchOne server, 0, results
 
     fetchOne = (server, i, results, mailsDone) =>
-        console.log "#{@} fetch new mail: #{i}/#{results.length}"
+        @log "fetch new mail: #{i}/#{results.length}"
         mailsDone = 0
 
         if i < results.length
@@ -346,34 +349,30 @@ Mailbox::setupImport = (callback) ->
     mailbox = @
  
     @connectImapServer (err, server) =>
-        if err
-            emitOnErr server, err
-        else
-            @loadInbox server, (err) ->
-                if err
-                    emitOnErr server, err
-                else
-                    loadInboxMails server
+        return emitOnErr server, err if err
+        @loadInbox server, (err) ->
+            return emitOnErr server, err if err
+            loadInboxMails server
               
-    emitOnErr = (server, error) ->
-        if error
-            console.log error
-            server.emit "error", error if server?
+    emitOnErr = (server, err) ->
+        if err
+            console.log err
+            server.emit "error", err if server?
 
     loadInboxMails = (server) =>
         server.search ['ALL'], (err, results) =>
             if err
                 emitOnErr server, err
             else
-                console.log "Search query succeeded"
+                @log "Search query succeeded"
 
                 unless results.length
-                    console.log "No message to fetch"
+                    @log "No message to fetch"
                     server.logout()
                     callback()
                 else
-                    console.log "[#{@name}] #{results.length} mails to download"
-                    console.log "[#{@name}] Start grabing mail ids"
+                    @log "#{results.length} mails to download"
+                    @log "Start grabing mail ids"
                     fetchOne server, results, 0, 0, results.length, 0
 
             
@@ -396,8 +395,8 @@ Mailbox::setupImport = (callback) ->
                     mailsDone++
         
                     if mailsDone is mailsToGo
-                        console.log "Finished saving ids to database"
-                        console.log "max id = #{maxId}"
+                        @log "Finished saving ids to database"
+                        @log "max id = #{maxId}"
                         data =
                             mailsToImport: results.length
                             IMAP_last_fetched_id: maxId
@@ -406,7 +405,7 @@ Mailbox::setupImport = (callback) ->
 
                         @updateAttributes data, (err) =>
                             server.logout () =>
-                                console.log "[#{@name}] All mail ids collected"
+                                @log "All mail ids collected"
                                 callback err
                     else
                         fetchOne server, results, i + 1, mailsDone, mailsToGo, maxId
@@ -425,36 +424,36 @@ Mailbox::setupImport = (callback) ->
 
 Mailbox::doImport = (job, callback) ->
 
-    emitOnErr = (server, error) ->
-        if error and server?
+    emitOnErr = (server, err) ->
+        if err and server?
             server.logout () ->
-                console.log error
-                server.emit "error", error
+                console.log err
+                server.emit "error", err
   
     @connectImapServer (err, server) =>
         return emitOnErr server, err if err
         MailToBe.fromMailbox @, (err, mailsToBe) =>
             if err
                 emitOnErr server, err
-            else if not mailsToBe.length
-                console.log "Import #{@name}: Nothing to download"
+            else if mailsToBe.length is 0
+                @log "Import: Nothing to download"
                 server.logout()
                 callback()
             else
                 @loadInbox server, =>
-                    fetchOne server, mailsToBe, 0, mailsToBe.length, 0
+                    fetchMails server, mailsToBe, 0, mailsToBe.length, 0
                     
-    fetchOne = (server, mailsToBe, i, mailsToGo, mailsDone) =>
-        console.log "Import #{@name} progress:  #{i}/#{mailsToBe.length}"
+    fetchMails = (server, mailsToBe, i, mailsToGo, mailsDone) =>
+        @log "Import progress:  #{i}/#{mailsToBe.length}"
         
         if i < mailsToBe.length
             mailToBe = mailsToBe[i]
 
             @fetchMessage server, mailToBe, (err) =>
                 if err
-                    console.log 'Mail creation error, skip this message'
+                    @log 'Mail creation error, skip this message'
                     console.log err
-                    fetchOne server, mailsToBe, i + 1, mailsToGo, mailsDone
+                    fetchMails server, mailsToBe, i + 1, mailsToGo, mailsDone
                 else
                     mailsDone++
                     diff = mailsToGo - mailsDone
@@ -464,11 +463,11 @@ Mailbox::doImport = (job, callback) ->
                     if mailsToGo is mailsDone
                         callback()
                     else
-                        fetchOne server, mailsToBe, i + 1, mailsToGo, mailsDone
+                        fetchMails server, mailsToBe, i + 1, mailsToGo, mailsDone
                                        
         else
             server.logout =>
                 if mailsToGo isnt mailsDone
-                    msg = "Import #{@name}: the box was not fully impoterd."
+                    msg = "The box was not fully imported."
                     server.emit 'error', new Error msg
                 callback()
