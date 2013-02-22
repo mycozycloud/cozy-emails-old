@@ -194,8 +194,11 @@ Mailbox::connectImapServer = (callback) ->
         else
             @log "Server connection closed."
      
-    server.connect (err) =>
-        callback err, server
+    if @ImapServer?
+        server.connect (err) =>
+            callback err, server
+    else
+        @log 'No host defined'
              
 Mailbox::loadInbox = (server, callback) ->
     @log "Connection established successfully"
