@@ -177,6 +177,14 @@ Mailbox::connectImapServer = (callback) ->
         port: @ImapPort
         secure: @ImapSecure
 
+    console.log
+        username: @login
+        password: @password
+        host: @ImapServer
+        port: @ImapPort
+        secure: @ImapSecure
+
+        
     server.on "alert", (alert) =>
         @log "[SERVER ALERT] #{alert}"
 
@@ -192,6 +200,7 @@ Mailbox::connectImapServer = (callback) ->
         else
             @log "Server connection closed."
      
+    @log "Try to connect..."
     if @ImapServer?
         server.connect (err) =>
             @log "Connection established successfully"

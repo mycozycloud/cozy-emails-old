@@ -3958,11 +3958,11 @@ window.require.register("views/templates/_mailbox/mailbox_edit", function(export
   buf.push('/></div></div><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
-  buf.push(attrs({ 'for':("pass"), "class": ('control-label') }));
+  buf.push(attrs({ 'for':("password"), "class": ('control-label') }));
   buf.push('>Your password</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("pass"), 'type':("password"), 'value':(model.get("pass")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("password"), 'type':("password"), 'value':(model.get("password")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>Login and password you use for this mailbox. It\'s stored safely, don\'t worry.</p></div></div><div');
