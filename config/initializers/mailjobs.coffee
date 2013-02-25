@@ -35,9 +35,9 @@ logProgress = (job, progress) ->
 @jobs.process "check mailbox", 1, (job, done) ->
     logStarted job
 
-    Mailbox.find job.data.mailboxId, (error, mailbox) ->
+    Mailbox.find job.data.mailboxId, (err, mailbox) ->
         if error or not mailbox
-            done error
+            done err
         else
             mailbox.getNewMail job, done
 
@@ -48,9 +48,10 @@ app.createCheckJob = (mailboxId, callback) =>
     jobs = @jobs
     lastProgress = -1
     
-    Mailbox.find mailboxId, (error, mailbox) ->
-        if error
+    Mailbox.find mailboxId, (err, mailbox) ->
+        if err or not mailbox?
             console.error "Check error... The mailbox doesn't exist"
+            callback err if callback?
         else
             job = jobs.create "check mailbox",
                 mailboxId: mailboxId
@@ -61,8 +62,8 @@ app.createCheckJob = (mailboxId, callback) =>
             
             job.on 'complete', () ->
                 logComplete job
-                mailbox.fetchFinished (error) ->
-                    if error
+                mailbox.fetchFinished (err) ->
+                    if err
                         mailbox.log "Check error..."
                     else
                         mailbox.log "Check successful !"
@@ -78,7 +79,7 @@ app.createCheckJob = (mailboxId, callback) =>
 app.createCheckJobs = =>
     console.log "Creating check jobs..."
     Mailbox.all (err, mailboxes) ->
-        if mailboxes?.length
+        if mailboxes?.length > 0
             app.createCheckJob(mailbox.id) for mailbox in mailboxes
             
 # set-up CRON
@@ -95,8 +96,8 @@ app.createCheckJobs()
     logStarted job
 
     Mailbox.find job.data.mailboxId, (error, mailbox) ->
-        if error
-            done error
+        if err
+            done err
         else
             mailbox.doImport job, done
 
@@ -107,17 +108,17 @@ app.createImportJob = (mailboxId) =>
     lastProgress = -1
     lastTenProgress = 0
     
-    createJobs = (mailbox, mailboxId) ->
+    createJobs = (mailbox) ->
         job = jobs.create "import mailbox",
-            mailboxId: mailboxId
-            title: "Import of " + mailbox.name
+            mailboxId: mailbox.id
+            title: "Import of #{mailbox.name}"
             waitAfterFail: 1000 * 60
         .save()
         .attempts(9999)
         
         LogMessage.createImportStartedInfo mailbox
 
-        job.on 'complete', () ->
+        job.on 'complete', ->
             logComplete job
             mailbox.importSuccessfull (error) ->
                 if error
@@ -125,7 +126,7 @@ app.createImportJob = (mailboxId) =>
                 else
                     mailbox.log "Import successful !"
 
-        job.on 'failed', () ->
+        job.on 'failed', ->
             logFailed job
             mailbox.importFailed (error) ->
                 mailbox.log "Import failed...."
@@ -141,13 +142,13 @@ app.createImportJob = (mailboxId) =>
                         console.error error if error
                         
 
-    Mailbox.find mailboxId, (error, mailbox) ->
-        if error
+    Mailbox.find mailboxId, (err, mailbox) ->
+        if error or not mailbox?
             console.error "Import error... The mailbox doesn't exist"
         else
-            mailbox.setupImport (error) ->
-                if error
+            mailbox.setupImport (err) ->
+                if err
                     mailbox.importError ->
                         mailbox.log "Could not prepare the import. Aborting."
                 else
-                    createJobs mailbox, mailboxId
+                    createJobs mailbox
