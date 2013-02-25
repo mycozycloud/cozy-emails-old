@@ -74,7 +74,7 @@ Mailbox = define 'Mailbox', ->
     
     # shared credentails for in and out bound
     property 'login'
-    property 'pass'
+    property 'password'
 
     # data for outbound mails - SMTP
     property 'SmtpSserver'

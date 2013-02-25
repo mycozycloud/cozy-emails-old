@@ -36,7 +36,7 @@ logProgress = (job, progress) ->
     logStarted job
 
     Mailbox.find job.data.mailboxId, (err, mailbox) ->
-        if error or not mailbox
+        if err or not mailbox
             done err
         else
             mailbox.getNewMail job, done
@@ -70,7 +70,7 @@ app.createCheckJob = (mailboxId, callback) =>
 
             job.on 'failed', () ->
                 logFailed job
-                mailbox.fetchFailed (error) ->
+                mailbox.fetchFailed (err) ->
                     mailbox.log "Mail check failed."
 
             job.on 'progress', (progress) ->
@@ -95,7 +95,7 @@ app.createCheckJobs()
 @jobs.process "import mailbox", 1, (job, done) ->
     logStarted job
 
-    Mailbox.find job.data.mailboxId, (error, mailbox) ->
+    Mailbox.find job.data.mailboxId, (err, mailbox) ->
         if err
             done err
         else
@@ -120,15 +120,15 @@ app.createImportJob = (mailboxId) =>
 
         job.on 'complete', ->
             logComplete job
-            mailbox.importSuccessfull (error) ->
-                if error
+            mailbox.importSuccessfull (err) ->
+                if err
                     mailbox.log "Import error..."
                 else
                     mailbox.log "Import successful !"
 
         job.on 'failed', ->
             logFailed job
-            mailbox.importFailed (error) ->
+            mailbox.importFailed (err) ->
                 mailbox.log "Import failed...."
 
         job.on 'progress', (progress) ->
@@ -138,12 +138,12 @@ app.createImportJob = (mailboxId) =>
                 lastProgress = progress
                 if progress > lastTenProgress + 10
                     lastTenProgress += 10
-                    mailbox.progress progress, (error) ->
-                        console.error error if error
+                    mailbox.progress progress, (err) ->
+                        console.error err if err
                         
 
     Mailbox.find mailboxId, (err, mailbox) ->
-        if error or not mailbox?
+        if err or not mailbox?
             console.error "Import error... The mailbox doesn't exist"
         else
             mailbox.setupImport (err) ->

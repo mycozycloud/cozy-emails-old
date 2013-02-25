@@ -134,7 +134,7 @@ Mailbox::sendMail = (data, callback) ->
         port: @SmtpPort
         auth:
             user: @login
-            pass: @pass
+            pass: @password
 
     # configure the message object to send
     message =
@@ -170,23 +170,21 @@ Mailbox::sendMail = (data, callback) ->
 
 Mailbox::connectImapServer = (callback) ->
 
-    # let's create a connection
     server = new imap.ImapConnection
         username: @login
-        password: @pass
+        password: @password
         host: @ImapServer
         port: @ImapPort
         secure: @ImapSecure
 
-    # set up lsiteners, handle errors and callback
     server.on "alert", (alert) =>
         @log "[SERVER ALERT] #{alert}"
 
-    server.on "error", (error) =>
-        @log "[ERROR]: #{error.toString()}"
-        @updateAttributes status: error.toString(), (err) ->
+    server.on "error", (err) =>
+        @log "[ERROR]: #{err.toString()}"
+        @updateAttributes status: error.toString(), (error) ->
             LogMessage.createBoxImportError ->
-                callback error
+                callback err
 
     server.on "close", (err) =>
         if err
