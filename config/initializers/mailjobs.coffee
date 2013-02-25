@@ -67,11 +67,17 @@ app.createCheckJob = (mailboxId, callback) =>
                         mailbox.log "Check error..."
                     else
                         mailbox.log "Check successful !"
+                    job.remove (err) ->
+                        console.log err if err
+                        console.log "removed completed job ##{job.id}"
 
             job.on 'failed', () ->
                 logFailed job
                 mailbox.fetchFailed (err) ->
                     mailbox.log "Mail check failed."
+                    job.remove (err) ->
+                        console.log err if err
+                        console.log "removed completed job ##{job.id}"
 
             job.on 'progress', (progress) ->
                 logProgress job, progress if progress isnt lastProgress
@@ -114,7 +120,7 @@ app.createImportJob = (mailboxId) =>
             title: "Import of #{mailbox.name}"
             waitAfterFail: 1000 * 60
         .save()
-        .attempts(9999)
+        .attempts(5)
         
         LogMessage.createImportStartedInfo mailbox
 
@@ -125,11 +131,17 @@ app.createImportJob = (mailboxId) =>
                     mailbox.log "Import error..."
                 else
                     mailbox.log "Import successful !"
+                job.remove (err) ->
+                    console.log err if err
+                    console.log "removed completed job ##{job.id}"
 
         job.on 'failed', ->
             logFailed job
             mailbox.importFailed (err) ->
                 mailbox.log "Import failed...."
+                job.remove (err) ->
+                    console.log err if err
+                    console.log "removed completed job ##{job.id}"
 
         job.on 'progress', (progress) ->
             if progress isnt lastProgress

@@ -194,13 +194,13 @@ Mailbox::connectImapServer = (callback) ->
      
     if @ImapServer?
         server.connect (err) =>
+            @log "Connection established successfully"
             callback err, server
     else
         @log 'No host defined'
         callback new Error 'No host defined'
              
 Mailbox::loadInbox = (server, callback) ->
-    @log "Connection established successfully"
     server.openBox 'INBOX', false, (err, box) =>
         @log "INBOX opened successfully"
         callback err, server
@@ -289,6 +289,7 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
         if err
             console.log err
             server.emit "error", err if server?
+            callback err
 
     @connectImapServer (err, server) =>
         return emitOnErr(server, err) if err
@@ -303,8 +304,8 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
 
             unless results.length
                 @log "Nothing to download"
-                server.logout ->
-                    callback()
+                server.logout (err) ->
+                    callback err
             else
                 @log "#{results.length} mails to download"
                 LogMessage.createImportInfo results, @, ->
@@ -340,6 +341,7 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
                 if mailsDone isnt results.length
                     msg = "Could not import all the mail. Retry"
                     server.emit "error", new Error(msg)
+            callback()
 
 
 ###
@@ -361,6 +363,7 @@ Mailbox::setupImport = (callback) ->
         if err
             console.log err
             server.emit "error", err if server?
+            callback err
 
     loadInboxMails = (server) =>
         server.search ['ALL'], (err, results) =>
@@ -418,6 +421,7 @@ Mailbox::setupImport = (callback) ->
                 server.logout ->
                     msg =  "Error occured - not all ids could be stored to the database"
                     server.emit "error", new Error msg
+                    callback()
     
 
 ###
