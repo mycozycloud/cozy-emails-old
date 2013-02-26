@@ -11,7 +11,6 @@
 {MailboxCollection} = require 'collections/mailboxes'
 {MailsCollection} = require 'collections/mails'
 {MailsSentCollection} = require 'collections/mails_sent'
-{AttachmentsCollection} = require 'collections/attachments'
 {LogMessagesCollection} = require 'collections/logmessages'
 {AppView} = require 'views/app'
 {MailNew} = require 'models/mail_new'
@@ -26,7 +25,6 @@ class exports.Application extends BrunchApplication
         @mailboxes = new MailboxCollection
         @mails = new MailsCollection
         @mailssent = new MailsSentCollection
-        @attachments = new AttachmentsCollection
         @logmessages = new LogMessagesCollection
         @router = new MainRouter
         @appView = new AppView

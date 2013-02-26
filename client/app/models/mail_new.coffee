@@ -11,4 +11,4 @@ BaseModel = require("./models").BaseModel
 ###
 class exports.MailNew extends BaseModel
   
-  url: "sendmail"
+    url: "sendmail"

@@ -23,10 +23,10 @@ class exports.MailboxesListNew extends Backbone.View
   # Action when user clicks on new mailbox
   addMailbox: (event) ->
     event.preventDefault()
-    newbox = new Mailbox
+    newbox = new Mailbox()
     newbox.isEdit = true
     @collection.add newbox
 
   render: ->
-    $(@el).html require('./templates/_mailbox/mailbox_new')
+    @$el.html require('./templates/_mailbox/mailbox_new')
     @

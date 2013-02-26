@@ -1,29 +1,29 @@
 {LogMessage} = require "../models/logmessage"
 
 ###
-  @file: logmessages.coffee
-  @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-  @description: 
-    Backbone collection for holding log messages objects.
+    @file: logmessages.coffee
+    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+    @description: 
+        Backbone collection for holding log messages objects.
 ###
 
 class exports.LogMessagesCollection extends Backbone.Collection
-    
-  model: LogMessage
-  lastCreatedAt: 0
-  urlRoot: 'logs'
+        
+    model: LogMessage
+    lastCreatedAt: 0
+    urlRoot: 'logs'
 
-  comparator: (msg) ->
-    msg.get "createdAt"
-    
-  initialize: ->
-    @fetchNew()
-    setInterval @fetchNew, 5 * 1000
+    comparator: (msg) ->
+        msg.get "createdAt"
+        
+    initialize: ->
+        @fetchNew()
+        setInterval @fetchNew, 5 * 1000
 
-  # fetches new log messages from server
-  fetchNew: () =>
-    @fetch
-        add : true
-        url: "#{@urlRoot}/#{@lastCreatedAt}"
-        success: =>
-            @reset()
+    # fetches new log messages from server
+    fetchNew: () =>
+        @fetch
+            add: true
+            url: "#{@urlRoot}/#{@lastCreatedAt}"
+            success: =>
+                @reset()

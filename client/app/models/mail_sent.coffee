@@ -7,6 +7,7 @@ BaseModel = require("./models").BaseModel
     Model which defines the sent MAIL object.
 
 ###
+# TODO: Rewrite this class by extending mail class
 class exports.MailSent extends BaseModel
 
   initialize: ->
@@ -101,7 +102,7 @@ class exports.MailSent extends BaseModel
     @get("text").replace(/\r\n|\r|\n/g, "<br />")
 
   html: ->
-    expression = new RegExp("(<style>(.|\s)*?</style>)", "gi");
+    expression = new RegExp("(<style>(.|\s)*?</style>)", "gi")
     exp = ///
       /(<style>(.|\s)*?</style>)/ig
       ///
@@ -130,4 +131,3 @@ class exports.MailSent extends BaseModel
       @text()
     else
       @html()
-      

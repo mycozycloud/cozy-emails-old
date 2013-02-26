@@ -20,13 +20,13 @@ class exports.MailsColumn extends Backbone.View
     super()
 
   render: ->
-    $(@el).html require('./templates/_mail/mails')
+    @$el.html require('./templates/_mail/mails')
     # the button to check for new mail
-    @viewMailsListNew = new MailsListNew @.$("#button_get_new_mails"), @collection
+    @viewMailsListNew = new MailsListNew @$("#button_get_new_mails"), @collection
     # thea actual list of mails
-    @viewMailsList = new MailsList @.$("#mails_list_container"), @collection
+    @viewMailsList = new MailsList @$("#mails_list_container"), @collection
     # the button to load older mail
-    @viewMailsListMore = new MailsListMore @.$("#button_load_more_mails"), @collection
+    @viewMailsListMore = new MailsListMore @$("#button_load_more_mails"), @collection
 
     @viewMailsListNew.render()
     @viewMailsList.render()

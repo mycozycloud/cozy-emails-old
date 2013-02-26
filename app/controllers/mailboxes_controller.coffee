@@ -39,6 +39,7 @@ action 'create', ->
         if err
             send 500
         else
+            app.createImportJob mailbox.id
             send mailbox
 
 
@@ -94,12 +95,6 @@ action 'sendmail', ->
                 else
                     send success: true
             
-
-# get /importmailbox/:id
-action 'import', ->
-    app.createImportJob @box.id
-    send success: true
-
 
 # get /fetchmailbox/:id
 action 'fetch', ->

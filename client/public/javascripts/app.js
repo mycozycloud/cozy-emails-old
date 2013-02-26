@@ -88,29 +88,24 @@ window.require.register("collections/attachments", function(exports, require, mo
     Attachment = require("../models/attachment").Attachment;
 
     /*
-      @file: attachments.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        Backbone collection for handling Attachment objects.
-        Used to render the list of attachments fetched for the chosen mail.
+        @file: attachments.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            Backbone collection for handling Attachment objects.
+            Used to render the list of attachments fetched for the chosen mail.
     */
 
     exports.AttachmentsCollection = (function(_super) {
 
       __extends(AttachmentsCollection, _super);
 
-      function AttachmentsCollection() {
-        AttachmentsCollection.__super__.constructor.apply(this, arguments);
-      }
-
       AttachmentsCollection.prototype.model = Attachment;
 
-      AttachmentsCollection.prototype.url = 'getattachments';
-
-      AttachmentsCollection.prototype.setModel = function(areAttachmentsOf) {
-        this.areAttachmentsOf = areAttachmentsOf;
-        return this.url = "mails/" + (this.areAttachmentsOf.get("id")) + "/attachments";
-      };
+      function AttachmentsCollection(mail) {
+        this.mail = mail;
+        this.url = "mails/" + (this.mail.get("id")) + "/attachments";
+        AttachmentsCollection.__super__.constructor.call(this);
+      }
 
       AttachmentsCollection.prototype.comparator = function(attachment) {
         return attachment.get("fileName");
@@ -133,10 +128,10 @@ window.require.register("collections/logmessages", function(exports, require, mo
     LogMessage = require("../models/logmessage").LogMessage;
 
     /*
-      @file: logmessages.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        Backbone collection for holding log messages objects.
+        @file: logmessages.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            Backbone collection for holding log messages objects.
     */
 
     exports.LogMessagesCollection = (function(_super) {
@@ -190,11 +185,11 @@ window.require.register("collections/mailboxes", function(exports, require, modu
     Mailbox = require("../models/mailbox").Mailbox;
 
     /*
-      @file: mailboxes.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        Generic collection of all mailboxes configured by user.
-        Uses standard "resourceful" approach for DB API, via it's url.
+        @file: mailboxes.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            Generic collection of all mailboxes configured by user.
+            Uses standard "resourceful" approach for DB API, via it's url.
     */
 
     exports.MailboxCollection = (function(_super) {
@@ -226,10 +221,11 @@ window.require.register("collections/mailboxes", function(exports, require, modu
       MailboxCollection.prototype.updateActiveMailboxes = function() {
         var _this = this;
         this.activeMailboxes = [];
-        this.each(function(mb) {
-          if (mb.get("checked")) return _this.activeMailboxes.push(mb.get("id"));
+        this.each(function(mailbox) {
+          if (mailbox.get("checked")) {
+            return _this.activeMailboxes.push(mailbox.get("id"));
+          }
         });
-        console.log("update mailboxes: " + this.activeMailboxes);
         this.trigger("change_active_mailboxes", this);
         window.app.mails.trigger("update_number_mails_shown");
         return window.app.mailssent.trigger("update_number_mails_shown");
@@ -252,11 +248,11 @@ window.require.register("collections/mails", function(exports, require, module) 
     Mail = require("../models/mail").Mail;
 
     /*
-      @file: mails.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The collection to store emails - gets populated with the content of the database.
-        Uses standard "resourceful" approcha for API.
+        @file: mails.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The collection to store emails - gets populated with the content of 
+            the database.
     */
 
     exports.MailsCollection = (function(_super) {
@@ -282,17 +278,14 @@ window.require.register("collections/mails", function(exports, require, module) 
       MailsCollection.prototype.mailsShown = 0;
 
       MailsCollection.prototype.calculateMailsShown = function() {
-        var col,
-          _this = this;
+        var _this = this;
         this.mailsShown = 0;
-        col = this;
-        this.each(function(m) {
+        this.each(function(mail) {
           var _ref;
-          if (_ref = m.get("mailbox"), __indexOf.call(window.app.mailboxes.activeMailboxes, _ref) >= 0) {
-            return col.mailsShown++;
+          if (_ref = mail.get("mailbox"), __indexOf.call(window.app.mailboxes.activeMailboxes, _ref) >= 0) {
+            return _this.mailsShown++;
           }
         });
-        console.log("updated number of visible mails: " + this.mailsShown);
         return this.trigger("updated_number_mails_shown");
       };
 
@@ -318,7 +311,6 @@ window.require.register("collections/mails", function(exports, require, module) 
         var mails;
         mails = window.app.mails;
         this.url = "mailslist/" + mails.timestampOld + "." + mails.mailsAtOnce + "/" + mails.lastIdOld;
-        console.log("fetchOlder: " + this.url);
         return this.fetch({
           add: true,
           success: callback,
@@ -330,7 +322,6 @@ window.require.register("collections/mails", function(exports, require, module) 
         var mails;
         mails = window.app.mails;
         mails.url = "mails/new/" + mails.timestampNew + "/" + mails.lastIdNew;
-        console.log("fetchNew: " + mails.url);
         return mails.fetch({
           add: true,
           success: callback,
@@ -521,7 +512,7 @@ window.require.register("initialize", function(exports, require, module) {
   */
 
   (function() {
-    var AppView, AttachmentsCollection, BrunchApplication, LogMessagesCollection, MailNew, MailboxCollection, MailsCollection, MailsSentCollection, MainRouter,
+    var AppView, BrunchApplication, LogMessagesCollection, MailNew, MailboxCollection, MailsCollection, MailsSentCollection, MainRouter,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -534,8 +525,6 @@ window.require.register("initialize", function(exports, require, module) {
     MailsCollection = require('collections/mails').MailsCollection;
 
     MailsSentCollection = require('collections/mails_sent').MailsSentCollection;
-
-    AttachmentsCollection = require('collections/attachments').AttachmentsCollection;
 
     LogMessagesCollection = require('collections/logmessages').LogMessagesCollection;
 
@@ -556,7 +545,6 @@ window.require.register("initialize", function(exports, require, module) {
         this.mailboxes = new MailboxCollection;
         this.mails = new MailsCollection;
         this.mailssent = new MailsSentCollection;
-        this.attachments = new AttachmentsCollection;
         this.logmessages = new LogMessagesCollection;
         this.router = new MainRouter;
         this.appView = new AppView;
@@ -646,10 +634,10 @@ window.require.register("models/mail", function(exports, require, module) {
     BaseModel = require("./models").BaseModel;
 
     /*
-      @file: mail.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        Model which defines the MAIL object.
+        @file: mail.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            Model which defines the MAIL object.
     */
 
     exports.Mail = (function(_super) {
@@ -691,20 +679,26 @@ window.require.register("models/mail", function(exports, require, module) {
       };
 
       /*
-            RENDERING - these functions attr() replace @get "attr", and add some parsing logic.
-            To be used in views, to keep the maximum of logic related to mails in one place.
+              RENDERING - these functions attr() replace @get "attr", and add
+              some parsing logic.  To be used in views, to keep the maximum of
+              logic related to mails in one place.
       */
 
-      Mail.prototype.from = function() {
-        var obj, out, parsed, _i, _len;
-        out = "";
-        if (this.get("from")) {
-          parsed = JSON.parse(this.get("from"));
-          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-            obj = parsed[_i];
-            out += obj.name + " <" + obj.address + ">, ";
-          }
+      Mail.prototype.asEmailList = function(field, out) {
+        var obj, parsed, _i, _len, _results;
+        parsed = JSON.parse(this.get(field));
+        _results = [];
+        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+          obj = parsed[_i];
+          _results.push(out += "" + obj.name + " <" + obj.address + ">, ");
         }
+        return _results;
+      };
+
+      Mail.prototype.from = function() {
+        var out;
+        out = "";
+        if (this.get("from")) this.asEmailList("from", out);
         return out;
       };
 
@@ -726,15 +720,9 @@ window.require.register("models/mail", function(exports, require, module) {
       };
 
       Mail.prototype.cc = function() {
-        var obj, out, parsed, _i, _len;
+        var out;
         out = "";
-        if (this.get("cc")) {
-          parsed = JSON.parse(this.get("cc"));
-          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-            obj = parsed[_i];
-            out += obj.name + " <" + obj.address + ">, ";
-          }
-        }
+        if (this.get("cc")) this.asEmailList("cc", out);
         return out;
       };
 
@@ -752,22 +740,10 @@ window.require.register("models/mail", function(exports, require, module) {
       };
 
       Mail.prototype.fromAndCc = function() {
-        var obj, out, parsed, _i, _j, _len, _len2;
+        var out;
         out = "";
-        if (this.get("from")) {
-          parsed = JSON.parse(this.get("from"));
-          for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-            obj = parsed[_i];
-            out += obj.name + " <" + obj.address + ">, ";
-          }
-        }
-        if (this.get("cc")) {
-          parsed = JSON.parse(this.get("cc"));
-          for (_j = 0, _len2 = parsed.length; _j < _len2; _j++) {
-            obj = parsed[_j];
-            out += obj.name + " <" + obj.address + ">, ";
-          }
-        }
+        if (this.get("from")) this.asEmailList("from", out);
+        if (this.get("cc")) this.asEmailList("cc", out);
         return out;
       };
 
@@ -778,7 +754,7 @@ window.require.register("models/mail", function(exports, require, module) {
       };
 
       Mail.prototype.respondingToText = function() {
-        return this.fromShort() + " on " + this.date() + " wrote:";
+        return "" + (this.fromShort()) + " on " + (this.date()) + " wrote:";
       };
 
       Mail.prototype.subjectResponse = function(mode) {
@@ -864,8 +840,7 @@ window.require.register("models/mail", function(exports, require, module) {
       };
 
       /*
-          Changing mail's properties - read and flagged
-          TODO: synchronise them with remote servers.
+              Changing mail properties - read and flagged
       */
 
       Mail.prototype.isUnread = function() {
@@ -881,11 +856,11 @@ window.require.register("models/mail", function(exports, require, module) {
             flags.push("\\Seen");
             box = window.app.mailboxes.get(this.get("mailbox"));
             if (box != null) {
-              box.set("newMessages", (parseInt(box != null ? box.get("newMessages") : void 0)) - 1);
+              box.set("newMessages", parseInt(box.get("newMessages")) - 1);
             }
           }
           this.set({
-            "read": true
+            read: true
           });
         } else {
           flagsPrev = flags.length;
@@ -899,11 +874,11 @@ window.require.register("models/mail", function(exports, require, module) {
             }
           }
           this.set({
-            "read": false
+            read: false
           });
         }
         return this.set({
-          "flags": JSON.stringify(flags)
+          flags: JSON.stringify(flags)
         });
       };
 
@@ -923,10 +898,10 @@ window.require.register("models/mail", function(exports, require, module) {
           });
         }
         this.set({
-          "flagged": flagged
+          flagged: flagged
         });
         return this.set({
-          "flags": JSON.stringify(flags)
+          flags: JSON.stringify(flags)
         });
       };
 
@@ -1185,12 +1160,13 @@ window.require.register("models/mailbox", function(exports, require, module) {
     BaseModel = require("./models").BaseModel;
 
     /*
-      @file: mailbox.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        A model which defines the MAILBOX object.
-        MAILBOX stocks all the data necessary for a successful connection to IMAP and SMTP servers,
-        and all the data relative to this mailbox, internal to the application.
+        @file: mailbox.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            A model which defines the MAILBOX object.
+            MAILBOX stocks all the data necessary for a successful connection to
+            IMAP and SMTP servers, and all the data relative to this mailbox,
+            internal to the application.
     */
 
     exports.Mailbox = (function(_super) {
@@ -1210,7 +1186,7 @@ window.require.register("models/mailbox", function(exports, require, module) {
         config: 0,
         name: "box",
         login: "login",
-        pass: "pass",
+        password: "pass",
         SmtpServer: "smtp.gmail.com",
         SmtpSsl: true,
         SmtpSendAs: "support@mycozycloud.com",
@@ -1248,11 +1224,11 @@ window.require.register("models/mailbox", function(exports, require, module) {
 window.require.register("models/models", function(exports, require, module) {
   
   /*
-    @file: models.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
-      Base class which contains methods common for all the models.
-      Might get useful at some point, even though it's not visible yet...
+      @file: models.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description: 
+          Base class which contains methods common for all the models.
+          Might get useful at some point, even though it's not visible yet...
   */
 
   (function() {
@@ -1267,30 +1243,22 @@ window.require.register("models/models", function(exports, require, module) {
         BaseModel.__super__.constructor.apply(this, arguments);
       }
 
-      BaseModel.prototype.debug = true;
-
       BaseModel.prototype.isNew = function() {
         return !(this.id != null);
       };
 
       BaseModel.prototype.prerender = function() {
         var prop, val, _ref;
-        if (this.debug != null) console.log("Prerender");
         _ref = this.attributes;
         for (prop in _ref) {
           val = _ref[prop];
           this["_" + prop] = this[prop](val);
           if (this["render_" + prop] != null) {
-            if (this.debug != null) {
-              console.log("rendering " + prop + " -> __" + prop);
-            }
             this["_" + prop] = this["_render_" + prop](val);
           } else {
-            if (this.debug != null) console.log("copying " + prop + " -> __" + prop);
             this["__" + prop] = this.attributes[prop];
           }
         }
-        if (this.debug != null) console.log(this);
         return this;
       };
 
@@ -1310,11 +1278,11 @@ window.require.register("routers/main_router", function(exports, require, module
     Mail = require("../models/mail").Mail;
 
     /*
-      @file: main_router.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The application router.
-        Trying to recreate the minimum of object on every reroute.
+        @file: main_router.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The application router.
+            Trying to recreate the minimum of object on every reroute.
     */
 
     exports.MainRouter = (function(_super) {
@@ -1586,10 +1554,10 @@ window.require.register("views/mailboxes_list", function(exports, require, modul
     MailboxesListElement = require("../views/mailboxes_list_element").MailboxesListElement;
 
     /*
-      @file: mailboxes_list.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        Displays the list of configured mailboxes.
+        @file: mailboxes_list.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            Displays the list of configured mailboxes.
     */
 
     exports.MailboxesList = (function(_super) {
@@ -1611,18 +1579,18 @@ window.require.register("views/mailboxes_list", function(exports, require, modul
         return this.collection.on('reset', this.render, this);
       };
 
-      MailboxesList.prototype.addOne = function(mail) {
+      MailboxesList.prototype.addOne = function(mailbox) {
         var box;
-        box = new MailboxesListElement(mail, mail.collection);
-        return $(this.el).append(box.render().el);
+        box = new MailboxesListElement(mailbox, this.collection);
+        return this.$el.append(box.render().el);
       };
 
       MailboxesList.prototype.render = function() {
         var _this = this;
         $(this.el).html("");
-        this.collection.each(function(m) {
-          m.isEdit = false;
-          return _this.addOne(m);
+        this.collection.each(function(mailbox) {
+          mailbox.isEdit = false;
+          return _this.addOne(mailbox);
         });
         return this;
       };
@@ -1644,11 +1612,11 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
     Mailbox = require("../models/mailbox").Mailbox;
 
     /*
-      @file: mailboxes_list_element.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The element of the list of mailboxes.
-        mailboxes_list -> mailboxes_list_element
+        @file: mailboxes_list_element.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The element of the list of mailboxes.
+            mailboxes_list -> mailboxes_list_element
     */
 
     exports.MailboxesListElement = (function(_super) {
@@ -1665,9 +1633,7 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
         "click .save_mailbox": "buttonSave",
         "click .delete_mailbox": "buttonDelete",
         "input input#name": "updateName",
-        "change #color": "updateColor",
-        "click .fetch_mailbox": "buttonFetchMailbox",
-        "click .fetch_mails": "buttonFetchMails"
+        "change #color": "updateColor"
       };
 
       function MailboxesListElement(model, collection) {
@@ -1678,12 +1644,6 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
         this.model.view = this;
       }
 
-      MailboxesListElement.prototype.initialize = function() {
-        var model, view;
-        view = this;
-        return model = this.model;
-      };
-
       MailboxesListElement.prototype.updateName = function(event) {
         return this.model.set("name", $(event.target).val());
       };
@@ -1692,43 +1652,19 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
         return this.model.set("color", $(event.target).val());
       };
 
-      MailboxesListElement.prototype.buttonFetchMails = function(event) {
-        $(event.target).addClass("disabled").removeClass("fetch_mails").text("Loading...");
-        return $.ajax("fetchmailbox/" + this.model.id, {
-          complete: function() {
-            window.app.mails.fetchNew();
-            return $(event.target).removeClass("disabled").addClass("fetch_mails").text("Check for new mail complete");
-          }
-        });
-      };
-
-      MailboxesListElement.prototype.buttonFetchMailbox = function(event) {
-        var view;
-        view = this;
-        $(event.target).addClass("disabled").removeClass("fetch_mailbox").text("Loading...");
-        this.model.url = 'mailboxes/' + this.model.id;
-        return this.model.fetch({
-          success: function() {
-            $(event.target).removeClass("disabled").addClass("fetch_mailbox").text("Status verified");
-            return view.render();
-          }
-        });
-      };
-
       MailboxesListElement.prototype.buttonEdit = function(event) {
         this.model.isEdit = true;
         return this.render();
       };
 
       MailboxesListElement.prototype.buttonCancel = function(event) {
-        if (this.model.isNew()) this.model.destroy();
         this.model.isEdit = false;
+        if (this.model.isNew()) this.model.destroy();
         return this.render();
       };
 
       MailboxesListElement.prototype.buttonSave = function(event) {
-        var data, input,
-          _this = this;
+        var data, input;
         $(event.target).addClass("disabled").removeClass("buttonSave");
         input = this.$(".content");
         data = {};
@@ -1736,24 +1672,9 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
           return data[input[i].id] = input[i].value;
         });
         this.model.isEdit = false;
-        if (this.model.isNew()) {
-          return this.model.save(data, {
-            success: function(modelSaved, response) {
-              $.ajax("importmailbox/" + modelSaved.id, {
-                complete: function() {
-                  return console.log("importmailbox/" + modelSaved.id);
-                }
-              });
-              return _this.render();
-            }
-          });
-        } else {
-          return this.model.save(data, {
-            success: function() {
-              return _this.render();
-            }
-          });
-        }
+        return this.model.save(data, {
+          success: this.render
+        });
       };
 
       MailboxesListElement.prototype.buttonDelete = function(event) {
@@ -1768,8 +1689,8 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
         } else {
           template = require('./templates/_mailbox/mailbox');
         }
-        $(this.el).html(template({
-          "model": this.model
+        this.$el.html(template({
+          model: this.model
         }));
         return this;
       };
@@ -1818,13 +1739,13 @@ window.require.register("views/mailboxes_list_new", function(exports, require, m
       MailboxesListNew.prototype.addMailbox = function(event) {
         var newbox;
         event.preventDefault();
-        newbox = new Mailbox;
+        newbox = new Mailbox();
         newbox.isEdit = true;
         return this.collection.add(newbox);
       };
 
       MailboxesListNew.prototype.render = function() {
-        $(this.el).html(require('./templates/_mailbox/mailbox_new'));
+        this.$el.html(require('./templates/_mailbox/mailbox_new'));
         return this;
       };
 
@@ -1958,21 +1879,19 @@ window.require.register("views/mails_answer", function(exports, require, module)
 });
 window.require.register("views/mails_attachments_list", function(exports, require, module) {
   (function() {
-    var Attachment, AttachmentsCollection, MailsAttachmentsListElement,
+    var AttachmentsCollection, MailsAttachmentsListElement,
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
-
-    Attachment = require("../models/attachment").Attachment;
 
     AttachmentsCollection = require("../collections/attachments").AttachmentsCollection;
 
     MailsAttachmentsListElement = require("./mails_attachments_list_element").MailsAttachmentsListElement;
 
     /*
-      @file: mails_attachments_list.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The list of attachments, created every time user displays a mail.
+        @file: mails_attachments_list.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The list of attachments, created every time user displays a mail.
     */
 
     exports.MailsAttachmentsList = (function(_super) {
@@ -1986,24 +1905,24 @@ window.require.register("views/mails_attachments_list", function(exports, requir
       }
 
       MailsAttachmentsList.prototype.initialize = function() {
-        window.app.attachments.on('reset', this.render, this);
-        window.app.attachments.on('add', this.addOne, this);
-        window.app.attachments.setModel(this.model);
+        this.collection = new AttachmentsCollection(this.model);
+        this.collection.on('reset', this.render, this);
+        this.collection.on('add', this.addOne, this);
         this.$el.html("loading...");
         this.$el.spin("small");
-        return window.app.attachments.fetch();
+        return this.collection.fetch();
       };
 
       MailsAttachmentsList.prototype.addOne = function(attachment) {
         var box;
         box = new MailsAttachmentsListElement(attachment, this.collection);
-        return $(this.el).append(box.render().el);
+        return this.$el.append(box.render().el);
       };
 
       MailsAttachmentsList.prototype.render = function() {
         var _this = this;
-        $(this.el).html("");
-        window.app.attachments.each(function(attachment) {
+        this.$el.html("");
+        this.collection.each(function(attachment) {
           return _this.addOne(attachment);
         });
         return this;
@@ -2019,10 +1938,10 @@ window.require.register("views/mails_attachments_list", function(exports, requir
 window.require.register("views/mails_attachments_list_element", function(exports, require, module) {
   
   /*
-    @file: mails_attachments_list_element.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
-      Renders clickable attachments link.
+      @file: mails_attachments_list_element.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description: 
+          Renders clickable attachments link.
   */
 
   (function() {
@@ -2033,8 +1952,6 @@ window.require.register("views/mails_attachments_list_element", function(exports
 
       __extends(MailsAttachmentsListElement, _super);
 
-      MailsAttachmentsListElement.prototype.tagName = "p";
-
       function MailsAttachmentsListElement(attachment) {
         this.attachment = attachment;
         MailsAttachmentsListElement.__super__.constructor.call(this);
@@ -2044,8 +1961,8 @@ window.require.register("views/mails_attachments_list_element", function(exports
       MailsAttachmentsListElement.prototype.render = function() {
         var template;
         template = require('./templates/_attachment/attachment_element');
-        $(this.el).html(template({
-          "attachment": this.attachment
+        this.$el.html(template({
+          attachment: this.attachment
         }));
         return this;
       };
@@ -2093,7 +2010,7 @@ window.require.register("views/mails_column", function(exports, require, module)
       }
 
       MailsColumn.prototype.render = function() {
-        $(this.el).html(require('./templates/_mail/mails'));
+        this.$el.html(require('./templates/_mail/mails'));
         this.viewMailsListNew = new MailsListNew(this.$("#button_get_new_mails"), this.collection);
         this.viewMailsList = new MailsList(this.$("#mails_list_container"), this.collection);
         this.viewMailsListMore = new MailsListMore(this.$("#button_load_more_mails"), this.collection);
@@ -3140,7 +3057,7 @@ window.require.register("views/menu_mailboxes_list_element", function(exports, r
       MenuMailboxListElement.prototype.render = function() {
         var template;
         template = require('./templates/_mailbox/mailbox_menu');
-        $(this.el).html(template({
+        this.$el.html(template({
           model: this.model.toJSON()
         }));
         return this;
@@ -3188,29 +3105,41 @@ window.require.register("views/message_box", function(exports, require, module) 
       };
 
       MessageBox.prototype.renderOne = function(logmessage) {
-        var date, mailsList;
+        this.updateLastLogDate(logmessage);
         if (logmessage.get("subtype") === "check" && logmessage.get("type") === "info") {
-          date = new Date(logmessage.get('createdAt'));
-          mailsList = window.app.viewMailsList;
-          if (mailsList != null) {
-            mailsList.viewMailsListNew.changeGetNewMailLabel(date);
-          }
-          if (this.previousCheckMessage != null) {
-            this.collection.remove(this.previousCheckMessage);
-            this.previousCheckMessage.destroy();
-          }
-          return this.previousCheckMessage = logmessage;
+          this.changeLastCheckedDate(logmessage);
+          return this.keepOnlyLastCheckLog(logmessage);
         } else {
           return this.addNewBox(logmessage);
         }
       };
 
+      MessageBox.prototype.changeLastCheckedDate = function(logmessage) {
+        var date, mailsList;
+        date = new Date(logmessage.get('createdAt'));
+        mailsList = window.app.viewMailsList;
+        if (mailsList != null) {
+          return mailsList.viewMailsListNew.changeGetNewMailLabel(date);
+        }
+      };
+
+      MessageBox.prototype.keepOnlyLastCheckLog = function(logmessage) {
+        if (this.previousCheckMessage != null) {
+          this.collection.remove(this.previousCheckMessage);
+          this.previousCheckMessage.destroy();
+        }
+        return this.previousCheckMessage = logmessage;
+      };
+
       MessageBox.prototype.addNewBox = function(logmessage) {
         var box;
         box = new MessageBoxElement(logmessage, this.collection);
-        this.$el.prepend(box.render().el);
+        return this.$el.prepend(box.render().el);
+      };
+
+      MessageBox.prototype.updateLastLogDate = function(logmessage) {
         if (Number(logmessage.get("createdAt")) > Number(this.collection.lastCreatedAt)) {
-          return this.collection.lastCreatedAt = Number(logmessage.get("createdAt")) + 1;
+          return this.collection.lastCreatedAt = Number(logmessage.get("createdAt")) + 2;
         }
       };
 
@@ -3233,10 +3162,10 @@ window.require.register("views/message_box", function(exports, require, module) 
 window.require.register("views/message_box_element", function(exports, require, module) {
   
   /*
-    @file: message_box_element.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
-      Serves a single message to user
+      @file: message_box_element.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description: 
+          Serves a single message to user
   */
 
   (function() {
@@ -3252,21 +3181,20 @@ window.require.register("views/message_box_element", function(exports, require, 
         this.model = model;
         this.collection = collection;
         this.remove = __bind(this.remove, this);
-        this.buttonClose = __bind(this.buttonClose, this);
+        this.onCloseClicked = __bind(this.onCloseClicked, this);
         MessageBoxElement.__super__.constructor.call(this);
         this.model.view = this;
       }
 
       MessageBoxElement.prototype.events = {
-        "click button.close": 'buttonClose'
+        "click button.close": 'onCloseClicked'
       };
 
-      MessageBoxElement.prototype.buttonClose = function() {
-        if (this.model.get("timeout") === 0) {
-          this.model.destroy();
-          this.$el.fadeOut();
-          return this.remove();
-        }
+      MessageBoxElement.prototype.onCloseClicked = function() {
+        this.$el.fadeOut();
+        this.model.destroy();
+        this.collection.remove(this.model);
+        return this.remove();
       };
 
       MessageBoxElement.prototype.remove = function() {
@@ -3907,8 +3835,6 @@ window.require.register("views/templates/_mailbox/mailbox", function(exports, re
   buf.push('<div');
   buf.push(attrs({ "class": ('btn-group') }));
   buf.push('><a');
-  buf.push(attrs({ "class": ('fetch_mailbox') + ' ' + ('btn') }));
-  buf.push('>Verify status</a><a');
   buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('btn') }));
   buf.push('>Edit</a><a');
   buf.push(attrs({ "class": ('delete_mailbox') + ' ' + ('btn') + ' ' + ('btn-danger') }));
