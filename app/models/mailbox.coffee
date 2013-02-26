@@ -76,7 +76,7 @@ Mailbox::importError = (callback) ->
 
     @updateAttributes data, (error) =>
         if error
-            callback error
+            callback error if callback?
         else
             LogMessage.createImportPreparationError @, callaback
 
@@ -177,20 +177,12 @@ Mailbox::connectImapServer = (callback) ->
         port: @ImapPort
         secure: @ImapSecure
 
-    console.log
-        username: @login
-        password: @password
-        host: @ImapServer
-        port: @ImapPort
-        secure: @ImapSecure
-
-        
     server.on "alert", (alert) =>
         @log "[SERVER ALERT] #{alert}"
 
     server.on "error", (err) =>
         @log "[ERROR]: #{err.toString()}"
-        @updateAttributes status: error.toString(), (error) ->
+        @updateAttributes status: err.toString(), (error) ->
             LogMessage.createBoxImportError ->
                 callback err
 
@@ -406,7 +398,6 @@ Mailbox::setupImport = (callback) ->
                 if error
                     server.logout -> server.emit "error", error
                 else
-                    #console.log "#{mailToBe.remoteId} id saved successfully"
                     mailsDone++
         
                     if mailsDone is mailsToGo

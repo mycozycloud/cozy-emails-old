@@ -59,7 +59,7 @@ class exports.MailboxesListElement extends Backbone.View
         $(event.target).addClass("disabled").removeClass("delete_mailbox")
         @model.destroy()
 
-    render: ->
+    render: =>
         # whether we should activate the edit mode or not
         if @model.isEdit
             template = require('./templates/_mailbox/mailbox_edit')

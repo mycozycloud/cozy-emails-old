@@ -1639,6 +1639,7 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
       function MailboxesListElement(model, collection) {
         this.model = model;
         this.collection = collection;
+        this.render = __bind(this.render, this);
         this.buttonDelete = __bind(this.buttonDelete, this);
         MailboxesListElement.__super__.constructor.call(this);
         this.model.view = this;
