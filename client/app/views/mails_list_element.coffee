@@ -25,7 +25,8 @@ class exports.MailsListElement extends Backbone.View
     setActiveMail: (event) ->
         @collection.setActiveMail @model
         @render()
-        @collection.setActiveMailAsRead @model
+        if not @model.get 'read'
+            @collection.setActiveMailAsRead()
         @collection.trigger "change_active_mail"
     
     checkVisible: ->

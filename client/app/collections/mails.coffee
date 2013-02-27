@@ -34,7 +34,7 @@ class exports.MailsCollection extends Backbone.Collection
         #@model.get("mailbox") in window.app.mailboxes.activeMailboxes
         @mailsShown = 0
         @each (mail) =>
-            if mail.get("mailbox") in window.app.mailboxes.activeMailboxes
+            if mail.get("mailbox") in window.app.appView.mailboxes.activeMailboxes
                 @mailsShown++
         @trigger "updated_number_mails_shown"
     

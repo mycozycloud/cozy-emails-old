@@ -282,7 +282,7 @@ window.require.register("collections/mails", function(exports, require, module) 
         this.mailsShown = 0;
         this.each(function(mail) {
           var _ref;
-          if (_ref = mail.get("mailbox"), __indexOf.call(window.app.mailboxes.activeMailboxes, _ref) >= 0) {
+          if (_ref = mail.get("mailbox"), __indexOf.call(window.app.appView.mailboxes.activeMailboxes, _ref) >= 0) {
             return _this.mailsShown++;
           }
         });
@@ -2430,7 +2430,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
       MailsListElement.prototype.setActiveMail = function(event) {
         this.collection.setActiveMail(this.model);
         this.render();
-        this.collection.setActiveMailAsRead(this.model);
+        if (!this.model.get('read')) this.collection.setActiveMailAsRead();
         return this.collection.trigger("change_active_mail");
       };
 
