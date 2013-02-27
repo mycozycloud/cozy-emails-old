@@ -10,11 +10,11 @@ load 'application'
 
 # shared functionnality : find the mail via its ID
 before ->
-    Mail.find req.params.id, (err, box) =>
-        if err or !box
+    Mail.find req.params.id, (err, mail) =>
+        if err or not mail
             send 404
         else
-            @box = box
+            @mail = mail
             next()
 , { only: ['show', 'update', 'destroy', 'getattachmentslist'] }
 
@@ -27,21 +27,36 @@ action 'index', ->
 
 # GET /mails/:id
 action 'show', ->
-    send @box
+    send @mail
 
 
 # PUT /mails/:id
+# Modify given mail. If mail read flag is changed, the remote mail version is 
+# updated too.
 action 'update', ->
-    @box.updateAttributes body, (err) =>
+    markRead = false
+    if body.read and not @mail.read
+        markRead = true
+
+    @mail.updateAttributes body, (err) =>
         if err
             send 500
         else
-            send 200
+            if markRead
+                Mailbox.find @mail.mailbox, (err, mailbox) =>
+                    if err or not mailbox?
+                        send error: "unknown mailbox can't update read flag", 500
+                    else
+                        mailbox.markMailAsRead @mail, (err) ->
+                            if err
+                                send error: "can't update read flag", 500
+                            else
+                                send 200
 
 
 # DELETE /mails/:id
 action 'destroy', ->
-    @box.destroy (err) =>
+    @mail.destroy (err) =>
         if err
             send 500
         else
@@ -119,7 +134,7 @@ action 'getnewlist', ->
 # GET '/getattachments/:id
 action 'getattachmentslist', ->
     query =
-        key: @box.id
+        key: @mail.id
 
     Attachment.fromMail query, (err, attachments) ->
         if err
