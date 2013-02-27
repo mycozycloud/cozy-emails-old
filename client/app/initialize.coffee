@@ -11,7 +11,6 @@
 {MailboxCollection} = require 'collections/mailboxes'
 {MailsCollection} = require 'collections/mails'
 {MailsSentCollection} = require 'collections/mails_sent'
-{LogMessagesCollection} = require 'collections/logmessages'
 {AppView} = require 'views/app'
 {MailNew} = require 'models/mail_new'
 
@@ -22,10 +21,8 @@ class exports.Application extends BrunchApplication
     
     initialize: ->
         @initializeJQueryExtensions()
-        @mailboxes = new MailboxCollection
         @mails = new MailsCollection
         @mailssent = new MailsSentCollection
-        @logmessages = new LogMessagesCollection
         @router = new MainRouter
         @appView = new AppView
         @mailtosend = new MailNew

@@ -14,11 +14,11 @@ class exports.Mail extends BaseModel
         
     mailbox: ->
         if not @mailbox
-            @mailbox = window.app.mailboxes.get @get "mailbox"
+            @mailbox = window.app.appView.mailboxes.get @get "mailbox"
         @mailbox
 
     getColor: ->
-        box = window.app.mailboxes.get @get "mailbox"
+        box = window.app.appView.mailboxes.get @get "mailbox"
         if box
             box.get "color"
         else
@@ -148,7 +148,7 @@ class exports.Mail extends BaseModel
         if read
             unless "\\Seen" in flags
                 flags.push("\\Seen")
-                box = window.app.mailboxes.get @get("mailbox")
+                box = window.app.appView.mailboxes.get @get("mailbox")
                 box?.set "newMessages", (parseInt(box.get("newMessages")) - 1)
             @set read: true
         else
@@ -156,7 +156,7 @@ class exports.Mail extends BaseModel
             flags = $.grep flags, (val) ->
                 val isnt "\\Seen"
             unless flagsPrev is flags.length
-                box = window.app.mailboxes.get @get("mailbox")
+                box = window.app.appView.mailboxes.get @get("mailbox")
                 box?.set "newMessages", ((parseInt box?.get "newMessages") + 1)
             @set read: false
         @set flags: JSON.stringify(flags)

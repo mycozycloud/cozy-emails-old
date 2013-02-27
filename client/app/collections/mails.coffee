@@ -47,10 +47,21 @@ class exports.MailsCollection extends Backbone.Collection
         @on "update_number_mails_shown", @calculateMailsShown, @
         setInterval @fetchNew, 1000 * 15
 
+    setActiveMail: (mail) ->
+        @activeMail?.view?.active = false
+        @activeMail?.view?.render()
+        @activeMail = mail
+        @activeMail.view.active = true
+
+    setActiveMailAsRead: ->
+        @activeMail.setRead()
+        @activeMail.url = "mails/#{@activeMail.get("id")}"
+        @activeMail.save read: true
+
     # sets the url to the active mail, chosen by user (for browser history to work, for example)
     navigateMail: (event) ->
         if @activeMail?
-            window.app.router.navigate "mail/" + @activeMail.id
+            window.app.router.navigate "mail/#{@activeMail.id}"
         else
             console.error "NavigateMail without active mail"
     

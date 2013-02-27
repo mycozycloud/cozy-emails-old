@@ -7,6 +7,8 @@
 {MailsSentElement} = require '../views/mailssent_element'
 {MailsCompose} = require '../views/mails_compose'
 {MessageBox} = require 'views/message_box'
+{LogMessagesCollection} = require 'collections/logmessages'
+{MailboxCollection} = require 'collections/mailboxes'
 
 ###
     @file: app.coffee
@@ -25,11 +27,11 @@ class exports.AppView extends Backbone.View
         window.onresize = @resize
         
         # put on the big layout
-        $(@el).html require('./templates/app')
+        @$el.html require('./templates/app')
         @containerMenu = @$("#menu_container")
         @containerContent = @$("#content")
         @viewMessageBox =
-            new MessageBox @$("#message_box"), window.app.logmessages
+            new MessageBox @$("#message_box"), new LogMessagesCollection
         @setLayoutMenu()
     
     # making sure the view takes 100% height of the viewport.
@@ -55,17 +57,19 @@ class exports.AppView extends Backbone.View
         
         # set ut the menu view
         @containerMenu.html require('./templates/menu')
-        window.app.viewMenu =
-            new MenuMailboxesList @$("#menu_mailboxes"), window.app.mailboxes
+        @mailboxMenu =
+            new MenuMailboxesList @$("#menu_mailboxes"), new MailboxCollection
         
+        @mailboxes = @mailboxMenu.collection
+
         # fetch necessary data
-        window.app.viewMenu.render()
-        window.app.mailboxes.reset()
-        window.app.viewMenu.showLoading()
-        window.app.mailboxes.fetch
+        @mailboxMenu.render()
+        @mailboxes.reset()
+        @mailboxMenu.showLoading()
+        @mailboxes.fetch
             success: =>
-                window.app.mailboxes.updateActiveMailboxes()
-                window.app.mailboxes.trigger("change_active_mailboxes")
+                @mailboxes.updateActiveMailboxes()
+                @mailboxes.trigger "change_active_mailboxes"
                 callback() if callback?
             error: =>
                 @$("#menu_mailboxes").html ""
@@ -80,13 +84,14 @@ class exports.AppView extends Backbone.View
         
         # lay the mailboxes out
         @containerContent.html require('./templates/_layouts/layout_mailboxes')
-        window.app.viewMailboxes =
-                new MailboxesList @.$("#mail_list_container"), window.app.mailboxes
-        window.app.viewMailboxesNew =
-                new MailboxesListNew @.$("#add_mail_button_container"), window.app.mailboxes
+
+        @mailboxesView =
+            new MailboxesList @$("#mail_list_container"), @mailboxes
+        @newMailboxesView =
+            new MailboxesListNew @$("#add_mail_button_container"), @mailboxes
         
-        @setLayoutMenu ->
-            window.app.viewMailboxesNew.render()
+        @setLayoutMenu =>
+            @newMailboxesView.render()
         
         # ensure the right size
         @resize()
@@ -97,7 +102,8 @@ class exports.AppView extends Backbone.View
 
         # lay the mailboxes out
         @containerContent.html require('./templates/_layouts/layout_compose_mail')
-        window.app.viewComposeMail = new MailsCompose @.$("#compose_mail_container"), window.app.mailboxes
+        window.app.viewComposeMail =
+            new MailsCompose @$("#compose_mail_container"), @mailboxes
         
         @setLayoutMenu ->
             window.app.viewComposeMail.render()
@@ -117,21 +123,21 @@ class exports.AppView extends Backbone.View
 
     # put on the layout to display mails:
     setLayoutMails: ->
-        
         # lay the mails out
         @containerContent.html require('./templates/_layouts/layout_mails')
         
         # create views for the columns
         window.app.viewMailsList =
-            new MailsColumn @$("#column_mails_list"), window.app.mails
+            new MailsColumn @$("#column_mails_list"), window.app.mails, @mailboxes
         window.app.viewMailsList.render()
         window.app.view_mail =
             new MailsElement @$("#column_mail"), window.app.mails
         
         @$("#no-mails-message").hide()
+
         # fetch necessary data
-        if window.app.mailboxes.length is 0
-            window.app.mailboxes.fetch
+        if @mailboxes.length is 0
+            @mailboxes.fetch
                 success: =>
                     if window.app.mails.length is 0
                         # fetch necessary data
@@ -140,7 +146,7 @@ class exports.AppView extends Backbone.View
                         window.app.mails.fetchOlder =>
                             @$("#column_mails_list tbody").spin()
                             @$("#column_mails_list tbody span").remove()
-                            window.app.mailboxes.updateActiveMailboxes()
+                            @mailboxes.updateActiveMailboxes()
                             @showMailList()
                         , =>
                             @$("#column_mails_list tbody").spin()
@@ -155,7 +161,7 @@ class exports.AppView extends Backbone.View
             window.app.mails.fetchOlder () =>
                 @$("#column_mails_list tbody").spin()
                 @$("#column_mails_list tbody span").remove()
-                window.app.mailboxes.updateActiveMailboxes()
+                @mailboxes.updateActiveMailboxes()
                 @showMailList()
         else
             @$("#no-mails-message").hide()
@@ -172,24 +178,23 @@ class exports.AppView extends Backbone.View
         # create views for the columns
         window.app.viewMailsSentList = new MailsSentColumn @$("#column_mails_list"), window.app.mailssent
         window.app.viewMailsSentList.render()
-        window.app.view_mailsent = new MailsSentElement @.$("#column_mail"), window.app.mailssent
+        window.app.view_mailsent = new MailsSentElement @$("#column_mail"), window.app.mailssent
 
         # fetch necessary data
-        if window.app.mailboxes.length is 0
-            window.app.mailboxes.fetch({
+        if @mailboxes.length is 0
+            @mailboxes.fetch
                 success: ->
                     console.log "Initial mails sent mailboxes load OK"
                     if window.app.mailssent.length is 0
                         # fetch necessary data
-                        window.app.mailssent.fetchOlder () ->
+                        window.app.mailssent.fetchOlder ->
                                 console.log "Initial mails sent mails load OK"
                                 window.app.mailboxes.updateActiveMailboxes()
-                })
         else if window.app.mailssent.length is 0
             # fetch necessary data
-            window.app.mailssent.fetchOlder () ->
+            window.app.mailssent.fetchOlder ->
                 console.log "Initial mails sent mails load OK"
-                window.app.mailboxes.updateActiveMailboxes()
+                @mailboxes.updateActiveMailboxes()
 
         # ensure the right size
         @resize()

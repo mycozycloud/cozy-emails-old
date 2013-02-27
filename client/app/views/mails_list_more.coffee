@@ -14,14 +14,14 @@ class exports.MailsListMore extends Backbone.View
   clickable: true
   disabled: false
 
-  constructor: (@el, @collection) ->
+  constructor: (@el, @collection, @mailboxes) ->
     super()
     
   initialize: ->
     @collection.on 'reset', @render, @
     @collection.on 'add', @render, @
     @collection.on 'updated_number_mails_shown', @render, @
-    window.app.mailboxes.on "change_active_mailboxes", @render, @
+    @mailboxes.on "change_active_mailboxes", @render, @
 
   events:
      "click #add_more_mails": 'loadOlderMails',
