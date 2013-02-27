@@ -201,11 +201,29 @@ Mailbox::connectImapServer = (callback) ->
         @log 'No host defined'
         callback new Error 'No host defined'
              
-Mailbox::loadInbox = (server, callback) ->
-    server.openBox 'INBOX', false, (err, box) =>
-        @log "INBOX opened successfully"
-        callback err, server
- 
+
+Mailbox::openInbox = (callback) ->
+    @connectImapServer (err, server) =>
+        if err
+            server.emit "error", err if server?
+            callback err
+        else
+            server.openBox 'INBOX', false, (err, box) =>
+                @log "INBOX opened successfully"
+                callback err, server
+
+                
+Mailbox::closeBox = (server, callback) ->
+   server.closeBox (err) =>
+        if err
+            @log "cant close box"
+            callback err
+        else
+            server.logout =>
+                @log "logged out from IMAP server"
+                callback()
+
+
 Mailbox::fetchMessage = (server, mailToBe, callback) ->
     
     if typeof mailToBe is "string"
@@ -276,6 +294,32 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
             messageFlags = message.flags
             do parser.end
      
+Mailbox::fetchLastChanges = (server, callback) ->
+    @log "fetch last modification started."
+    callback()
+    #server.fetch("1:#{@ImapLastFetchedId} FLAGS", { struct: false },
+        #headers: 'from'
+        #body: true
+        #cb: (fetch) ->
+            #fetch.on 'message', (msg) ->
+              #console.log('Saw message no. ' + msg.seqno)
+              #body = ''
+              #msg.on 'headers', (hdrs) ->
+                #console.log('Headers for no. ' + msg.seqno + ': ' + show(hdrs))
+              #msg.on 'data', (chunk) ->
+                #body += chunk.toString('utf8')
+              #msg.on 'end', ->
+                #console.log('Finished message no. ' + msg.seqno)
+                #console.log('UID: ' + msg.uid)
+                #console.log('Flags: ' + msg.flags)
+                #console.log('Date: ' + msg.date)
+                #console.log('Body: ' + show(body))
+    #, (err) ->
+        #@log "fetch modification finished."
+        #console.log err if err
+        
+        #callback err
+    #)
 
 Mailbox::getNewMail = (job, callback, limit=250) ->
     
@@ -292,13 +336,13 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
             server.emit "error", err if server?
             callback err
 
-    @connectImapServer (err, server) =>
-        return emitOnErr(server, err) if err
-        @loadInbox server, (err) =>
-            return emitOnErr server, err if err
-            loadNewMails(server, id)
+    @openInbox (err, server) =>
+        return emitOnErr server, err if err
+        loadNewMails server, id, =>
+            @log "New Mails fetched"
+            @fetchLastChanges(server, callback)
             
-    loadNewMails = (server, id) =>
+    loadNewMails = (server, id, localCallback) =>
         range = "#{id}:#{id + limit}"
         server.search [['UID', range]], (err, results) =>
             return emitOnErr(server, err) if err
@@ -306,7 +350,7 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
             unless results.length
                 @log "Nothing to download"
                 server.logout (err) ->
-                    callback err
+                    localCallback err
             else
                 @log "#{results.length} mails to download"
                 LogMessage.createImportInfo results, @, ->
@@ -333,7 +377,7 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
                                 job.progress mailsDone, results.length
 
                                 if mailsDone is results.length
-                                    callback()
+                                    localCallback()
                                 else
                                     fetchOne(server, i + 1, results, mailsDone)
 
@@ -342,7 +386,7 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
                 if mailsDone isnt results.length
                     msg = "Could not import all the mail. Retry"
                     server.emit "error", new Error(msg)
-            callback()
+            localCallback()
 
 
 ###
@@ -354,11 +398,9 @@ Mailbox::setupImport = (callback) ->
     # global vars
     mailbox = @
  
-    @connectImapServer (err, server) =>
+    @openInbox (err, server) ->
         return emitOnErr server, err if err
-        @loadInbox server, (err) ->
-            return emitOnErr server, err if err
-            loadInboxMails server
+        loadInboxMails server
               
     emitOnErr = (server, err) ->
         if err
@@ -437,8 +479,7 @@ Mailbox::doImport = (job, callback) ->
                 console.log err
                 server.emit "error", err
   
-    @connectImapServer (err, server) =>
-        return emitOnErr server, err if err
+    @openInbox (err, server)  =>
         MailToBe.fromMailbox @, (err, mailsToBe) =>
             if err
                 emitOnErr server, err
@@ -447,8 +488,7 @@ Mailbox::doImport = (job, callback) ->
                 server.logout()
                 callback()
             else
-                @loadInbox server, =>
-                    fetchMails server, mailsToBe, 0, mailsToBe.length, 0
+                fetchMails server, mailsToBe, 0, mailsToBe.length, 0
                     
     fetchMails = (server, mailsToBe, i, mailsToGo, mailsDone) =>
         @log "Import progress:  #{i}/#{mailsToBe.length}"
@@ -478,3 +518,19 @@ Mailbox::doImport = (job, callback) ->
                     msg = "The box was not fully imported."
                     server.emit 'error', new Error msg
                 callback()
+
+Mailbox::markMailAsRead = (mail, callback) ->
+    @log "Add read flag to mail #{mail.idRemoteMailbox}"
+    @openInbox (err, server) =>
+        if err
+            console.log err if err
+            @closeBox ->
+                callback err
+        else
+            server.addFlags mail.idRemoteMailbox, 'Seen', (err) =>
+                if err
+                    @log "mail #{mail.idRemoteMailbox} not marked as seen"
+                    console.log err
+                else
+                    @log "mail #{mail.idRemoteMailbox} marked as seen"
+                @closeBox server, callback
