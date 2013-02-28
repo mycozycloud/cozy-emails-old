@@ -78,7 +78,7 @@ Mailbox::importError = (callback) ->
         if error
             callback error if callback?
         else
-            LogMessage.createImportPreparationError @, callaback
+            LogMessage.createImportPreparationError @, callback
 
 Mailbox::importSuccessfull = (callback) ->
     data =
@@ -205,8 +205,10 @@ Mailbox::connectImapServer = (callback) ->
 Mailbox::openInbox = (callback) ->
     @connectImapServer (err, server) =>
         if err
-            server.emit "error", err if server?
-            callback err
+            # error is not directly returned because in case of wrong
+            # credentials it displays password in logs.
+            @log "[Error] #{err.message}"
+            callback new Error("Connection failed")
         else
             server.openBox 'INBOX', false, (err, box) =>
                 @log "INBOX opened successfully"
