@@ -298,30 +298,24 @@ Mailbox::fetchMessage = (server, mailToBe, callback) ->
      
 Mailbox::fetchLastChanges = (server, callback) ->
     @log "fetch last modification started."
-    callback()
-    #server.fetch("1:#{@ImapLastFetchedId} FLAGS", { struct: false },
-        #headers: 'from'
-        #body: true
-        #cb: (fetch) ->
-            #fetch.on 'message', (msg) ->
-              #console.log('Saw message no. ' + msg.seqno)
-              #body = ''
-              #msg.on 'headers', (hdrs) ->
-                #console.log('Headers for no. ' + msg.seqno + ': ' + show(hdrs))
-              #msg.on 'data', (chunk) ->
-                #body += chunk.toString('utf8')
-              #msg.on 'end', ->
-                #console.log('Finished message no. ' + msg.seqno)
-                #console.log('UID: ' + msg.uid)
-                #console.log('Flags: ' + msg.flags)
-                #console.log('Date: ' + msg.date)
-                #console.log('Body: ' + show(body))
-    #, (err) ->
-        #@log "fetch modification finished."
-        #console.log err if err
-        
-        #callback err
-    #)
+    @log "1:#{@ImapLastFetchedId}"
+    fetch = server.fetch "1:#{@ImapLastFetchedId}"
+    flagDict = {}
+    fetch.on 'message', (msg) =>
+        msg.on 'end', =>
+            flagDict[msg.seqno] = msg.flags
+
+    fetch.on 'end', (msg) =>
+        @log "fetch modification finished."
+        Mail.fromMailbox key: @id, (err, mails) =>
+            return callback err if err
+            for mail in mails
+                flags = flagDict[mail.idRemoteMailbox]
+                if flags?
+                    mail.updateFlags flags
+                else
+                    mail.destroy()
+            callback()
 
 Mailbox::getNewMail = (job, callback, limit=250) ->
     
@@ -342,7 +336,8 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
         return emitOnErr server, err if err
         loadNewMails server, id, =>
             @log "New Mails fetched"
-            @fetchLastChanges(server, callback)
+            @fetchLastChanges server, =>
+                @closeBox server, callback
             
     loadNewMails = (server, id, localCallback) =>
         range = "#{id}:#{id + limit}"
@@ -351,8 +346,7 @@ Mailbox::getNewMail = (job, callback, limit=250) ->
 
             unless results.length
                 @log "Nothing to download"
-                server.logout (err) ->
-                    localCallback err
+                localCallback err
             else
                 @log "#{results.length} mails to download"
                 LogMessage.createImportInfo results, @, ->

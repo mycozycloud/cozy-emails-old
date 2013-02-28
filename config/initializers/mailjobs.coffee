@@ -51,6 +51,9 @@ if process.env isnt "test"
             if err or not mailbox?
                 console.error "Check error... The mailbox doesn't exist"
                 callback err if callback?
+            else if not mailbox.imported
+                mailbox.log 'No mail check, the mailbox is not fully imported'
+                callback() if callback?
             else
                 job = jobs.create "check mailbox",
                     mailboxId: mailboxId
