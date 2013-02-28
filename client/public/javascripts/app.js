@@ -1469,6 +1469,7 @@ window.require.register("views/app", function(exports, require, module) {
         this.setLayoutMenu(function() {
           return _this.newMailboxesView.render();
         });
+        this.mailboxesView.render();
         return this.resize();
       };
 
@@ -1609,7 +1610,7 @@ window.require.register("views/mailboxes_list", function(exports, require, modul
 
       MailboxesList.prototype.render = function() {
         var _this = this;
-        $(this.el).html("");
+        this.$el.html("");
         this.collection.each(function(mailbox) {
           mailbox.isEdit = false;
           return _this.addOne(mailbox);

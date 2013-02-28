@@ -25,7 +25,7 @@ class exports.MailboxesList extends Backbone.View
         @$el.append box.render().el
 
     render: ->
-        $(@el).html ""
+        @$el.html ""
         @collection.each (mailbox) =>
             mailbox.isEdit = false
             @addOne mailbox

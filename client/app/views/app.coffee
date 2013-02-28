@@ -93,6 +93,8 @@ class exports.AppView extends Backbone.View
         @setLayoutMenu =>
             @newMailboxesView.render()
         
+        @mailboxesView.render()
+
         # ensure the right size
         @resize()
 
