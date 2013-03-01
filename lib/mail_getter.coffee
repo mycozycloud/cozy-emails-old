@@ -6,7 +6,7 @@ class MailGetter
     constructor: (@mailbox) ->
 
     connect: (callback) ->
-        @server = new imap.imapConnection
+        @server = new imap.ImapConnection
             username: @mailbox.login
             password: @mailbox.password
             host: @mailbox.imapServer
@@ -18,7 +18,7 @@ class MailGetter
 
         @server.on "error", (err) =>
             @mailbox.log "[ERROR]: #{err.toString()}"
-            @mailbox.updateAttributes status: err.toString(), (error) ->
+            @mailbox.updateAttributes status: err.toString(), ->
                 LogMessage.createBoxImportError ->
                     callback err
 
