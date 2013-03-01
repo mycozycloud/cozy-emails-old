@@ -39,8 +39,8 @@ action 'create', ->
         if err
             send 500
         else
-            mailbox.setupImport =>
-                mailbox.doImport()
+            mailbox.setupImport (err) =>
+                mailbox.doImport() unless err
             send mailbox
 
 
@@ -58,7 +58,9 @@ action 'update', ->
         if err
             send 500
         else
-            app.createImportJob @box.id unless @box.imported
+            unless @box.imported
+                @box.setupImport (err) =>
+                    @box.doImport() unless err
             send success: true
 
 

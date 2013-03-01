@@ -31,14 +31,18 @@ class MailGetter
         @mailbox.log "Try to connect..."
         if @mailbox.imapServer?
             @server.connect (err) =>
-                @mailbox.log "Connection established successfully"
-                callback err, @server
+                if err
+                    @mailbox.log "Connection failed"
+                    callback err
+                else
+                    @mailbox.log "Connection established successfully"
+                    callback null
         else
             @mailbox.log 'No host defined'
             callback new Error 'No host defined'
              
     openInbox: (callback) =>
-        @connect (err, server) =>
+        @connect (err) =>
             if err
                 # error is not directly returned because in case of wrong
                 # credentials it displays password in logs.

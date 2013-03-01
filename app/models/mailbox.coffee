@@ -238,21 +238,25 @@ Mailbox::setupImport = (callback) ->
     mailbox = @
  
     @openInbox (err) =>
-        @mailGetter.getAllMails (err, results) =>
-            if err
-                @log "Can't retrieve emails"
-                console.log err
+        if err
+            LogMessage.createImportPreparationError mailbox, =>
                 callback err
-            else
-                @log "Search query succeeded"
-
-                unless results.length
-                    @log "No message to fetch"
-                    @closeBox callback
+        else
+            @mailGetter.getAllMails (err, results) =>
+                if err
+                    @log "Can't retrieve emails"
+                    console.log err
+                    callback err
                 else
-                    @log "#{results.length} mails to download"
-                    @log "Start grabing mail ids"
-                    fetchMailIds results, 0, 0, results.length, 0
+                    @log "Search query succeeded"
+
+                    unless results.length
+                        @log "No message to fetch"
+                        @closeBox callback
+                    else
+                        @log "#{results.length} mails to download"
+                        @log "Start grabing mail ids"
+                        fetchMailIds results, 0, 0, results.length, 0
 
             
     # for every ID, fetch the message
