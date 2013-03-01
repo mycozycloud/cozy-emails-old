@@ -177,19 +177,25 @@ Mailbox::getNewMail = (limit, callback) ->
     @log "Fetching mail #{@} | UID #{range})"
                             
     @openInbox (err) =>
-        @loadNewMails id, range,  =>
-            @log "New Mails fetched"
-            @synchronizeChanges  =>
-                @closeBox callback
+        @loadNewMails id, range,  (err) =>
+            if err
+                @closeBox =>
+                    @fetchFailed callback
+            else
+                @log "New Mails fetched"
+                @synchronizeChanges  =>
+                    @closeBox =>
+                        @fetchFinished callback
             
 Mailbox::loadNewMails = (id, range, callback) ->
     @mailGetter.getMails range, (err, results) =>
         if err
             @log "Can't retrieve new mails"
             console.log err
+            callback err
         else if results.length is 0
             @log "Nothing to download"
-            callback err
+            callback()
         else
             @log "#{results.length} mails to download"
             LogMessage.createImportInfo results, @, ->
@@ -206,26 +212,22 @@ Mailbox::loadNewMails = (id, range, callback) ->
                     @log "Mail #{remoteId} cannot be imported"
                     fetchNewMails i + 1, results, mailsDone
                 else
-                    if @imapLastFetchedId < mail.idRemoteMailbox
-                        data = imapLastFetchedId: mail.idRemoteMailbox
-                        @updateAttributes data, (err) ->
-                            if err
-                                @log "can't update mailbox state"
-                                console.log err
-                            else
-                                mailsDone++
-
-                                if i is results.length
-                                    localCallback()
-                                else
-                                    fetchNewMails i + 1, results, mailsDone
-                    else
-                        callback()
+                    data = imapLastFetchedId: mail.idRemoteMailbox
+                    @updateAttributes data, (err) ->
+                        if err
+                            @log "can't update mailbox state"
+                            console.log err
+                            callback err
+                        else
+                            mailsDone++
+                            fetchNewMails i + 1, results, mailsDone
 
         else
             if mailsDone isnt results.length
                 @log "Could not import all the mail. Retry"
-            localCallback()
+                callback new Error "Not full fetching"
+            else
+                callback()
 
 
 ###
@@ -233,30 +235,30 @@ Mailbox::loadNewMails = (id, range, callback) ->
 ###
 
 Mailbox::setupImport = (callback) ->
-    
     # global vars
     mailbox = @
  
-    @openInbox (err) =>
-        if err
-            LogMessage.createImportPreparationError mailbox, =>
-                callback err
-        else
-            @mailGetter.getAllMails (err, results) =>
-                if err
-                    @log "Can't retrieve emails"
-                    console.log err
+    LogMessage.createImportStartedInfo mailbox, =>
+        @openInbox (err) =>
+            if err
+                LogMessage.createImportPreparationError mailbox, =>
                     callback err
-                else
-                    @log "Search query succeeded"
-
-                    unless results.length
-                        @log "No message to fetch"
-                        @closeBox callback
+            else
+                @mailGetter.getAllMails (err, results) =>
+                    if err
+                        @log "Can't retrieve emails"
+                        console.log err
+                        callback err
                     else
-                        @log "#{results.length} mails to download"
-                        @log "Start grabing mail ids"
-                        fetchMailIds results, 0, 0, results.length, 0
+                        @log "Search query succeeded"
+
+                        unless results.length
+                            @log "No message to fetch"
+                            @closeBox callback
+                        else
+                            @log "#{results.length} mails to download"
+                            @log "Start grabing mail ids"
+                            fetchMailIds results, 0, 0, results.length, 0
 
             
     # for every ID, fetch the message
@@ -305,11 +307,14 @@ Mailbox::doImport = (callback) ->
         MailToBe.fromMailbox @, (err, mailsToBe) =>
             if err
                 console.log err
-                @closeBox callback
+                @closeBox =>
+                    @importFailed callback
                 
             else if mailsToBe.length is 0
                 @log "Import: Nothing to download"
-                @closeBox callback
+                @closeBox =>
+                    @importSuccessfull callback
+
             else
                 fetchMails mailsToBe, 0, mailsToBe.length, 0
                     
@@ -321,14 +326,22 @@ Mailbox::doImport = (callback) ->
 
             @fetchMessage mailToBe, (err) =>
                 if err
-                    @log 'Mail creation error, skip this message'
+                    @log 'Mail creation error, skip this mail'
                     console.log err
                     fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
                 else
+                    previousProgress = (mailsDone/mailsToGo) * 100
+                    previousStep = previousProgress / 10
                     mailsDone++
+                    progress = (mailsDone/mailsToGo) * 100
+                    step = progress / 10
+                    if step isnt previousProgress and mailsToGo isnt mailsDone
+                        @progress step * 10, (err) ->
+                            console.error err if err
                     
                     if mailsToGo is mailsDone
-                        callback()
+                        @importSuccessfull (err) ->
+                            callback() if callback?
                     else
                         fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
                                        
@@ -336,7 +349,7 @@ Mailbox::doImport = (callback) ->
             @closeBox =>
                 if mailsToGo isnt mailsDone
                     @log "The box was not fully imported."
-                callback()
+                callback() if callback?
 
     @log "Start import"
     if @mailGetter?

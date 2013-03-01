@@ -46,7 +46,7 @@ if false
     app.createCheckJob = (mailboxId, callback) =>
         jobs = @jobs
         lastProgress = -1
-        
+ 
         Mailbox.find mailboxId, (err, mailbox) ->
             if err or not mailbox?
                 console.error "Check error... The mailbox doesn't exist"
@@ -124,8 +124,6 @@ if false
             .save()
             .attempts(5)
             
-            LogMessage.createImportStartedInfo mailbox
-
             job.on 'complete', ->
                 logComplete job
                 mailbox.importSuccessfull (err) ->
