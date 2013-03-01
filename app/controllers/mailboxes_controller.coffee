@@ -39,7 +39,8 @@ action 'create', ->
         if err
             send 500
         else
-            app.createImportJob mailbox.id
+            mailbox.setupImport =>
+                mailbox.doImport()
             send mailbox
 
 

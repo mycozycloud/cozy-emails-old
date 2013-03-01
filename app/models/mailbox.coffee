@@ -214,7 +214,6 @@ Mailbox::loadNewMails = (id, range, callback) ->
                                 console.log err
                             else
                                 mailsDone++
-                                job.progress mailsDone, results.length
 
                                 if i is results.length
                                     localCallback()
@@ -297,14 +296,7 @@ Mailbox::setupImport = (callback) ->
                     callback()
     
 
-Mailbox::doImport = (job, callback) ->
-
-    if @mailGetter?
-        importMails()
-    else
-        @openInbox (err)  =>
-            importMails()
-
+Mailbox::doImport = (callback) ->
     importMails = =>
         MailToBe.fromMailbox @, (err, mailsToBe) =>
             if err
@@ -330,7 +322,6 @@ Mailbox::doImport = (job, callback) ->
                     fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
                 else
                     mailsDone++
-                    job.progress @mailsDone, @mailsToGo
                     
                     if mailsToGo is mailsDone
                         callback()
@@ -342,6 +333,14 @@ Mailbox::doImport = (job, callback) ->
                 if mailsToGo isnt mailsDone
                     @log "The box was not fully imported."
                 callback()
+
+    @log "Start import"
+    if @mailGetter?
+        importMails()
+    else
+        @openInbox (err)  =>
+            importMails()
+
 
 Mailbox::markMailAsRead = (mail, callback) ->
     @log "Add read flag to mail #{mail.idRemoteMailbox}"

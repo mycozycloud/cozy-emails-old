@@ -1,4 +1,4 @@
-if process.env.NODE_ENV isnt "test"
+if false
     @kue = require 'kue'
 
     Job = @kue.Job
