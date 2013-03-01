@@ -77,19 +77,19 @@ Mailbox = define 'Mailbox', ->
     property 'password'
 
     # data for outbound mails - SMTP
-    property 'SmtpSserver'
-    property 'SmtpSendAs'
-    property 'SmtpSsl', Boolean, default: true
-    property 'SmtpPort', Number, default: 465
+    property 'smtpSserver'
+    property 'smtpSendAs'
+    property 'smtpSsl', Boolean, default: true
+    property 'smtpPort', Number, default: 465
 
     # data for inbound mails - IMAP
-    property 'ImapServer'
-    property 'ImapPort'
-    property 'ImapSecure', Boolean, default: true
-    property 'ImapLastSync', Date, default: 0
-    property 'ImapLastFectechDate', Date, default: 0
+    property 'imapServer'
+    property 'imapPort'
+    property 'imapSecure', Boolean, default: true
+    property 'imapLastSync', Date, default: 0
+    property 'imapLastFectechDate', Date, default: 0
     # this one is used to build the query to fetch new mails
-    property 'ImapLastFetchedId', Number, default: 0
+    property 'imapLastFetchedId', Number, default: 0
 
     # data regarding the interface
     property 'checked', Boolean, default: true

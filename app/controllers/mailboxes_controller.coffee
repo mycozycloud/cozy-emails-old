@@ -87,7 +87,7 @@ action 'sendmail', ->
             
             body.mailbox = @box.id
             body.sentAt = new Date().valueOf()
-            body.from = @box.SmtpSendAs
+            body.from = @box.smtpSendAs
 
             MailSent.create body, (err) =>
                 if err

@@ -1,7 +1,7 @@
 h3 #{model.get('name')}
 p
-  i "#{model.get('SmtpSendAs')}" 
-  i last check at #{model.IMAPLastFetchedDate()} 
+  i "#{model.get('smtpSendAs')}" 
+  i last check at #{model.imapLastFetchedDate()} 
   
 if model.get("status")
   p

@@ -12,8 +12,6 @@
 
 MailSender = require '../../lib/mail_sender'
 MailGetter = require '../../lib/mail_getter'
-imap = require "imap"
-mailparser = require "mailparser"
 
 
 # helpers
@@ -40,7 +38,7 @@ Mailbox::destroyAttachments = (callback) ->
     Attachment.requestDestroy "bymailbox", key: @id, callback
 
 Mailbox::fetchFinished = (callback) ->
-    @updateAttributes ImapLastFetchedDate: new Date(), (error) =>
+    @updateAttributes imapLastFetchedDate: new Date(), (error) =>
         if error
             callback error
         else
@@ -174,7 +172,7 @@ Mailbox::synchronizeChanges = (callback) ->
 
 Mailbox::getNewMail = (limit, callback) ->
     
-    id = Number(@ImapLastFetchedId) + 1
+    id = Number(@imapLastFetchedId) + 1
     range = "#{id}:#{id + limit}"
     @log "Fetching mail #{@} | UID #{range})"
                             
@@ -208,8 +206,8 @@ Mailbox::loadNewMails = (id, range, callback) ->
                     @log "Mail #{remoteId} cannot be imported"
                     fetchNewMails i + 1, results, mailsDone
                 else
-                    if @ImapLastFetchedId < mail.idRemoteMailbox
-                        data = ImapLastFetchedId: mail.idRemoteMailbox
+                    if @imapLastFetchedId < mail.idRemoteMailbox
+                        data = imapLastFetchedId: mail.idRemoteMailbox
                         @updateAttributes data, (err) ->
                             if err
                                 @log "can't update mailbox state"
@@ -279,7 +277,7 @@ Mailbox::setupImport = (callback) ->
                         @log "max id = #{maxId}"
                         data =
                             mailsToImport: results.length
-                            ImapLastFetchedId: maxId
+                            imapLastFetchedId: maxId
                             activated: true
                             importing: true
 

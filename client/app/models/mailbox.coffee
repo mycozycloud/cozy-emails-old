@@ -21,12 +21,12 @@ class exports.Mailbox extends BaseModel
         name: "box"
         login: "login"
         password: "pass"
-        SmtpServer: "smtp.gmail.com"
-        SmtpSsl: true
-        SmtpSendAs: "support@mycozycloud.com"
-        ImapServer: "imap.gmail.com"
-        ImapPort: 993
-        ImapSecure: true
+        smtpServer: "smtp.gmail.com"
+        smtpSsl: true
+        smtpSendAs: "support@mycozycloud.com"
+        imapServer: "imap.gmail.com"
+        imapPort: 993
+        imapSecure: true
         color: "orange"
 
     initialize: ->
@@ -38,6 +38,6 @@ class exports.Mailbox extends BaseModel
     removeView: ->
         @view.remove() if @view?
         
-    IMAPLastFetchedDate: ->
+    imapLastFetchedDate: ->
         parsed = new Date @get("IMapLastFetchedDate")
         parsed.toUTCString()

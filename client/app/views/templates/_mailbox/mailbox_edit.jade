@@ -7,9 +7,9 @@ from.form-horizontal
         input.content(id="name", type="text", value= model.get("name")).input-xlarge
         p.help-block Name your mailbox to identify it easily.
     .control-group
-      label(for="SmtpSendAs").control-label Your address
+      label(for="smtpSendAs").control-label Your address
       .controls
-        input.content(id="SmtpSendAs", type="text", value= model.get("SmtpSendAs")).input-xlarge
+        input.content(id="smtpSendAs", type="text", value= model.get("smtpSendAs")).input-xlarge
         p.help-block This adress will be visible to people to whom you send mail.
         p.help-block Like "johny@cozycloud.cc" or "Mickey Mouse <mickey@domain.com>".
     .control-group
@@ -22,7 +22,7 @@ from.form-horizontal
         input.content(id="password", type="password", value=model.get("password")).input-xlarge
         p.help-block Login and password you use for this mailbox. It's stored safely, don't worry.
     .control-group
-      label(for="pass").control-label Rainbows and unicorns
+      label(for="color").control-label Rainbows and unicorns
       .controls
         select.content(id="color", value= model.get("color")).input-xlarge
           option(value="orange") orange
@@ -39,32 +39,31 @@ from.form-horizontal
   fieldset
     legend Server data
     .control-group
-      label(for="SmtpServer").control-label SMTP host
+      label(for="smtpServer").control-label SMTP host
       .controls
-        input.content(id="SmtpServer", type="text", value= model.get("SmtpServer")).input-xlarge
+        input.content(id="smtpServer", type="text", value= model.get("qmtpServer")).input-xlarge
         p.help-block The address of your server. Like smtp.gmail.com
     .control-group
       label(for="SmtpSsl").control-label SMTP ssl
       .controls
-        input.content(id="SmtpSsl", type="text", value= model.get("SmtpSsl").toString()).input-xlarge
+        input.content(id="smtpSsl", type="text", value= model.get("smtpSsl").toString()).input-xlarge
         p.help-block Everybody wants it, but some servers may not have it. Leave it "true" :)
     .control-group
-      label(for="ImapServer").control-label IMAP host
+      label(for="imapServer").control-label IMAP host
       .controls
-        input.content(id="ImapServer", type="text", value= model.get("ImapServer")).input-xlarge
+        input.content(id="imapServer", type="text", value= model.get("imapServer")).input-xlarge
         p.help-block The inbound server address. Say imap.gmail.com ..
     .control-group
-      label(for="ImapPort").control-label IMAP port
+      label(for="imapPort").control-label IMAP port
       .controls
-        input.content(id="ImapPort", type="text", value= model.get("ImapPort")).input-xlarge
+        input.content(id="imapPort", type="text", value= model.get("imapPort")).input-xlarge
         p.help-block Usually 993.
     .control-group
-      label(for="ImapSecure").control-label IMAP secure
+      label(for="imapSecure").control-label IMAP secure
       .controls
-        input.content(id="ImapSecure", type="text", value= model.get("ImapSecure").toString()).input-xlarge
+        input.content(id="imapSecure", type="text", value= model.get("imapSecure").toString()).input-xlarge
         p.help-block Everybody wants it, but some servers may not have it. Leave it "true" :)
 
   .form-actions
     input.save_mailbox.isEdit.btn.btn-success(type='submit', value="Save")
     a.cancel_edit_mailbox.isEdit.btn.btn-warning() Cancel
-  

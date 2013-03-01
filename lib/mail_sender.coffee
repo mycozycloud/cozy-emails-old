@@ -8,16 +8,16 @@ class MailSender
         # create the connection - transport object, 
         # and configure it with our mailbox's data
         transport = nodemailer.createTransport "SMTP",
-            host: @mailbox.SmtpServer
-            secureConnection: @mailbox.SmtpSsl
-            port: @mailbox.SmtpPort
+            host: @mailbox.smtpServer
+            secureConnection: @mailbox.smtpSsl
+            port: @mailbox.smtpPort
             auth:
                 user: @mailbox.login
                 pass: @mailbox.password
 
         # configure the message object to send
         message =
-            from: @mailbox.SmtpSendAs
+            from: @mailbox.smtpSendAs
             to: data.to
             cc: data.cc if data.cc?
             bcc: data.bcc if data.bcc?

@@ -6,12 +6,12 @@ class MailGetter
     constructor: (@mailbox) ->
 
     connect: (callback) ->
-        @server = new imap.ImapConnection
+        @server = new imap.imapConnection
             username: @mailbox.login
             password: @mailbox.password
-            host: @mailbox.ImapServer
-            port: @mailbox.ImapPort
-            secure: @mailbox.ImapSecure
+            host: @mailbox.imapServer
+            port: @mailbox.imapPort
+            secure: @mailbox.imapSecure
 
         @server.on "alert", (alert) =>
             @mailbox.log "[SERVER ALERT] #{alert}"
@@ -29,7 +29,7 @@ class MailGetter
                 @mailbox.log "Server connection closed."
          
         @mailbox.log "Try to connect..."
-        if @mailbox.ImapServer?
+        if @mailbox.imapServer?
             @server.connect (err) =>
                 @mailbox.log "Connection established successfully"
                 callback err, @server
@@ -125,8 +125,8 @@ class MailGetter
 
     getFlags: (callback) ->
         @mailbox.log "fetch last modification started."
-        @mailbox.log "1:#{@mailbox.ImapLastFetchedId}"
-        fetch = @server.fetch "1:#{@mailbox.ImapLastFetchedId}"
+        @mailbox.log "1:#{@mailbox.imapLastFetchedId}"
+        fetch = @server.fetch "1:#{@mailbox.imapLastFetchedId}"
         flagDict = {}
         fetch.on 'message', (msg) =>
             msg.on 'end', =>
