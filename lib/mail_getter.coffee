@@ -31,14 +31,18 @@ class MailGetter
         @mailbox.log "Try to connect..."
         if @mailbox.imapServer?
             @server.connect (err) =>
-                @mailbox.log "Connection established successfully"
-                callback err, @server
+                if err
+                    @mailbox.log "Connection failed"
+                    callback err
+                else
+                    @mailbox.log "Connection established successfully"
+                    callback null
         else
             @mailbox.log 'No host defined'
             callback new Error 'No host defined'
              
     openInbox: (callback) =>
-        @connect (err, server) =>
+        @connect (err) =>
             if err
                 # error is not directly returned because in case of wrong
                 # credentials it displays password in logs.
@@ -62,9 +66,9 @@ class MailGetter
     fetchMail: (remoteId, callback) =>
         mail = null
         fetch = @server.fetch remoteId,
-            request:
-                body: 'full'
-                headers: false
+            body: true
+            headers:
+                parse: false
             cb: (fetch) =>
                 messageFlags = []
                 fetch.on 'message', (message) =>
@@ -73,8 +77,7 @@ class MailGetter
                     parser.on "end", (mailParsed) =>
                         dateSent = @getDateSent mailParsed
                         attachments = mailParsed.attachments
-                        hasAttachments =
-                            if mailParsed.attachments then true else false
+                        hasAttachments = if attachments then true else false
 
                         mail =
                             mailbox: @mailbox.id
@@ -106,7 +109,7 @@ class MailGetter
                         # additional data to store, which is "forgotten" byt the parser
                         # well, for now, we will store it on the parser itself
                         messageFlags = message.flags
-                        do parser.end
+                        parser.end()
 
     getAllMails: (callback) =>
         @server.search ['ALL'], callback
@@ -140,6 +143,6 @@ class MailGetter
         )
 
     markRead: (mail, callback) ->
-        server.addFlags mail.idRemoteMailbox, 'Seen', callback
+        @server.addFlags mail.idRemoteMailbox, 'Seen', callback
 
 module.exports = MailGetter

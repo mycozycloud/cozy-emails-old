@@ -1,6 +1,7 @@
 exports.routes = (map) ->
     map.get '/', 'mails#index'
       
+    map.get '/mails/fetch-new/', 'mailboxes#fetchNew'
     map.resources 'mailboxes'
     map.resources 'mails'
     map.get '/mailslist/:timestamp.:num/:id', 'mails#getlist'
@@ -11,9 +12,6 @@ exports.routes = (map) ->
     map.put '/sendmail/:id', 'mailboxes#sendmail'
     map.post '/sendmail/:id', 'mailboxes#sendmail'
     
-    map.get '/fetchmailbox/:id', 'mailboxes#fetch'
-    map.get '/fetchmailboxandwait/:id', 'mailboxes#fetchandwait'
-
     map.get '/mails/:id/attachments', 'mails#getattachmentslist'
     map.get '/attachments/:id/:filename', 'mails#getattachment'
     

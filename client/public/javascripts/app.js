@@ -342,10 +342,12 @@ window.require.register("collections/mails", function(exports, require, module) 
         var mails;
         mails = window.app.mails;
         mails.url = "mails/new/" + mails.timestampNew + "/" + mails.lastIdNew;
-        return mails.fetch({
-          add: true,
-          success: callback,
-          error: errorCallback
+        return $.ajax('mails/fetch-new/', function() {
+          return mails.fetch({
+            add: true,
+            success: callback,
+            error: errorCallback
+          });
         });
       };
 

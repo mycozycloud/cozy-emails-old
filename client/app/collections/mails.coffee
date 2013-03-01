@@ -78,7 +78,8 @@ class exports.MailsCollection extends Backbone.Collection
     fetchNew: (callback, errorCallback) ->
         mails = window.app.mails
         mails.url = "mails/new/" + mails.timestampNew + "/" + mails.lastIdNew
-        mails.fetch
-            add: true
-            success: callback
-            error: errorCallback
+        $.ajax 'mails/fetch-new/', ->
+            mails.fetch
+                add: true
+                success: callback
+                error: errorCallback
