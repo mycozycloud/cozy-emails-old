@@ -99,27 +99,22 @@ action 'sendmail', ->
                     send success: true
             
 
-# get /fetchmailbox/:id
-action 'fetch', ->
-    app.createCheckJob @box.id, (err) ->
-        if not err
-            send success: true
+
+action 'fetchNew', ->
+    fetchBoxes = (boxes, callback) ->
+        if boxes.length > 0
+            box = boxes.pop()
+            box.getNewMails (err) ->
+                if err
+                    callback err
+                else
+                    fetchBoxes box, callback
         else
+            callback()
+
+    Mailbox.all (err, boxes) ->
+        if err
             send 500
-
-
-# get /fetchmailboxandwait/:id
-action 'fetchandwait', ->
-    # fake job object
-    job =
-        progress: (at, from) ->
-            console.log "Fetch and wait progress: #{at / from*100}%"
-        data:
-            title: "fake job"
-            mailboxId: @box.id
-
-    @box.getNewMail 250, job, (err) ->
-        if not err
-            send success: true
         else
-            send 500
+            fetchBoxes boxes, ->
+                send 200

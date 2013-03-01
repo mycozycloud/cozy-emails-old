@@ -170,7 +170,7 @@ Mailbox::synchronizeChanges = (callback) ->
                     mail.destroy()
             callback()
 
-Mailbox::getNewMail = (limit, callback) ->
+Mailbox::getNewMails = (limit, callback) ->
     
     id = Number(@imapLastFetchedId) + 1
     range = "#{id}:#{id + limit}"
@@ -330,12 +330,14 @@ Mailbox::doImport = (callback) ->
                     console.log err
                     fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
                 else
-                    previousProgress = (mailsDone/mailsToGo) * 100
-                    previousStep = previousProgress / 10
+                    previousProgress = (mailsDone / mailsToGo) * 100
+                    previousStep = Math.floor(previousProgress / 10)
                     mailsDone++
-                    progress = (mailsDone/mailsToGo) * 100
-                    step = progress / 10
-                    if step isnt previousProgress and mailsToGo isnt mailsDone
+                    progress = (mailsDone / mailsToGo) * 100
+                    step = Math.floor(progress / 10)
+
+                    
+                    if step isnt previousStep and mailsToGo isnt mailsDone
                         @progress step * 10, (err) ->
                             console.error err if err
                     
