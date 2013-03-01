@@ -115,7 +115,7 @@ action 'fetchandwait', ->
             title: "fake job"
             mailboxId: @box.id
 
-    @box.getNewMail job, (err) ->
+    @box.getNewMail 250, job, (err) ->
         if not err
             send success: true
         else

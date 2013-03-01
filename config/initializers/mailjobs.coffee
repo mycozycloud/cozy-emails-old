@@ -39,7 +39,7 @@ if process.env isnt "test"
             if err or not mailbox
                 done err
             else
-                mailbox.getNewMail job, done
+                mailbox.getNewMail 250, job, done
 
 
     # Job configuration + job start
