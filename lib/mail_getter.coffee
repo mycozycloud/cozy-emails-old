@@ -60,50 +60,53 @@ class MailGetter
                     callback() if callback?
 
     fetchMail: (remoteId, callback) =>
+        mail = null
         fetch = @server.fetch remoteId,
             request:
                 body: 'full'
                 headers: false
+            cb: (fetch) =>
+                messageFlags = []
+                fetch.on 'message', (message) =>
+                    parser = new mailparser.MailParser()
 
-        messageFlags = []
-        fetch.on 'message', (message) =>
-            parser = new mailparser.MailParser()
+                    parser.on "end", (mailParsed) =>
+                        dateSent = @getDateSent mailParsed
+                        attachments = mailParsed.attachments
+                        hasAttachments =
+                            if mailParsed.attachments then true else false
 
-            parser.on "end", (mailParsedObject) =>
-                dateSent = @getDateSent mailParsedObject
-                attachments = mailParsedObject.attachments
-                mail =
-                    mailbox: @mailbox.id
-                    date: dateSent.toJSON()
-                    dateValueOf: dateSent.valueOf()
-                    createdAt: new Date().valueOf()
-                    from: JSON.stringify mailParsedObject.from
-                    to: JSON.stringify mailParsedObject.to
-                    cc: JSON.stringify mailParsedObject.cc
-                    subject: mailParsedObject.subject
-                    priority: mailParsedObject.priority
-                    text: mailParsedObject.text
-                    html: mailParsedObject.html
-                    idRemoteMailbox: remoteId
-                    headersRaw: JSON.stringify mailParsedObject.headers
-                    references: mailParsedObject.references or ""
-                    inReplyTo: mailParsedObject.inReplyTo or ""
-                    flags: JSON.stringify messageFlags
-                    read: "\\Seen" in messageFlags
-                    flagged: "\\Flagged" in messageFlags
-                    hasAttachments: if mailParsedObject.attachments then true else false
+                        mail =
+                            mailbox: @mailbox.id
+                            date: dateSent.toJSON()
+                            dateValueOf: dateSent.valueOf()
+                            createdAt: new Date().valueOf()
+                            from: JSON.stringify mailParsed.from
+                            to: JSON.stringify mailParsed.to
+                            cc: JSON.stringify mailParsed.cc
+                            subject: mailParsed.subject
+                            priority: mailParsed.priority
+                            text: mailParsed.text
+                            html: mailParsed.html
+                            idRemoteMailbox: remoteId
+                            headersRaw: JSON.stringify mailParsed.headers
+                            references: mailParsed.references or ""
+                            inReplyTo: mailParsed.inReplyTo or ""
+                            flags: JSON.stringify messageFlags
+                            read: "\\Seen" in messageFlags
+                            flagged: "\\Flagged" in messageFlags
+                            hasAttachments: hasAttachments
+                        callback null, mail
 
-                callback null, mail, attachments
+                    message.on "data", (data) ->
+                        # on data, we feed the parser
+                        parser.write data.toString()
 
-            message.on "data", (data) ->
-                # on data, we feed the parser
-                parser.write data.toString()
-
-            message.on "end", ->
-                # additional data to store, which is "forgotten" byt the parser
-                # well, for now, we will store it on the parser itself
-                messageFlags = message.flags
-                do parser.end
+                    message.on "end", ->
+                        # additional data to store, which is "forgotten" byt the parser
+                        # well, for now, we will store it on the parser itself
+                        messageFlags = message.flags
+                        do parser.end
 
     getAllMails: (callback) =>
         @server.search ['ALL'], callback
@@ -124,17 +127,17 @@ class MailGetter
             dateSent = new Date()
 
     getFlags: (callback) ->
-        @mailbox.log "fetch last modification started."
-        @mailbox.log "1:#{@mailbox.imapLastFetchedId}"
-        fetch = @server.fetch "1:#{@mailbox.imapLastFetchedId}"
         flagDict = {}
-        fetch.on 'message', (msg) =>
-            msg.on 'end', =>
-                flagDict[msg.seqno] = msg.flags
-
-        fetch.on 'end', (msg) =>
+        @mailbox.log "fetch last modification started."
+        @server.fetch("1:#{@mailbox.imapLastFetchedId}",
+            cb: (fetch) ->
+                fetch.on 'message', (msg) ->
+                    msg.on 'end', ->
+                        flagDict[msg.seqno] = msg.flags
+        , (err) =>
             @mailbox.log "fetch modification finished."
-            callback null, flagDict
+            callback err, flagDict
+        )
 
     markRead: (mail, callback) ->
         server.addFlags mail.idRemoteMailbox, 'Seen', callback
