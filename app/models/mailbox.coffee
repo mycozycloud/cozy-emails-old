@@ -38,9 +38,9 @@ Mailbox::destroyAttachments = (callback) ->
     Attachment.requestDestroy "bymailbox", key: @id, callback
 
 Mailbox::fetchFinished = (callback) ->
-    @updateAttributes imapLastFetchedDate: new Date(), (error) =>
-        if error
-            callback error
+    @updateAttributes imapLastFetchedDate: new Date(), (err) =>
+        if err
+            callback err
         else
             LogMessage.createNewMailInfo @, callback
             
@@ -128,7 +128,7 @@ Mailbox::openInbox = (callback) ->
             @log "INBOX opened successfully"
         callback err, server
                 
-Mailbox::closeBox = (server, callback) ->
+Mailbox::closeBox = (callback) ->
     @mailGetter.closeBox callback
 
 Mailbox::fetchMessage = (mailToBe, callback) ->
@@ -156,7 +156,6 @@ Mailbox::fetchMessage = (mailToBe, callback) ->
                         mailToBe.destroy (error) ->
                             return callback(err) if err
                             callback null, mail
-
      
 Mailbox::synchronizeChanges = (callback) ->
     @mailGetter.getFlags (err, flagDict) =>
@@ -174,7 +173,7 @@ Mailbox::getNewMails = (limit, callback) ->
     
     id = Number(@imapLastFetchedId) + 1
     range = "#{id}:#{id + limit}"
-    @log "Fetching mail #{@} | UID #{range})"
+    @log "Fetching new mails: #{range})"
                             
     @openInbox (err) =>
         @loadNewMails id, range,  (err) =>

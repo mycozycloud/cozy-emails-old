@@ -104,7 +104,7 @@ action 'fetchNew', ->
     fetchBoxes = (boxes, callback) ->
         if boxes.length > 0
             box = boxes.pop()
-            box.getNewMails (err) ->
+            box.getNewMails 200, (err) ->
                 if err
                     callback err
                 else
@@ -116,5 +116,8 @@ action 'fetchNew', ->
         if err
             send 500
         else
-            fetchBoxes boxes, ->
-                send 200
+            fetchBoxes boxes, (err) ->
+                if err
+                    send 500
+                else
+                    send 200
