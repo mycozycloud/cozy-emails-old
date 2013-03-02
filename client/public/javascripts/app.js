@@ -3943,7 +3943,7 @@ window.require.register("views/templates/_mailbox/mailbox_edit", function(export
   buf.push('>SMTP host</label><div');
   buf.push(attrs({ "class": ('controls') }));
   buf.push('><input');
-  buf.push(attrs({ 'id':("smtpServer"), 'type':("text"), 'value':(model.get("qmtpServer")), "class": ('content') + ' ' + ('input-xlarge') }));
+  buf.push(attrs({ 'id':("smtpServer"), 'type':("text"), 'value':(model.get("smtpServer")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
   buf.push('>The address of your server. Like smtp.gmail.com</p></div></div><div');
