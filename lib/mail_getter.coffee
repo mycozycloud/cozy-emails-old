@@ -50,7 +50,6 @@ class MailGetter
                 callback new Error("Connection failed")
             else
                 @server.openBox 'INBOX', false, (err, box) =>
-                    @mailbox.log "INBOX opened successfully"
                     callback err, @server
 
     closeBox: (callback) =>

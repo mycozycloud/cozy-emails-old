@@ -97,7 +97,6 @@ action 'sendmail', ->
                     send 500
                 else
                     send success: true
-            
 
 
 action 'fetchNew', ->
