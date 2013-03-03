@@ -296,7 +296,7 @@ window.require.register("collections/mails", function(exports, require, module) 
       MailsCollection.prototype.initialize = function() {
         this.on("change_active_mail", this.navigateMail, this);
         this.on("update_number_mails_shown", this.calculateMailsShown, this);
-        return setInterval(this.fetchNew, 1000 * 15);
+        return setInterval(this.fetchNew, 1000 * 60);
       };
 
       MailsCollection.prototype.setActiveMail = function(mail) {

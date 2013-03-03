@@ -45,7 +45,7 @@ class exports.MailsCollection extends Backbone.Collection
     initialize: ->
         @on "change_active_mail", @navigateMail, @
         @on "update_number_mails_shown", @calculateMailsShown, @
-        setInterval @fetchNew, 1000 * 15
+        setInterval @fetchNew, 1000 * 60
 
     setActiveMail: (mail) ->
         @activeMail?.view?.active = false
