@@ -21,11 +21,13 @@ class exports.MenuMailboxesList extends Backbone.View
         @collection.on 'change', @render, @
 
     render: ->
+        @$el = $("#menu_mailboxes")
         @$el.html ""
         @total_inbox = 0
-        @collection.each (mailbox) =>
+        for mailbox in @collection.toArray()
             box = new MenuMailboxListElement mailbox, @collection
-            @$el.append box.render().el
+            box.render()
+            @$el.append box.el
             @total_inbox += (Number) mailbox.get("new_messages")
         @
 

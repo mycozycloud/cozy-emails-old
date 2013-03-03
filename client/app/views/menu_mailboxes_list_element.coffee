@@ -13,10 +13,10 @@ class exports.MenuMailboxListElement extends Backbone.View
         super()
         
     events:
-        "click a.menu_choose" : 'setupMailbox'
+        'click a.menu_choose' : 'setupMailbox'
 
     setupMailbox: (event) ->
-        @model.set "checked", not @model.get("checked")
+        @model.set 'checked', not @model.get('checked')
         @model.save()
         @collection.updateActiveMailboxes()
 

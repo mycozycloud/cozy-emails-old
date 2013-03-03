@@ -67,20 +67,20 @@ class exports.MailsCollection extends Backbone.Collection
     
     # fetches older mails (the list of mails)
     fetchOlder: (callback, errorCallback) ->
-        mails = window.app.mails
-        @url = "mails/" + mails.timestampOld + "/" + mails.mailsAtOnce + "/" + mails.lastIdOld
+        @url = "mails/" + @timestampOld + "/" + @mailsAtOnce + "/" + @lastIdOld
         @fetch
             add: true
             success: callback
             error: errorCallback
 
     # fetches new mails from server
-    fetchNew: (callback, errorCallback) ->
-        mails = window.app.mails
-        mails.url = "mails/new/" + mails.timestampNew + "/" + mails.lastIdNew
+    fetchNew: (callback, errorCallback) =>
+        @url = "mails/new/#{@timestampNew}/#{@lastIdNew}"
         $.ajax 'mails/fetch-new/',
-            success: ->
-                mails.fetch
+            success: =>
+                console.log @
+                
+                @fetch
                     add: true
                     success: callback
                     error: errorCallback

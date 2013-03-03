@@ -58,7 +58,7 @@ class exports.AppView extends Backbone.View
         # set ut the menu view
         @containerMenu.html require('./templates/menu')
         @mailboxMenu =
-            new MenuMailboxesList @$("#menu_mailboxes"), new MailboxCollection
+            new MenuMailboxesList $("#menu_mailboxes"), new MailboxCollection
         
         @mailboxes = @mailboxMenu.collection
 

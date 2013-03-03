@@ -15,22 +15,20 @@ class exports.MailboxCollection extends Backbone.Collection
     activeMailboxes: []
     
     initialize: ->
-        @on "add", @addView, @
+        @on 'add', @addView, @
 
     comparator: (mailbox) ->
-        mailbox.get "name"
+        mailbox.get 'name'
         
     addView: (mail) ->
-        @view.addOne(mail) if @view?
+        @view.addOne mail if @view?
     
     # function fired when user changes the set of active mailboxes 
     # to rerender the list (filter it)
     updateActiveMailboxes: ->
         @activeMailboxes = []
         @each (mailbox) =>
-            if mailbox.get("checked")
-                @activeMailboxes.push mailbox.get("id")
+            if mailbox.get 'checked'
+                @activeMailboxes.push mailbox.get('id')
         
-        @trigger "change_active_mailboxes", @
-        window.app.mails.trigger "update_number_mails_shown"
-        window.app.mailssent.trigger "update_number_mails_shown"
+        @trigger 'change_active_mailboxes', @
