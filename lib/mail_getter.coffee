@@ -128,10 +128,18 @@ class MailGetter
         else
             dateSent = new Date()
 
-    getFlags: (callback) ->
+    getLastFlags: (callback) ->
+        start = @mailbox.imapLastFetchedId - 100
+        start = 1 if start < 1
+        @getFlags "#{start}:#{@mailbox.imapLastFetchedId}", callback
+
+    getAllFlags: (callback) ->
+        @getFlags "1:#{@mailbox.imapLastFetchedId}", callback
+
+    getFlags: (range, callback) ->
         flagDict = {}
         @mailbox.log "fetch last modification started."
-        @server.fetch("1:#{@mailbox.imapLastFetchedId}",
+        @server.fetch(range,
             cb: (fetch) ->
                 fetch.on 'message', (msg) ->
                     msg.on 'end', ->

@@ -157,9 +157,12 @@ Mailbox::fetchMessage = (mailToBe, callback) ->
                             return callback(err) if err
                             callback null, mail
      
-Mailbox::synchronizeChanges = (callback) ->
-    @mailGetter.getFlags (err, flagDict) =>
-        Mail.fromMailbox key: @id, (err, mails) =>
+Mailbox::synchronizeChanges = (limit, callback) ->
+    @mailGetter.getLastFlags (err, flagDict) =>
+        params =
+            startkey: [@id]
+            limit: limit
+        Mail.fromMailboxByDate params, (err, mails) =>
             return callback err if err
             for mail in mails
                 flags = flagDict[mail.idRemoteMailbox]
@@ -182,7 +185,7 @@ Mailbox::getNewMails = (limit, callback) ->
                     @fetchFailed callback
             else
                 @log "New Mails fetched"
-                @synchronizeChanges  =>
+                @synchronizeChanges 100,  =>
                     @closeBox =>
                         @fetchFinished callback
             

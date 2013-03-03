@@ -7,11 +7,13 @@ requests = require "../../common/requests"
 mailboxRequest = -> emit doc.mailbox, doc
 dateIdRequest = -> emit [doc.dateValueOf, doc._id], doc
 dateRequest = -> emit doc.dateValueOf, doc
+dateMailboxRequest = -> emit [doc.mailbox, doc.dateValueOf], doc
 
 Mail.defineRequest "all", requests.all, requests.checkError
 Mail.defineRequest "date", dateRequest, requests.checkError
 Mail.defineRequest "dateId", dateIdRequest, requests.checkError
 Mail.defineRequest "byMailbox", mailboxRequest, requests.checkError
+Mail.defineRequest "dateByMailbox", dateMailboxRequest, requests.checkError
 
 
 # Attachments
