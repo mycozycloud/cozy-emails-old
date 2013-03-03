@@ -70,7 +70,9 @@ class exports.MailsCollection extends Backbone.Collection
         @url = "mails/" + @timestampOld + "/" + @mailsAtOnce + "/" + @lastIdOld
         @fetch
             add: true
-            success: callback
+            success: (models) ->
+                callback models.length
+                
             error: errorCallback
 
     # fetches new mails from server
@@ -78,8 +80,6 @@ class exports.MailsCollection extends Backbone.Collection
         @url = "mails/new/#{@timestampNew}/#{@lastIdNew}"
         $.ajax 'mails/fetch-new/',
             success: =>
-                console.log @
-                
                 @fetch
                     add: true
                     success: callback

@@ -125,5 +125,5 @@ LogMessage = define 'LogMessage', ->
     property 'timeout', Number, default: 5 * 60
     property 'text',
     property 'createdAt', Number
-    property 'mailobx', String
+    property 'mailbox', String
     property 'counter', Number

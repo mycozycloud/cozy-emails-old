@@ -120,8 +120,11 @@ action 'getnewlist', ->
     else
         skip = 0
         
+    console.log "baaaa"
+    console.log timestamp
+    
     query =
-        startkey: [timestamp]
+        startkey: [timestamp, params.id]
         skip: skip
         descending: false
         

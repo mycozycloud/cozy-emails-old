@@ -331,7 +331,9 @@ window.require.register("collections/mails", function(exports, require, module) 
         this.url = "mails/" + this.timestampOld + "/" + this.mailsAtOnce + "/" + this.lastIdOld;
         return this.fetch({
           add: true,
-          success: callback,
+          success: function(models) {
+            return callback(models.length);
+          },
           error: errorCallback
         });
       };
@@ -341,7 +343,6 @@ window.require.register("collections/mails", function(exports, require, module) 
         this.url = "mails/new/" + this.timestampNew + "/" + this.lastIdNew;
         return $.ajax('mails/fetch-new/', {
           success: function() {
-            console.log(_this);
             return _this.fetch({
               add: true,
               success: callback,
@@ -2474,11 +2475,11 @@ window.require.register("views/mails_list_more", function(exports, require, modu
     Mail = require("../models/mail").Mail;
 
     /*
-      @file: mails_list_more.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The view with the "load more" button.
-        Also displays info on how many messages are visible in this filer, and how many are effectiveley downloaded.
+        @file: mails_list_more.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description: 
+            The view with the "load more" button.
+            Also displays info on how many messages are visible in this filer, and how many are effectiveley downloaded.
     */
 
     exports.MailsListMore = (function(_super) {
@@ -2508,17 +2509,19 @@ window.require.register("views/mails_list_more", function(exports, require, modu
       };
 
       MailsListMore.prototype.loadOlderMails = function() {
-        var element, error, success,
+        var button, element, error, success,
           _this = this;
-        $("#add_more_mails").addClass("disabled");
-        $("#add_more_mails").text("Loading...");
+        button = this.$("#add_more_mails");
+        button.addClass("disabled");
+        button.text("Loading...");
         if (this.clickable) {
-          success = function(collection) {
+          success = function(nbMails) {
             window.app.mails.trigger("update_number_mails_shown");
-            return $("#add_more_mails").text("more messages");
+            button.text("more messages");
+            return this.console.log(true);
           };
           error = function(collection, error) {
-            $("#add_more_mails").text("more messages");
+            button.text("more messages");
             _this.disabled = true;
             return _this.render();
           };
@@ -2527,8 +2530,7 @@ window.require.register("views/mails_list_more", function(exports, require, modu
           element = this;
           return setTimeout(function() {
             element.clickable = true;
-            element.render();
-            return console.log("retry");
+            return element.render();
           }, 1000 * 7);
         }
       };

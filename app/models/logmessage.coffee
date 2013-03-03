@@ -1,8 +1,12 @@
 # Helpers
 
 LogMessage.orderedByDate = (params, callback) ->
-    callback = params if typeof(params) is "function"
-    LogMessage.request "date", descending: true, callback
+    if typeof(params) is "function"
+        callback = params
+        params = descending: true
+    else
+        params.descending = true
+    LogMessage.request "date", params, callback
 
 # Errors
 
@@ -63,14 +67,10 @@ LogMessage.createBoxImportError = (mailbox, callback) ->
 # Notifications
 
 LogMessage.createInfo = (data, callback) ->
-    attributes =
-        type: "info"
-        subtype: data.subtype
-        text: data.text
-        createdAt: new Date().valueOf()
-        timeout: data.timeout
-        counter: data.counter
-    LogMessage.create attributes, callback
+    data.type = "info"
+    data.createdAt = new Date().valueOf()
+
+    LogMessage.create data, callback
 
 
 LogMessage.createImportInfo = (results, mailbox, callback) ->
