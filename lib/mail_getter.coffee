@@ -139,13 +139,16 @@ class MailGetter
     getFlags: (range, callback) ->
         flagDict = {}
         @mailbox.log "fetch last modification started."
+        @mailbox.log range
         @server.fetch(range,
             cb: (fetch) ->
                 fetch.on 'message', (msg) ->
                     msg.on 'end', ->
-                        flagDict[msg.seqno] = msg.flags
+                        flagDict[msg.uid] = msg.flags
         , (err) =>
             @mailbox.log "fetch modification finished."
+            
+            
             callback err, flagDict
         )
 

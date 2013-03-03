@@ -159,6 +159,7 @@ Mailbox::fetchMessage = (mailToBe, callback) ->
      
 Mailbox::synchronizeChanges = (limit, callback) ->
     @mailGetter.getLastFlags (err, flagDict) =>
+        return callback err if err
         params =
             startkey: [@id]
             limit: limit
@@ -176,7 +177,7 @@ Mailbox::getNewMails = (limit, callback) ->
     
     id = Number(@imapLastFetchedId) + 1
     range = "#{id}:#{id + limit}"
-    @log "Fetching new mails: #{range})"
+    @log "Fetching new mails: #{range}"
                             
     @openInbox (err) =>
         @loadNewMails id, range,  (err) =>
@@ -201,7 +202,7 @@ Mailbox::loadNewMails = (id, range, callback) ->
         else
             @log "#{results.length} mails to download"
             LogMessage.createImportInfo results, @, ->
-                fetchNewMails 0, results, callback
+                fetchNewMails 0, results, 0
 
     fetchNewMails = (i, results, mailsDone) =>
         @log "fetch new mail: #{i}/#{results.length}"
@@ -210,6 +211,7 @@ Mailbox::loadNewMails = (id, range, callback) ->
             remoteId = results[i]
 
             @fetchMessage remoteId, (err, mail) =>
+                
                 if err
                     @log "Mail #{remoteId} cannot be imported"
                     fetchNewMails i + 1, results, mailsDone
@@ -222,7 +224,7 @@ Mailbox::loadNewMails = (id, range, callback) ->
                             callback err
                         else
                             mailsDone++
-                            fetchNewMails i + 1, results, mailsDone
+                            fetchNewMails (i + 1), results, mailsDone
 
         else
             if mailsDone isnt results.length
