@@ -3,6 +3,7 @@ exports.routes = (map) ->
       
     map.get '/mails/fetch-new/', 'mailboxes#fetchNew'
     map.get '/mails/new/:timestamp/:id', 'mails#getnewlist'
+    map.get '/mails/:id/attachments', 'mails#getattachmentslist'
     map.get '/mails/:timestamp/:num/:id', 'mails#getlist'
     map.resources 'mailboxes'
     map.resources 'mails'
@@ -12,7 +13,6 @@ exports.routes = (map) ->
     map.put '/sendmail/:id', 'mailboxes#sendmail'
     map.post '/sendmail/:id', 'mailboxes#sendmail'
     
-    map.get '/mails/:id/attachments', 'mails#getattachmentslist'
     map.get '/attachments/:id/:filename', 'mails#getattachment'
     
     map.post '/logs', 'logs#savelog'

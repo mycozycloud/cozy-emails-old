@@ -137,8 +137,8 @@ Mailbox::fetchMessage = (mailToBe, callback) ->
     else
         remoteId = mailToBe.remoteId
 
-    @mailGetter.fetchMail remoteId, (err, mail) =>
-        Mail.create mail, (err, mail, attachments) =>
+    @mailGetter.fetchMail remoteId, (err, mail, attachments) =>
+        Mail.create mail, (err, mail) =>
             if err
                 callback err
             else

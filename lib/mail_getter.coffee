@@ -98,7 +98,7 @@ class MailGetter
                             read: "\\Seen" in messageFlags
                             flagged: "\\Flagged" in messageFlags
                             hasAttachments: hasAttachments
-                        callback null, mail
+                        callback null, mail, attachments
 
                     message.on "data", (data) ->
                         # on data, we feed the parser
