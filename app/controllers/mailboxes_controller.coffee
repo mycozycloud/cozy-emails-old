@@ -108,9 +108,9 @@ action 'fetchNew', ->
                     if err
                         callback err
                     else
-                        fetchBoxes box, callback
+                        fetchBoxes boxes, callback
             else
-                fetchBoxes box, callback
+                fetchBoxes boxes, callback
         else
             callback()
 
