@@ -1,7 +1,7 @@
 ###
     @file: mailbox.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         The model used to wrap tasks on other servers:
             * fetching mails with node-imap,
             * parsing mail with nodeparser,
@@ -43,7 +43,7 @@ Mailbox::fetchFinished = (callback) ->
             callback err
         else
             LogMessage.createNewMailInfo @, callback
-            
+
 Mailbox::fetchFailed = (callback) ->
     data =
         status: "Mail check failed."
@@ -105,11 +105,11 @@ Mailbox::markError = (error, callback) ->
             callback err
         else
             LogMessage.createImportError error, callback
-    
+
 
 Mailbox::sendMail = (data, callback) ->
     sender = new MailSender @
-       
+
     @log "Sending mail"
     sender.sendMail data (err) ->
         if err
@@ -127,7 +127,7 @@ Mailbox::openInbox = (callback) ->
         else
             @log "INBOX opened successfully"
         callback err, server
-                
+
 Mailbox::closeBox = (callback) ->
     @mailGetter.closeBox callback
 
@@ -146,7 +146,7 @@ Mailbox::fetchMessage = (mailToBe, callback) ->
                 msg += " #{mail.id} [#{mail.subject}] "
                 msg += JSON.stringify mail.from
                 @log msg
-                
+
                 mail.saveAttachments attachments, (err) ->
                     return callback(err) if err
 
@@ -156,7 +156,7 @@ Mailbox::fetchMessage = (mailToBe, callback) ->
                         mailToBe.destroy (error) ->
                             return callback(err) if err
                             callback null, mail
-     
+
 Mailbox::synchronizeChanges = (limit, callback) ->
     @mailGetter.getLastFlags (err, flagDict) =>
         return callback err if err
@@ -174,11 +174,11 @@ Mailbox::synchronizeChanges = (limit, callback) ->
             callback()
 
 Mailbox::getNewMails = (limit, callback) ->
-    
+
     id = Number(@imapLastFetchedId) + 1
     range = "#{id}:#{id + limit}"
     @log "Fetching new mails: #{range}"
-                            
+
     @openInbox (err) =>
         @loadNewMails id, range,  (err) =>
             if err
@@ -189,7 +189,7 @@ Mailbox::getNewMails = (limit, callback) ->
                 @synchronizeChanges 100,  =>
                     @closeBox =>
                         @fetchFinished callback
-            
+
 Mailbox::loadNewMails = (id, range, callback) ->
     @mailGetter.getMails range, (err, results) =>
         if err
@@ -211,7 +211,7 @@ Mailbox::loadNewMails = (id, range, callback) ->
             remoteId = results[i]
 
             @fetchMessage remoteId, (err, mail) =>
-                
+
                 if err
                     @log "Mail #{remoteId} cannot be imported"
                     fetchNewMails i + 1, results, mailsDone
@@ -241,7 +241,7 @@ Mailbox::loadNewMails = (id, range, callback) ->
 Mailbox::setupImport = (callback) ->
     # global vars
     mailbox = @
- 
+
     LogMessage.createImportStartedInfo mailbox, =>
         @openInbox (err) =>
             if err
@@ -264,7 +264,7 @@ Mailbox::setupImport = (callback) ->
                             @log "Start grabing mail ids"
                             fetchMailIds results, 0, 0, results.length, 0
 
-            
+
     # for every ID, fetch the message
     fetchMailIds = (results, i, mailsDone, mailsToGo, maxId) =>
 
@@ -272,7 +272,7 @@ Mailbox::setupImport = (callback) ->
             id = results[i]
             idInt = parseInt id
             maxId = idInt if idInt > maxId
-    
+
             mailbox.mailsToBe.create remoteId: idInt, (error, mailToBe) =>
                 if error
                     @closeBox =>
@@ -280,7 +280,7 @@ Mailbox::setupImport = (callback) ->
                         callback()
                 else
                     mailsDone++
-        
+
                     if mailsDone is mailsToGo
                         @log "Finished saving ids to database"
                         @log "max id = #{maxId}"
@@ -304,7 +304,7 @@ Mailbox::setupImport = (callback) ->
                 @closeBox =>
                     @log  "Error occured - not all ids could be stored to the database"
                     callback()
-    
+
 
 Mailbox::doImport = (callback) ->
     importMails = =>
@@ -313,7 +313,7 @@ Mailbox::doImport = (callback) ->
                 console.log err
                 @closeBox =>
                     @importFailed callback
-                
+
             else if mailsToBe.length is 0
                 @log "Import: Nothing to download"
                 @closeBox =>
@@ -321,10 +321,10 @@ Mailbox::doImport = (callback) ->
 
             else
                 fetchMails mailsToBe, 0, mailsToBe.length, 0
-                    
+
     fetchMails = (mailsToBe, i, mailsToGo, mailsDone) =>
         @log "Import progress:  #{i}/#{mailsToBe.length}"
-        
+
         if i < mailsToBe.length
             mailToBe = mailsToBe[i]
 
@@ -340,17 +340,17 @@ Mailbox::doImport = (callback) ->
                     progress = (mailsDone / mailsToGo) * 100
                     step = Math.floor(progress / 10)
 
-                    
+
                     if step isnt previousStep and mailsToGo isnt mailsDone
                         @progress step * 10, (err) ->
                             console.error err if err
-                    
+
                     if mailsToGo is mailsDone
                         @importSuccessfull (err) ->
                             callback() if callback?
                     else
                         fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
-                                       
+
         else
             @closeBox =>
                 if mailsToGo isnt mailsDone

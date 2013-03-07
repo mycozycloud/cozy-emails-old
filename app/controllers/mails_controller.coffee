@@ -1,7 +1,7 @@
 ###
     @file: mails_controller.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         Railwayjs controller to handle mails CRUD backend and their attachments.
 ###
 
@@ -31,7 +31,7 @@ action 'show', ->
 
 
 # PUT /mails/:id
-# Modify given mail. If mail read flag is changed, the remote mail version is 
+# Modify given mail. If mail read flag is changed, the remote mail version is
 # updated too.
 action 'update', ->
     markRead = false
@@ -47,11 +47,13 @@ action 'update', ->
                     if err or not mailbox?
                         send error: "unknown mailbox can't update read flag", 500
                     else
-                        mailbox.markMailAsRead @mail, (err) ->
-                            if err
-                                send error: "can't update read flag", 500
-                            else
-                                send 200
+                        mailbox.getAccount (err, account) =>
+                            mailbox.password = account.password
+                            mailbox.markMailAsRead @mail, (err) ->
+                                if err
+                                    send error: "can't update read flag", 500
+                                else
+                                    send 200
 
 
 # DELETE /mails/:id
@@ -61,13 +63,13 @@ action 'destroy', ->
             send 500
         else
             send 204
-            
+
 
 # GET '/mailslist/:timestamp.:num'
 action 'getlist', ->
     num = parseInt req.params.num
     timestamp = parseInt req.params.timestamp
-    
+
     if params.id? and params.id isnt "undefined"
         skip = 1
     else
@@ -87,7 +89,7 @@ action 'getlist', ->
                 send []
             else
                 send mails
-            
+
 
 # GET '/mailssentlist/:timestamp.:num'
 action 'getlistsent', ->
@@ -119,12 +121,12 @@ action 'getnewlist', ->
         skip = 1
     else
         skip = 0
-        
+
     query =
         startkey: [timestamp, params.id]
         skip: skip
         descending: false
-        
+
     Mail.dateId query, (err, mails) ->
         if err
             send 500
@@ -141,7 +143,7 @@ action 'getattachmentslist', ->
             send 500
         else
             send attachments
-                    
+
 # GET '/attachments/:id'
 action 'getattachment', ->
     Attachment.find req.params.id, (err, attachment) =>
