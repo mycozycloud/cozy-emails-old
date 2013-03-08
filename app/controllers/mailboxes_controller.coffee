@@ -12,7 +12,7 @@ mimelib = require "mimelib"
 
 # shared functionnality : find the mailbox via its ID
 before ->
-    Mailbox.find req.params.id, (err, box) =>
+    Mailbox.find params.id, (err, box) =>
         if err
             send 500
         else if not box
