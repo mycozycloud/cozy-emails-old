@@ -19,9 +19,11 @@ before ->
             send 404
         else
             @box = box
-            @box.getAccount (err) =>
+            @box.getAccount (err, account) =>
                 if err
                     send 500
+                else
+                    @box.password = account.password
             next()
 , only: ['show', 'update', 'destroy',
          'sendmail', 'import', 'fetch', 'fetchandwait']
@@ -103,7 +105,7 @@ action 'update', ->
             unless @box.imported
                 @box.setupImport (err) =>
                     @box.doImport() unless err
-                send success: true
+            send success: true
 
 
 # DELETE /mailboxes/:id
