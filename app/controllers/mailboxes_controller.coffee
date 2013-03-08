@@ -52,7 +52,7 @@ action 'index', ->
         else
             addPassword boxes, (err) =>
                 if err
-                    send 500
+                    send "Can't decrypt password", 500
                 else
                     send mailboxes
 
@@ -61,18 +61,19 @@ action 'index', ->
 action 'create', ->
     password = body.password
     body.password = null
-    Mailbox.create body, (err, mailbox) =>
+    Mailbox.create body, (err, mailbox) ->
         if err
             send 500
         else
-            mailbox.createAccount password: password, (err, account) =>
+            mailbox.createAccount password: password, (err, account) ->
                 if err
                     send 500
                 else
-                    mailbox.password = account.password
-                    mailbox.setupImport (err) =>
-                        mailbox.doImport() unless err
-                    send mailbox
+                    mailbox.getAccount (err, account) ->
+                        mailbox.password = account.password
+                        mailbox.setupImport (err) =>
+                            mailbox.doImport() unless err
+                        send mailbox
 
 
 # GET /mailboxes/:id
