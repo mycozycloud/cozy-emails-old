@@ -24,7 +24,7 @@ before ->
                     send 500
                 else
                     @box.password = account.password
-            next()
+                next()
 , only: ['show', 'update', 'destroy',
          'sendmail', 'import', 'fetch', 'fetchandwait']
 
