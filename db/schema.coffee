@@ -1,7 +1,7 @@
 ###
   @file: schema.coffee
   @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-  @description: 
+  @description:
     Objects' descriptions.
 
 ###
@@ -34,7 +34,7 @@ Mail = define 'Mail', ->
     property 'hasAttachments', Boolean, default: false
     property 'inReplyTo'
     property 'references'
-    
+
 Attachment = define 'Attachment', ->
     property 'mailId'
     property 'cid', Number
@@ -44,7 +44,7 @@ Attachment = define 'Attachment', ->
     property 'checksum'
     property 'content', Text
     property 'mailbox',
-    
+
 Mail.hasMany Attachment, {as: 'attachments', foreignKey: 'mail_id'}
 
 MailSent = define 'MailSent', ->
@@ -57,23 +57,24 @@ MailSent = define 'MailSent', ->
     property 'cc',
     property 'bcc',
     property 'html', Text
-    
+
 MailToBe = define 'MailToBe', ->
     property 'remoteId', Number
     property 'mailbox'
-  
+
 # Mailbox object to store the information on connections to remote servers
 # and have attached mails
 Mailbox = define 'Mailbox', ->
-  
+
     # identification
     property 'name'
     property 'config', Number, default: 0
     property 'newMessages', default: 0
     property 'createdAt', Date, default: Date
-    
+
     # shared credentails for in and out bound
     property 'login'
+    property 'account'
     property 'password'
 
     # data for outbound mails - SMTP
@@ -95,14 +96,14 @@ Mailbox = define 'Mailbox', ->
     property 'checked', Boolean, default: true
     property 'color', default: "#0099FF" # color of the mailbox in the list
     property 'status', default: "Waiting for import" # status visible for user
-    
+
     # data for import
     # ready to be fetched for new mail
     property 'activated', Boolean, default: false
     property 'imported', Boolean, default: false
     property 'importing', Boolean, default: false
     property 'mailsToImport', Number, default: 0
-    
+
 Mailbox.hasMany Mail, {as: 'mails',  foreignKey: 'mailbox'}
 Mailbox.hasMany MailToBe, {as: 'mailsToBe', foreignKey: 'mailbox'}
 Mailbox.hasMany MailSent, {as: 'mailsSent', foreignKey: 'mailbox'}
@@ -110,7 +111,7 @@ Mailbox.hasMany MailSent, {as: 'mailsSent', foreignKey: 'mailbox'}
 
 # logs managment
 LogMessage = define 'LogMessage', ->
-    
+
     # type:
     #   "info" - standard message
     #   "success" - success message
@@ -118,7 +119,7 @@ LogMessage = define 'LogMessage', ->
     #   "error" - error message
     property 'type', String, default: "info"
     property 'subtype', String, default: "info"
-    
+
     # timeout:
     #   0 - message will be displayed until user click OK to discard it
     #   > 0 - message will be displayed only once, and will disappear after x seconds
