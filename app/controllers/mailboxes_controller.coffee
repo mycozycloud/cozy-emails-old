@@ -36,7 +36,8 @@ getAccount = (box, callback) ->
                     callback null, null
         else if err
             callback null, err
-        else callback account
+        else
+            callback account
 
 
 # shared functionnality : find the mailbox via its ID
@@ -48,10 +49,10 @@ before ->
             send 404
         else
             @box = box
-            getAccount box, (account, err) =>
+            getAccount @box, (account, err) =>
                 if err
                     send 500
-                else if not account?
+                else if not account
                     send 404
                 else
                     @box.password = account.password
@@ -71,7 +72,7 @@ action 'index', ->
                 if err
                     console.log "[addPassword] err: #{err}"
                     callback err
-                else if not account?
+                else if not account
                     addPassword boxes, callback
                 else
                     box.password = account.password
@@ -117,7 +118,7 @@ action 'show', ->
         getAccount @box, (account, err) =>
             if err
                 send 500
-            else if not account?
+            else if not account
                 send 404
             else
                 @box.account = account.password
@@ -163,7 +164,7 @@ action 'sendmail', ->
     getAccount @box, (account, err) =>
         if err
             send 500
-        else if not account?
+        else if not account
             send 404
         else
             @box.password = account.password
@@ -193,7 +194,7 @@ action 'fetchNew', ->
             getAccount box, (account, err) =>
                 if err
                     callback err
-                else if not account?
+                else if not account
                     fetchBoxes boxes, callbacks
                 else
                     box.password = account.password
