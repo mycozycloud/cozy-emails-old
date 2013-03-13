@@ -10,6 +10,35 @@ load "application"
 
 mimelib = require "mimelib"
 
+#helpers
+remove = (box, callback) ->
+    box.destroyMails (err) =>
+        callback err if err
+        box.destroyAttachments (err) =>
+            callback err if err
+            box.destroyMailsToBe (err) =>
+                callback err if err
+                box.destroyAccount (err) =>
+                    callback err if err
+                    box.destroy (err) =>
+                        if err
+                            callack err
+                        else
+                            callback()
+
+getAccount = (box, callback) ->
+    box.getAccount (err, account) =>
+        if err and String(err) is "Error: Data are corrupted"
+            remove box, (err) =>
+                if err
+                    callback null, err
+                else
+                    callback null, null
+        else if err
+            callback null, err
+        else callback account
+
+
 # shared functionnality : find the mailbox via its ID
 before ->
     Mailbox.find params.id, (err, box) =>
@@ -19,12 +48,14 @@ before ->
             send 404
         else
             @box = box
-            @box.getAccount (err, account) =>
+            getAccount box, (account, err) =>
                 if err
                     send 500
+                else if not account?
+                    send 404
                 else
                     @box.password = account.password
-                next()
+                    next()
 , only: ['show', 'update', 'destroy',
          'sendmail', 'import', 'fetch', 'fetchandwait']
 
@@ -36,9 +67,12 @@ action 'index', ->
     addPassword = (boxes, callback) ->
         if boxes.length > 0
             box = boxes.pop()
-            box.getAccount (err, account) =>
+            getAccount box, (account, err) =>
                 if err
+                    console.log "[addPassword] err: #{err}"
                     callback err
+                else if not account?
+                    addPassword boxes, callback
                 else
                     box.password = account.password
                     mailboxes.push box
@@ -48,6 +82,7 @@ action 'index', ->
 
     Mailbox.all (err, boxes) ->
         if err
+            console.log "[Mailbox.all] err: #{err}"
             send 500
         else
             addPassword boxes, (err) =>
@@ -69,7 +104,7 @@ action 'create', ->
                 if err
                     send 500
                 else
-                    mailbox.password = account.password
+                    mailbox.password = password
                     mailbox.setupImport (err) =>
                         mailbox.doImport() unless err
                     send mailbox
@@ -80,9 +115,11 @@ action 'show', ->
     if not @box
         send new Mailbox
     else
-        @box.getAccount (err, account) =>
+        getAccount @box, (account, err) =>
             if err
                 send 500
+            else if not account?
+                send 404
             else
                 @box.account = account.password
                 send @box
@@ -124,9 +161,11 @@ action 'destroy', ->
 # post /sendmail
 action 'sendmail', ->
     body.createdAt = new Date().valueOf()
-    @box.getAccount (err, account) =>
+    getAccount @box, (account, err) =>
         if err
             send 500
+        else if not account?
+            send 404
         else
             @box.password = account.password
             @box.sendMail body, (err) =>
@@ -152,9 +191,11 @@ action 'fetchNew', ->
     fetchBoxes = (boxes, callback) ->
         if boxes.length > 0
             box = boxes.pop()
-            box.getAccount (err, account) =>
+            getAccount box, (account, err) =>
                 if err
                     callback err
+                else if not account?
+                    fetchBoxes boxes, callbacks
                 else
                     box.password = account.password
                     if box.imported
