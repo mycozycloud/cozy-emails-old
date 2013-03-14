@@ -26,6 +26,7 @@ action 'index', ->
 
 
 # GET /mails/:id
+# Return mail corresponding to given ID.
 action 'show', ->
     send @mail
 
@@ -42,30 +43,9 @@ action 'update', ->
         if err
             send 500
         else
-            if markRead
-                Mailbox.find @mail.mailbox, (err, mailbox) =>
-                    if err or not mailbox?
-                        send error: "unknown mailbox can't update read flag", 500
-                    else
-                        mailbox.getAccount (err, account) =>
-                            mailbox.password = account.password
-                            mailbox.markMailAsRead @mail, (err) ->
-                                if err
-                                    send error: "can't update read flag", 500
-                                else
-                                    send 200
 
-
-# DELETE /mails/:id
-action 'destroy', ->
-    @mail.destroy (err) =>
-        if err
-            send 500
-        else
-            send 204
-
-
-# GET '/mailslist/:timestamp.:num'
+# GET '/mailslist/:timestamp/:num'
+# Get num mails until given timestamp.
 action 'getlist', ->
     num = parseInt req.params.num
     timestamp = parseInt req.params.timestamp
@@ -114,6 +94,7 @@ action 'getlistsent', ->
             send mails
 
 # GET '/mailsnew/:timestamp'
+# Get all mails after a given timestamp.
 action 'getnewlist', ->
     timestamp = parseInt params.timestamp
 
@@ -133,7 +114,8 @@ action 'getnewlist', ->
         else
             send mails
 
-# GET '/getattachments/:id
+# GET '/mails/:id/attachments
+# Get all attachements object for given mail.
 action 'getattachmentslist', ->
     query =
         key: @mail.id
@@ -144,9 +126,10 @@ action 'getattachmentslist', ->
         else
             send attachments
 
-# GET '/attachments/:id'
+# GET '/attachments/:id/'
+# Get file linked to attachement with given id.
 action 'getattachment', ->
-    Attachment.find req.params.id, (err, attachment) =>
+    Attachment.find params.id, (err, attachment) =>
         if err
             send 500
         else if not attachment

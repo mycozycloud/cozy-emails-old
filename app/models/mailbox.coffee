@@ -1,15 +1,3 @@
-###
-    @file: mailbox.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description:
-        The model used to wrap tasks on other servers:
-            * fetching mails with node-imap,
-            * parsing mail with nodeparser,
-            * saving mail to the database,
-            * sending mail with nodemailer,
-            * flagging mail on remote servers (not yet implemented)
-###
-
 MailSender = require '../../lib/mail_sender'
 MailGetter = require '../../lib/mail_getter'
 
@@ -25,18 +13,39 @@ Mailbox::toString = ->
 
 # Destroy helpers
 
+# Delete mailbox and everthing related mails, mailToBes, attachments,
+# accounts...
+Mailbox::remove =>
+    @log "destroying box..."
+    box.destroyMails (err) =>
+        @log err if err
+        box.destroyAttachments (err) =>
+            @log err if err
+            box.destroyMailsToBe (err) =>
+                @log err if err
+                box.destroyAccount (err) =>
+                    @log err if err
+                    box.destroy (err) =>
+                        @log err if err
+                        @log "destroying finished..."
+                        callback()
+
+# Destroy mails linked to current mailbox
 Mailbox::destroyMails = (callback) ->
     Mail.requestDestroy "bymailbox", key: @id, callback
 
+# Destroy mail to bes linked to current mailbox
 Mailbox::destroyMailsToBe = (callback) ->
     params =
         startkey: [@id]
         endkey: [@id + "0"]
     MailToBe.requestDestroy "bymailbox", params, callback
 
+# Destroy attachments linked to current mailbox
 Mailbox::destroyAttachments = (callback) ->
     Attachment.requestDestroy "bymailbox", key: @id, callback
 
+# Mark last fetched date to current mailbox and store a notification about it.
 Mailbox::fetchFinished = (callback) ->
     @updateAttributes imapLastFetchedDate: new Date(), (err) =>
         if err
@@ -44,6 +53,7 @@ Mailbox::fetchFinished = (callback) ->
         else
             LogMessage.createNewMailInfo @, callback
 
+# Mark fetch failed error and store a notification about it.
 Mailbox::fetchFailed = (callback) ->
     data =
         status: "Mail check failed."
@@ -54,6 +64,7 @@ Mailbox::fetchFailed = (callback) ->
         else
             LogMessage.createCheckMailError @, callback
 
+# Mark import as failed and stores a notification message about it.
 Mailbox::importError = (callback) ->
     data =
         imported: false
@@ -65,9 +76,11 @@ Mailbox::importError = (callback) ->
         else
             LogMessage.createImportPreparationError @, callback
 
+# Mark import as successfull and stores a notification message about it.
 Mailbox::importSuccessfull = (callback) ->
     data =
         imported: true
+        importing: true
         status: "Import successful !"
 
     @updateAttributes data, (error) =>
@@ -76,6 +89,8 @@ Mailbox::importSuccessfull = (callback) ->
         else
             LogMessage.createImportSuccess @, callback
 
+
+# Mark import as failed and stores a notification message about it.
 Mailbox::importFailed = (callback) ->
     data =
         imported: false
@@ -88,6 +103,7 @@ Mailbox::importFailed = (callback) ->
         else
             LogMessage.createBoxImportError @
 
+# Update box status with given progress and stores a notification about it.
 Mailbox::progress = (progress, callback) ->
     data =
         status: "Import #{progress} %"
@@ -96,6 +112,7 @@ Mailbox::progress = (progress, callback) ->
         LogMessage.createImportProgressInfo @, progress, callback
 
 
+# Mark import as failed and stores a notification message about it.
 Mailbox::markError = (error, callback) ->
     data =
         status: error.toString()
@@ -107,6 +124,8 @@ Mailbox::markError = (error, callback) ->
             LogMessage.createImportError error, callback
 
 
+# Send a mail by using smpt server set in the configuration of the current
+# mailbox.
 Mailbox::sendMail = (data, callback) ->
     sender = new MailSender @
 
@@ -119,6 +138,8 @@ Mailbox::sendMail = (data, callback) ->
             @log "Message sent successfully!"
             callback()
 
+
+# Connect mailbox to remote inbox.
 Mailbox::openInbox = (callback) ->
     @mailGetter = new MailGetter @
     @mailGetter.openInbox (err, server) =>
@@ -128,9 +149,14 @@ Mailbox::openInbox = (callback) ->
             @log "INBOX opened successfully"
         callback err, server
 
+
+# Close connection with the remote mailbox.
 Mailbox::closeBox = (callback) ->
     @mailGetter.closeBox callback
 
+
+# Get message corresponding to given remote ID, save it to database and
+# download its attachments.
 Mailbox::fetchMessage = (mailToBe, callback) ->
     if typeof mailToBe is "string"
         remoteId = mailToBe
@@ -157,6 +183,10 @@ Mailbox::fetchMessage = (mailToBe, callback) ->
                             return callback(err) if err
                             callback null, mail
 
+# Get last changes from remote inbox (defined by limit, get the limit latest
+# mails...) and update the current mailbox mails if needed.
+# Changes are based upon flags. If a mail has no flag it is considered as
+# deleted. Else it updates read and starred status if they change.
 Mailbox::synchronizeChanges = (limit, callback) ->
     @mailGetter.getLastFlags (err, flagDict) =>
         return callback err if err
@@ -173,6 +203,8 @@ Mailbox::synchronizeChanges = (limit, callback) ->
                     mail.destroy()
             callback()
 
+# Check if new mails arrives in remote inbox (base this on the last email
+# fetched id). Then it synchronize last recieved mails.
 Mailbox::getNewMails = (limit, callback) ->
 
     id = Number(@imapLastFetchedId) + 1
@@ -190,6 +222,7 @@ Mailbox::getNewMails = (limit, callback) ->
                     @closeBox =>
                         @fetchFinished callback
 
+# Load given range of mails inside inbox considering that box is already open.
 Mailbox::loadNewMails = (id, range, callback) ->
     @mailGetter.getMails range, (err, results) =>
         if err
@@ -201,9 +234,10 @@ Mailbox::loadNewMails = (id, range, callback) ->
             callback()
         else
             @log "#{results.length} mails to download"
-            LogMessage.createImportInfo results, @, ->
-                fetchNewMails 0, results, 0
+            fetchNewMails 0, results, 0
 
+    # Fetch new mail sequentially via a recursive function.
+    # Run callback when the fetching finished.
     fetchNewMails = (i, results, mailsDone) =>
         @log "fetch new mail: #{i}/#{results.length}"
 
@@ -234,13 +268,13 @@ Mailbox::loadNewMails = (id, range, callback) ->
                 callback()
 
 
-###
-    ## Specialised function to prepare a new mailbox for import and fetching new mail
-###
-
+# Prepare import of current mailbox. Grab and store all ids that should be
+# retrieved. This is useful in case of crash if the import should be start
+# again.
 Mailbox::setupImport = (callback) ->
 
-    return callback() if @importing # no need to initialize import again.
+    # no need to initialize import again if it was importing.
+    return callback() if @importing
 
     LogMessage.createImportStartedInfo @, =>
         @openInbox (err) =>
@@ -265,7 +299,8 @@ Mailbox::setupImport = (callback) ->
                             fetchMailIds results, 0, 0, results.length, 0
 
 
-    # for every ID, fetch the message
+    # Store all remote mail IDs via a recursive function.
+    # Run callback when it finishes.
     fetchMailIds = (results, i, mailsDone, mailsToGo, maxId) =>
 
         if i < results.length
@@ -305,7 +340,8 @@ Mailbox::setupImport = (callback) ->
                     @log  "Error occured - not all ids could be stored to the database"
                     callback()
 
-
+# Run the real import grab all mailtobes from database and fetch message one by
+# one based on this list.
 Mailbox::doImport = (callback) ->
     importMails = =>
         MailToBe.fromMailbox @, (err, mailsToBe) =>
@@ -323,12 +359,15 @@ Mailbox::doImport = (callback) ->
                 fetchMails mailsToBe, 0, mailsToBe.length, 0
 
     finishImport = =>
-        @updateAttributes {importing: false, imported: true}, (err) =>
+        @importSuccessfull (err) =>
             @log err if err
             @destroyMailsToBe (err) =>
                 @log err if err
                 callback() if callback?
 
+    # Recursive function to fetch all mails.
+    # Update progress status during the import (create a notification).
+    # Make import as failed if one message is not imported.
     fetchMails = (mailsToBe, i, mailsToGo, mailsDone) =>
         @log "Import progress:  #{i}/#{mailsToBe.length}"
 
@@ -357,7 +396,6 @@ Mailbox::doImport = (callback) ->
                             finishImport()
                     else
                         fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
-
         else
             @closeBox =>
                 if mailsToGo isnt mailsDone
@@ -371,7 +409,8 @@ Mailbox::doImport = (callback) ->
         @openInbox (err)  =>
             importMails()
 
-
+# Mark given mail as read. This is needed when the user read a message on his
+# Cozy, to synchronize the remote mailbox.
 Mailbox::markMailAsRead = (mail, callback) ->
     @log "Add read flag to mail #{mail.idRemoteMailbox}"
     @openInbox (err) =>

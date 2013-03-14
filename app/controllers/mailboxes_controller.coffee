@@ -10,29 +10,6 @@ load "application"
 
 mimelib = require "mimelib"
 
-#helpers
-remove = (box, callback) ->
-    box.destroyMails (err) =>
-        callback err if err
-        box.destroyAttachments (err) =>
-            callback err if err
-            box.destroyMailsToBe (err) =>
-                callback err if err
-                box.destroyAccount (err) =>
-                    callback err if err
-                    box.destroy (err) =>
-                        if err
-                            callack err
-                        else
-                            callback()
-
-getAccount = (box, callback) ->
-    box.getAccount (err, account) =>
-        if err
-            callback err
-        else
-            callback null, account
-
 
 # shared functionnality : find the mailbox via its ID
 before ->
@@ -44,7 +21,7 @@ before ->
             send 404
         else
             @box = box
-            getAccount @box, (err, account) =>
+            @box.getAccount (err, account) =>
                 if err
                     console.log err
                 else if not account
@@ -58,13 +35,14 @@ before ->
 
 
 # GET /mailboxes
+# Get the list of mailbox and set account informations (decrypted passwords).
 action 'index', ->
     mailboxes = []
 
     addPassword = (boxes, callback) ->
         if boxes.length > 0
             box = boxes.pop()
-            getAccount box, (err, account) =>
+            box.getAccount (err, account) =>
                 if err
                     console.log "[addPassword] err: #{err}"
                     
@@ -89,6 +67,7 @@ action 'index', ->
 
 
 # POST /mailboxes
+# Create a new mailbox and start a new import.
 action 'create', ->
     password = body.password
     body.password = null
@@ -106,11 +85,12 @@ action 'create', ->
                     send mailbox
 
 # GET /mailboxes/:id
+# Get mailbox with given id and set decrypted password on it.
 action 'show', ->
     if not @box
         send new Mailbox
     else
-        getAccount @box, (account, err) =>
+        @box.getAccount (account, err) =>
             if err
                 send 500
             else if not account
@@ -121,6 +101,8 @@ action 'show', ->
 
 
 # PUT /mailboxes/:id
+# Save given mailbox changes and start a new import if previous one did not
+# finished succesfully.
 action 'update', ->
     password = body.password
     delete body.password
@@ -141,22 +123,15 @@ action 'update', ->
 
 
 # DELETE /mailboxes/:id
+# Delete given mailbox and all related stuff (mails, attachments...)
 action 'destroy', ->
-    @box.destroyMails (err) =>
-        console.log "destroy mails: #{err}" if err
-        @box.destroyAttachments (err) =>
-            console.log "destroy attachments: #{err}" if err
-            @box.destroyMailsToBe (err) =>
-                console.log "destroy mailstobe: #{err}" if err
-                @box.destroyAccount (err) =>
-                    console.log "destroy account: #{err}" if err
-                    @box.destroy (err) ->
-                        send 204
+    @box.remove ->
+        send 204
 
 # post /sendmail
 action 'sendmail', ->
     body.createdAt = new Date().valueOf()
-    getAccount @box, (account, err) =>
+    @box.getAccount (err, account) =>
         if err
             send 500
         else if not account
@@ -182,11 +157,14 @@ action 'sendmail', ->
                             send success: true
 
 
+# Get account information for all mailbox (decrypted passwords) and load last
+# mails (+ synchronize last recieved mails). Do nothing if the mailbox is not
+# fully imported.
 action 'fetchNew', ->
     fetchBoxes = (boxes, callback) ->
         if boxes.length > 0
             box = boxes.pop()
-            getAccount box, (err, account) =>
+            box.getAccount (err, account) =>
                 if err
                     callback err
                 else if not account

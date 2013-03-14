@@ -10,6 +10,7 @@ Mail.dateId = (params, callback) ->
 Mail.fromMailboxByDate = (params, callback) ->
     Mail.request "dateByMailbox", params, callback
 
+
 # Get attachments returned by mailparser as parameter. Save them as couchdb
 # attachments wrapped in a dedicated model.
 Mail::saveAttachments = (attachments, callback) ->
@@ -32,6 +33,7 @@ Mail::saveAttachments = (attachments, callback) ->
                         @saveAttachments attachments, callback
     else
         callback()
+
 
 # Update mail attributes with given flags. Save model if changes occured.
 Mail::updateFlags = (flags, callback) ->
@@ -51,6 +53,8 @@ Mail::updateFlags = (flags, callback) ->
     if isModification
         @save callback
     else
+
+
 # Get attachments returned by mailparser as parameter. Save them as couchdb
 # attachments wrapped in a dedicated model.
 Mail::saveAttachments = (attachments, callback) ->
@@ -73,6 +77,7 @@ Mail::saveAttachments = (attachments, callback) ->
                         @saveAttachments attachments, callback
     else
         callback()
+
 
 # Update mail attributes with given flags. Save model if changes occured.
 Mail::updateFlags = (flags, callback) ->

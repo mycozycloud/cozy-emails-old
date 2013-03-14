@@ -1,10 +1,12 @@
 imap = require "imap"
 mailparser = require "mailparser"
 
+# Utility class to get mails.
 class MailGetter
 
     constructor: (@mailbox) ->
 
+    # Start connection with the server describe in the mailbox configuration.
     connect: (callback) ->
         @server = new imap.ImapConnection
             username: @mailbox.login
@@ -41,6 +43,7 @@ class MailGetter
             @mailbox.log 'No host defined'
             callback new Error 'No host defined'
              
+    # Start a connexion with remote IMAP server and open INBOX.
     openInbox: (callback) =>
         @connect (err) =>
             if err
@@ -52,6 +55,7 @@ class MailGetter
                 @server.openBox 'INBOX', false, (err, box) =>
                     callback err, @server
 
+    # Close INBOX and stop server connection.
     closeBox: (callback) =>
         @server.closeBox (err) =>
             if err
@@ -62,6 +66,15 @@ class MailGetter
                     @mailbox.log "logged out from IMAP server"
                     callback() if callback?
 
+    # Retrieve all mails.
+    getAllMails: (callback) =>
+        @server.search ['ALL'], callback
+
+    # Retrieve all with ID in a given range.
+    getMails: (range, callback) =>
+        @server.search [['UID', range]], callback
+    # Fetch mail with given remoteID and make a new
+    # mail object from it. Download its attachments and return them separately.
     fetchMail: (remoteId, callback) =>
         mail = null
         fetch = @server.fetch remoteId,
@@ -110,12 +123,7 @@ class MailGetter
                         messageFlags = message.flags
                         parser.end()
 
-    getAllMails: (callback) =>
-        @server.search ['ALL'], callback
-
-    getMails: (range, callback) =>
-        @server.search [['UID', range]], callback
-
+    # Convert date set recieved message into an usual date.
     getDateSent: (mailParsedObject) ->
         # choose the right date
         if mailParsedObject.headers.date
@@ -128,14 +136,17 @@ class MailGetter
         else
             dateSent = new Date()
 
+    # Get last 100 mails flags.
     getLastFlags: (callback) ->
         start = @mailbox.imapLastFetchedId - 100
         start = 1 if start < 1
         @getFlags "#{start}:#{@mailbox.imapLastFetchedId}", callback
 
+    # Get all the mailbox flags
     getAllFlags: (callback) ->
         @getFlags "1:#{@mailbox.imapLastFetchedId}", callback
 
+    # Get flags for a given range of IDs.
     getFlags: (range, callback) ->
         flagDict = {}
         @mailbox.log "fetch last modification started."
@@ -152,6 +163,7 @@ class MailGetter
             callback err, flagDict
         )
 
+    # Mark given mail as read by adding remotely the Seen flag to its flags.
     markRead: (mail, callback) ->
         @server.addFlags mail.idRemoteMailbox, 'Seen', callback
 
