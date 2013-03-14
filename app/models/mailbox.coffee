@@ -15,7 +15,7 @@ Mailbox::toString = ->
 
 # Delete mailbox and everthing related mails, mailToBes, attachments,
 # accounts...
-Mailbox::remove =>
+Mailbox::remove = (callback) ->
     @log "destroying box..."
     box.destroyMails (err) =>
         @log err if err
