@@ -8,9 +8,6 @@
 
 ###
 
-kue = require 'kue'
-jobs = kue.createQueue()
-
 app = module.exports = require('railway').createServer()
 
 if not module.parent
