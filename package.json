@@ -25,8 +25,6 @@
   , "nodemailer":       "= 0.3.29"
   , "imap":             "= 0.7.7"
   , "mailparser":       "= 0.3.0"
-  , "kue":              "= 0.4.1"
-  , "cluster":          "= 0.7.7"
   , "mimelib":		">= 0"
   , "request-json":     ">= 0"
   }
