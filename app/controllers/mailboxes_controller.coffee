@@ -28,35 +28,31 @@ remove = (box, callback) ->
 
 getAccount = (box, callback) ->
     box.getAccount (err, account) =>
-        if err and String(err) is "Error: Data are corrupted"
-            remove box, (err) =>
-                if err
-                    callback null, err
-                else
-                    callback null, null
-        else if err
-            callback null, err
+        if err
+            callback err
         else
-            callback account
+            callback null, account
 
 
 # shared functionnality : find the mailbox via its ID
 before ->
     Mailbox.find params.id, (err, box) =>
         if err
+            console.log err
             send 500
         else if not box
             send 404
         else
             @box = box
-            getAccount @box, (account, err) =>
+            getAccount @box, (err, account) =>
                 if err
-                    send 500
+                    console.log err
                 else if not account
-                    send 404
-                else
+                    @box.log "no account object set on this mailbox"
+
+                if account?
                     @box.password = account.password
-                    next()
+                next()
 , only: ['show', 'update', 'destroy',
          'sendmail', 'import', 'fetch', 'fetchandwait']
 
@@ -68,16 +64,15 @@ action 'index', ->
     addPassword = (boxes, callback) ->
         if boxes.length > 0
             box = boxes.pop()
-            getAccount box, (account, err) =>
+            getAccount box, (err, account) =>
                 if err
                     console.log "[addPassword] err: #{err}"
-                    callback err
-                else if not account
-                    addPassword boxes, callback
-                else
+                    
+                if account?
                     box.password = account.password
-                    mailboxes.push box
-                    addPassword boxes, callback
+
+                mailboxes.push box
+                addPassword boxes, callback
         else
             callback()
 

@@ -239,13 +239,13 @@ Mailbox::loadNewMails = (id, range, callback) ->
 ###
 
 Mailbox::setupImport = (callback) ->
-    # global vars
-    mailbox = @
 
-    LogMessage.createImportStartedInfo mailbox, =>
+    return callback() if @importing # no need to initialize import again.
+
+    LogMessage.createImportStartedInfo @, =>
         @openInbox (err) =>
             if err
-                LogMessage.createImportPreparationError mailbox, =>
+                LogMessage.createImportPreparationError @, =>
                     callback err
             else
                 @mailGetter.getAllMails (err, results) =>
@@ -322,6 +322,13 @@ Mailbox::doImport = (callback) ->
             else
                 fetchMails mailsToBe, 0, mailsToBe.length, 0
 
+    finishImport = =>
+        @updateAttributes {importing: false, imported: true}, (err) =>
+            @log err if err
+            @destroyMailsToBe (err) =>
+                @log err if err
+                callback() if callback?
+
     fetchMails = (mailsToBe, i, mailsToGo, mailsDone) =>
         @log "Import progress:  #{i}/#{mailsToBe.length}"
 
@@ -347,7 +354,7 @@ Mailbox::doImport = (callback) ->
 
                     if mailsToGo is mailsDone
                         @importSuccessfull (err) ->
-                            callback() if callback?
+                            finishImport()
                     else
                         fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
 
@@ -355,7 +362,7 @@ Mailbox::doImport = (callback) ->
             @closeBox =>
                 if mailsToGo isnt mailsDone
                     @log "The box was not fully imported."
-                callback() if callback?
+                finishImport()
 
     @log "Start import"
     if @mailGetter?
