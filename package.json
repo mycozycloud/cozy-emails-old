@@ -9,8 +9,7 @@
   }
 , "main": "server.coffee"
 , "dependencies":
-  { "jade":             "= 0.27.6"
-  , "jade-ext":         "= 0.0.5"
+  { "jade":             "= 0.28.2"
   , "iconv":            "= 2.0.3"
   , "express":          "= 3.0.0"
   , "connect":          "= 2.6.1"
