@@ -273,7 +273,7 @@ Mailbox::setupImport = (callback) ->
             idInt = parseInt id
             maxId = idInt if idInt > maxId
 
-            mailbox.mailsToBe.create remoteId: idInt, (error, mailToBe) =>
+            @mailsToBe.create remoteId: idInt, (error, mailToBe) =>
                 if error
                     @closeBox =>
                         @log "Error occured while saving email."

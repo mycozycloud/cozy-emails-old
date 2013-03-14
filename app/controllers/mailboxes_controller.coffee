@@ -186,7 +186,7 @@ action 'fetchNew', ->
     fetchBoxes = (boxes, callback) ->
         if boxes.length > 0
             box = boxes.pop()
-            getAccount box, (account, err) =>
+            getAccount box, (err, account) =>
                 if err
                     callback err
                 else if not account
@@ -206,10 +206,12 @@ action 'fetchNew', ->
 
     Mailbox.all (err, boxes) ->
         if err
+            console.log err
             send 500
         else
             fetchBoxes boxes, (err) ->
                 if err
+                    console.log err
                     send 500
                 else
                     send 200
