@@ -48,7 +48,7 @@ class exports.MailsList extends Backbone.View
         @$el.append box.render().el
             
     addNew: (mail) ->
-        box = new MailsListElement mail, window.app.mails
+        box = new MailsListElement mail, @collection 
         @$el.prepend box.render().el
 
     render: ->

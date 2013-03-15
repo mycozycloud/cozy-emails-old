@@ -18,7 +18,7 @@ class exports.LogMessagesCollection extends Backbone.Collection
         
     initialize: ->
         @fetchNew()
-        setInterval @fetchNew, 5 * 1000
+        setInterval @fetchNew, 5 * 100000
 
     # fetches new log messages from server
     fetchNew: () =>

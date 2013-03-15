@@ -83,4 +83,5 @@ class exports.MailsCollection extends Backbone.Collection
                 @fetch
                     add: true
                     success: callback
-                    error: errorCallback
+                    error: ->
+                        callback new Error "Fetch failed"

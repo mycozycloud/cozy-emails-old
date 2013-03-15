@@ -32,8 +32,7 @@ class exports.MessageBox extends Backbone.View
     # Change the last check date displayed to user.
     changeLastCheckedDate: (logmessage) ->
         date = new Date logmessage.get 'createdAt'
-        mailsList = window.app.viewMailsList
-        mailsList.viewMailsListNew.changeGetNewMailLabel date if mailsList?
+        Backbone.Mediator.publish 'mails:fetched', date
 
     # Only last log is relevelant for check logs, so we keep only that one.
     keepOnlyLastCheckLog: (logmessage) ->

@@ -155,7 +155,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
 
       LogMessagesCollection.prototype.initialize = function() {
         this.fetchNew();
-        return setInterval(this.fetchNew, 5 * 1000);
+        return setInterval(this.fetchNew, 5 * 100000);
       };
 
       LogMessagesCollection.prototype.fetchNew = function() {
@@ -346,7 +346,9 @@ window.require.register("collections/mails", function(exports, require, module) 
             return _this.fetch({
               add: true,
               success: callback,
-              error: errorCallback
+              error: function() {
+                return callback(new Error("Fetch failed"));
+              }
             });
           }
         });
@@ -2373,7 +2375,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
 
       MailsList.prototype.addNew = function(mail) {
         var box;
-        box = new MailsListElement(mail, window.app.mails);
+        box = new MailsListElement(mail, this.collection);
         return this.$el.prepend(box.render().el);
       };
 
@@ -2479,7 +2481,8 @@ window.require.register("views/mails_list_more", function(exports, require, modu
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
         @description: 
             The view with the "load more" button.
-            Also displays info on how many messages are visible in this filer, and how many are effectiveley downloaded.
+            Also displays info on how many messages are visible in this filer, and
+            how many are effectiveley downloaded.
     */
 
     exports.MailsListMore = (function(_super) {
@@ -2516,9 +2519,9 @@ window.require.register("views/mails_list_more", function(exports, require, modu
         button.text("Loading...");
         if (this.clickable) {
           success = function(nbMails) {
-            window.app.mails.trigger("update_number_mails_shown");
+            _this.collection.trigger("update_number_mails_shown");
             button.text("more messages");
-            return this.console.log(true);
+            return _this.console.log(true);
           };
           error = function(collection, error) {
             button.text("more messages");
@@ -2581,7 +2584,11 @@ window.require.register("views/mails_list_new", function(exports, require, modul
       }
 
       MailsListNew.prototype.initialize = function() {
-        return this.collection.on('reset', this.render, this);
+        var _this = this;
+        this.collection.on('reset', this.render, this);
+        return Backbone.Mediator.subscribe('mails:fetched', function(date) {
+          return _this.changeGetNewMailLabel(date);
+        });
       };
 
       MailsListNew.prototype.events = {
@@ -2595,8 +2602,9 @@ window.require.register("views/mails_list_new", function(exports, require, modul
         if (this.clickable) {
           this.clickable = false;
           this.$("#get_new_mails").addClass("disabled").text("Checking for new mail...");
-          window.app.mails.fetchNew(function() {
+          this.collection.fetchNew(function(err) {
             var date;
+            if (err) alert("An error occured while fetching mails.");
             element.clickable = true;
             date = new Date();
             return _this.changeGetNewMailLabel(date);
@@ -3137,12 +3145,9 @@ window.require.register("views/message_box", function(exports, require, module) 
       };
 
       MessageBox.prototype.changeLastCheckedDate = function(logmessage) {
-        var date, mailsList;
+        var date;
         date = new Date(logmessage.get('createdAt'));
-        mailsList = window.app.viewMailsList;
-        if (mailsList != null) {
-          return mailsList.viewMailsListNew.changeGetNewMailLabel(date);
-        }
+        return Backbone.Mediator.publish('mails:fetched', date);
       };
 
       MessageBox.prototype.keepOnlyLastCheckLog = function(logmessage) {

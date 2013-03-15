@@ -5,7 +5,8 @@
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
     @description: 
         The view with the "load more" button.
-        Also displays info on how many messages are visible in this filer, and how many are effectiveley downloaded.
+        Also displays info on how many messages are visible in this filer, and
+        how many are effectiveley downloaded.
 
 ###
 class exports.MailsListMore extends Backbone.View
@@ -36,8 +37,8 @@ class exports.MailsListMore extends Backbone.View
         # if not disabled
         if @clickable
             # fetch new data
-            success = (nbMails) ->
-                window.app.mails.trigger "update_number_mails_shown"
+            success = (nbMails) =>
+                @collection.trigger "update_number_mails_shown"
                 button.text "more messages"
                 @console.log true
                 

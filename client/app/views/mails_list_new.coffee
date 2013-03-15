@@ -17,6 +17,8 @@ class exports.MailsListNew extends Backbone.View
         
     initialize: ->
         @collection.on 'reset', @render, @
+        Backbone.Mediator.subscribe 'mails:fetched', (date) =>
+            @changeGetNewMailLabel date
 
     events:
          "click #get_new_mails": 'loadNewMails',
@@ -32,7 +34,8 @@ class exports.MailsListNew extends Backbone.View
                 .addClass("disabled")
                 .text("Checking for new mail...")
 
-            window.app.mails.fetchNew =>
+            @collection.fetchNew (err) =>
+                alert "An error occured while fetching mails." if err
                 element.clickable = true
                 date = new Date()
                 @changeGetNewMailLabel date
