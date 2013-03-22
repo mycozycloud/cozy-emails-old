@@ -17,15 +17,15 @@ Mailbox::toString = ->
 # accounts...
 Mailbox::remove = (callback) ->
     @log "destroying box..."
-    box.destroyMails (err) =>
+    @destroyMails (err) =>
         @log err if err
-        box.destroyAttachments (err) =>
+        @destroyAttachments (err) =>
             @log err if err
-            box.destroyMailsToBe (err) =>
+            @destroyMailsToBe (err) =>
                 @log err if err
-                box.destroyAccount (err) =>
+                @destroyAccount (err) =>
                     @log err if err
-                    box.destroy (err) =>
+                    @destroy (err) =>
                         @log err if err
                         @log "destroying finished..."
                         callback()
