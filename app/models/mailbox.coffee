@@ -76,11 +76,23 @@ Mailbox::importError = (callback) ->
         else
             LogMessage.createImportPreparationError @, callback
 
+Mailbox::importStarted = (callback) ->
+    data =
+        imported: false
+        importing: true
+        status: "Import successful !"
+
+    @updateAttributes data, (error) =>
+        if error
+            callback error
+        else
+            LogMessage.createImportStartedInfo @, callback
+ 
 # Mark import as successfull and stores a notification message about it.
 Mailbox::importSuccessfull = (callback) ->
     data =
         imported: true
-        importing: true
+        importing: false
         status: "Import successful !"
 
     @updateAttributes data, (error) =>
@@ -276,7 +288,7 @@ Mailbox::setupImport = (callback) ->
     # no need to initialize import again if it was importing.
     return callback() if @importing
 
-    LogMessage.createImportStartedInfo @, =>
+    @importStarted =>
         @openInbox (err) =>
             if err
                 LogMessage.createImportPreparationError @, =>

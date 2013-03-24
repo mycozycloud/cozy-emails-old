@@ -116,7 +116,7 @@ action 'update', ->
                     if err
                         send 500
 
-            unless @box.imported
+            unless @box.imported or @box.importing
                 @box.setupImport (err) =>
                     @box.doImport() unless err
             send success: true
