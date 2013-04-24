@@ -145,13 +145,12 @@ class exports.Mail extends BaseModel
 
     setRead: (read=true) ->
         stringFlags = @get "flags"
-        flags = "[]" if  typeof(stringFlags) is "object"
-        flags = JSON.parse stringFlags if typeof(stringFlags) is "string"
+        if  typeof(stringFlags) is "object" then flags = []
+        else if typeof(stringFlags) is "string"
+            flags = JSON.parse stringFlags
+
         if read
             unless "\\Seen" in flags
-                console.log flags
-                console.log typeof(flags)
-
                 flags.push("\\Seen")
                 box = window.app.appView.mailboxes.get @get("mailbox")
                 box?.set "newMessages", (parseInt(box.get("newMessages")) - 1)

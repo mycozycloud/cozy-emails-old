@@ -130,7 +130,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
     /*
         @file: logmessages.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             Backbone collection for holding log messages objects.
     */
 
@@ -163,7 +163,8 @@ window.require.register("collections/logmessages", function(exports, require, mo
         return this.fetch({
           add: true,
           url: "" + this.urlRoot + "/" + this.lastCreatedAt,
-          success: function() {
+          success: function(models) {
+            console.log(models);
             return _this.reset();
           }
         });
@@ -874,12 +875,13 @@ window.require.register("models/mail", function(exports, require, module) {
         var box, flags, flagsPrev, stringFlags;
         if (read == null) read = true;
         stringFlags = this.get("flags");
-        if (typeof stringFlags === "object") flags = "[]";
-        if (typeof stringFlags === "string") flags = JSON.parse(stringFlags);
+        if (typeof stringFlags === "object") {
+          flags = [];
+        } else if (typeof stringFlags === "string") {
+          flags = JSON.parse(stringFlags);
+        }
         if (read) {
           if (__indexOf.call(flags, "\\Seen") < 0) {
-            console.log(flags);
-            console.log(typeof flags);
             flags.push("\\Seen");
             box = window.app.appView.mailboxes.get(this.get("mailbox"));
             if (box != null) {
