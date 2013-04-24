@@ -346,7 +346,7 @@ window.require.register("collections/mails", function(exports, require, module) 
             return _this.fetch({
               add: true,
               success: function(data) {
-                return callback(null, data);
+                if (callback != null) return callback(null, data);
               },
               error: function() {
                 return callback(new Error("Fetch failed"));
@@ -871,13 +871,15 @@ window.require.register("models/mail", function(exports, require, module) {
       };
 
       Mail.prototype.setRead = function(read) {
-        var box, flags, flagsPrev;
+        var box, flags, flagsPrev, stringFlags;
         if (read == null) read = true;
-        flags = this.get("flags");
-        if (flags == null) flags = "[]";
-        if (typeof stringFlags === String) flags = JSON.parse(stringFlags);
+        stringFlags = this.get("flags");
+        if (typeof stringFlags === "object") flags = "[]";
+        if (typeof stringFlags === "string") flags = JSON.parse(stringFlags);
         if (read) {
           if (__indexOf.call(flags, "\\Seen") < 0) {
+            console.log(flags);
+            console.log(typeof flags);
             flags.push("\\Seen");
             box = window.app.appView.mailboxes.get(this.get("mailbox"));
             if (box != null) {
@@ -2608,7 +2610,6 @@ window.require.register("views/mails_list_new", function(exports, require, modul
           this.$("#get_new_mails").addClass("disabled").text("Checking for new mail...");
           this.collection.fetchNew(function(err) {
             var date;
-            console.log(err);
             if (err) alert("An error occured while fetching mails.");
             element.clickable = true;
             date = new Date();

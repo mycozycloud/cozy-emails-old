@@ -35,8 +35,6 @@ class exports.MailsListNew extends Backbone.View
                 .text("Checking for new mail...")
 
             @collection.fetchNew (err) =>
-                console.log err
-
                 alert "An error occured while fetching mails." if err
                 element.clickable = true
                 date = new Date()

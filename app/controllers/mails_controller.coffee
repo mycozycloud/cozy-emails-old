@@ -43,6 +43,7 @@ action 'update', ->
         if err
             send 500
         else
+            send success: true
 
 # GET '/mailslist/:timestamp/:num'
 # Get num mails until given timestamp.
@@ -144,4 +145,4 @@ action 'getattachment', ->
                     send 500
                 else
                     send 200
-            .pipe response
+            .pipe res
