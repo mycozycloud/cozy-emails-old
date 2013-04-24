@@ -155,7 +155,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
 
       LogMessagesCollection.prototype.initialize = function() {
         this.fetchNew();
-        return setInterval(this.fetchNew, 5 * 100000);
+        return setInterval(this.fetchNew, 5 * 1000);
       };
 
       LogMessagesCollection.prototype.fetchNew = function() {
@@ -164,8 +164,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
           add: true,
           url: "" + this.urlRoot + "/" + this.lastCreatedAt,
           success: function(models) {
-            console.log(models);
-            return _this.reset();
+            return _this.trigger('reset');
           }
         });
       };
@@ -3111,6 +3110,7 @@ window.require.register("views/menu_mailboxes_list_element", function(exports, r
 window.require.register("views/message_box", function(exports, require, module) {
   (function() {
     var LogMessage, MessageBoxElement,
+      __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
       __hasProp = Object.prototype.hasOwnProperty,
       __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
@@ -3121,7 +3121,7 @@ window.require.register("views/message_box", function(exports, require, module) 
     /*
             @file: message_box.coffee
             @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-            @description: 
+            @description:
                 Serves a place to display messages which are meant to be seen by user.
     */
 
@@ -3134,15 +3134,18 @@ window.require.register("views/message_box", function(exports, require, module) 
       function MessageBox(el, collection) {
         this.el = el;
         this.collection = collection;
+        this.render = __bind(this.render, this);
+        this.renderOne = __bind(this.renderOne, this);
         MessageBox.__super__.constructor.call(this);
       }
 
       MessageBox.prototype.initialize = function() {
-        this.collection.on("add", this.renderOne, this);
-        return this.collection.on("reset", this.render, this);
+        this.collection.on("add", this.renderOne);
+        return this.collection.on("reset", this.render);
       };
 
       MessageBox.prototype.renderOne = function(logmessage) {
+        console.log(logmessage);
         this.updateLastLogDate(logmessage);
         if (logmessage.get("subtype") === "check" && logmessage.get("type") === "info") {
           this.changeLastCheckedDate(logmessage);

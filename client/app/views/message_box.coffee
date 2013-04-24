@@ -4,23 +4,25 @@
 ###
         @file: message_box.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             Serves a place to display messages which are meant to be seen by user.
 ###
 
 class exports.MessageBox extends Backbone.View
-    
+
     id: "message_box"
 
     constructor: (@el, @collection) ->
         super()
 
     initialize: ->
-        @collection.on "add", @renderOne, @
-        @collection.on "reset", @render, @
+        @collection.on "add", @renderOne
+        @collection.on "reset", @render
 
     # Add a mailbox at the top of the list.
-    renderOne: (logmessage) ->
+    renderOne: (logmessage) =>
+        console.log logmessage
+
         @updateLastLogDate logmessage
         if logmessage.get("subtype") is "check" and
         logmessage.get("type") is "info"
@@ -51,7 +53,7 @@ class exports.MessageBox extends Backbone.View
         if Number(logmessage.get "createdAt") > Number(@collection.lastCreatedAt)
             @collection.lastCreatedAt = Number(logmessage.get "createdAt") + 2
 
-    render: ->
+    render: =>
         @previousCheckMessage = null
         @collection.each (message) =>
             @renderOne message

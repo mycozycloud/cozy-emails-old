@@ -18,7 +18,7 @@ class exports.LogMessagesCollection extends Backbone.Collection
 
     initialize: ->
         @fetchNew()
-        setInterval @fetchNew, 5 * 100000
+        setInterval @fetchNew, 5 * 1000
 
     # fetches new log messages from server
     fetchNew: =>
@@ -26,6 +26,4 @@ class exports.LogMessagesCollection extends Backbone.Collection
             add: true
             url: "#{@urlRoot}/#{@lastCreatedAt}"
             success: (models) =>
-                console.log models
-
-                @reset()
+                @trigger 'reset'

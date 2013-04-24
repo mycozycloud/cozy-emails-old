@@ -10,8 +10,8 @@ load 'application'
 
 # shared functionnality : find the mail via its ID
 before ->
-    Mail.find req.params.id, (err, mail) =>
-        if err or not mail
+    Mail.find params.id, (err, mail) =>
+        if err or not mail?
             send 404
         else
             @mail = mail
@@ -39,11 +39,53 @@ action 'update', ->
     if body.read and not @mail.read
         markRead = true
 
+
     @mail.updateAttributes body, (err) =>
         if err
             send 500
         else
-            send success: true
+            if markRead
+                Mailbox.find @mail.mailbox, (err, mailbox) =>
+                    if err or not mailbox?
+                        send error: "unknown mailbox can't update read flag", 500
+                    else
+                        mailbox.getAccount (err, account) =>
+                            mailbox.password = account.password
+                            mailbox.markMailAsRead @mail, (err) ->
+                                if err
+                                    send error: "can't update read flag", 500
+                                else
+                                    send 200
+            else
+                send success: true
+
+
+
+# GET '/mailslist/:timestamp/:num'
+# Get num mails until given timestamp.
+action 'getlist', ->
+    num = parseInt req.params.num
+    timestamp = parseInt req.params.timestamp
+
+    if params.id? and params.id isnt "undefined"
+        skip = 1
+    else
+        skip = 0
+
+    query =
+        startkey: [timestamp, params.id]
+        limit: num
+        descending: true
+        skip: skip
+
+    Mail.dateId query, (err, mails) ->
+        if err
+            send 500
+        else
+            if mails.length is 0
+                send []
+            else
+                send mails
 
 # GET '/mailslist/:timestamp/:num'
 # Get num mails until given timestamp.
