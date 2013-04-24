@@ -249,8 +249,8 @@ window.require.register("collections/mails", function(exports, require, module) 
     /*
         @file: mails.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
-            The collection to store emails - gets populated with the content of 
+        @description:
+            The collection to store emails - gets populated with the content of
             the database.
     */
 
@@ -345,7 +345,9 @@ window.require.register("collections/mails", function(exports, require, module) 
           success: function() {
             return _this.fetch({
               add: true,
-              success: callback,
+              success: function(data) {
+                return callback(null, data);
+              },
               error: function() {
                 return callback(new Error("Fetch failed"));
               }
@@ -657,7 +659,7 @@ window.require.register("models/mail", function(exports, require, module) {
     /*
         @file: mail.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             Model which defines the MAIL object.
     */
 
@@ -871,7 +873,9 @@ window.require.register("models/mail", function(exports, require, module) {
       Mail.prototype.setRead = function(read) {
         var box, flags, flagsPrev;
         if (read == null) read = true;
-        flags = JSON.parse(this.get("flags"));
+        flags = this.get("flags");
+        if (flags == null) flags = "[]";
+        if (typeof stringFlags === String) flags = JSON.parse(stringFlags);
         if (read) {
           if (__indexOf.call(flags, "\\Seen") < 0) {
             flags.push("\\Seen");
@@ -2567,7 +2571,7 @@ window.require.register("views/mails_list_new", function(exports, require, modul
     /*
         @file: mails_list_new.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             The view with the "load new" button.
     */
 
@@ -2604,6 +2608,7 @@ window.require.register("views/mails_list_new", function(exports, require, modul
           this.$("#get_new_mails").addClass("disabled").text("Checking for new mail...");
           this.collection.fetchNew(function(err) {
             var date;
+            console.log(err);
             if (err) alert("An error occured while fetching mails.");
             element.clickable = true;
             date = new Date();
