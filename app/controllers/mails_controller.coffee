@@ -39,7 +39,6 @@ action 'update', ->
     if body.read and not @mail.read
         markRead = true
 
-
     @mail.updateAttributes body, (err) =>
         if err
             send 500
@@ -58,7 +57,6 @@ action 'update', ->
                                     send 200
             else
                 send success: true
-
 
 
 # GET '/mailslist/:timestamp/:num'
