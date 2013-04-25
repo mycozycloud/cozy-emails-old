@@ -5208,7 +5208,9 @@ a[data-wysihtml5-command-value="green"] {
 
 a[data-wysihtml5-command-value="blue"] {
   color: blue;
-}body{padding-top:10px}
+}@font-face{font-family:styled;src:url("/fonts/maven-pro-light-300.otf")}
+@font-face{font-family:main;src:url("/fonts/signika-regular.ttf")}
+body{padding-top:10px;font-family:main}
 .sidebar-nav{padding:9px 0}
 div.column{height:770px;overflow:auto}
 #message_box{position:absolute;top:15px;right:15px;z-index:9}
@@ -5216,6 +5218,13 @@ iframe{border-top-width:0;border-right-width:0;border-bottom-width:0;border-left
 textarea#html{width:100%}
 blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 #newmailbutton,#sentbutton,#additional_bar,.btn-toolbar{display:none}
+.nav li .active a{background:#9ad3ff}
+.nav li a{color:#333}
+.nav li a:hover{background:#fe8800;color:#fff}
+.well{background:#fff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;border:0}
+#no-mails-message{padding-top:0}
+.btn{border:1px solid #34a6ff;background:#34a6ff;color:#fff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;text-shadow:none;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;font-family:main;font-weight:bold}
+.btn:hover{background:#45c7f5;color:#fff}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */
