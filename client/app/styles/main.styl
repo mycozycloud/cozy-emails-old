@@ -5,8 +5,26 @@
 //     The application-wide styling.
 // ###
 
+@import 'nib'
+
+blue = #34A6FF
+green = #5C5
+orange = #fe8800
+darkgrey = #333
+
+
+@font-face
+    font-family: styled
+    src: url('/fonts/maven-pro-light-300.otf');
+
+@font-face
+    font-family: main
+    src: url('/fonts/signika-regular.ttf');
+
+
 body
   padding-top: 10px
+  font-family: main
 
 .sidebar-nav
   padding: 9px 0
@@ -42,3 +60,36 @@ blockquote
 #additional_bar
 .btn-toolbar
     display: none
+
+.nav 
+    li
+        .active
+            a
+                background: blue + 50%
+        a
+            color: darkgrey
+        a:hover
+            background: orange
+            color: white
+
+.well
+    background: white
+    box-shadow: none
+    border: 0
+
+#no-mails-message
+    padding-top: 0px
+
+.btn
+    border: 1px solid blue
+    background: blue
+    color: white
+    box-shadow: none
+    text-shadow: none
+    border-radius: 0
+    font-family: main
+    font-weight: bold
+
+.btn:hover
+    background: #45C7F5
+    color: white
