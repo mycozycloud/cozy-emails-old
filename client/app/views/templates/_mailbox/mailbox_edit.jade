@@ -7,12 +7,6 @@ from.form-horizontal
         input.content(id="name", type="text", value= model.get("name")).input-xlarge
         p.help-block Name your mailbox to identify it easily.
     .control-group
-      label(for="smtpSendAs").control-label Your address
-      .controls
-        input.content(id="smtpSendAs", type="text", value= model.get("smtpSendAs")).input-xlarge
-        p.help-block This adress will be visible to people to whom you send mail.
-        p.help-block Like "johny@cozycloud.cc" or "Mickey Mouse <mickey@domain.com>".
-    .control-group
       label(for="login").control-label Your login
       .controls
         input.content(id="login", type="text", value= model.get("login")).input-xlarge
@@ -39,16 +33,6 @@ from.form-horizontal
   fieldset
     legend Server data
     .control-group
-      label(for="smtpServer").control-label SMTP host
-      .controls
-        input.content(id="smtpServer", type="text", value= model.get("smtpServer")).input-xlarge
-        p.help-block The address of your server. Like smtp.gmail.com
-    .control-group
-      label(for="SmtpSsl").control-label SMTP ssl
-      .controls
-        input.content(id="smtpSsl", type="text", value= model.get("smtpSsl").toString()).input-xlarge
-        p.help-block Everybody wants it, but some servers may not have it. Leave it "true" :)
-    .control-group
       label(for="imapServer").control-label IMAP host
       .controls
         input.content(id="imapServer", type="text", value= model.get("imapServer")).input-xlarge
@@ -65,5 +49,5 @@ from.form-horizontal
         p.help-block Everybody wants it, but some servers may not have it. Leave it "true" :)
 
   .form-actions
-    input.save_mailbox.isEdit.btn.btn-success(type='submit', value="Save")
-    a.cancel_edit_mailbox.isEdit.btn.btn-warning() Cancel
+    button.save_mailbox.isEdit.btn.btn-success save
+    button.cancel_edit_mailbox.isEdit.btn.btn-warning() cancel

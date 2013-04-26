@@ -26,20 +26,16 @@ body
   padding-top: 10px
   font-family: main
 
+legend
+    font-family: styled
+
+fieldset
+font-weight: normal
+
 .sidebar-nav
   padding: 9px 0
-  
-div.column
-  height : 770px
-  overflow: auto
 
-#message_box
-  position: absolute
-  top: 15px
-  right: 15px
-  z-index: 9
-  
-iframe
+ iframe
   border-top-width: 0px
   border-right-width: 0px
   border-bottom-width: 0px
@@ -54,6 +50,17 @@ blockquote
   border-left: 5px gray solid
   margin-left: 15px
   padding-left: 10px
+ 
+.column
+  height: 770px
+  overflow: auto
+
+#message_box
+  position: absolute
+  top: 15px
+  right: 15px
+  z-index: 9
+  
 
 #newmailbutton
 #sentbutton
@@ -77,6 +84,12 @@ blockquote
     box-shadow: none
     border: 0
 
+.form-actions
+    background: transparent
+
+.save_mailbox
+    margin-right: 5px
+
 #no-mails-message
     padding-top: 0px
 
@@ -91,5 +104,7 @@ blockquote
     font-weight: bold
 
 .btn:hover
-    background: #45C7F5
+    background: orange
     color: white
+    border-color: orange
+    text-shadow: none
