@@ -26,4 +26,3 @@ class exports.LogMessagesCollection extends Backbone.Collection
             add: true
             url: "#{@urlRoot}/#{@lastCreatedAt}"
             success: (models) =>
-                @trigger 'reset'

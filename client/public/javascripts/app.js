@@ -163,9 +163,7 @@ window.require.register("collections/logmessages", function(exports, require, mo
         return this.fetch({
           add: true,
           url: "" + this.urlRoot + "/" + this.lastCreatedAt,
-          success: function(models) {
-            return _this.trigger('reset');
-          }
+          success: function(models) {}
         });
       };
 
@@ -2333,7 +2331,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
     /*
         @file: mails_list.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             View to generate the list of mails - the second column from the left.
             Uses MailsListElement to generate each mail's view
     */

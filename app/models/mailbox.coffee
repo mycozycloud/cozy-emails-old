@@ -12,6 +12,16 @@ module.exports = (compound, Mailbox) ->
     Mailbox::toString = ->
         "[Mailbox #{@name} #{@id}]"
 
+    Mailbox.findByEmail = (email, callback) ->
+        Mailbox.request 'byEmail', key: email, (err, boxes) ->
+            console.log boxes
+
+            if err then callback err
+            else if boxes?.length is 0
+                callback null, null
+            else
+                callback null, boxes[0]
+
 
     # Destroy helpers
 
@@ -89,7 +99,7 @@ module.exports = (compound, Mailbox) ->
                 callback error
             else
                 LogMessage.createImportStartedInfo @, callback
-     
+
     # Mark import as successfull and stores a notification message about it.
     Mailbox::importSuccessfull = (callback) ->
         data =

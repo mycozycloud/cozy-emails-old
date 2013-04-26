@@ -4,7 +4,7 @@
 ###
     @file: mails_list.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         View to generate the list of mails - the second column from the left.
         Uses MailsListElement to generate each mail's view
 ###
@@ -24,14 +24,14 @@ class exports.MailsList extends Backbone.View
     # mail), or the bottom ("more mails" button) of the list.
     treatAdd: (mail) ->
         dateValueOf = mail.get "dateValueOf"
-    
+
         # check if we are adding a new message, or an old one
         if dateValueOf <= @collection.timestampMiddle
             # update timestamp for the list of messages
             if dateValueOf < @collection.timestampOld
                 @collection.timestampOld = dateValueOf
                 @collection.lastIdOld = mail.get("id")
-    
+
             # add its view at the bottom of the list
             @addOne mail
         else
@@ -39,16 +39,16 @@ class exports.MailsList extends Backbone.View
             if dateValueOf > @collection.timestampNew
                 @collection.timestampNew = dateValueOf
                 @collection.lastIdNew = mail.get("id")
-        
+
             # add its view on top of the list
             @addNew mail
 
     addOne: (mail) ->
         box = new MailsListElement mail, @collection
         @$el.append box.render().el
-            
+
     addNew: (mail) ->
-        box = new MailsListElement mail, @collection 
+        box = new MailsListElement mail, @collection
         @$el.prepend box.render().el
 
     render: ->

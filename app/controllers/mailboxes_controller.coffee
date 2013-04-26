@@ -45,7 +45,7 @@ action 'index', ->
             box.getAccount (err, account) =>
                 if err
                     console.log "[addPassword] err: #{err}"
-                    
+
                 if account?
                     box.password = account.password
 
@@ -71,18 +71,23 @@ action 'index', ->
 action 'create', ->
     password = body.password
     body.password = null
-    Mailbox.create body, (err, mailbox) ->
-        if err
-            send 500
+
+    Mailbox.findByEmail body.login, (err, box) ->
+        console.log box
+
+        if err then send error: true, 500
+        else if box? then send error: "Box already exists", 400
         else
-            mailbox.createAccount password: password, (err, account) ->
-                if err
-                    send 500
+            Mailbox.create body, (err, mailbox) ->
+                if err then send error: true, 500
                 else
-                    mailbox.password = password
-                    mailbox.setupImport (err) =>
-                        mailbox.doImport() unless err
-                    send mailbox
+                    mailbox.createAccount password: password, (err, account) ->
+                        if err then send error: "Cannot save box password", 500
+                        else
+                            mailbox.password = password
+                            mailbox.setupImport (err) =>
+                                mailbox.doImport() unless err
+                            send mailbox
 
 # GET /mailboxes/:id
 # Get mailbox with given id and set decrypted password on it.

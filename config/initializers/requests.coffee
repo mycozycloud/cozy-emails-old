@@ -36,7 +36,9 @@ module.exports = (compound) ->
 
 
     # Mailboxes
+    byEmailRequest = -> emit doc.login, doc
     Mailbox.defineRequest "all", requests.all, requests.checkError
+    Mailbox.defineRequest "byEmail", byEmailRequest, requests.checkError
 
 
     # Log messages
