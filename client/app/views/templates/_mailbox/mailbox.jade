@@ -1,11 +1,6 @@
 h3 #{model.get('name')}
-p
-  i "#{model.get('smtpSendAs')}" 
-  i last check at #{model.imapLastFetchedDate()} 
-  
-if model.get("status")
-  p
-    i  status: #{model.get('status')}
-.btn-group
-  a.edit_mailbox.btn Edit
-  a.delete_mailbox.btn.btn-danger Delete
+    if model.get("status")
+        span.mailbox-status  (#{model.get('status')})
+div
+    button.edit-mailbox.btn edit
+    button.delete-mailbox.btn.btn-danger delete

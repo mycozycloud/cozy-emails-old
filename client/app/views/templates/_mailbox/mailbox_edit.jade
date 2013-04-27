@@ -42,11 +42,6 @@ from.form-horizontal
       .controls
         input.content(id="imapPort", type="text", value= model.get("imapPort")).input-xlarge
         p.help-block Usually 993.
-    .control-group
-      label(for="imapSecure").control-label IMAP secure
-      .controls
-        input.content(id="imapSecure", type="text", value= model.get("imapSecure").toString()).input-xlarge
-        p.help-block Everybody wants it, but some servers may not have it. Leave it "true" :)
 
   .form-actions
     button.save_mailbox.isEdit.btn.btn-success save

@@ -1647,7 +1647,7 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
     /*
         @file: mailboxes_list_element.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             The element of the list of mailboxes.
             mailboxes_list -> mailboxes_list_element
     */
@@ -1661,10 +1661,10 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
       MailboxesListElement.prototype.isEdit = false;
 
       MailboxesListElement.prototype.events = {
-        "click .edit_mailbox": "buttonEdit",
+        "click .edit-mailbox": "buttonEdit",
         "click .cancel_edit_mailbox": "buttonCancel",
         "click .save_mailbox": "buttonSave",
-        "click .delete_mailbox": "buttonDelete",
+        "click .delete-mailbox": "buttonDelete",
         "input input#name": "updateName",
         "change #color": "updateColor"
       };
@@ -1688,12 +1688,14 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
 
       MailboxesListElement.prototype.buttonEdit = function(event) {
         this.model.isEdit = true;
+        $("#add_mailbox").hide();
         return this.render();
       };
 
       MailboxesListElement.prototype.buttonCancel = function(event) {
         this.model.isEdit = false;
         if (this.model.isNew()) this.model.destroy();
+        $("#add_mailbox").show();
         return this.render();
       };
 
@@ -1707,7 +1709,20 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
         });
         this.model.isEdit = false;
         return this.model.save(data, {
-          success: this.render
+          success: function() {
+            $("#add_mailbox").show();
+            return this.render;
+          },
+          error: function(model, xhr) {
+            var msg;
+            msg = "Server error occured";
+            if (xhr.status === 400) {
+              data = JSON.parse(xhr.responseText);
+              msg = data.error;
+            }
+            alert(msg);
+            return $(event.target).removeClass("disabled").addClass("buttonSave");
+          }
         });
       };
 
@@ -1745,11 +1760,11 @@ window.require.register("views/mailboxes_list_new", function(exports, require, m
     Mailbox = require("../models/mailbox").Mailbox;
 
     /*
-      @file: mailboxes_list_new.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
-        The toolbar to add a new mailbox.
-        mailboxes_list -> mailboxes_list_new
+        @file: mailboxes_list_new.coffee
+        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+        @description:
+            The toolbar to add a new mailbox.
+            mailboxes_list -> mailboxes_list_new
     */
 
     exports.MailboxesListNew = (function(_super) {
@@ -1775,6 +1790,7 @@ window.require.register("views/mailboxes_list_new", function(exports, require, m
         event.preventDefault();
         newbox = new Mailbox();
         newbox.isEdit = true;
+        this.$("#add_mailbox").hide();
         return this.collection.add(newbox);
       };
 
@@ -3863,18 +3879,18 @@ window.require.register("views/templates/_mailbox/mailbox", function(exports, re
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<h3>' + escape((interp = model.get('name')) == null ? '' : interp) + '</h3><p><i>"' + escape((interp = model.get('smtpSendAs')) == null ? '' : interp) + '" </i><i>last check at ' + escape((interp = model.imapLastFetchedDate()) == null ? '' : interp) + ' </i></p>');
+  buf.push('<h3>' + escape((interp = model.get('name')) == null ? '' : interp) + '');
   if ( model.get("status"))
   {
-  buf.push('<p><i>status: ' + escape((interp = model.get('status')) == null ? '' : interp) + '</i></p>');
+  buf.push('<span');
+  buf.push(attrs({ "class": ('mailbox-status') }));
+  buf.push('>(' + escape((interp = model.get('status')) == null ? '' : interp) + ')</span>');
   }
-  buf.push('<div');
-  buf.push(attrs({ "class": ('btn-group') }));
-  buf.push('><a');
-  buf.push(attrs({ "class": ('edit_mailbox') + ' ' + ('btn') }));
-  buf.push('>Edit</a><a');
-  buf.push(attrs({ "class": ('delete_mailbox') + ' ' + ('btn') + ' ' + ('btn-danger') }));
-  buf.push('>Delete</a></div>');
+  buf.push('</h3><div><button');
+  buf.push(attrs({ "class": ('edit-mailbox') + ' ' + ('btn') }));
+  buf.push('>edit</button><button');
+  buf.push(attrs({ "class": ('delete-mailbox') + ' ' + ('btn') + ' ' + ('btn-danger') }));
+  buf.push('>delete</button></div>');
   }
   return buf.join("");
   };
@@ -3963,17 +3979,7 @@ window.require.register("views/templates/_mailbox/mailbox_edit", function(export
   buf.push(attrs({ 'id':("imapPort"), 'type':("text"), 'value':(model.get("imapPort")), "class": ('content') + ' ' + ('input-xlarge') }));
   buf.push('/><p');
   buf.push(attrs({ "class": ('help-block') }));
-  buf.push('>Usually 993.</p></div></div><div');
-  buf.push(attrs({ "class": ('control-group') }));
-  buf.push('><label');
-  buf.push(attrs({ 'for':("imapSecure"), "class": ('control-label') }));
-  buf.push('>IMAP secure</label><div');
-  buf.push(attrs({ "class": ('controls') }));
-  buf.push('><input');
-  buf.push(attrs({ 'id':("imapSecure"), 'type':("text"), 'value':(model.get("imapSecure").toString()), "class": ('content') + ' ' + ('input-xlarge') }));
-  buf.push('/><p');
-  buf.push(attrs({ "class": ('help-block') }));
-  buf.push('>Everybody wants it, but some servers may not have it. Leave it "true" :)</p></div></div></fieldset><div');
+  buf.push('>Usually 993.</p></div></div></fieldset><div');
   buf.push(attrs({ "class": ('form-actions') }));
   buf.push('><button');
   buf.push(attrs({ "class": ('save_mailbox') + ' ' + ('isEdit') + ' ' + ('btn') + ' ' + ('btn-success') }));

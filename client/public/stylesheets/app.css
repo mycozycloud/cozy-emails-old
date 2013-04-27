@@ -5212,16 +5212,19 @@ a[data-wysihtml5-command-value="blue"] {
 @font-face{font-family:main;src:url("/fonts/signika-regular.ttf")}
 body{padding-top:10px;font-family:main}
 legend{font-family:styled}
-fieldset{font-weight:normal}
-.sidebar-nav{padding:9px 0}
+fieldset,font-weight: normal,.sidebar-nav{padding:9px 0}
 iframe{border-top-width:0;border-right-width:0;border-bottom-width:0;border-left-width:0;width:100%}
 textarea#html{width:100%}
 blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
+.mailbox_well input{border:1px solid #d3d3d3;-webkit-box-shadow:0;-moz-box-shadow:0;box-shadow:0;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:none;font-family:styled,helvetica}
+.mailbox_well input:hover{border:1px solid #34a6ff;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:inset 1px 1px 2px rgba(100,100,100,0.10);color:#333}
+.mailbox_well input:focus,.mailbox_well input:active{border:1px solid #fe8800;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
+.mailbox_well .controls p{font-size:11px}
 .column{height:770px;overflow:auto}
 #message_box{position:absolute;top:15px;right:15px;z-index:9}
 #newmailbutton,#sentbutton,#additional_bar,.btn-toolbar{display:none}
 .nav li .active a{background:#9ad3ff}
-.nav li a{color:#333}
+.nav li a{color:#ccc}
 .nav li a:hover{background:#fe8800;color:#fff}
 .well{background:#fff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;border:0}
 .form-actions{background:transparent}
@@ -5229,6 +5232,9 @@ blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 #no-mails-message{padding-top:0}
 .btn{border:1px solid #34a6ff;background:#34a6ff;color:#fff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;text-shadow:none;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;font-family:main;font-weight:bold}
 .btn:hover{background:#fe8800;color:#fff;border-color:#fe8800;text-shadow:none}
+.mailbox_well{border-bottom:1px solid #d3d3d3;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0}
+.edit-mailbox{margin-right:5px}
+.mailbox-status{margin-left:10px;font-weight:normal;font-size:14px}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */
