@@ -1411,7 +1411,7 @@ window.require.register("views/app", function(exports, require, module) {
     /*
         @file: app.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             The application's main view - creates other views, lays things out.
     */
 
@@ -1446,9 +1446,10 @@ window.require.register("views/app", function(exports, require, module) {
           }
           return e[a + "Height"];
         };
-        $("body").height(viewport() - 10);
-        $("#content").height(viewport() - 10);
-        return $(".column").height(viewport() - 10);
+        $("body").height(viewport());
+        $("#content").height(viewport());
+        $(".column").height(viewport());
+        return $("#sidebar").height(viewport());
       };
 
       AppView.prototype.setLayoutMenu = function(callback) {
@@ -1540,7 +1541,8 @@ window.require.register("views/app", function(exports, require, module) {
         } else {
           this.$("#no-mails-message").hide();
         }
-        return this.resize();
+        this.resize();
+        return this.$("#column_mails_list").niceScroll();
       };
 
       AppView.prototype.setLayoutMailsSent = function() {
@@ -1700,7 +1702,9 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
       };
 
       MailboxesListElement.prototype.buttonSave = function(event) {
-        var data, input;
+        var data, input,
+          _this = this;
+        if ($(event.target).hasClass("disabled")) return false;
         $(event.target).addClass("disabled").removeClass("buttonSave");
         input = this.$(".content");
         data = {};
@@ -1711,7 +1715,7 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
         return this.model.save(data, {
           success: function() {
             $("#add_mailbox").show();
-            return this.render;
+            return _this.render();
           },
           error: function(model, xhr) {
             var msg;
@@ -2428,7 +2432,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
     /*
         @file: mails_list_element.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             The element on the list of mails. Reacts for events, and stuff.
     */
 
@@ -2456,7 +2460,8 @@ window.require.register("views/mails_list_element", function(exports, require, m
 
       MailsListElement.prototype.setActiveMail = function(event) {
         this.collection.setActiveMail(this.model);
-        this.render();
+        $(".table tr").removeClass("active");
+        this.$el.addClass("active");
         if (!this.model.get('read')) this.collection.setActiveMailAsRead();
         return this.collection.trigger("change_active_mail");
       };
@@ -2476,7 +2481,6 @@ window.require.register("views/mails_list_element", function(exports, require, m
         template = require('./templates/_mail/mail_list');
         this.$el.html(template({
           model: this.model,
-          active: this.active,
           visible: this.visible
         }));
         return this;
@@ -3504,17 +3508,15 @@ window.require.register("views/templates/_mail/mail_big", function(exports, requ
   buf.push('><i');
   buf.push(attrs({ "class": ('icon-remove') }));
   buf.push('></i>Delete\n</a></div></div><div');
-  buf.push(attrs({ "class": ('well') }));
-  buf.push('><p>From: ' + escape((interp = model.from()) == null ? '' : interp) + '\n');
+  buf.push(attrs({ "class": ('well') + ' ' + ('mail-panel') }));
+  buf.push('><p>' + escape((interp = model.fromShort()) == null ? '' : interp) + ' \n<i');
+  buf.push(attrs({ "class": ('date') }));
+  buf.push('>' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
   if ( model.get("cc"))
   {
   buf.push('<p>CC:  ' + escape((interp = model.cc()) == null ? '' : interp) + '\n</p>');
   }
-  buf.push('</p><p><i');
-  buf.push(attrs({ 'style':('color: lightgray;') }));
-  buf.push('>sent ' + escape((interp = model.date()) == null ? '' : interp) + '</i><br');
-  buf.push(attrs({  }));
-  buf.push('/></p><h3>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</h3><br');
+  buf.push('</p><h3>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</h3><br');
   buf.push(attrs({  }));
   buf.push('/>');
   if ( model.hasHtml())
@@ -3532,7 +3534,9 @@ window.require.register("views/templates/_mail/mail_big", function(exports, requ
   buf.push('</div>');
   if ( model.hasAttachments())
   {
-  buf.push('<div');
+  buf.push('<h3');
+  buf.push(attrs({ "class": ('attachments-title') }));
+  buf.push('>attachments</h3><div');
   buf.push(attrs({ 'id':('attachments_list'), "class": ('well') }));
   buf.push('></div>');
   }
@@ -3723,12 +3727,7 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   {
   buf.push('<td');
   buf.push(attrs({ 'style':('width: 5px; padding: 0; background-color: ' + model.getColor() + ';') }));
-  buf.push('></td>');
-  if ( active)
-  {
-  buf.push('<td');
-  buf.push(attrs({ 'style':('background-color: lightgray; overflow: hidden;') }));
-  buf.push('><p>');
+  buf.push('></td><td><p>');
   if ( model.isUnread())
   {
   buf.push('<strong>' + escape((interp = model.fromShort()) == null ? '' : interp) + '</strong>');
@@ -3737,6 +3736,7 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   {
   buf.push('' + escape((interp = model.fromShort()) == null ? '' : interp) + '\n');
   }
+  buf.push('<i>' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
   if ( model.hasAttachments())
   {
   buf.push('<i');
@@ -3749,11 +3749,6 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   buf.push(attrs({ "class": ('icon-star') }));
   buf.push('></i>');
   }
-  buf.push('<br');
-  buf.push(attrs({  }));
-  buf.push('/><i');
-  buf.push(attrs({ 'style':('color: black;') }));
-  buf.push('>' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
   if ( model.isUnread())
   {
   buf.push('<p><strong>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</strong></p>');
@@ -3763,45 +3758,6 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   buf.push('<p>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</p>');
   }
   buf.push('</p></td>');
-  }
-  else
-  {
-  buf.push('<td><p>');
-  if ( model.isUnread())
-  {
-  buf.push('<strong>' + escape((interp = model.fromShort()) == null ? '' : interp) + '</strong>');
-  }
-  else
-  {
-  buf.push('' + escape((interp = model.fromShort()) == null ? '' : interp) + '\n');
-  }
-  if ( model.hasAttachments())
-  {
-  buf.push('<i');
-  buf.push(attrs({ "class": ('icon-file') }));
-  buf.push('></i>');
-  }
-  if ( model.isFlagged())
-  {
-  buf.push('<i');
-  buf.push(attrs({ "class": ('icon-star') }));
-  buf.push('></i>');
-  }
-  buf.push('<br');
-  buf.push(attrs({  }));
-  buf.push('/><i');
-  buf.push(attrs({ 'style':('color: gray;') }));
-  buf.push('>' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
-  if ( model.isUnread())
-  {
-  buf.push('<p><strong>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</strong></p>');
-  }
-  else
-  {
-  buf.push('<p>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</p>');
-  }
-  buf.push('</p></td>');
-  }
   }
   }
   return buf.join("");
@@ -3842,16 +3798,16 @@ window.require.register("views/templates/_mail/mails", function(exports, require
   with (locals || {}) {
   var interp;
   buf.push('<div');
+  buf.push(attrs({ 'id':('no-mails-message'), "class": ('well') }));
+  buf.push('><h3>Hey !\n</h3><p>It looks like there are no mails to show.\n</p><p>If you\'re here for the first time, just click \n<a');
+  buf.push(attrs({ 'href':("#config-mailboxes") }));
+  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div><div');
   buf.push(attrs({ 'id':('button_get_new_mails') }));
   buf.push('></div><table');
   buf.push(attrs({ "class": ('table') + ' ' + ('table-striped') }));
   buf.push('><tbody');
   buf.push(attrs({ 'id':('mails_list_container') }));
   buf.push('></tbody></table><div');
-  buf.push(attrs({ 'id':('no-mails-message'), "class": ('well') }));
-  buf.push('><h3>Hey !\n</h3><p>It looks like there are no mails to show.\n</p><p>If you\'re here for the first time, just click \n<a');
-  buf.push(attrs({ 'href':("#config-mailboxes") }));
-  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div><div');
   buf.push(attrs({ 'id':('button_load_more_mails') }));
   buf.push('></div>');
   }
@@ -3886,11 +3842,11 @@ window.require.register("views/templates/_mailbox/mailbox", function(exports, re
   buf.push(attrs({ "class": ('mailbox-status') }));
   buf.push('>(' + escape((interp = model.get('status')) == null ? '' : interp) + ')</span>');
   }
-  buf.push('</h3><div><button');
+  buf.push('<button');
   buf.push(attrs({ "class": ('edit-mailbox') + ' ' + ('btn') }));
   buf.push('>edit</button><button');
   buf.push(attrs({ "class": ('delete-mailbox') + ' ' + ('btn') + ' ' + ('btn-danger') }));
-  buf.push('>delete</button></div>');
+  buf.push('>delete</button></h3>');
   }
   return buf.join("");
   };

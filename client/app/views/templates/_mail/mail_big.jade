@@ -22,15 +22,14 @@
       i.icon-remove
       | Delete
 
-.well
+.well.mail-panel
   p
-    | From: #{model.from()}
+    | #{model.fromShort()} 
+    i.date #{model.date()}
+
     if model.get("cc")
       p
         | CC:  #{model.cc()}
-  p
-    i(style='color: lightgray;') sent #{model.date()}
-    br
 
   h3 #{model.get("subject")}
   br
@@ -41,7 +40,9 @@
   else
     #mail_content_text
       !{model.text()}
+      
 if model.hasAttachments()
+  h3.attachments-title attachments
   #attachments_list.well
 
 .btn-toolbar

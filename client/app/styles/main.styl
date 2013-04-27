@@ -8,10 +8,13 @@
 @import 'nib'
 
 blue = #34A6FF
+lightblue = #CBE4FB
 green = #5C5
 orange = #fe8800
+lightorange = #FFC47F
 darkgrey = #333
-darkgrey = #CCC
+lightgrey = #CCC
+grey = #AAA
 
 
 @font-face
@@ -23,9 +26,16 @@ darkgrey = #CCC
     src: url('/fonts/signika-regular.ttf');
 
 
+html
+  overflow: hidden
+  box-sizing: border-box
+
 body
-  padding-top: 10px
+  padding: 0
+  margin: 0
+  overflow: hidden
   font-family: main
+  box-sizing: border-box
 
 legend
     font-family: styled
@@ -53,6 +63,7 @@ blockquote
     padding-left: 10px
  
 .mailbox_well
+    
     input
         border: 1px solid lightgrey
         box-shadow: 0
@@ -78,44 +89,6 @@ blockquote
     height: 770px
     overflow: auto
 
-#message_box
-    position: absolute
-    top: 15px
-    right: 15px
-    z-index: 9
-    
-
-#newmailbutton
-#sentbutton
-#additional_bar
-.btn-toolbar
-    display: none
-
-.nav 
-    li
-        .active
-            a
-                background: blue + 50%
-        a
-            color: darkgrey
-        a:hover
-            background: orange
-            color: white
-
-.well
-    background: white
-    box-shadow: none
-    border: 0
-
-.form-actions
-    background: transparent
-
-.save_mailbox
-    margin-right: 5px
-
-#no-mails-message
-    padding-top: 0px
-
 .btn
     border: 1px solid blue
     background: blue
@@ -132,11 +105,145 @@ blockquote
     border-color: orange
     text-shadow: none
 
+
+#mails_list_container
+    tr:hover
+        background: lightorange
+
+        td
+            background: lightorange
+
+    tr.active
+        background: lightblue
+
+        td
+            background: lightblue
+
+
+.row-fluid
+    overflow: hidden
+    margin: 0
+    padding: 0
+
+#content
+    overflow: hidden
+    margin: 0
+    padding: 0
+
+#message_box
+    position: absolute
+    top: 15px
+    right: 15px
+    z-index: 9
+
+#newmailbutton
+#sentbutton
+#additional_bar
+.btn-toolbar
+    display: none
+
+.nav 
+    li
+        .active
+            a
+                background: blue + 50%
+        a
+            color: darkgrey
+
+        a:hover
+            background: lightorange
+            color: white
+
+.well
+    background: white
+    box-shadow: none
+    border: 0
+
+.form-actions
+    background: transparent
+
+.save_mailbox
+    margin-right: 5px
+
+.container-fluid
+    padding: 0
+    margin: 0
+    overflow: hidden
+
+.mail-panel
+    margin-top: 10px
+    border: 1px solid lightgrey
+    box-shadow: 1px 1px 2px #DDDDDD
+    border-radius: 1px
+
+    h3
+        margin-top: 20px
+        font-family: styled
+        font-size: 22px
+
+#column_mail
+    h3.attachments-title
+        font-family: styled
+        font-size: 14px
+
+    a
+    a:visited
+    a:hover
+        color: blue
+
+    i
+        margin-right: 5px
+
+.date
+    margin: 0
+    padding: 0
+    margin-left: 10px
+    color: grey
+
+#sidebar
+    background: #F5F5F5
+    height: 100%
+    border-right: 1px solid lightgrey
+    border-bottom: 1px solid lightgrey
+
+    .well
+        background: #F5F5F5
+        padding-right: 0
+
+#no-mails-message
+    padding-top: 0px
+
+#add_more_mails
+#get_new_mails
+    margin: 10px
+    border-radius: 0
+
+#column_mail
+    margin-left: 0
+    box-shadow: inset 2px 0px 3px 1px lightgrey
+    padding: 0 20px
+    
+
+#menu_container
+    .active
+        a
+            background: lightblue
+            color: darkgrey
+            text-shadow: none
+    a
+        cursor: pointer
+
+#mail_content_html
+    margin: 0
+    padding: 0
+
 .mailbox_well
     border-bottom: 1px solid lightgrey
     border-radius: 0
+    margin-bottom: 0
 
 .edit-mailbox
+    margin-left: 20px
     margin-right: 5px
 
 .mailbox-status

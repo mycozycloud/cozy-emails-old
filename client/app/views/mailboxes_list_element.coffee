@@ -49,6 +49,8 @@ class exports.MailboxesListElement extends Backbone.View
 
     # save changes to server
     buttonSave: (event) ->
+        if $(event.target).hasClass("disabled") then return false
+
         $(event.target).addClass("disabled").removeClass("buttonSave")
         input = @$(".content")
         data = {}
@@ -56,9 +58,9 @@ class exports.MailboxesListElement extends Backbone.View
             data[input[i].id] = input[i].value
         @model.isEdit = false
         @model.save data,
-            success: ->
+            success: =>
                 $("#add_mailbox").show()
-                @render
+                @render()
             error: (model, xhr) ->
                 msg = "Server error occured"
                 if xhr.status is 400

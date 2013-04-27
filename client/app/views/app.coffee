@@ -13,7 +13,7 @@
 ###
     @file: app.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         The application's main view - creates other views, lays things out.
 
 ###
@@ -25,7 +25,7 @@ class exports.AppView extends Backbone.View
     initialize: ->
         # capture the resize event, to adjust the size of UI
         window.onresize = @resize
-        
+
         # put on the big layout
         @$el.html require('./templates/app')
         @containerMenu = @$("#menu_container")
@@ -33,7 +33,7 @@ class exports.AppView extends Backbone.View
         @viewMessageBox =
             new MessageBox @$("#message_box"), new LogMessagesCollection
         @setLayoutMenu()
-    
+
     # making sure the view takes 100% height of the viewport.
     resize: ->
         viewport = ->
@@ -43,23 +43,24 @@ class exports.AppView extends Backbone.View
                 a = "client"
                 e = document.documentElement or document.body
             e[a + "Height"]
-        $("body").height viewport() - 10
-        $("#content").height viewport() - 10
-        $(".column").height viewport() - 10
+        $("body").height viewport()
+        $("#content").height viewport()
+        $(".column").height viewport()
+        $("#sidebar").height viewport()
 
-        
+
 ###################################################
 ## COMMON
 ###################################################
-                
+
     # layout the dynamic menu
     setLayoutMenu: (callback) ->
-        
+
         # set ut the menu view
         @containerMenu.html require('./templates/menu')
         @mailboxMenu =
             new MenuMailboxesList $("#menu_mailboxes"), new MailboxCollection
-        
+
         @mailboxes = @mailboxMenu.collection
 
         # fetch necessary data
@@ -73,7 +74,7 @@ class exports.AppView extends Backbone.View
                 callback() if callback?
             error: =>
                 @$("#menu_mailboxes").html ""
-            
+
 
 ###################################################
 ## LAYOUTS
@@ -81,7 +82,7 @@ class exports.AppView extends Backbone.View
 
     # put on the layout to display mailboxes:
     setLayoutMailboxes: ->
-        
+
         # lay the mailboxes out
         @containerContent.html require('./templates/_layouts/layout_mailboxes')
 
@@ -89,10 +90,10 @@ class exports.AppView extends Backbone.View
             new MailboxesList @$("#mail_list_container"), @mailboxes
         @newMailboxesView =
             new MailboxesListNew @$("#add_mail_button_container"), @mailboxes
-        
+
         @setLayoutMenu =>
             @newMailboxesView.render()
-        
+
         @mailboxesView.render()
 
         # ensure the right size
@@ -106,7 +107,7 @@ class exports.AppView extends Backbone.View
         @containerContent.html require('./templates/_layouts/layout_compose_mail')
         window.app.viewComposeMail =
             new MailsCompose @$("#compose_mail_container"), @mailboxes
-        
+
         @setLayoutMenu ->
             window.app.viewComposeMail.render()
 
@@ -127,14 +128,14 @@ class exports.AppView extends Backbone.View
     setLayoutMails: ->
         # lay the mails out
         @containerContent.html require('./templates/_layouts/layout_mails')
-        
+
         # create views for the columns
         window.app.viewMailsList =
             new MailsColumn @$("#column_mails_list"), window.app.mails, @mailboxes
         window.app.viewMailsList.render()
         window.app.view_mail =
             new MailsElement @$("#column_mail"), window.app.mails
-        
+
         @$("#no-mails-message").hide()
 
         # fetch necessary data
@@ -155,7 +156,7 @@ class exports.AppView extends Backbone.View
                             @$("#column_mails_list tbody span").remove()
                             @showMailList()
 
-                
+
         else if window.app.mails.length is 0
             # fetch necessary data
             @$("#column_mails_list tbody").prepend "<span>loading...</span>"
@@ -167,10 +168,11 @@ class exports.AppView extends Backbone.View
                 @showMailList()
         else
             @$("#no-mails-message").hide()
-        
+
         # ensure the right size
         @resize()
-        
+        @$("#column_mails_list").niceScroll()
+
     # put on the layout to display mails:
     setLayoutMailsSent: ->
 
