@@ -5214,7 +5214,7 @@ html{overflow:hidden;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;bo
 body{padding:0;margin:0;overflow:hidden;font-family:main;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
 legend{font-family:styled}
 fieldset,font-weight: normal,.sidebar-nav{padding:9px 0}
-iframe{border-top-width:0;border-right-width:0;border-bottom-width:0;border-left-width:0;width:100%}
+iframe{border-top-width:0;border-right-width:0;border-bottom-width:0;border-left-width:0;width:100%;overflow-y:hidden}
 textarea#html{width:100%}
 blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 .mailbox_well input{border:1px solid #ccc;-webkit-box-shadow:0;-moz-box-shadow:0;box-shadow:0;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:none;font-family:styled,helvetica}
@@ -5228,13 +5228,15 @@ blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 #mails_list_container tr:hover td{background:#ffc47f}
 #mails_list_container tr.active{background:#cbe4fb;}
 #mails_list_container tr.active td{background:#cbe4fb}
+#mails_list_container i.date{color:#aaa;margin-right:10px}
+#mails_list_container p.subject{font-family:styled;font-size:16px}
 .row-fluid{overflow:hidden;margin:0;padding:0}
 #content{overflow:hidden;margin:0;padding:0}
 #message_box{position:absolute;top:15px;right:15px;z-index:9}
 #newmailbutton,#sentbutton,#additional_bar,.btn-toolbar{display:none}
 .nav li .active a{background:#9ad3ff}
 .nav li a{color:#333}
-.nav li a:hover{background:#ffc47f;color:#fff}
+.nav li a:hover{background:#ffc47f;color:#333}
 .well{background:#fff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;border:0}
 .form-actions{background:transparent}
 .save_mailbox{margin-right:5px}
@@ -5256,6 +5258,7 @@ blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 #menu_container .active a{background:#cbe4fb;color:#333;text-shadow:none}
 #menu_container a{cursor:pointer}
 #mail_content_html{margin:0;padding:0}
+#no-mails-message{margin-top:20px}
 .mailbox_well{border-bottom:1px solid #ccc;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;margin-bottom:0}
 .edit-mailbox{margin-left:20px;margin-right:5px}
 .mailbox-status{margin-left:10px;font-weight:normal;font-size:14px}

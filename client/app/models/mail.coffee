@@ -77,8 +77,8 @@ class exports.Mail extends BaseModel
         out
 
     date: ->
-        parsed = new Date @get("date")
-        parsed.toUTCString()
+        parsed = moment @get("date")
+        parsed.calendar()
 
     respondingToText: ->
         "#{@fromShort()} on #{@date()} wrote:"

@@ -6,13 +6,13 @@ if visible
         strong #{model.fromShort()}
       else
         #{model.fromShort()}
-      i #{model.date()}
+      i.date #{model.date()}
       if model.hasAttachments()
         i.icon-file
       if model.isFlagged()
         i.icon-star
       if model.isUnread()
-        p 
+        p.subject
           strong #{model.get("subject")}
       else
-         p #{model.get("subject")}
+         p.subject #{model.get("subject")}

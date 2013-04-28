@@ -770,8 +770,8 @@ window.require.register("models/mail", function(exports, require, module) {
 
       Mail.prototype.date = function() {
         var parsed;
-        parsed = new Date(this.get("date"));
-        return parsed.toUTCString();
+        parsed = moment(this.get("date"));
+        return parsed.calendar();
       };
 
       Mail.prototype.respondingToText = function() {
@@ -3346,7 +3346,7 @@ window.require.register("views/templates/_layouts/layout_mails", function(export
   buf.push('><div');
   buf.push(attrs({ 'id':('column_mails_list'), "class": ('column') + ' ' + ('span4') }));
   buf.push('></div><div');
-  buf.push(attrs({ 'id':('column_mail'), "class": ('column') + ' ' + ('span8') }));
+  buf.push(attrs({ 'id':('column_mail'), "class": ('column') }));
   buf.push('></div></div>');
   }
   return buf.join("");
@@ -3739,7 +3739,9 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   {
   buf.push('' + escape((interp = model.fromShort()) == null ? '' : interp) + '\n');
   }
-  buf.push('<i>' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
+  buf.push('<i');
+  buf.push(attrs({ "class": ('date') }));
+  buf.push('>' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
   if ( model.hasAttachments())
   {
   buf.push('<i');
@@ -3754,11 +3756,15 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   }
   if ( model.isUnread())
   {
-  buf.push('<p><strong>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</strong></p>');
+  buf.push('<p');
+  buf.push(attrs({ "class": ('subject') }));
+  buf.push('><strong>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</strong></p>');
   }
   else
   {
-  buf.push('<p>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</p>');
+  buf.push('<p');
+  buf.push(attrs({ "class": ('subject') }));
+  buf.push('>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</p>');
   }
   buf.push('</p></td>');
   }
@@ -4169,7 +4175,7 @@ window.require.register("views/templates/app", function(exports, require, module
   buf.push('><div');
   buf.push(attrs({ 'id':('menu_container'), "class": ('well') + ' ' + ('sidebar-nav') }));
   buf.push('></div></div><div');
-  buf.push(attrs({ 'id':('content'), "class": ('span10') }));
+  buf.push(attrs({ 'id':('content') }));
   buf.push('></div></div></div>');
   }
   return buf.join("");
