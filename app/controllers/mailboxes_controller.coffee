@@ -190,11 +190,11 @@ action 'fetchNew', ->
     Mailbox.all (err, boxes) ->
         if err
             console.log err
-            send 500
+            send error: true, 500
         else
             fetchBoxes boxes, (err) ->
                 if err
                     console.log err
-                    send 500
+                    send error: true, 500
                 else
-                    send 200
+                    send success: true, 200
