@@ -26,7 +26,7 @@ class exports.MailsList extends Backbone.View
         dateValueOf = mail.get "dateValueOf"
 
         # check if we are adding a new message, or an old one
-        if dateValueOf <= @collection.timestampMiddle
+        if dateValueOf < @collection.timestampNew
             # update timestamp for the list of messages
             if dateValueOf < @collection.timestampOld
                 @collection.timestampOld = dateValueOf

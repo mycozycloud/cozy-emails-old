@@ -294,7 +294,7 @@ window.require.register("collections/mails", function(exports, require, module) 
       MailsCollection.prototype.initialize = function() {
         this.on("change_active_mail", this.navigateMail, this);
         this.on("update_number_mails_shown", this.calculateMailsShown, this);
-        return setInterval(this.fetchNew, 1000 * 60);
+        return setInterval(this.fetchNew, 1000 * 30);
       };
 
       MailsCollection.prototype.setActiveMail = function(mail) {
@@ -326,28 +326,35 @@ window.require.register("collections/mails", function(exports, require, module) 
       };
 
       MailsCollection.prototype.fetchOlder = function(callback, errorCallback) {
+        var _this = this;
         this.url = "mails/" + this.timestampOld + "/" + this.mailsAtOnce + "/" + this.lastIdOld;
         return this.fetch({
           add: true,
           success: function(models) {
+            if (models.length > 0) {
+              _this.timestampNew = models.at(0).get("dateValueOf");
+            }
             return callback(models.length);
           },
           error: errorCallback
         });
       };
 
-      MailsCollection.prototype.fetchNew = function(callback, errorCallback) {
+      MailsCollection.prototype.fetchNew = function(callback) {
         var _this = this;
-        this.url = "mails/new/" + this.timestampNew + "/" + this.lastIdNew;
+        this.url = "mails/new/" + this.timestampNew + "/";
         return $.ajax('mails/fetch-new/', {
           success: function() {
             return _this.fetch({
               add: true,
-              success: function(data) {
+              success: function(models) {
+                if (models.length > 0) {
+                  _this.timestampNew = models.at(0).get("dateValueOf");
+                }
                 if (callback != null) return callback(null, data);
               },
               error: function() {
-                return callback(new Error("Fetch failed"));
+                return alert("Fetch new mail failed");
               }
             });
           }
@@ -1521,7 +1528,8 @@ window.require.register("views/app", function(exports, require, module) {
                   _this.$("#column_mails_list tbody").spin();
                   _this.$("#column_mails_list tbody span").remove();
                   _this.mailboxes.updateActiveMailboxes();
-                  return _this.showMailList();
+                  _this.showMailList();
+                  return window.app.mails.fetchNew();
                 }, function() {
                   _this.$("#column_mails_list tbody").spin();
                   _this.$("#column_mails_list tbody span").remove();
@@ -2391,7 +2399,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
       MailsList.prototype.treatAdd = function(mail) {
         var dateValueOf;
         dateValueOf = mail.get("dateValueOf");
-        if (dateValueOf <= this.collection.timestampMiddle) {
+        if (dateValueOf < this.collection.timestampNew) {
           if (dateValueOf < this.collection.timestampOld) {
             this.collection.timestampOld = dateValueOf;
             this.collection.lastIdOld = mail.get("id");
@@ -3177,40 +3185,16 @@ window.require.register("views/message_box", function(exports, require, module) 
       };
 
       MessageBox.prototype.renderOne = function(logmessage) {
-        console.log(logmessage);
-        this.updateLastLogDate(logmessage);
+        this.addNewBox(logmessage);
         if (logmessage.get("subtype") === "check" && logmessage.get("type") === "info") {
-          this.changeLastCheckedDate(logmessage);
-          return this.keepOnlyLastCheckLog(logmessage);
-        } else {
-          return this.addNewBox(logmessage);
+          return logmessage.destroy();
         }
-      };
-
-      MessageBox.prototype.changeLastCheckedDate = function(logmessage) {
-        var date;
-        date = new Date(logmessage.get('createdAt'));
-        return Backbone.Mediator.publish('mails:fetched', date);
-      };
-
-      MessageBox.prototype.keepOnlyLastCheckLog = function(logmessage) {
-        if (this.previousCheckMessage != null) {
-          this.collection.remove(this.previousCheckMessage);
-          this.previousCheckMessage.destroy();
-        }
-        return this.previousCheckMessage = logmessage;
       };
 
       MessageBox.prototype.addNewBox = function(logmessage) {
         var box;
         box = new MessageBoxElement(logmessage, this.collection);
         return this.$el.prepend(box.render().el);
-      };
-
-      MessageBox.prototype.updateLastLogDate = function(logmessage) {
-        if (Number(logmessage.get("createdAt")) > Number(this.collection.lastCreatedAt)) {
-          return this.collection.lastCreatedAt = Number(logmessage.get("createdAt")) + 2;
-        }
       };
 
       MessageBox.prototype.render = function() {

@@ -45,7 +45,7 @@ class exports.MailsCollection extends Backbone.Collection
     initialize: ->
         @on "change_active_mail", @navigateMail, @
         @on "update_number_mails_shown", @calculateMailsShown, @
-        setInterval @fetchNew, 1000 * 60
+        setInterval @fetchNew, 1000 * 30
 
     setActiveMail: (mail) ->
         @activeMail?.view?.active = false
@@ -67,22 +67,26 @@ class exports.MailsCollection extends Backbone.Collection
 
     # fetches older mails (the list of mails)
     fetchOlder: (callback, errorCallback) ->
-        @url = "mails/" + @timestampOld + "/" + @mailsAtOnce + "/" + @lastIdOld
+        @url = "mails/#{@timestampOld}/#{@mailsAtOnce}/#{@lastIdOld}"
         @fetch
             add: true
-            success: (models) ->
+            success: (models) =>
+                if models.length > 0
+                    @timestampNew = models.at(0).get("dateValueOf")
                 callback models.length
 
             error: errorCallback
 
     # fetches new mails from server
-    fetchNew: (callback, errorCallback) =>
-        @url = "mails/new/#{@timestampNew}/#{@lastIdNew}"
+    fetchNew: (callback) =>
+        @url = "mails/new/#{@timestampNew}/"
         $.ajax 'mails/fetch-new/',
             success: =>
                 @fetch
                     add: true
-                    success: (data) ->
+                    success: (models) =>
+                        if models.length > 0
+                            @timestampNew = models.at(0).get("dateValueOf")
                         callback null, data if callback?
                     error: ->
-                        callback new Error "Fetch failed"
+                        alert "Fetch new mail failed"

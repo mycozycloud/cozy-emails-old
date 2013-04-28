@@ -152,6 +152,7 @@ class exports.AppView extends Backbone.View
                             @$("#column_mails_list tbody span").remove()
                             @mailboxes.updateActiveMailboxes()
                             @showMailList()
+                            window.app.mails.fetchNew()
                         , =>
                             @$("#column_mails_list tbody").spin()
                             @$("#column_mails_list tbody span").remove()

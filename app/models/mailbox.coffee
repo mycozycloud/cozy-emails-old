@@ -58,12 +58,12 @@ module.exports = (compound, Mailbox) ->
         Attachment.requestDestroy "bymailbox", key: @id, callback
 
     # Mark last fetched date to current mailbox and store a notification about it.
-    Mailbox::fetchFinished = (callback) ->
+    Mailbox::fetchFinished = (nbNewMails, callback) ->
         @updateAttributes imapLastFetchedDate: new Date(), (err) =>
             if err
                 callback err
             else
-                LogMessage.createNewMailInfo @, callback
+                LogMessage.createNewMailInfo @, nbNewMails, callback
 
     # Mark fetch failed error and store a notification about it.
     Mailbox::fetchFailed = (callback) ->
@@ -237,7 +237,7 @@ module.exports = (compound, Mailbox) ->
         @log "Fetching new mails: #{range}"
 
         @openInbox (err) =>
-            @loadNewMails id, range,  (err) =>
+            @loadNewMails id, range,  (err, nbNewMails) =>
                 if err
                     @closeBox =>
                         @fetchFailed callback
@@ -245,7 +245,7 @@ module.exports = (compound, Mailbox) ->
                     @log "New Mails fetched"
                     @synchronizeChanges 100,  =>
                         @closeBox =>
-                            @fetchFinished callback
+                            @fetchFinished nbNewMails, callback
 
     # Load given range of mails inside inbox considering that box is already open.
     Mailbox::loadNewMails = (id, range, callback) ->
@@ -253,10 +253,10 @@ module.exports = (compound, Mailbox) ->
             if err
                 @log "Can't retrieve new mails"
                 console.log err
-                callback err
+                callback err, 0
             else if results.length is 0
                 @log "Nothing to download"
-                callback()
+                callback null, 0
             else
                 @log "#{results.length} mails to download"
                 fetchNewMails 0, results, 0
@@ -280,7 +280,7 @@ module.exports = (compound, Mailbox) ->
                             if err
                                 @log "can't update mailbox state"
                                 console.log err
-                                callback err
+                                callback err, 0
                             else
                                 mailsDone++
                                 fetchNewMails (i + 1), results, mailsDone
@@ -290,7 +290,7 @@ module.exports = (compound, Mailbox) ->
                     @log "Could not import all the mail. Retry"
                     callback new Error "Not full fetching"
                 else
-                    callback()
+                    callback null, results.length
 
 
     # Prepare import of current mailbox. Grab and store all ids that should be
