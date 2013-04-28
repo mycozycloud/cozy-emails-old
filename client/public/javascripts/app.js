@@ -1592,7 +1592,7 @@ window.require.register("views/mailboxes_list", function(exports, require, modul
     /*
         @file: mailboxes_list.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             Displays the list of configured mailboxes.
     */
 
@@ -1628,6 +1628,9 @@ window.require.register("views/mailboxes_list", function(exports, require, modul
           mailbox.isEdit = false;
           return _this.addOne(mailbox);
         });
+        if (this.collection.length === 0) {
+          this.$el.append('<p id="no-mailbox-msg">no mailbox found</p>');
+        }
         return this;
       };
 
@@ -1716,6 +1719,7 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
         return this.model.save(data, {
           success: function() {
             $("#add_mailbox").show();
+            $("#no-mailbox-msg").hide();
             return _this.render();
           },
           error: function(model, xhr) {

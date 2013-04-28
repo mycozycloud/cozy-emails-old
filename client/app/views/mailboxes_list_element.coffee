@@ -60,6 +60,7 @@ class exports.MailboxesListElement extends Backbone.View
         @model.save data,
             success: =>
                 $("#add_mailbox").show()
+                $("#no-mailbox-msg").hide()
                 @render()
             error: (model, xhr) ->
                 msg = "Server error occured"

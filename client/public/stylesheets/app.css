@@ -5258,6 +5258,7 @@ blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 #menu_container .active a{background:#cbe4fb;color:#333;text-shadow:none}
 #menu_container a{cursor:pointer}
 #mail_content_html{margin:0;padding:0}
+#no-mailbox-msg{margin:20px}
 #no-mails-message{margin-top:20px}
 .mailbox_well{border-bottom:1px solid #ccc;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;margin-bottom:0}
 .edit-mailbox{margin-left:20px;margin-right:5px}
