@@ -72,8 +72,15 @@ class exports.MailboxesListElement extends Backbone.View
                 $(event.target).removeClass("disabled").addClass("buttonSave")
 
     buttonDelete: (event) =>
-        $(event.target).addClass("disabled").removeClass("delete_mailbox")
-        @model.destroy()
+        deleteMailbox = =>
+            $(event.target).addClass("disabled").removeClass("delete_mailbox")
+            @model.destroy()
+
+        $("#confirm-delete-modal .yes-button").bind 'click', deleteMailbox
+        $("#confirm-delete-modal").modal()
+        $("#confirm-delete-modal").bind 'hide', =>
+            $("#confirm-delete-modal .yes-button").unbind 'click', deleteMailbox
+
 
     render: =>
         # whether we should activate the edit mode or not

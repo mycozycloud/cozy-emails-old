@@ -1736,8 +1736,17 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
       };
 
       MailboxesListElement.prototype.buttonDelete = function(event) {
-        $(event.target).addClass("disabled").removeClass("delete_mailbox");
-        return this.model.destroy();
+        var deleteMailbox,
+          _this = this;
+        deleteMailbox = function() {
+          $(event.target).addClass("disabled").removeClass("delete_mailbox");
+          return _this.model.destroy();
+        };
+        $("#confirm-delete-modal .yes-button").bind('click', deleteMailbox);
+        $("#confirm-delete-modal").modal();
+        return $("#confirm-delete-modal").bind('hide', function() {
+          return $("#confirm-delete-modal .yes-button").unbind('click', deleteMailbox);
+        });
       };
 
       MailboxesListElement.prototype.render = function() {
@@ -4180,7 +4189,21 @@ window.require.register("views/templates/app", function(exports, require, module
   buf.push(attrs({ 'id':('menu_container'), "class": ('well') + ' ' + ('sidebar-nav') }));
   buf.push('></div></div><div');
   buf.push(attrs({ 'id':('content') }));
-  buf.push('></div></div></div>');
+  buf.push('></div></div></div><div');
+  buf.push(attrs({ 'id':('confirm-delete-modal'), 'tabindex':("-1"), 'role':("dialog"), 'aria-hidden':("true"), "class": ('modal') + ' ' + ('hide') + ' ' + ('fade') + ' ' + ('in') }));
+  buf.push('><div');
+  buf.push(attrs({ "class": ('modal-header') }));
+  buf.push('><h3');
+  buf.push(attrs({ 'id':('confirm-delete-modal-label') }));
+  buf.push('>Warning!</h3></div><div');
+  buf.push(attrs({ "class": ('modal-body') }));
+  buf.push('><p>You are about to delete a mailbox and all its mails. Do you\nyou want to continue?\n</p></div><div');
+  buf.push(attrs({ "class": ('modal-footer') }));
+  buf.push('><button');
+  buf.push(attrs({ 'data-dismiss':("modal"), 'aria-hidden':("true"), "class": ('yes-button') + ' ' + ('btn') }));
+  buf.push('>Yes</button><button');
+  buf.push(attrs({ 'data-dismiss':("modal"), 'aria-hidden':("true"), "class": ('no-button') + ' ' + ('btn') + ' ' + ('btn-info') }));
+  buf.push('>No</button></div></div>');
   }
   return buf.join("");
   };
