@@ -47,6 +47,7 @@ class exports.AppView extends Backbone.View
         $("#content").height viewport()
         $(".column").height viewport()
         $("#sidebar").height viewport()
+        $("#column_mail").width( $(window).width - $("#column_mails_list").width() - $("#sidebar").width())
 
 
 ###################################################

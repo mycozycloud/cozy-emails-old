@@ -1449,7 +1449,8 @@ window.require.register("views/app", function(exports, require, module) {
         $("body").height(viewport());
         $("#content").height(viewport());
         $(".column").height(viewport());
-        return $("#sidebar").height(viewport());
+        $("#sidebar").height(viewport());
+        return $("#column_mail").width($(window).width - $("#column_mails_list").width() - $("#sidebar").width());
       };
 
       AppView.prototype.setLayoutMenu = function(callback) {
@@ -3534,11 +3535,13 @@ window.require.register("views/templates/_mail/mail_big", function(exports, requ
   buf.push('</div>');
   if ( model.hasAttachments())
   {
-  buf.push('<h3');
+  buf.push('<div');
+  buf.push(attrs({ "class": ('attachments-box') }));
+  buf.push('><h3');
   buf.push(attrs({ "class": ('attachments-title') }));
   buf.push('>attachments</h3><div');
   buf.push(attrs({ 'id':('attachments_list'), "class": ('well') }));
-  buf.push('></div>');
+  buf.push('></div></div>');
   }
   buf.push('<div');
   buf.push(attrs({ "class": ('btn-toolbar') }));
@@ -3801,9 +3804,7 @@ window.require.register("views/templates/_mail/mails", function(exports, require
   buf.push(attrs({ 'id':('no-mails-message'), "class": ('well') }));
   buf.push('><h3>Hey !\n</h3><p>It looks like there are no mails to show.\n</p><p>If you\'re here for the first time, just click \n<a');
   buf.push(attrs({ 'href':("#config-mailboxes") }));
-  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div><div');
-  buf.push(attrs({ 'id':('button_get_new_mails') }));
-  buf.push('></div><table');
+  buf.push('>add/modify </a>from the menu.\n</p><p>If You just did it, and still see no messages, you may need to wait for us to download them for you.\nEnjoy  :)\n</p></div><table');
   buf.push(attrs({ "class": ('table') + ' ' + ('table-striped') }));
   buf.push('><tbody');
   buf.push(attrs({ 'id':('mails_list_container') }));
