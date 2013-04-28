@@ -120,6 +120,7 @@ module.exports = (compound, Mailbox) ->
             imported: false
             importing: false
             activated: false
+            status: "Import failed"
 
         @updateAttributes data, (error) =>
             if error
@@ -303,7 +304,7 @@ module.exports = (compound, Mailbox) ->
         @importStarted =>
             @openInbox (err) =>
                 if err
-                    LogMessage.createImportPreparationError @, =>
+                    @importFailed =>
                         callback err
                 else
                     @mailGetter.getAllMails (err, results) =>
