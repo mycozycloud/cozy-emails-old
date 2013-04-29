@@ -26,3 +26,5 @@ class exports.LogMessagesCollection extends Backbone.Collection
             add: true
             url: "#{@urlRoot}/#{@lastCreatedAt}"
             success: (models) =>
+                if models.length > 0
+                    @lastCreatedAt = models.at(0).get "createdAt"

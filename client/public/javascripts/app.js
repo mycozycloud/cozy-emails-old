@@ -163,7 +163,11 @@ window.require.register("collections/logmessages", function(exports, require, mo
         return this.fetch({
           add: true,
           url: "" + this.urlRoot + "/" + this.lastCreatedAt,
-          success: function(models) {}
+          success: function(models) {
+            if (models.length > 0) {
+              return _this.lastCreatedAt = models.at(0).get("createdAt");
+            }
+          }
         });
       };
 
@@ -1313,7 +1317,7 @@ window.require.register("routers/main_router", function(exports, require, module
     /*
         @file: main_router.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             The application router.
             Trying to recreate the minimum of object on every reroute.
     */
@@ -1550,8 +1554,7 @@ window.require.register("views/app", function(exports, require, module) {
         } else {
           this.$("#no-mails-message").hide();
         }
-        this.resize();
-        return this.$("#column_mails_list").niceScroll();
+        return this.resize();
       };
 
       AppView.prototype.setLayoutMailsSent = function() {
@@ -3218,7 +3221,7 @@ window.require.register("views/message_box_element", function(exports, require, 
   /*
       @file: message_box_element.coffee
       @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
+      @description:
           Serves a single message to user
   */
 
@@ -3246,7 +3249,9 @@ window.require.register("views/message_box_element", function(exports, require, 
 
       MessageBoxElement.prototype.onCloseClicked = function() {
         this.$el.fadeOut();
-        this.model.destroy();
+        if (this.model.get("type") !== "info" || this.model.get("type") !== "check") {
+          this.model.destroy();
+        }
         this.collection.remove(this.model);
         return this.remove();
       };

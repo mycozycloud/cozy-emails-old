@@ -3,7 +3,7 @@
 ###
     @file: main_router.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         The application router.
         Trying to recreate the minimum of object on every reroute.
 ###
@@ -40,10 +40,10 @@ class exports.MainRouter extends Backbone.Router
         app.appView.setLayoutMailboxes()
         $(".menu_option").removeClass("active")
         $("#mailboxesbutton").addClass("active")
-        
+
     mail : (path) ->
         @home()
-        
+
         # if the mail is already downloaded, show it
         if app.mails.get(path)?
             app.mails.activeMail = app.mails.get(path)

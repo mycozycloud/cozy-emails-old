@@ -173,7 +173,6 @@ class exports.AppView extends Backbone.View
 
         # ensure the right size
         @resize()
-        @$("#column_mails_list").niceScroll()
 
     # put on the layout to display mails:
     setLayoutMailsSent: ->

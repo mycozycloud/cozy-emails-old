@@ -113,25 +113,35 @@ action 'update', ->
     delete body.password
     @box.updateAttributes body, (err) =>
         if err
-            send 500
+            send error: true, 500
         else
             if password isnt @box.password
                 @box.password = password
                 @box.mergeAccount password: password, (err) =>
                     if err
-                        send 500
+                        send error: true, 500
+                    else
+                        unless @box.imported or @box.importing
+                            @box.setupImport (err) =>
+                                @box.doImport() unless err
+
+                        send success: true
 
             unless @box.imported or @box.importing
                 @box.setupImport (err) =>
                     @box.doImport() unless err
+
             send success: true
 
 
 # DELETE /mailboxes/:id
 # Delete given mailbox and all related stuff (mails, attachments...)
 action 'destroy', ->
-    @box.remove ->
-        send 204
+    unless @box.importing
+        @box.remove ->
+            send 204
+    else
+        send error: "Cannot delete the mailbox while importing.", 400
 
 # post /sendmail
 action 'sendmail', ->

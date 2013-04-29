@@ -67,19 +67,13 @@ module.exports = (compound, Mailbox) ->
 
     # Mark fetch failed error and store a notification about it.
     Mailbox::fetchFailed = (callback) ->
-        data =
-            status: "Mail check failed."
-
-        @updateAttributes data, (error) =>
-            if error
-                callback error
-            else
-                LogMessage.createCheckMailError @, callback
+        LogMessage.createCheckMailError @, callback
 
     # Mark import as failed and stores a notification message about it.
     Mailbox::importError = (callback) ->
         data =
             imported: false
+            importing: false
             status: "Could not prepare the import."
 
         @updateAttributes data, (error) =>
