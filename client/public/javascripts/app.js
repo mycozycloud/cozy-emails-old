@@ -702,14 +702,13 @@ window.require.register("models/mail", function(exports, require, module) {
       */
 
       Mail.prototype.asEmailList = function(field, out) {
-        var obj, parsed, _i, _len, _results;
+        var obj, parsed, _i, _len;
         parsed = JSON.parse(this.get(field));
-        _results = [];
         for (_i = 0, _len = parsed.length; _i < _len; _i++) {
           obj = parsed[_i];
-          _results.push(out += "" + obj.name + " <" + obj.address + ">, ");
+          out += "" + obj.name + " <" + obj.address + ">, ";
         }
-        return _results;
+        return out.substring(0, out.length - 3);
       };
 
       Mail.prototype.from = function() {
@@ -739,7 +738,8 @@ window.require.register("models/mail", function(exports, require, module) {
       Mail.prototype.cc = function() {
         var out;
         out = "";
-        if (this.get("cc")) this.asEmailList("cc", out);
+        if (this.get("cc")) out = this.asEmailList("cc", out);
+        console.log(out);
         return out;
       };
 

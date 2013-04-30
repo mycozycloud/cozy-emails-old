@@ -40,6 +40,7 @@ class exports.Mail extends BaseModel
         parsed = JSON.parse @get field
         for obj in parsed
             out += "#{obj.name} <#{obj.address}>, "
+        out.substring(0, out.length - 2)
 
     from: ->
         out = ""
@@ -59,7 +60,8 @@ class exports.Mail extends BaseModel
 
     cc: ->
         out = ""
-        @asEmailList "cc", out if @get "cc"
+        out = @asEmailList "cc", out if @get "cc"
+        console.log out
         out
 
     ccShort: ->
