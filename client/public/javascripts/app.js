@@ -3894,7 +3894,7 @@ window.require.register("views/templates/_mailbox/mailbox_edit", function(export
   buf.push(attrs({ 'value':("brown"), 'selected':("brown" === model.get("color")) }));
   buf.push('>brown</option></select><p');
   buf.push(attrs({ "class": ('help-block') }));
-  buf.push('>The color to mark mails from th=== inbox. Enjoy!</p></div></div></fieldset><fieldset><legend>Server data</legend><div');
+  buf.push('>The color to mark mails from this inbox. Enjoy!</p></div></div></fieldset><fieldset><legend>Server data</legend><div');
   buf.push(attrs({ "class": ('control-group') }));
   buf.push('><label');
   buf.push(attrs({ 'for':("imapServer"), "class": ('control-label') }));
