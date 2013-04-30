@@ -18,17 +18,17 @@ from.form-horizontal
     .control-group
       label(for="color").control-label Rainbows and unicorns
       .controls
-        select.content(id="color", value= model.get("color")).input-xlarge
-          option(value="orange") orange
-          option(value="blue") blue
-          option(value="red") red
-          option(value="green") green
-          option(value="gold") gold
-          option(value="purple") purple
-          option(value="pink") pink
-          option(value="black") black
-          option(value="brown") brown
-        p.help-block The color to mark mails from this inbox. Enjoy!
+        select.content(id="color", selected=model.get("color")).input-xlarge
+          option(value="orange", selected="orange" === model.get("color")) orange
+          option(value="blue", selected="blue" === model.get("color")) blue
+          option(value="red", selected="red" === model.get("color")) red
+          option(value="green", selected="green" === model.get("color")) green
+          option(value="gold", selected="gold" === model.get("color")) gold
+          option(value="purple", selected="purple" === model.get("color")) purple
+          option(value="pink", selected="pink" === model.get("color")) pink
+          option(value="black", selected="black" === model.get("color")) black
+          option(value="brown", selected="brown" === model.get("color")) brown
+        p.help-block The color to mark mails from th=== inbox. Enjoy!
 
   fieldset
     legend Server data
