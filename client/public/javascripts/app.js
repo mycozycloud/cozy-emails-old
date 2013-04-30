@@ -1416,6 +1416,7 @@ window.require.register("views/app", function(exports, require, module) {
         this.containerContent = this.$("#content");
         this.boxContainerContent = this.$("#box-content");
         this.viewMessageBox = new MessageBox(this.$("#message_box"), new LogMessagesCollection);
+        this.mailboxes = new MailboxCollection;
         return this.setLayoutMenu();
       };
 
@@ -1434,26 +1435,11 @@ window.require.register("views/app", function(exports, require, module) {
         $("body").height(viewport());
         $("#content").height(viewport());
         $(".column").height(viewport());
-        $("#sidebar").height(viewport());
-        return $("#column_mail").width($(window).width - $("#column_mails_list").width() - $("#sidebar").width());
+        return $("#sidebar").height(viewport());
       };
 
       AppView.prototype.setLayoutMenu = function(callback) {
-        var _this = this;
-        this.containerMenu.html(require('./templates/menu'));
-        this.mailboxMenu = new MenuMailboxesList($("#menu_mailboxes"), new MailboxCollection);
-        this.mailboxes = this.mailboxMenu.collection;
-        this.mailboxes.reset();
-        return this.mailboxes.fetch({
-          success: function() {
-            _this.mailboxes.updateActiveMailboxes();
-            _this.mailboxes.trigger("change_active_mailboxes");
-            if (callback != null) return callback();
-          },
-          error: function() {
-            return alert("Error while loading mailboxes");
-          }
-        });
+        return this.containerMenu.html(require('./templates/menu'));
       };
 
       AppView.prototype.setLayoutMailboxes = function() {
@@ -1462,33 +1448,20 @@ window.require.register("views/app", function(exports, require, module) {
           this.boxContainerContent.html(require('./templates/_layouts/layout_mailboxes'));
           this.mailboxesView = new MailboxesList(this.$("#mail_list_container"), this.mailboxes);
           this.newMailboxesView = new MailboxesListNew(this.$("#add_mail_button_container"), this.mailboxes);
-          this.setLayoutMenu(function() {
-            return _this.newMailboxesView.render();
+          this.mailboxes.reset();
+          this.mailboxes.fetch({
+            success: function() {
+              return _this.newMailboxesView.render();
+            },
+            error: function() {
+              return alert("Error while loading mailboxes");
+            }
           });
           this.mailboxesView.render();
         }
         this.containerContent.hide();
         this.boxContainerContent.show();
         return this.resize();
-      };
-
-      AppView.prototype.setLayoutComposeMail = function() {
-        this.containerContent.html(require('./templates/_layouts/layout_compose_mail'));
-        window.app.viewComposeMail = new MailsCompose(this.$("#compose_mail_container"), this.mailboxes);
-        this.setLayoutMenu(function() {
-          return window.app.viewComposeMail.render();
-        });
-        return this.resize();
-      };
-
-      AppView.prototype.showMailList = function() {
-        if (window.app.mails.length === 0) {
-          this.$("#more-button").hide();
-          this.$("#button_get_new_mails").hide();
-          return this.$("#no-mails-message").show();
-        } else {
-          return this.$("#no-mails-message").hide();
-        }
       };
 
       AppView.prototype.setLayoutMails = function() {
@@ -1560,30 +1533,14 @@ window.require.register("views/app", function(exports, require, module) {
         return this.resize();
       };
 
-      AppView.prototype.setLayoutMailsSent = function() {
-        this.containerContent.html(require('./templates/_layouts/layout_mails'));
-        window.app.viewMailsSentList = new MailsSentColumn(this.$("#column_mails_list"), window.app.mailssent);
-        window.app.viewMailsSentList.render();
-        window.app.view_mailsent = new MailsSentElement(this.$("#column_mail"), window.app.mailssent);
-        if (this.mailboxes.length === 0) {
-          this.mailboxes.fetch({
-            success: function() {
-              console.log("Initial mails sent mailboxes load OK");
-              if (window.app.mailssent.length === 0) {
-                return window.app.mailssent.fetchOlder(function() {
-                  console.log("Initial mails sent mails load OK");
-                  return window.app.mailboxes.updateActiveMailboxes();
-                });
-              }
-            }
-          });
-        } else if (window.app.mailssent.length === 0) {
-          window.app.mailssent.fetchOlder(function() {
-            console.log("Initial mails sent mails load OK");
-            return this.mailboxes.updateActiveMailboxes();
-          });
+      AppView.prototype.showMailList = function() {
+        if (window.app.mails.length === 0) {
+          this.$("#more-button").hide();
+          this.$("#button_get_new_mails").hide();
+          return this.$("#no-mails-message").show();
+        } else {
+          return this.$("#no-mails-message").hide();
         }
-        return this.resize();
       };
 
       return AppView;
@@ -3330,11 +3287,9 @@ window.require.register("views/templates/_layouts/layout_mailboxes", function(ex
   buf.push(attrs({ "class": ('row-fluid') }));
   buf.push('><div');
   buf.push(attrs({ 'id':('mail_list_container'), "class": ('span12') }));
-  buf.push('></div></div><div');
-  buf.push(attrs({ "class": ('row-fluid') }));
-  buf.push('><div');
-  buf.push(attrs({ 'id':('add_mail_button_container'), "class": ('span12') }));
-  buf.push('></div></div>');
+  buf.push('></div><div><div');
+  buf.push(attrs({ 'id':('add_mail_button_container') }));
+  buf.push('></div></div></div>');
   }
   return buf.join("");
   };
@@ -3996,11 +3951,9 @@ window.require.register("views/templates/_mailbox/mailbox_new", function(exports
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<form');
-  buf.push(attrs({ "class": ('well') }));
-  buf.push('><a');
+  buf.push('<a');
   buf.push(attrs({ 'id':('add_mailbox'), "class": ('btn') }));
-  buf.push('>Add a new mailbox</a></form>');
+  buf.push('>Add a new mailbox</a>');
   }
   return buf.join("");
   };

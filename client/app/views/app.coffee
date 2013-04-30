@@ -33,6 +33,7 @@ class exports.AppView extends Backbone.View
         @boxContainerContent = @$("#box-content")
         @viewMessageBox =
             new MessageBox @$("#message_box"), new LogMessagesCollection
+        @mailboxes = new MailboxCollection
         @setLayoutMenu()
 
     # making sure the view takes 100% height of the viewport.
@@ -48,42 +49,18 @@ class exports.AppView extends Backbone.View
         $("#content").height viewport()
         $(".column").height viewport()
         $("#sidebar").height viewport()
-        $("#column_mail").width( $(window).width - $("#column_mails_list").width() - $("#sidebar").width())
 
-
-###################################################
-## COMMON
-###################################################
 
     # layout the dynamic menu
     setLayoutMenu: (callback) ->
 
         # set ut the menu view
         @containerMenu.html require('./templates/menu')
-        @mailboxMenu =
-            new MenuMailboxesList $("#menu_mailboxes"), new MailboxCollection
 
-        @mailboxes = @mailboxMenu.collection
-
-        # fetch necessary data
-        @mailboxes.reset()
-        @mailboxes.fetch
-            success: =>
-                @mailboxes.updateActiveMailboxes()
-                @mailboxes.trigger "change_active_mailboxes"
-                callback() if callback?
-            error: =>
-                alert "Error while loading mailboxes"
-
-
-###################################################
-## LAYOUTS
-###################################################
 
     # put on the layout to display mailboxes:
     setLayoutMailboxes: ->
 
-        # lay the mailboxes out
         if @boxContainerContent.html() is ""
             @boxContainerContent.html require('./templates/_layouts/layout_mailboxes')
 
@@ -92,40 +69,18 @@ class exports.AppView extends Backbone.View
             @newMailboxesView =
                 new MailboxesListNew @$("#add_mail_button_container"), @mailboxes
 
-            @setLayoutMenu =>
-                @newMailboxesView.render()
-
+            @mailboxes.reset()
+            @mailboxes.fetch
+                success: =>
+                    @newMailboxesView.render()
+                error: =>
+                    alert "Error while loading mailboxes"
             @mailboxesView.render()
 
         @containerContent.hide()
         @boxContainerContent.show()
-        # ensure the right size
+
         @resize()
-
-
-    # put on the layout to display mailboxes:
-    setLayoutComposeMail: ->
-
-        # lay the mailboxes out
-        @containerContent.html require('./templates/_layouts/layout_compose_mail')
-        window.app.viewComposeMail =
-            new MailsCompose @$("#compose_mail_container"), @mailboxes
-
-        @setLayoutMenu ->
-            window.app.viewComposeMail.render()
-
-        # ensure the right size
-        @resize()
-
-    # Depending on mail number it displays the mail list or an informative
-    # message explaining why the mail list is empty and what to do to fill it.
-    showMailList: ->
-        if window.app.mails.length is 0
-            @$("#more-button").hide()
-            @$("#button_get_new_mails").hide()
-            @$("#no-mails-message").show()
-        else
-            @$("#no-mails-message").hide()
 
     # put on the layout to display mails:
     setLayoutMails: ->
@@ -194,32 +149,12 @@ class exports.AppView extends Backbone.View
         # ensure the right size
         @resize()
 
-    # put on the layout to display mails:
-    setLayoutMailsSent: ->
-
-        # lay the mails out
-        @containerContent.html require('./templates/_layouts/layout_mails')
-
-        # create views for the columns
-        window.app.viewMailsSentList = new MailsSentColumn @$("#column_mails_list"), window.app.mailssent
-        window.app.viewMailsSentList.render()
-        window.app.view_mailsent = new MailsSentElement @$("#column_mail"), window.app.mailssent
-
-        # fetch necessary data
-        if @mailboxes.length is 0
-            @mailboxes.fetch
-                success: ->
-                    console.log "Initial mails sent mailboxes load OK"
-                    if window.app.mailssent.length is 0
-                        # fetch necessary data
-                        window.app.mailssent.fetchOlder ->
-                                console.log "Initial mails sent mails load OK"
-                                window.app.mailboxes.updateActiveMailboxes()
-        else if window.app.mailssent.length is 0
-            # fetch necessary data
-            window.app.mailssent.fetchOlder ->
-                console.log "Initial mails sent mails load OK"
-                @mailboxes.updateActiveMailboxes()
-
-        # ensure the right size
-        @resize()
+    # Depending on mail number it displays the mail list or an informative
+    # message explaining why the mail list is empty and what to do to fill it.
+    showMailList: ->
+        if window.app.mails.length is 0
+            @$("#more-button").hide()
+            @$("#button_get_new_mails").hide()
+            @$("#no-mails-message").show()
+        else
+            @$("#no-mails-message").hide()

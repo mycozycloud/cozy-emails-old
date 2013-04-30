@@ -5210,6 +5210,8 @@ a[data-wysihtml5-command-value="blue"] {
   color: blue;
 }@font-face{font-family:styled;src:url("/fonts/maven-pro-light-300.otf")}
 @font-face{font-family:main;src:url("/fonts/signika-regular.ttf")}
+::selection{background:#fe8800}
+::-moz-selection{background:#fe8800}
 html{overflow:hidden;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
 body{padding:0;margin:0;overflow:hidden;font-family:main;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
 legend{font-family:styled}
@@ -5263,6 +5265,7 @@ blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 .mailbox_well{border-bottom:1px solid #ccc;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;margin-bottom:0}
 .edit-mailbox{margin-left:20px;margin-right:5px}
 .mailbox-status{margin-left:10px;font-weight:normal;font-size:14px}
+#add_mailbox{margin:10px;margin-top:10px}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */
