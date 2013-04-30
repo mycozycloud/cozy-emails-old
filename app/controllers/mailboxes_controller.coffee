@@ -137,11 +137,8 @@ action 'update', ->
 # DELETE /mailboxes/:id
 # Delete given mailbox and all related stuff (mails, attachments...)
 action 'destroy', ->
-    unless @box.importing
-        @box.remove ->
-            send 204
-    else
-        send error: "Cannot delete the mailbox while importing.", 400
+    @box.remove ->
+        send sucess: true, 204
 
 # post /sendmail
 action 'sendmail', ->

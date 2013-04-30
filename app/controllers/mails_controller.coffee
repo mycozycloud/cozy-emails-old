@@ -78,33 +78,7 @@ action 'getlist', ->
 
     Mail.dateId query, (err, mails) ->
         if err
-            send 500
-        else
-            if mails.length is 0
-                send []
-            else
-                send mails
-
-# GET '/mailslist/:timestamp/:num'
-# Get num mails until given timestamp.
-action 'getlist', ->
-    num = parseInt req.params.num
-    timestamp = parseInt req.params.timestamp
-
-    if params.id? and params.id isnt "undefined"
-        skip = 1
-    else
-        skip = 0
-
-    query =
-        startkey: [timestamp, params.id]
-        limit: num
-        descending: true
-        skip: skip
-
-    Mail.dateId query, (err, mails) ->
-        if err
-            send 500
+            send error: true, 500
         else
             if mails.length is 0
                 send []

@@ -327,7 +327,8 @@ module.exports = (compound, Mailbox) ->
                 idInt = parseInt id
                 maxId = idInt if idInt > maxId
 
-                @mailsToBe.create remoteId: idInt, (error, mailToBe) =>
+                data = remoteId: idInt, mailbox: @id
+                MailToBe.create data, (error, mailToBe) =>
                     if error
                         @closeBox =>
                             @log "Error occured while saving email."

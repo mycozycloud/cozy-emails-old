@@ -56,7 +56,7 @@ action 'getactivelogs', ->
 
     params =
         startkey: Number req.params.createdAt
-        skip: 0
+        skip: skip
         descending: false
 
     LogMessage.request "date", params, (err, logs) =>
