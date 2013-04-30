@@ -86,28 +86,6 @@ action 'getlist', ->
                 send mails
 
 
-# GET '/mailssentlist/:timestamp.:num'
-action 'getlistsent', ->
-    num = parseInt params.num
-    timestamp = parseInt params.timestamp
-
-    if params.id? and params.id isnt "undefined"
-        skip = 1
-    else
-        skip = 0
-
-    query =
-        startkey: [timestamp, params.id]
-        limit: num
-        descending: true
-        skip: skip
-
-    MailSent.dateId query, (err, mails) ->
-        if err
-            send error: true, 500
-        else
-            send mails
-
 # GET '/mailsnew/:timestamp'
 # Get all mails after a given timestamp.
 action 'getnewlist', ->
