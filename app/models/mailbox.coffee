@@ -412,8 +412,7 @@ module.exports = (compound, Mailbox) ->
                                 console.error err if err
 
                         if mailsToGo is mailsDone
-                            @importSuccessfull (err) ->
-                                finishImport()
+                            finishImport()
                         else
                             fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
             else
