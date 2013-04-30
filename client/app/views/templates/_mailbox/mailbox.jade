@@ -1,5 +1,5 @@
 h3 #{model.get('name')}
     if model.get("status")
-        span.mailbox-status  (#{model.get('status')})
+        span.mailbox-status  #{model.get('status')}
     button.edit-mailbox.btn edit
     button.delete-mailbox.btn.btn-danger delete

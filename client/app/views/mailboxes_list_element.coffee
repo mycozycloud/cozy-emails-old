@@ -61,6 +61,8 @@ class exports.MailboxesListElement extends Backbone.View
             success: =>
                 $("#add_mailbox").show()
                 $("#no-mailbox-msg").hide()
+
+                window.app.viewMailsList?.viewMailsList.updateColors()
                 @render()
             error: (model, xhr) ->
                 msg = "Server error occured"

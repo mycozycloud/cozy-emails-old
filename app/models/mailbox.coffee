@@ -74,7 +74,7 @@ module.exports = (compound, Mailbox) ->
         data =
             imported: false
             importing: false
-            status: "Could not prepare the import."
+            status: "import preparation failed"
 
         @updateAttributes data, (error) =>
             if error
@@ -86,7 +86,7 @@ module.exports = (compound, Mailbox) ->
         data =
             imported: false
             importing: true
-            status: "Import started..."
+            status: "import started"
 
         @updateAttributes data, (error) =>
             if error
@@ -99,7 +99,7 @@ module.exports = (compound, Mailbox) ->
         data =
             imported: true
             importing: false
-            status: "Import successful !"
+            status: "import complete"
 
         @updateAttributes data, (error) =>
             if error
@@ -114,7 +114,7 @@ module.exports = (compound, Mailbox) ->
             imported: false
             importing: false
             activated: false
-            status: "Import failed"
+            status: "import failed"
 
         @updateAttributes data, (error) =>
             if error
@@ -125,7 +125,7 @@ module.exports = (compound, Mailbox) ->
     # Update box status with given progress and stores a notification about it.
     Mailbox::progress = (progress, callback) ->
         data =
-            status: "Import #{progress} %"
+            status: "importing #{progress} %"
 
         @updateAttributes data, (error) =>
             LogMessage.createImportProgressInfo @, progress, callback

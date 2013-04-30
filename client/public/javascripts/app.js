@@ -708,7 +708,7 @@ window.require.register("models/mail", function(exports, require, module) {
           obj = parsed[_i];
           out += "" + obj.name + " <" + obj.address + ">, ";
         }
-        return out.substring(0, out.length - 3);
+        return out.substring(0, out.length - 2);
       };
 
       Mail.prototype.from = function() {
@@ -1689,8 +1689,12 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
         this.model.isEdit = false;
         return this.model.save(data, {
           success: function() {
+            var _ref;
             $("#add_mailbox").show();
             $("#no-mailbox-msg").hide();
+            if ((_ref = window.app.viewMailsList) != null) {
+              _ref.viewMailsList.updateColors();
+            }
             return _this.render();
           },
           error: function(model, xhr) {
@@ -2352,6 +2356,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
         this.collection = collection;
         MailsList.__super__.constructor.call(this);
         this.collection.view = this;
+        this.views = [];
       }
 
       MailsList.prototype.initialize = function() {
@@ -2380,22 +2385,36 @@ window.require.register("views/mails_list", function(exports, require, module) {
       MailsList.prototype.addOne = function(mail) {
         var box;
         box = new MailsListElement(mail, this.collection);
-        return this.$el.append(box.render().el);
+        this.$el.append(box.render().el);
+        return this.views.push(box);
       };
 
       MailsList.prototype.addNew = function(mail) {
         var box;
         box = new MailsListElement(mail, this.collection);
-        return this.$el.prepend(box.render().el);
+        this.$el.prepend(box.render().el);
+        return this.views.splice(0, 0, box);
       };
 
       MailsList.prototype.render = function() {
         var _this = this;
         this.$el.html("");
+        this.views = [];
         this.collection.each(function(mail) {
           return _this.addOne(mail);
         });
         return this;
+      };
+
+      MailsList.prototype.updateColors = function() {
+        var view, _i, _len, _ref, _results;
+        _ref = this.views;
+        _results = [];
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          view = _ref[_i];
+          _results.push(view.render());
+        }
+        return _results;
       };
 
       return MailsList;
@@ -2409,8 +2428,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
   (function() {
     var Mail,
       __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
-      __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     Mail = require("../models/mail").Mail;
 
@@ -2440,7 +2458,6 @@ window.require.register("views/mails_list_element", function(exports, require, m
         this.collection = collection;
         MailsListElement.__super__.constructor.call(this);
         this.model.view = this;
-        window.app.appView.mailboxes.on("change_active_mailboxes", this.checkVisible, this);
       }
 
       MailsListElement.prototype.setActiveMail = function(event) {
@@ -2452,21 +2469,16 @@ window.require.register("views/mails_list_element", function(exports, require, m
       };
 
       MailsListElement.prototype.checkVisible = function() {
-        var state, _ref;
-        state = (_ref = this.model.get("mailbox"), __indexOf.call(window.app.appView.mailboxes.activeMailboxes, _ref) >= 0);
-        if (state !== this.visible) {
-          this.visible = state;
-          return this.render();
-        }
+        return this.render();
       };
 
       MailsListElement.prototype.render = function() {
-        var template, _ref;
-        this.visible = (_ref = this.model.get("mailbox"), __indexOf.call(window.app.appView.mailboxes.activeMailboxes, _ref) >= 0);
+        var mailbox, template;
+        mailbox = window.app.appView.mailboxes.get(this.model.get("mailbox"));
         template = require('./templates/_mail/mail_list');
         this.$el.html(template({
           model: this.model,
-          visible: this.visible
+          mailbox: mailbox
         }));
         return this;
       };
@@ -3687,11 +3699,11 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   var buf = [];
   with (locals || {}) {
   var interp;
-  if ( visible)
-  {
   buf.push('<td');
-  buf.push(attrs({ 'style':('width: 5px; padding: 0; background-color: ' + model.getColor() + ';') }));
-  buf.push('></td><td><p>');
+  buf.push(attrs({ 'title':(mailbox.get('name')), 'style':('width: 5px; padding: 0; background-color: ' + model.getColor() + ';') }));
+  buf.push('></td><td');
+  buf.push(attrs({ 'title':(mailbox.get('name')) }));
+  buf.push('><p>');
   if ( model.isUnread())
   {
   buf.push('<strong>' + escape((interp = model.fromShort()) == null ? '' : interp) + '</strong>');
@@ -3728,7 +3740,6 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   buf.push('>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</p>');
   }
   buf.push('</p></td>');
-  }
   }
   return buf.join("");
   };
@@ -3808,7 +3819,7 @@ window.require.register("views/templates/_mailbox/mailbox", function(exports, re
   {
   buf.push('<span');
   buf.push(attrs({ "class": ('mailbox-status') }));
-  buf.push('>(' + escape((interp = model.get('status')) == null ? '' : interp) + ')</span>');
+  buf.push('>' + escape((interp = model.get('status')) == null ? '' : interp) + '</span>');
   }
   buf.push('<button');
   buf.push(attrs({ "class": ('edit-mailbox') + ' ' + ('btn') }));

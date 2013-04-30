@@ -5262,7 +5262,8 @@ blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 #mail_content_html{margin:0;padding:0}
 #no-mailbox-msg{margin:20px}
 #no-mails-message{margin-top:20px}
-.mailbox_well{border-bottom:1px solid #ccc;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;margin-bottom:0}
+.mailbox_well{border-bottom:1px solid #ccc;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;margin-bottom:0;font-family:styled;}
+.mailbox_well span{font-family:main;color:#aaa}
 .edit-mailbox{margin-left:20px;margin-right:5px}
 .mailbox-status{margin-left:10px;font-weight:normal;font-size:14px}
 #add_mailbox{margin:10px;margin-top:10px}

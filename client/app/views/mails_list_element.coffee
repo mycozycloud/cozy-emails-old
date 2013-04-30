@@ -20,26 +20,21 @@ class exports.MailsListElement extends Backbone.View
     constructor: (@model, @collection) ->
         super()
         @model.view = @
-        window.app.appView.mailboxes.on "change_active_mailboxes", @checkVisible, @
 
     setActiveMail: (event) ->
         @collection.setActiveMail @model
         $(".table tr").removeClass "active"
         @$el.addClass "active"
-        if not @model.get 'read'
-            @collection.setActiveMailAsRead()
+        @collection.setActiveMailAsRead() if not @model.get 'read'
         @collection.trigger "change_active_mail"
 
     checkVisible: ->
-        state = @model.get("mailbox") in window.app.appView.mailboxes.activeMailboxes
-        if state isnt @visible
-            @visible = state
-            @render()
+        @render()
 
     render: ->
-        @visible = @model.get("mailbox") in window.app.appView.mailboxes.activeMailboxes
+        mailbox = window.app.appView.mailboxes.get @model.get("mailbox")
         template = require('./templates/_mail/mail_list')
         @$el.html template
             model: @model
-            visible: @visible
+            mailbox: mailbox
         @

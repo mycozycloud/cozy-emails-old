@@ -1,18 +1,18 @@
-if visible
-  td(style='width: 5px; padding: 0; background-color: ' + model.getColor() + ';')
-  td
+td(title=mailbox.get('name'), style='width: 5px; padding: 0; background-color: ' + model.getColor() + ';')
+td(title=mailbox.get('name'))
     p
-      if model.isUnread()
-        strong #{model.fromShort()}
-      else
-        #{model.fromShort()}
-      i.date #{model.date()}
-      if model.hasAttachments()
-        i.icon-file
-      if model.isFlagged()
-        i.icon-star
-      if model.isUnread()
-        p.subject
-          strong #{model.get("subject")}
-      else
-         p.subject #{model.get("subject")}
+        if model.isUnread()
+            strong #{model.fromShort()}
+        else
+            #{model.fromShort()}
+
+        i.date #{model.date()}
+        if model.hasAttachments()
+            i.icon-file
+        if model.isFlagged()
+            i.icon-star
+        if model.isUnread()
+            p.subject
+                strong #{model.get("subject")}
+        else
+             p.subject #{model.get("subject")}
