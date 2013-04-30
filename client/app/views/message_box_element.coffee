@@ -17,13 +17,14 @@ class exports.MessageBoxElement extends Backbone.View
         "click button.close" : 'onCloseClicked'
 
     onCloseClicked: =>
-         @$el.fadeOut()
          if @model.get("type") isnt "info" or @model.get("type") isnt "check"
+             @model.url = "logs/#{@model.id}"
              @model.destroy()
          @collection.remove @model
          @remove()
 
     remove: =>
+        @$el.fadeOut()
         @$el.remove()
 
     render: ->

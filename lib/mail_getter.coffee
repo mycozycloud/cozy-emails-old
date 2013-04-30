@@ -29,7 +29,7 @@ class MailGetter
                 @mailbox.log "Connection closed (error: #{err.toString()})"
             else
                 @mailbox.log "Server connection closed."
-         
+
         @mailbox.log "Try to connect..."
         if @mailbox.imapServer?
             @server.connect (err) =>
@@ -42,7 +42,7 @@ class MailGetter
         else
             @mailbox.log 'No host defined'
             callback new Error 'No host defined'
-             
+
     # Start a connexion with remote IMAP server and open INBOX.
     openInbox: (callback) =>
         @connect (err) =>
@@ -73,6 +73,7 @@ class MailGetter
     # Retrieve all with ID in a given range.
     getMails: (range, callback) =>
         @server.search [['UID', range]], callback
+
     # Fetch mail with given remoteID and make a new
     # mail object from it. Download its attachments and return them separately.
     fetchMail: (remoteId, callback) =>
@@ -103,7 +104,7 @@ class MailGetter
                             priority: mailParsed.priority
                             text: mailParsed.text
                             html: mailParsed.html
-                            idRemoteMailbox: remoteId
+                            idRemoteMailbox: new String(remoteId)
                             headersRaw: JSON.stringify mailParsed.headers
                             references: mailParsed.references or ""
                             inReplyTo: mailParsed.inReplyTo or ""
@@ -158,8 +159,8 @@ class MailGetter
                         flagDict[msg.uid] = msg.flags
         , (err) =>
             @mailbox.log "fetch modification finished."
-            
-            
+
+
             callback err, flagDict
         )
 

@@ -160,12 +160,12 @@ window.require.register("collections/logmessages", function(exports, require, mo
 
       LogMessagesCollection.prototype.fetchNew = function() {
         var _this = this;
+        this.url = "" + this.urlRoot + "/" + this.lastCreatedAt;
         return this.fetch({
           add: true,
-          url: "" + this.urlRoot + "/" + this.lastCreatedAt,
           success: function(models) {
             if (models.length > 0) {
-              return _this.lastCreatedAt = models.at(0).get("createdAt");
+              return _this.lastCreatedAt = models.last().get("createdAt");
             }
           }
         });
@@ -618,7 +618,7 @@ window.require.register("models/logmessage", function(exports, require, module) 
     /*
       @file: logmessage.coffee
       @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description: 
+      @description:
         Model which represents a log message - displayed to user
     */
 
@@ -3207,8 +3207,8 @@ window.require.register("views/message_box_element", function(exports, require, 
       };
 
       MessageBoxElement.prototype.onCloseClicked = function() {
-        this.$el.fadeOut();
         if (this.model.get("type") !== "info" || this.model.get("type") !== "check") {
+          this.model.url = "logs/" + this.model.id;
           this.model.destroy();
         }
         this.collection.remove(this.model);
@@ -3216,6 +3216,7 @@ window.require.register("views/message_box_element", function(exports, require, 
       };
 
       MessageBoxElement.prototype.remove = function() {
+        this.$el.fadeOut();
         return this.$el.remove();
       };
 
