@@ -3149,6 +3149,7 @@ window.require.register("views/message_box", function(exports, require, module) 
       MessageBox.prototype.renderOne = function(logmessage) {
         this.addNewBox(logmessage);
         if (logmessage.get("subtype") === "check" && logmessage.get("type") === "info") {
+          logmessage.url = "logs/" + logmessage.id;
           return logmessage.destroy();
         }
       };

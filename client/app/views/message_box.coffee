@@ -23,6 +23,7 @@ class exports.MessageBox extends Backbone.View
         @addNewBox logmessage
         if logmessage.get("subtype") is "check" and
         logmessage.get("type") is "info"
+            logmessage.url = "logs/#{logmessage.id}"
             logmessage.destroy()
 
 
