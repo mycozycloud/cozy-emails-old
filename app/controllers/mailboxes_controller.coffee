@@ -111,25 +111,26 @@ action 'show', ->
 action 'update', ->
     password = body.password
     delete body.password
+
     @box.updateAttributes body, (err) =>
         if err
             send error: true, 500
         else
-            if password isnt @box.password
-                @box.password = password
-                @box.mergeAccount password: password, (err) =>
-                    if err
-                        send error: true, 500
-                    else
-                        unless @box.imported or @box.importing
-                            @box.setupImport (err) =>
-                                @box.doImport() unless err
+            @box.getAccount (err, account) =>
+                if err
+                    send error: true, 500
+                else
+                    if password isnt account.password
+                        @box.password = password
+                        @box.mergeAccount password: password, (err) =>
+                            if err
+                                send error: true, 500
+                            else
+                                send success: true
 
-                        send success: true
-
-            unless @box.imported or @box.importing
-                @box.setupImport (err) =>
-                    @box.doImport() unless err
+                    unless @box.imported or @box.importing
+                        @box.setupImport (err) =>
+                            @box.doImport() unless err
 
             send success: true
 
@@ -183,12 +184,12 @@ action 'fetchNew', ->
                     fetchBoxes boxes, callbacks
                 else
                     box.password = account.password
-                    if box.imported
+                    if box.imported and not box.importing
                         box.getNewMails 200, (err) ->
                             if err
                                 callback err
                             else
-                            fetchBoxes boxes, callback
+                                fetchBoxes boxes, callback
                     else
                         fetchBoxes boxes, callback
         else

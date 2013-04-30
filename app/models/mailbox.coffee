@@ -135,6 +135,7 @@ module.exports = (compound, Mailbox) ->
     Mailbox::markError = (error, callback) ->
         data =
             status: error.toString()
+            importing: false
 
         @updateAttributes data, (err) ->
             if err
