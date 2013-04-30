@@ -26,15 +26,6 @@ class exports.MainRouter extends Backbone.Router
         $(".menu_option").removeClass("active")
         $("#inboxbutton").addClass("active")
 
-    new : ->
-        app.appView.setLayoutComposeMail()
-        $(".menu_option").removeClass("active")
-        $("#newmailbutton").addClass("active")
-
-    sent : ->
-        app.appView.setLayoutMailsSent()
-        $(".menu_option").removeClass("active")
-        $("#sentbutton").addClass("active")
 
     configMailboxes : ->
         app.appView.setLayoutMailboxes()

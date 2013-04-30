@@ -26,18 +26,6 @@ class exports.MailsCollection extends Backbone.Collection
     # number of mails to fetch at one click on "more mail" button
     mailsAtOnce: 100
 
-    # variable to store number of mails visible in the active filter
-    mailsShown: 0
-
-    calculateMailsShown: ->
-        #window.app.mails.trigger "update_number_mails_shown"
-        #@model.get("mailbox") in window.app.mailboxes.activeMailboxes
-        @mailsShown = 0
-        @each (mail) =>
-            if mail.get("mailbox") in window.app.appView.mailboxes.activeMailboxes
-                @mailsShown++
-        @trigger "updated_number_mails_shown"
-
     # comparator to sort the collection with the date
     comparator: (mail) ->
         - mail.get("dateValueOf")

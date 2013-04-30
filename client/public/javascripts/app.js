@@ -243,8 +243,7 @@ window.require.register("collections/mails", function(exports, require, module) 
     var Mail,
       __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
       __hasProp = Object.prototype.hasOwnProperty,
-      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; },
-      __indexOf = Array.prototype.indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+      __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor; child.__super__ = parent.prototype; return child; };
 
     Mail = require("../models/mail").Mail;
 
@@ -276,20 +275,6 @@ window.require.register("collections/mails", function(exports, require, module) 
       MailsCollection.prototype.timestampMiddle = new Date().valueOf();
 
       MailsCollection.prototype.mailsAtOnce = 100;
-
-      MailsCollection.prototype.mailsShown = 0;
-
-      MailsCollection.prototype.calculateMailsShown = function() {
-        var _this = this;
-        this.mailsShown = 0;
-        this.each(function(mail) {
-          var _ref;
-          if (_ref = mail.get("mailbox"), __indexOf.call(window.app.appView.mailboxes.activeMailboxes, _ref) >= 0) {
-            return _this.mailsShown++;
-          }
-        });
-        return this.trigger("updated_number_mails_shown");
-      };
 
       MailsCollection.prototype.comparator = function(mail) {
         return -mail.get("dateValueOf");
@@ -1348,18 +1333,6 @@ window.require.register("routers/main_router", function(exports, require, module
         return $("#inboxbutton").addClass("active");
       };
 
-      MainRouter.prototype["new"] = function() {
-        app.appView.setLayoutComposeMail();
-        $(".menu_option").removeClass("active");
-        return $("#newmailbutton").addClass("active");
-      };
-
-      MainRouter.prototype.sent = function() {
-        app.appView.setLayoutMailsSent();
-        $(".menu_option").removeClass("active");
-        return $("#sentbutton").addClass("active");
-      };
-
       MainRouter.prototype.configMailboxes = function() {
         app.appView.setLayoutMailboxes();
         $(".menu_option").removeClass("active");
@@ -1441,6 +1414,7 @@ window.require.register("views/app", function(exports, require, module) {
         this.$el.html(require('./templates/app'));
         this.containerMenu = this.$("#menu_container");
         this.containerContent = this.$("#content");
+        this.boxContainerContent = this.$("#box-content");
         this.viewMessageBox = new MessageBox(this.$("#message_box"), new LogMessagesCollection);
         return this.setLayoutMenu();
       };
@@ -1469,9 +1443,7 @@ window.require.register("views/app", function(exports, require, module) {
         this.containerMenu.html(require('./templates/menu'));
         this.mailboxMenu = new MenuMailboxesList($("#menu_mailboxes"), new MailboxCollection);
         this.mailboxes = this.mailboxMenu.collection;
-        this.mailboxMenu.render();
         this.mailboxes.reset();
-        this.mailboxMenu.showLoading();
         return this.mailboxes.fetch({
           success: function() {
             _this.mailboxes.updateActiveMailboxes();
@@ -1479,20 +1451,24 @@ window.require.register("views/app", function(exports, require, module) {
             if (callback != null) return callback();
           },
           error: function() {
-            return _this.$("#menu_mailboxes").html("");
+            return alert("Error while loading mailboxes");
           }
         });
       };
 
       AppView.prototype.setLayoutMailboxes = function() {
         var _this = this;
-        this.containerContent.html(require('./templates/_layouts/layout_mailboxes'));
-        this.mailboxesView = new MailboxesList(this.$("#mail_list_container"), this.mailboxes);
-        this.newMailboxesView = new MailboxesListNew(this.$("#add_mail_button_container"), this.mailboxes);
-        this.setLayoutMenu(function() {
-          return _this.newMailboxesView.render();
-        });
-        this.mailboxesView.render();
+        if (this.boxContainerContent.html() === "") {
+          this.boxContainerContent.html(require('./templates/_layouts/layout_mailboxes'));
+          this.mailboxesView = new MailboxesList(this.$("#mail_list_container"), this.mailboxes);
+          this.newMailboxesView = new MailboxesListNew(this.$("#add_mail_button_container"), this.mailboxes);
+          this.setLayoutMenu(function() {
+            return _this.newMailboxesView.render();
+          });
+          this.mailboxesView.render();
+        }
+        this.containerContent.hide();
+        this.boxContainerContent.show();
         return this.resize();
       };
 
@@ -1516,11 +1492,18 @@ window.require.register("views/app", function(exports, require, module) {
       };
 
       AppView.prototype.setLayoutMails = function() {
-        var _this = this;
-        this.containerContent.html(require('./templates/_layouts/layout_mails'));
-        window.app.viewMailsList = new MailsColumn(this.$("#column_mails_list"), window.app.mails, this.mailboxes);
-        window.app.viewMailsList.render();
-        window.app.view_mail = new MailsElement(this.$("#column_mail"), window.app.mails);
+        var renderScroll,
+          _this = this;
+        this.boxContainerContent.hide();
+        this.containerContent.show();
+        renderScroll = false;
+        if (this.containerContent.html() === "") {
+          this.containerContent.html(require('./templates/_layouts/layout_mails'));
+          window.app.viewMailsList = new MailsColumn(this.$("#column_mails_list"), window.app.mails, this.mailboxes);
+          window.app.viewMailsList.render();
+          window.app.view_mail = new MailsElement(this.$("#column_mail"), window.app.mails);
+          renderScroll = true;
+        }
         this.$("#no-mails-message").hide();
         if (this.mailboxes.length === 0) {
           this.mailboxes.fetch({
@@ -1533,11 +1516,21 @@ window.require.register("views/app", function(exports, require, module) {
                   _this.$("#column_mails_list tbody span").remove();
                   _this.mailboxes.updateActiveMailboxes();
                   _this.showMailList();
+                  if (renderScroll) {
+                    _this.$("#column_mails_list").niceScroll({
+                      cursorcolor: "#CCC"
+                    });
+                  }
                   return window.app.mails.fetchNew();
                 }, function() {
                   _this.$("#column_mails_list tbody").spin();
                   _this.$("#column_mails_list tbody span").remove();
-                  return _this.showMailList();
+                  _this.showMailList();
+                  if (renderScroll) {
+                    return _this.$("#column_mails_list").niceScroll({
+                      cursorcolor: "#CCC"
+                    });
+                  }
                 });
               }
             }
@@ -1549,10 +1542,20 @@ window.require.register("views/app", function(exports, require, module) {
             _this.$("#column_mails_list tbody").spin();
             _this.$("#column_mails_list tbody span").remove();
             _this.mailboxes.updateActiveMailboxes();
-            return _this.showMailList();
+            _this.showMailList();
+            if (renderScroll) {
+              return _this.$("#column_mails_list").niceScroll({
+                cursorcolor: "#CCC"
+              });
+            }
           });
         } else {
           this.$("#no-mails-message").hide();
+          if (renderScroll) {
+            this.$("#column_mails_list").niceScroll({
+              cursorcolor: "#CCC"
+            });
+          }
         }
         return this.resize();
       };
@@ -2529,7 +2532,7 @@ window.require.register("views/mails_list_more", function(exports, require, modu
     /*
         @file: mails_list_more.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             The view with the "load more" button.
             Also displays info on how many messages are visible in this filer, and
             how many are effectiveley downloaded.
@@ -2569,9 +2572,8 @@ window.require.register("views/mails_list_more", function(exports, require, modu
         button.text("Loading...");
         if (this.clickable) {
           success = function(nbMails) {
-            _this.collection.trigger("update_number_mails_shown");
             button.text("more messages");
-            return _this.console.log(true);
+            if (nbMails === 0) return $(_this.el).hide();
           };
           error = function(collection, error) {
             button.text("more messages");
@@ -3346,7 +3348,7 @@ window.require.register("views/templates/_layouts/layout_mails", function(export
   buf.push('<div');
   buf.push(attrs({ "class": ('row-fluid') }));
   buf.push('><div');
-  buf.push(attrs({ 'id':('column_mails_list'), "class": ('column') + ' ' + ('span4') }));
+  buf.push(attrs({ 'id':('column_mails_list'), "class": ('column') + ' ' + ('span5') }));
   buf.push('></div><div');
   buf.push(attrs({ 'id':('column_mail'), "class": ('column') }));
   buf.push('></div></div>');
@@ -4173,11 +4175,13 @@ window.require.register("views/templates/app", function(exports, require, module
   buf.push('><div');
   buf.push(attrs({ "class": ('row-fluid') }));
   buf.push('><div');
-  buf.push(attrs({ 'id':('sidebar'), "class": ('span2') }));
+  buf.push(attrs({ 'id':('sidebar'), "class": ('span1') }));
   buf.push('><div');
   buf.push(attrs({ 'id':('menu_container'), "class": ('well') + ' ' + ('sidebar-nav') }));
   buf.push('></div></div><div');
   buf.push(attrs({ 'id':('content') }));
+  buf.push('></div><div');
+  buf.push(attrs({ 'id':('box-content') }));
   buf.push('></div></div></div><div');
   buf.push(attrs({ 'id':('confirm-delete-modal'), 'tabindex':("-1"), 'role':("dialog"), 'aria-hidden':("true"), "class": ('modal') + ' ' + ('hide') + ' ' + ('fade') + ' ' + ('in') }));
   buf.push('><div');
@@ -4206,32 +4210,18 @@ window.require.register("views/templates/menu", function(exports, require, modul
   buf.push('<ul');
   buf.push(attrs({ "class": ('nav') + ' ' + ('nav-list') }));
   buf.push('><li');
-  buf.push(attrs({ "class": ('nav-header') }));
-  buf.push('>All your mails</li><li');
-  buf.push(attrs({ 'id':('newmailbutton'), "class": ('menu_option') }));
-  buf.push('><a');
-  buf.push(attrs({ 'href':('#new-mail') }));
-  buf.push('>Compose a new mail\n</a></li><li');
   buf.push(attrs({ 'id':('inboxbutton'), "class": ('menu_option') }));
   buf.push('><a');
   buf.push(attrs({ 'href':('#inbox') }));
-  buf.push('>Inbox \n</a></li><li');
-  buf.push(attrs({ 'id':('sentbutton'), "class": ('menu_option') }));
-  buf.push('><a');
-  buf.push(attrs({ 'href':('#sent') }));
-  buf.push('>Sent\n</a></li><li');
-  buf.push(attrs({ "class": ('divider') }));
-  buf.push('></li><li');
-  buf.push(attrs({ "class": ('nav-header') }));
-  buf.push('>Mailboxes</li></ul><ul');
-  buf.push(attrs({ 'id':('menu_mailboxes'), "class": ('nav') + ' ' + ('nav-list') }));
-  buf.push('></ul><ul');
-  buf.push(attrs({ "class": ('nav') + ' ' + ('nav-list') }));
-  buf.push('><li');
+  buf.push('><img');
+  buf.push(attrs({ 'src':("img/icon-mails.png") }));
+  buf.push('/></a></li><li');
   buf.push(attrs({ 'id':('mailboxesbutton'), "class": ('menu_option') }));
   buf.push('><a');
   buf.push(attrs({ 'href':('#config-mailboxes') }));
-  buf.push('>add/modify\n</a></li></ul>');
+  buf.push('><img');
+  buf.push(attrs({ 'src':("img/icon-config.png") }));
+  buf.push('/></a></li></ul>');
   }
   return buf.join("");
   };

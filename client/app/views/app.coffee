@@ -30,6 +30,7 @@ class exports.AppView extends Backbone.View
         @$el.html require('./templates/app')
         @containerMenu = @$("#menu_container")
         @containerContent = @$("#content")
+        @boxContainerContent = @$("#box-content")
         @viewMessageBox =
             new MessageBox @$("#message_box"), new LogMessagesCollection
         @setLayoutMenu()
@@ -65,16 +66,14 @@ class exports.AppView extends Backbone.View
         @mailboxes = @mailboxMenu.collection
 
         # fetch necessary data
-        @mailboxMenu.render()
         @mailboxes.reset()
-        @mailboxMenu.showLoading()
         @mailboxes.fetch
             success: =>
                 @mailboxes.updateActiveMailboxes()
                 @mailboxes.trigger "change_active_mailboxes"
                 callback() if callback?
             error: =>
-                @$("#menu_mailboxes").html ""
+                alert "Error while loading mailboxes"
 
 
 ###################################################
@@ -85,18 +84,21 @@ class exports.AppView extends Backbone.View
     setLayoutMailboxes: ->
 
         # lay the mailboxes out
-        @containerContent.html require('./templates/_layouts/layout_mailboxes')
+        if @boxContainerContent.html() is ""
+            @boxContainerContent.html require('./templates/_layouts/layout_mailboxes')
 
-        @mailboxesView =
-            new MailboxesList @$("#mail_list_container"), @mailboxes
-        @newMailboxesView =
-            new MailboxesListNew @$("#add_mail_button_container"), @mailboxes
+            @mailboxesView =
+                new MailboxesList @$("#mail_list_container"), @mailboxes
+            @newMailboxesView =
+                new MailboxesListNew @$("#add_mail_button_container"), @mailboxes
 
-        @setLayoutMenu =>
-            @newMailboxesView.render()
+            @setLayoutMenu =>
+                @newMailboxesView.render()
 
-        @mailboxesView.render()
+            @mailboxesView.render()
 
+        @containerContent.hide()
+        @boxContainerContent.show()
         # ensure the right size
         @resize()
 
@@ -128,14 +130,20 @@ class exports.AppView extends Backbone.View
     # put on the layout to display mails:
     setLayoutMails: ->
         # lay the mails out
-        @containerContent.html require('./templates/_layouts/layout_mails')
+        @boxContainerContent.hide()
+        @containerContent.show()
+        renderScroll = false
+        if @containerContent.html() is ""
+            @containerContent.html require('./templates/_layouts/layout_mails')
 
-        # create views for the columns
-        window.app.viewMailsList =
-            new MailsColumn @$("#column_mails_list"), window.app.mails, @mailboxes
-        window.app.viewMailsList.render()
-        window.app.view_mail =
-            new MailsElement @$("#column_mail"), window.app.mails
+            # create views for the columns
+            window.app.viewMailsList =
+                new MailsColumn @$("#column_mails_list"), window.app.mails, @mailboxes
+            window.app.viewMailsList.render()
+            window.app.view_mail =
+                new MailsElement @$("#column_mail"), window.app.mails
+
+            renderScroll = true
 
         @$("#no-mails-message").hide()
 
@@ -152,11 +160,17 @@ class exports.AppView extends Backbone.View
                             @$("#column_mails_list tbody span").remove()
                             @mailboxes.updateActiveMailboxes()
                             @showMailList()
+                            if renderScroll
+                                @$("#column_mails_list").niceScroll
+                                    cursorcolor: "#CCC"
                             window.app.mails.fetchNew()
                         , =>
                             @$("#column_mails_list tbody").spin()
                             @$("#column_mails_list tbody span").remove()
                             @showMailList()
+                            if renderScroll
+                                @$("#column_mails_list").niceScroll
+                                    cursorcolor: "#CCC"
 
 
         else if window.app.mails.length is 0
@@ -168,8 +182,14 @@ class exports.AppView extends Backbone.View
                 @$("#column_mails_list tbody span").remove()
                 @mailboxes.updateActiveMailboxes()
                 @showMailList()
+                if renderScroll
+                    @$("#column_mails_list").niceScroll
+                        cursorcolor: "#CCC"
         else
             @$("#no-mails-message").hide()
+            if renderScroll
+                @$("#column_mails_list").niceScroll
+                    cursorcolor: "#CCC"
 
         # ensure the right size
         @resize()
