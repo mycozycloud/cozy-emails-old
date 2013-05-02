@@ -3,7 +3,7 @@ BaseModel = require("./models").BaseModel
 ###
     @file: mail.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         Model which defines the MAIL object.
 ###
 class exports.Mail extends BaseModel
@@ -11,7 +11,7 @@ class exports.Mail extends BaseModel
     initialize: ->
         @on "destroy", @removeView, @
         @on "change", @redrawView, @
-        
+
     mailbox: ->
         if not @mailbox
             @mailbox = window.app.appView.mailboxes.get @get "mailbox"
@@ -23,13 +23,13 @@ class exports.Mail extends BaseModel
             box.get "color"
         else
             "white"
-            
+
     redrawView: ->
         @view.render() if @view?
 
     removeView: ->
         @view.remove() if @view?
-        
+
     ###
         RENDERING - these functions attr() replace @get "attr", and add
         some parsing logic.  To be used in views, to keep the maximum of
@@ -40,12 +40,13 @@ class exports.Mail extends BaseModel
         parsed = JSON.parse @get field
         for obj in parsed
             out += "#{obj.name} <#{obj.address}>, "
+        out.substring(0, out.length - 2)
 
     from: ->
         out = ""
         @asEmailList "from", out if @get "from"
         out
-        
+
     fromShort: ->
         out = ""
         if @get "from"
@@ -56,10 +57,11 @@ class exports.Mail extends BaseModel
                 else
                     out += obj.address + " "
         out
-        
+
     cc: ->
         out = ""
-        @asEmailList "cc", out if @get "cc"
+        out = @asEmailList "cc", out if @get "cc"
+        console.log out
         out
 
     ccShort: ->
@@ -69,20 +71,20 @@ class exports.Mail extends BaseModel
             for obj in parsed
                 out += obj.name + " "
         out
-        
+
     fromAndCc: ->
         out = ""
         @asEmailList "from", out if @get "from"
         @asEmailList "cc", out if @get "cc"
         out
-        
+
     date: ->
-        parsed = new Date @get("date")
-        parsed.toUTCString()
-        
+        parsed = moment @get("date")
+        parsed.calendar()
+
     respondingToText: ->
         "#{@fromShort()} on #{@date()} wrote:"
-        
+
     subjectResponse: (mode="answer") ->
         subject = @get "subject"
         switch mode
@@ -112,15 +114,15 @@ class exports.Mail extends BaseModel
             ///
         string = new String @get("html")
         string.replace expression, ""
-        
+
     hasHtml: ->
         html = @get "html"
         html? and html != ""
-        
+
     hasText: ->
         text = @get "text"
         text? and text != ""
-        
+
     hasAttachments: ->
         @get "hasAttachments"
 
@@ -129,22 +131,26 @@ class exports.Mail extends BaseModel
             @html()
         else
             @text()
-            
+
     textOrHtml: ->
         if @hasText()
             @text()
         else
             @html()
-            
+
     ###
         Changing mail properties - read and flagged
     ###
-    
+
     isUnread: ->
         not @get("read")
-        
+
     setRead: (read=true) ->
-        flags = JSON.parse @get("flags")
+        stringFlags = @get "flags"
+        if  typeof(stringFlags) is "object" then flags = []
+        else if typeof(stringFlags) is "string"
+            flags = JSON.parse stringFlags
+
         if read
             unless "\\Seen" in flags
                 flags.push("\\Seen")
@@ -160,19 +166,19 @@ class exports.Mail extends BaseModel
                 box?.set "newMessages", ((parseInt box?.get "newMessages") + 1)
             @set read: false
         @set flags: JSON.stringify(flags)
-        
+
     isFlagged: ->
         @get "flagged"
 
     setFlagged: (flagged=true) ->
         flags = JSON.parse @get("flags")
-        
+
         if flagged
             unless "\\Flagged" in flags
                 flags.push("\\Flagged")
         else
             flags = $.grep flags, (val) ->
                 val isnt "\\Flagged"
-                
+
         @set flagged: flagged
         @set flags: JSON.stringify(flags)

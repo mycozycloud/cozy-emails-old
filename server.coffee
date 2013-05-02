@@ -1,16 +1,15 @@
 #!/usr/bin/env coffee
-
-###
-    @file: server.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
-        The core of the application - the railwayjs server + kue jobs to import and fetch mail.
-
-###
-
-app = module.exports = require('railway').createServer()
+app = module.exports = (params) ->
+    params = params || {}
+    params.root = params.root || __dirname
+    return require('compound').createServer params
 
 if not module.parent
     port = process.env.PORT or 9203
-    app.listen port, "127.0.0.1"
-    console.log "Cozy Mail server listening on port %d within %s environment", port, app.settings.env
+    host = process.env.HOST or "127.0.0.1"
+    server = app()
+
+    server.listen port, host, ->
+        console.log(
+            "Compound server listening on %s:%d within %s environment",
+            host, port, server.set 'env')

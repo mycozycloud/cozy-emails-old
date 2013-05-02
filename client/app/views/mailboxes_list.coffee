@@ -4,7 +4,7 @@
 ###
     @file: mailboxes_list.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         Displays the list of configured mailboxes.
 
 ###
@@ -29,4 +29,7 @@ class exports.MailboxesList extends Backbone.View
         @collection.each (mailbox) =>
             mailbox.isEdit = false
             @addOne mailbox
+
+        if @collection.length is 0
+            @$el.append '<p id="no-mailbox-msg">no mailbox found</p>'
         @

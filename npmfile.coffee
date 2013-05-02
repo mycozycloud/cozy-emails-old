@@ -1,5 +1,0 @@
-require 'jugglingdb'
-require 'nodemailer'
-require 'imap'
-require 'mailparser'
-require 'mimelib'

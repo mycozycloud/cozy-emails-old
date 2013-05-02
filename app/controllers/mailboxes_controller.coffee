@@ -45,7 +45,7 @@ action 'index', ->
             box.getAccount (err, account) =>
                 if err
                     console.log "[addPassword] err: #{err}"
-                    
+
                 if account?
                     box.password = account.password
 
@@ -71,18 +71,22 @@ action 'index', ->
 action 'create', ->
     password = body.password
     body.password = null
-    Mailbox.create body, (err, mailbox) ->
+
+    Mailbox.findByEmail body.login, (err, box) ->
         if err
-            send 500
+            send error: err, 500
+        else if box? then send error: "Box already exists", 400
         else
-            mailbox.createAccount password: password, (err, account) ->
-                if err
-                    send 500
+            Mailbox.create body, (err, mailbox) ->
+                if err then send error: err, 500
                 else
-                    mailbox.password = password
-                    mailbox.setupImport (err) =>
-                        mailbox.doImport() unless err
-                    send mailbox
+                    mailbox.createAccount password: password, (err, account) ->
+                        if err then send error: "Cannot save box password", 500
+                        else
+                            mailbox.password = password
+                            mailbox.setupImport (err) =>
+                                mailbox.doImport() unless err
+                            send mailbox
 
 # GET /mailboxes/:id
 # Get mailbox with given id and set decrypted password on it.
@@ -106,41 +110,53 @@ action 'show', ->
 action 'update', ->
     password = body.password
     delete body.password
+
     @box.updateAttributes body, (err) =>
         if err
-            send 500
+            send error: true, 500
         else
-            if password isnt @box.password
-                @box.password = password
-                @box.mergeAccount password: password, (err) =>
-                    if err
-                        send 500
+            @box.getAccount (err, account) =>
+                if err
+                    send error: true, 500
+                else
+                    if password isnt account.password
+                        @box.password = password
+                        @box.mergeAccount password: password, (err) =>
+                            if err
+                                send error: true, 500
+                            else
+                                send success: true
 
-            unless @box.imported or @box.importing
-                @box.setupImport (err) =>
-                    @box.doImport() unless err
+                    unless @box.status is "imported" or
+                    @box.status is "importing"
+                        @box.setupImport (err) =>
+                            @box.doImport() unless err
+
             send success: true
 
 
 # DELETE /mailboxes/:id
 # Delete given mailbox and all related stuff (mails, attachments...)
 action 'destroy', ->
-    @box.remove ->
-        send 204
+    unless @box.status is "importing"
+        @box.remove ->
+            send sucess: true, 204
+    else
+        send error: "Cannot delete a mailbox while importing", 400
 
 # post /sendmail
 action 'sendmail', ->
     body.createdAt = new Date().valueOf()
     @box.getAccount (err, account) =>
         if err
-            send 500
+            send error: err, 500
         else if not account
-            send 404
+            send error: "not found", 404
         else
             @box.password = account.password
             @box.sendMail body, (err) =>
                 if err
-                    send 500
+                    send error: err, 500
                 else
                     body.to = JSON.stringify mimelib.parseAddresses data.to
                     body.bcc = JSON.stringify mimelib.parseAddresses data.bcc
@@ -152,7 +168,7 @@ action 'sendmail', ->
 
                     MailSent.create body, (err) =>
                         if err
-                            send 500
+                            send error: err, 500
                         else
                             send success: true
 
@@ -171,12 +187,13 @@ action 'fetchNew', ->
                     fetchBoxes boxes, callbacks
                 else
                     box.password = account.password
-                    if box.imported
+                    if box.status is "imported" and
+                    not box.status is "importing"
                         box.getNewMails 200, (err) ->
                             if err
                                 callback err
                             else
-                            fetchBoxes boxes, callback
+                                fetchBoxes boxes, callback
                     else
                         fetchBoxes boxes, callback
         else
@@ -185,11 +202,11 @@ action 'fetchNew', ->
     Mailbox.all (err, boxes) ->
         if err
             console.log err
-            send 500
+            send error: true, 500
         else
             fetchBoxes boxes, (err) ->
                 if err
                     console.log err
-                    send 500
+                    send error: true, 500
                 else
-                    send 200
+                    send success: true, 200

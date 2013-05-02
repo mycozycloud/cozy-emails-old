@@ -3,18 +3,18 @@
 ###
     @file: mails_list_new.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         The view with the "load new" button.
 
 ###
 class exports.MailsListNew extends Backbone.View
-    
+
     # variable to avoid multiple requests with the same params
     clickable: true
 
     constructor: (@el, @collection) ->
         super()
-        
+
     initialize: ->
         @collection.on 'reset', @render, @
         Backbone.Mediator.subscribe 'mails:fetched', (date) =>
@@ -22,7 +22,7 @@ class exports.MailsListNew extends Backbone.View
 
     events:
          "click #get_new_mails": 'loadNewMails',
-    
+
     # when user clicks on "more mails" button
     loadNewMails: ->
         element = @
@@ -45,7 +45,7 @@ class exports.MailsListNew extends Backbone.View
                 element.clickable = true
                 @$("#get_new_mails").removeClass("disabled")
             , 1000 * 4)
-    
+
     changeGetNewMailLabel: (date) ->
         dateString = date.getHours() + ":"
         if date.getMinutes() < 10

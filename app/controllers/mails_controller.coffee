@@ -10,9 +10,11 @@ load 'application'
 
 # shared functionnality : find the mail via its ID
 before ->
-    Mail.find req.params.id, (err, mail) =>
-        if err or not mail
-            send 404
+    Mail.find params.id, (err, mail) =>
+        if err
+            send error: err, 500
+        else if not mail?
+            send error: "not found", 404
         else
             @mail = mail
             next()
@@ -41,8 +43,23 @@ action 'update', ->
 
     @mail.updateAttributes body, (err) =>
         if err
-            send 500
+            send error: err, 500
         else
+            if markRead
+                Mailbox.find @mail.mailbox, (err, mailbox) =>
+                    if err or not mailbox?
+                        send error: "unknown mailbox can't update read flag", 500
+                    else
+                        mailbox.getAccount (err, account) =>
+                            mailbox.password = account.password
+                            mailbox.markMailAsRead @mail, (err) ->
+                                if err
+                                    send error: "can't update read flag", 500
+                                else
+                                    send 200
+            else
+                send success: true
+
 
 # GET '/mailslist/:timestamp/:num'
 # Get num mails until given timestamp.
@@ -63,7 +80,7 @@ action 'getlist', ->
 
     Mail.dateId query, (err, mails) ->
         if err
-            send 500
+            send error: err, 500
         else
             if mails.length is 0
                 send []
@@ -71,46 +88,19 @@ action 'getlist', ->
                 send mails
 
 
-# GET '/mailssentlist/:timestamp.:num'
-action 'getlistsent', ->
-    num = parseInt params.num
-    timestamp = parseInt params.timestamp
-
-    if params.id? and params.id isnt "undefined"
-        skip = 1
-    else
-        skip = 0
-
-    query =
-        startkey: [timestamp, params.id]
-        limit: num
-        descending: true
-        skip: skip
-
-    MailSent.dateId query, (err, mails) ->
-        if err
-            send 500
-        else
-            send mails
-
 # GET '/mailsnew/:timestamp'
 # Get all mails after a given timestamp.
 action 'getnewlist', ->
     timestamp = parseInt params.timestamp
 
-    if params.id? and params.id isnt "undefined"
-        skip = 1
-    else
-        skip = 0
-
     query =
-        startkey: [timestamp, params.id]
-        skip: skip
+        startkey: [timestamp, undefined]
+        skip: 1
         descending: false
 
     Mail.dateId query, (err, mails) ->
         if err
-            send 500
+            send error: err, 500
         else
             send mails
 
@@ -122,7 +112,7 @@ action 'getattachmentslist', ->
 
     Attachment.fromMail query, (err, attachments) ->
         if err
-            send 500
+            send error: err, 500
         else
             send attachments
 
@@ -131,17 +121,17 @@ action 'getattachmentslist', ->
 action 'getattachment', ->
     Attachment.find params.id, (err, attachment) =>
         if err
-            send 500
+            send error: err, 500
         else if not attachment
-            send 400
+            send error: true, 400
         else
             attachment.getFile attachment.fileName, (err, res, body) ->
                 if err or not res?
-                    send 500
+                    send error: true, 500
                 else if res.statusCode is 404
                     send 'File not found', 404
                 else if res.statusCode isnt 200
-                    send 500
+                    send error: true, 500
                 else
-                    send 200
-            .pipe response
+                    send success: true, 200
+            .pipe res
