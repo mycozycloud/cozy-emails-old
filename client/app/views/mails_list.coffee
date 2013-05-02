@@ -15,6 +15,7 @@ class exports.MailsList extends Backbone.View
     constructor: (@el, @collection) ->
         super()
         @collection.view = @
+        @views = []
 
     initialize: ->
         @collection.on 'reset', @render, @
@@ -26,7 +27,7 @@ class exports.MailsList extends Backbone.View
         dateValueOf = mail.get "dateValueOf"
 
         # check if we are adding a new message, or an old one
-        if dateValueOf <= @collection.timestampMiddle
+        if dateValueOf < @collection.timestampNew
             # update timestamp for the list of messages
             if dateValueOf < @collection.timestampOld
                 @collection.timestampOld = dateValueOf
@@ -46,13 +47,19 @@ class exports.MailsList extends Backbone.View
     addOne: (mail) ->
         box = new MailsListElement mail, @collection
         @$el.append box.render().el
+        @views.push box
 
     addNew: (mail) ->
         box = new MailsListElement mail, @collection
         @$el.prepend box.render().el
+        @views.splice 0, 0, box
 
     render: ->
         @$el.html ""
+        @views = []
         @collection.each (mail) =>
             @addOne mail
         @
+
+    updateColors: ->
+        view.render() for view in @views

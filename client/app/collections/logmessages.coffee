@@ -22,7 +22,9 @@ class exports.LogMessagesCollection extends Backbone.Collection
 
     # fetches new log messages from server
     fetchNew: =>
+        @url = "#{@urlRoot}/#{@lastCreatedAt}"
         @fetch
             add: true
-            url: "#{@urlRoot}/#{@lastCreatedAt}"
             success: (models) =>
+                if models.length > 0
+                    @lastCreatedAt = models.last().get "createdAt"

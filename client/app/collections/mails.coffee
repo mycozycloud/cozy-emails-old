@@ -26,18 +26,6 @@ class exports.MailsCollection extends Backbone.Collection
     # number of mails to fetch at one click on "more mail" button
     mailsAtOnce: 100
 
-    # variable to store number of mails visible in the active filter
-    mailsShown: 0
-
-    calculateMailsShown: ->
-        #window.app.mails.trigger "update_number_mails_shown"
-        #@model.get("mailbox") in window.app.mailboxes.activeMailboxes
-        @mailsShown = 0
-        @each (mail) =>
-            if mail.get("mailbox") in window.app.appView.mailboxes.activeMailboxes
-                @mailsShown++
-        @trigger "updated_number_mails_shown"
-
     # comparator to sort the collection with the date
     comparator: (mail) ->
         - mail.get("dateValueOf")
@@ -45,7 +33,7 @@ class exports.MailsCollection extends Backbone.Collection
     initialize: ->
         @on "change_active_mail", @navigateMail, @
         @on "update_number_mails_shown", @calculateMailsShown, @
-        setInterval @fetchNew, 1000 * 60
+        setInterval @fetchNew, 1000 * 30
 
     setActiveMail: (mail) ->
         @activeMail?.view?.active = false
@@ -67,22 +55,26 @@ class exports.MailsCollection extends Backbone.Collection
 
     # fetches older mails (the list of mails)
     fetchOlder: (callback, errorCallback) ->
-        @url = "mails/" + @timestampOld + "/" + @mailsAtOnce + "/" + @lastIdOld
+        @url = "mails/#{@timestampOld}/#{@mailsAtOnce}/#{@lastIdOld}"
         @fetch
             add: true
-            success: (models) ->
+            success: (models) =>
+                if models.length > 0
+                    @timestampNew = models.at(0).get("dateValueOf")
                 callback models.length
 
             error: errorCallback
 
     # fetches new mails from server
-    fetchNew: (callback, errorCallback) =>
-        @url = "mails/new/#{@timestampNew}/#{@lastIdNew}"
+    fetchNew: (callback) =>
+        @url = "mails/new/#{@timestampNew}/"
         $.ajax 'mails/fetch-new/',
             success: =>
                 @fetch
                     add: true
-                    success: (data) ->
+                    success: (models) =>
+                        if models.length > 0
+                            @timestampNew = models.at(0).get("dateValueOf")
                         callback null, data if callback?
                     error: ->
-                        callback new Error "Fetch failed"
+                        alert "Fetch new mail failed"

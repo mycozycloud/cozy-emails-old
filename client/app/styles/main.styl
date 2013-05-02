@@ -5,40 +5,288 @@
 //     The application-wide styling.
 // ###
 
+@import 'nib'
+
+blue = #34A6FF
+lightblue = #CBE4FB
+green = #5C5
+orange = #fe8800
+lightorange = #FFC47F
+darkgrey = #333
+lightgrey = #CCC
+grey = #AAA
+
+
+@font-face
+    font-family: styled
+    src: url('/fonts/maven-pro-light-300.otf');
+
+@font-face
+    font-family: main
+    src: url('/fonts/signika-regular.ttf');
+
+::selection
+  background: orange
+::-moz-selection
+  background: orange
+
+html
+  overflow: hidden
+  box-sizing: border-box
+
 body
-  padding-top: 10px
+  padding: 0
+  margin: 0
+  overflow: hidden
+  font-family: main
+  box-sizing: border-box
+
+legend
+    font-family: styled
+
+fieldset
+font-weight: normal
 
 .sidebar-nav
-  padding: 9px 0
-  
-div.column
-  height : 770px
-  overflow: auto
+    padding: 9px 0
 
-#message_box
-  position: absolute
-  top: 15px
-  right: 15px
-  z-index: 9
-  
 iframe
-  border-top-width: 0px
-  border-right-width: 0px
-  border-bottom-width: 0px
-  border-left-width: 0px
-  width: 100%
+    border-top-width: 0px
+    border-right-width: 0px
+    border-bottom-width: 0px
+    border-left-width: 0px
+    width: 100%
+    overflow-y: hidden
 
 textarea#html
-  width: 100%
-  
-  
+    width: 100%
+    
+    
 blockquote
-  border-left: 5px gray solid
-  margin-left: 15px
-  padding-left: 10px
+    border-left: 5px gray solid
+    margin-left: 15px
+    padding-left: 10px
+ 
+.mailbox_well
+    
+    input
+        border: 1px solid lightgrey
+        box-shadow: 0
+        border-radius: 0px
+        shadow: none
+        font-family: styled, helvetica
+
+    input:hover
+        border: 1px solid blue
+        border-radius: 0px
+        shadow: inset 1px 1px 2px rgba(100, 100, 100, 0.1)
+        color: #333
+
+    input:focus
+    input:active
+        border: 1px solid orange
+        box-shadow: none
+
+    .controls p
+        font-size: 11px
+
+.column
+    height: 770px
+    overflow: auto
+
+.btn
+    border: 1px solid blue
+    background: blue
+    color: white
+    box-shadow: none
+    text-shadow: none
+    border-radius: 0
+    font-family: main
+    font-weight: bold
+
+.btn:hover
+    background: orange
+    color: white
+    border-color: orange
+    text-shadow: none
+
+
+#mails_list_container
+    tr:hover
+        background: lightorange
+
+        td
+            background: lightorange
+
+    tr.active
+        background: lightblue
+
+        td
+            background: lightblue
+
+    i.date
+        color: grey
+        margin-right: 10px
+
+    p.subject
+        font-family: styled
+        font-size: 16px
+
+
+.row-fluid
+    overflow: hidden
+    margin: 0
+    padding: 0
+
+#content
+    overflow: hidden
+    margin: 0
+    padding: 0
+
+#message_box
+    position: absolute
+    top: 15px
+    right: 15px
+    z-index: 9
 
 #newmailbutton
 #sentbutton
 #additional_bar
 .btn-toolbar
     display: none
+
+.nav 
+    li
+        .active
+            a
+                background: blue + 50%
+        a
+            color: darkgrey
+
+        a:hover
+            background: lightorange
+            color: darkgrey
+
+.well
+    background: white
+    box-shadow: none
+    border: 0
+
+.form-actions
+    background: transparent
+
+.save_mailbox
+    margin-right: 5px
+
+.container-fluid
+    padding: 0
+    margin: 0
+    overflow: hidden
+
+.mail-panel
+    margin-top: 10px
+    border: 1px solid lightgrey
+    box-shadow: 1px 1px 2px #DDDDDD
+    border-radius: 1px
+
+    h3
+        margin-top: 20px
+        font-family: styled
+        font-size: 22px
+
+#column_mail
+    background-image: url('../img/background-mail.jpg')
+
+    h3.attachments-title
+        font-family: styled
+        font-size: 14px
+
+    a
+    a:visited
+    a:hover
+        color: blue
+
+    i
+        margin-right: 5px
+
+    .attachments-box
+        border: 1px solid lightgrey
+        box-shadow: 1px 1px 2px #DDDDDD
+        border-radius: 1px
+        padding: 20px
+        background: white
+
+    #attachments_list
+        margin: 0
+
+.date
+    margin: 0
+    padding: 0
+    margin-left: 10px
+    color: grey
+
+#sidebar
+    background: #F5F5F5
+    height: 100%
+    border-right: 1px solid lightgrey
+    border-bottom: 1px solid lightgrey
+
+    .well
+        background: #F5F5F5
+        padding-right: 0
+
+#no-mails-message
+    padding-top: 0px
+
+#add_more_mails
+#get_new_mails
+    margin: 10px
+    border-radius: 0
+
+#column_mail
+    margin-left: 0
+    box-shadow: inset 2px 0px 3px 1px lightgrey
+    padding: 0 20px
+    
+
+#menu_container
+    .active
+        a
+            background: lightblue
+            color: darkgrey
+            text-shadow: none
+    a
+        cursor: pointer
+
+#mail_content_html
+    margin: 0
+    padding: 0
+
+#no-mailbox-msg
+    margin: 20px
+
+#no-mails-message
+    margin-top: 20px
+
+.mailbox_well
+    border-bottom: 1px solid lightgrey
+    border-radius: 0
+    margin-bottom: 0
+    font-family: styled
+
+    span
+        font-family: main
+        color: grey
+
+.edit-mailbox
+    margin-left: 20px
+    margin-right: 5px
+
+.mailbox-status
+    margin-left: 10px
+    font-weight: normal
+    font-size: 14px
+
+#add_mailbox
+    margin: 10px
+    margin-top: 10px

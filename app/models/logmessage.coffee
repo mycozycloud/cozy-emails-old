@@ -79,7 +79,7 @@ module.exports = (compound, LogMessage) ->
         mail_text += "s" if results.length > 1
         msg = "Downloading <strong>#{results.length}</strong> #{mail_text} from "
         msg += "<strong>#{mailbox.name}</strong> "
-        
+
         data =
             subtype: "download"
             text: msg
@@ -95,7 +95,7 @@ module.exports = (compound, LogMessage) ->
                 logMessage = logMessages[0]
                 logMessage.createdAt = new Date().valueOf()
                 logMessage.counter += results.length
-                
+
                 msg = "Downloading <strong>#{logMessage.counter}</strong>"
                 msg += " #{mail_text} from "
                 logMessage.text = msg
@@ -103,27 +103,19 @@ module.exports = (compound, LogMessage) ->
             else
                 LogMessage.createInfo data, callback
 
-    LogMessage.createNewMailInfo = (mailbox, callback) ->
-        msg = "Check for new mail in <strong>#{mailbox.name}</strong> finished at "
-        msg += new Date().toUTCString()
-        data =
-            type: "info"
-            subtype: "check"
-            text: msg
-            timeout: 0
-            mailbox: mailbox.id
-        LogMessage.orderedByDate limit: 1, (err, logMessages) ->
-            if logMessages.length > 0 and
-                logMessages[0].subtype is data.subtype and
-                logMessages[0].mailbox is data.mailbox
-                    logMessage = logMessages[0]
-                    logMessage.createdAt = new Date().valueOf()
-                    msg = "Check for new mail in <strong>#{mailbox.name}</strong> "
-                    msg += "finished at #{new Date().toUTCString()}"
-                    logMessage.text = msg
-                    logMessage.save callback
-            else
-                LogMessage.createInfo data, callback
+    LogMessage.createNewMailInfo = (mailbox, nbNewMails, callback) ->
+        if nbNewMails > 0
+            msg = "#{nbNewMails} new mail in #{mailbox.name}"
+            msg += "s" if nbNewMails > 1
+            data =
+                type: "info"
+                subtype: "check"
+                text: msg
+                timeout: 0
+                mailbox: mailbox.id
+            LogMessage.createInfo data, callback
+        else
+            callback()
 
     LogMessage.createImportStartedInfo = (mailbox, callback) ->
         data =

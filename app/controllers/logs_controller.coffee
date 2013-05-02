@@ -1,7 +1,7 @@
 ###
     @file: logs_controller.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description: 
+    @description:
         Railwayjs controller for logs system - displaying system information in the
         interface
 ###
@@ -16,7 +16,7 @@ before ->
             @logMessage = logMessage
             next()
 , only: ['discard']
-    
+
 
 # POST '/logs' Create a new log.
 action 'savelog', ->
@@ -27,10 +27,10 @@ action 'savelog', ->
         "createdAt",
         "timeout"
     ]
-    
+
     for attr in attrs
         data.attr = body.attr
-        
+
     if data["timeout"] is 0
         LogMessage.create data, (err, logMessage) =>
             if err or not logMessage
@@ -48,14 +48,17 @@ action 'discard', ->
             send 200
         else
             send 500
-                    
+
 
 # GET '/logs/:createdAt' Get logs from given date
 action 'getactivelogs', ->
+    if req.params.createdAt isnt 0 then skip = 1 else skip = 0
+
     params =
         startkey: Number req.params.createdAt
+        skip: skip
         descending: false
-        
+
     LogMessage.request "date", params, (err, logs) =>
         if err
             send 500
