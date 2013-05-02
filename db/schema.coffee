@@ -95,13 +95,12 @@ Mailbox = define 'Mailbox', ->
     # data regarding the interface
     property 'checked', Boolean, default: true
     property 'color', default: "#0099FF" # color of the mailbox in the list
-    property 'status', default: "Waiting for import" # status visible for user
+    property 'statusMsg', default: "Waiting for import" # status visible for user
 
     # data for import
     # ready to be fetched for new mail
     property 'activated', Boolean, default: false
-    property 'imported', Boolean, default: false
-    property 'importing', Boolean, default: false
+    property 'status', String, default: "freezed"
     property 'mailsToImport', Number, default: 0
 
 

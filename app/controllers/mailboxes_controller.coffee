@@ -73,13 +73,12 @@ action 'create', ->
     body.password = null
 
     Mailbox.findByEmail body.login, (err, box) ->
-        console.log box
-
-        if err then send error: true, 500
+        if err
+            send error: err, 500
         else if box? then send error: "Box already exists", 400
         else
             Mailbox.create body, (err, mailbox) ->
-                if err then send error: true, 500
+                if err then send error: err, 500
                 else
                     mailbox.createAccount password: password, (err, account) ->
                         if err then send error: "Cannot save box password", 500
@@ -128,7 +127,8 @@ action 'update', ->
                             else
                                 send success: true
 
-                    unless @box.imported or @box.importing
+                    unless @box.status is "imported" or
+                    @box.status is "importing"
                         @box.setupImport (err) =>
                             @box.doImport() unless err
 
@@ -138,22 +138,25 @@ action 'update', ->
 # DELETE /mailboxes/:id
 # Delete given mailbox and all related stuff (mails, attachments...)
 action 'destroy', ->
-    @box.remove ->
-        send sucess: true, 204
+    unless @box.status is "importing"
+        @box.remove ->
+            send sucess: true, 204
+    else
+        send error: "Cannot delete a mailbox while importing", 400
 
 # post /sendmail
 action 'sendmail', ->
     body.createdAt = new Date().valueOf()
     @box.getAccount (err, account) =>
         if err
-            send 500
+            send error: err, 500
         else if not account
-            send 404
+            send error: "not found", 404
         else
             @box.password = account.password
             @box.sendMail body, (err) =>
                 if err
-                    send 500
+                    send error: err, 500
                 else
                     body.to = JSON.stringify mimelib.parseAddresses data.to
                     body.bcc = JSON.stringify mimelib.parseAddresses data.bcc
@@ -165,7 +168,7 @@ action 'sendmail', ->
 
                     MailSent.create body, (err) =>
                         if err
-                            send 500
+                            send error: err, 500
                         else
                             send success: true
 
@@ -184,7 +187,8 @@ action 'fetchNew', ->
                     fetchBoxes boxes, callbacks
                 else
                     box.password = account.password
-                    if box.imported and not box.importing
+                    if box.status is "imported" and
+                    not box.status is "importing"
                         box.getNewMails 200, (err) ->
                             if err
                                 callback err

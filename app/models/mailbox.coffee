@@ -72,9 +72,8 @@ module.exports = (compound, Mailbox) ->
     # Mark import as failed and stores a notification message about it.
     Mailbox::importError = (callback) ->
         data =
-            imported: false
-            importing: false
-            status: "import preparation failed"
+            status: "prepare_failed"
+            statusMsg: "import preparation failed"
 
         @updateAttributes data, (error) =>
             if error
@@ -84,9 +83,8 @@ module.exports = (compound, Mailbox) ->
 
     Mailbox::importStarted = (callback) ->
         data =
-            imported: false
-            importing: true
-            status: "import started"
+            status: "import_preparing"
+            statusMsg: "import started"
 
         @updateAttributes data, (error) =>
             if error
@@ -97,9 +95,8 @@ module.exports = (compound, Mailbox) ->
     # Mark import as successfull and stores a notification message about it.
     Mailbox::importSuccessfull = (callback) ->
         data =
-            imported: true
-            importing: false
-            status: "import complete"
+            status: "imported"
+            statusMsg: "import complete"
 
         @updateAttributes data, (error) =>
             if error
@@ -111,10 +108,8 @@ module.exports = (compound, Mailbox) ->
     # Mark import as failed and stores a notification message about it.
     Mailbox::importFailed = (callback) ->
         data =
-            imported: false
-            importing: false
-            activated: false
-            status: "import failed"
+            status: "import_failed"
+            statusMsg: "import failed"
 
         @updateAttributes data, (error) =>
             if error
@@ -125,7 +120,8 @@ module.exports = (compound, Mailbox) ->
     # Update box status with given progress and stores a notification about it.
     Mailbox::progress = (progress, callback) ->
         data =
-            status: "importing #{progress} %"
+            status: "importing"
+            statusMsg: "importing #{progress} %"
 
         @updateAttributes data, (error) =>
             LogMessage.createImportProgressInfo @, progress, callback
@@ -134,8 +130,8 @@ module.exports = (compound, Mailbox) ->
     # Mark import as failed and stores a notification message about it.
     Mailbox::markError = (error, callback) ->
         data =
-            status: error.toString()
-            importing: false
+            status: "import_failed"
+            statusMsg: error.toString()
 
         @updateAttributes data, (err) ->
             if err
@@ -234,12 +230,14 @@ module.exports = (compound, Mailbox) ->
         @openInbox (err) =>
             @loadNewMails id, range,  (err, nbNewMails) =>
                 if err
-                    @closeBox =>
+                    @closeBox (err) =>
+                        @log err if err
                         @fetchFailed callback
                 else
                     @log "New Mails fetched"
                     @synchronizeChanges 100,  =>
-                        @closeBox =>
+                        @closeBox (err) =>
+                            @log err if err
                             @fetchFinished nbNewMails, callback
 
     # Load given range of mails inside inbox considering that box is already open.
@@ -294,7 +292,7 @@ module.exports = (compound, Mailbox) ->
     Mailbox::setupImport = (callback) ->
 
         # no need to initialize import again if it was importing.
-        return callback() if @importing
+        return callback() if @status is "importing"
 
         @importStarted =>
             @openInbox (err) =>
@@ -331,7 +329,8 @@ module.exports = (compound, Mailbox) ->
                 data = remoteId: idInt, mailbox: @id
                 MailToBe.create data, (error, mailToBe) =>
                     if error
-                        @closeBox =>
+                        @closeBox (err) =>
+                            @log err if err
                             @log "Error occured while saving email."
                             callback()
                     else
@@ -344,7 +343,7 @@ module.exports = (compound, Mailbox) ->
                                 mailsToImport: results.length
                                 imapLastFetchedId: maxId
                                 activated: true
-                                importing: true
+                                status: "importing"
 
                             @updateAttributes data, (err) =>
                                 if err
@@ -357,8 +356,9 @@ module.exports = (compound, Mailbox) ->
 
             else
                 if mailsDone isnt mailsToGo
-                    @closeBox =>
+                    @closeBox (err) =>
                         @log  "Error occured - not all ids could be stored to the database"
+                        @log err if err
                         callback()
 
     # Run the real import grab all mailtobes from database and fetch message one by
@@ -368,12 +368,14 @@ module.exports = (compound, Mailbox) ->
             MailToBe.fromMailbox @, (err, mailsToBe) =>
                 if err
                     console.log err
-                    @closeBox =>
+                    @closeBox (err) =>
+                        @log err if err
                         @importFailed callback
 
                 else if mailsToBe.length is 0
                     @log "Import: Nothing to download"
-                    @closeBox =>
+                    @closeBox (err) =>
+                        @log err if err
                         @importSuccessfull callback
 
                 else
@@ -417,7 +419,8 @@ module.exports = (compound, Mailbox) ->
                         else
                             fetchMails mailsToBe, i + 1, mailsToGo, mailsDone
             else
-                @closeBox =>
+                @closeBox (err) =>
+                    @log err if err
                     if mailsToGo isnt mailsDone
                         @log "The box was not fully imported."
                     finishImport()

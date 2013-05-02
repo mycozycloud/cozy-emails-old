@@ -11,8 +11,10 @@ load 'application'
 # shared functionnality : find the mail via its ID
 before ->
     Mail.find params.id, (err, mail) =>
-        if err or not mail?
-            send 404
+        if err
+            send error: err, 500
+        else if not mail?
+            send error: "not found", 404
         else
             @mail = mail
             next()
@@ -41,7 +43,7 @@ action 'update', ->
 
     @mail.updateAttributes body, (err) =>
         if err
-            send 500
+            send error: err, 500
         else
             if markRead
                 Mailbox.find @mail.mailbox, (err, mailbox) =>
@@ -78,7 +80,7 @@ action 'getlist', ->
 
     Mail.dateId query, (err, mails) ->
         if err
-            send error: true, 500
+            send error: err, 500
         else
             if mails.length is 0
                 send []
@@ -98,7 +100,7 @@ action 'getnewlist', ->
 
     Mail.dateId query, (err, mails) ->
         if err
-            send error: true, 500
+            send error: err, 500
         else
             send mails
 
@@ -110,7 +112,7 @@ action 'getattachmentslist', ->
 
     Attachment.fromMail query, (err, attachments) ->
         if err
-            send error: true, 500
+            send error: err, 500
         else
             send attachments
 
@@ -119,7 +121,7 @@ action 'getattachmentslist', ->
 action 'getattachment', ->
     Attachment.find params.id, (err, attachment) =>
         if err
-            send error: true, 500
+            send error: err, 500
         else if not attachment
             send error: true, 400
         else
