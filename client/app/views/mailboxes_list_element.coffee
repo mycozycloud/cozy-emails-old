@@ -76,7 +76,17 @@ class exports.MailboxesListElement extends Backbone.View
     buttonDelete: (event) =>
         deleteMailbox = =>
             $(event.target).addClass("disabled").removeClass("delete_mailbox")
-            @model.destroy()
+            @model.destroy
+                success: =>
+                    @model.removeView()
+                 error: (model, xhr) ->
+                    msg = "Server error occured"
+                    if xhr.status is 400
+                        data = JSON.parse xhr.responseText
+                        msg = data.error
+
+                    alert msg
+                    $(event.target).removeClass("disabled").addClass("delete_mailbox")
 
         $("#confirm-delete-modal .yes-button").bind 'click', deleteMailbox
         $("#confirm-delete-modal").modal()

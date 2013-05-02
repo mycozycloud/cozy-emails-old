@@ -1184,7 +1184,7 @@ window.require.register("models/mailbox", function(exports, require, module) {
     /*
         @file: mailbox.coffee
         @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description: 
+        @description:
             A model which defines the MAILBOX object.
             MAILBOX stocks all the data necessary for a successful connection to
             IMAP and SMTP servers, and all the data relative to this mailbox,
@@ -1216,10 +1216,6 @@ window.require.register("models/mailbox", function(exports, require, module) {
         imapPort: 993,
         imapSecure: true,
         color: "orange"
-      };
-
-      Mailbox.prototype.initialize = function() {
-        return this.on("destroy", this.removeView, this);
       };
 
       Mailbox.prototype.redrawView = function() {
@@ -1715,7 +1711,21 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
           _this = this;
         deleteMailbox = function() {
           $(event.target).addClass("disabled").removeClass("delete_mailbox");
-          return _this.model.destroy();
+          return _this.model.destroy({
+            success: function() {
+              return _this.model.removeView();
+            },
+            error: function(model, xhr) {
+              var data, msg;
+              msg = "Server error occured";
+              if (xhr.status === 400) {
+                data = JSON.parse(xhr.responseText);
+                msg = data.error;
+              }
+              alert(msg);
+              return $(event.target).removeClass("disabled").addClass("delete_mailbox");
+            }
+          });
         };
         $("#confirm-delete-modal .yes-button").bind('click', deleteMailbox);
         $("#confirm-delete-modal").modal();
@@ -3220,7 +3230,7 @@ window.require.register("views/message_box_element", function(exports, require, 
       };
 
       MessageBoxElement.prototype.onCloseClicked = function() {
-        if (this.model.get("type") !== "info" || this.model.get("type") !== "check") {
+        if (!(this.model.get("type") === "info" && this.model.get("type") === "check")) {
           this.model.url = "logs/" + this.model.id;
           this.model.destroy();
         }

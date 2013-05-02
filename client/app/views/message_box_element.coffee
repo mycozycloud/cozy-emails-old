@@ -17,7 +17,7 @@ class exports.MessageBoxElement extends Backbone.View
         "click button.close" : 'onCloseClicked'
 
     onCloseClicked: =>
-         if @model.get("type") isnt "info" or @model.get("type") isnt "check"
+         unless @model.get("type") is "info" and @model.get("type") is "check"
              @model.url = "logs/#{@model.id}"
              @model.destroy()
          @collection.remove @model
