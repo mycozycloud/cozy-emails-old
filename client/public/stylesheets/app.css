@@ -5220,8 +5220,8 @@ iframe{border-top-width:0;border-right-width:0;border-bottom-width:0;border-left
 textarea#html{width:100%}
 blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 .mailbox_well input{border:1px solid #ccc;-webkit-box-shadow:0;-moz-box-shadow:0;box-shadow:0;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:none;font-family:styled,helvetica}
-.mailbox_well input:hover{border:1px solid #34a6ff;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:inset 1px 1px 2px rgba(100,100,100,0.10);color:#333}
-.mailbox_well input:focus,.mailbox_well input:active{border:1px solid #fe8800;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
+.mailbox_well input:hover{border:1px solid #fe8800;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:inset 1px 1px 2px rgba(100,100,100,0.10);color:#333}
+.mailbox_well input:focus,.mailbox_well input:active{border:1px solid #34a6ff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
 .mailbox_well .controls p{font-size:11px}
 .column{height:770px;overflow:auto}
 .btn{border:1px solid #34a6ff;background:#34a6ff;color:#fff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;text-shadow:none;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;font-family:main;font-weight:bold}
