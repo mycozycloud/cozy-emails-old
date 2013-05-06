@@ -187,8 +187,8 @@ action 'fetchNew', ->
                     fetchBoxes boxes, callbacks
                 else
                     box.password = account.password
-                    if box.status is "imported" and
-                    not box.status is "importing"
+
+                    if box.status is "imported"
                         box.getNewMails 200, (err) ->
                             if err
                                 callback err
