@@ -105,8 +105,10 @@ module.exports = (compound, LogMessage) ->
 
     LogMessage.createNewMailInfo = (mailbox, nbNewMails, callback) ->
         if nbNewMails > 0
-            msg = "#{nbNewMails} new mail in #{mailbox.name}"
+            msg = "#{nbNewMails} new mail"
             msg += "s" if nbNewMails > 1
+            msg += " in #{mailbox.name}"
+
             data =
                 type: "info"
                 subtype: "check"
