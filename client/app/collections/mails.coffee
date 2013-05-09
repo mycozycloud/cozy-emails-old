@@ -26,10 +26,6 @@ class exports.MailsCollection extends Backbone.Collection
     # number of mails to fetch at one click on "more mail" button
     mailsAtOnce: 100
 
-    # comparator to sort the collection with the date
-    comparator: (mail) ->
-        - mail.get("dateValueOf")
-
     initialize: ->
         @on "change_active_mail", @navigateMail, @
         @on "update_number_mails_shown", @calculateMailsShown, @
@@ -73,8 +69,6 @@ class exports.MailsCollection extends Backbone.Collection
                 @fetch
                     add: true
                     success: (models) =>
-                        if models.length > 0
-                            @timestampNew = models.at(0).get("dateValueOf")
                         callback null, data if callback?
                     error: ->
                         alert "Fetch new mail failed"

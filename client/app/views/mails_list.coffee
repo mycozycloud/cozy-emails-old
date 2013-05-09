@@ -37,7 +37,7 @@ class exports.MailsList extends Backbone.View
             @addOne mail
         else
             # update timestamp for new messages
-            if dateValueOf > @collection.timestampNew
+            if dateValueOf >= @collection.timestampNew
                 @collection.timestampNew = dateValueOf
                 @collection.lastIdNew = mail.get("id")
 

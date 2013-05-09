@@ -95,8 +95,8 @@ action 'getnewlist', ->
 
     query =
         startkey: [timestamp, undefined]
-        skip: 1
         descending: false
+        skip: 1
 
     Mail.dateId query, (err, mails) ->
         if err

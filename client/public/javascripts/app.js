@@ -276,10 +276,6 @@ window.require.register("collections/mails", function(exports, require, module) 
 
       MailsCollection.prototype.mailsAtOnce = 100;
 
-      MailsCollection.prototype.comparator = function(mail) {
-        return -mail.get("dateValueOf");
-      };
-
       MailsCollection.prototype.initialize = function() {
         this.on("change_active_mail", this.navigateMail, this);
         this.on("update_number_mails_shown", this.calculateMailsShown, this);
@@ -337,9 +333,6 @@ window.require.register("collections/mails", function(exports, require, module) 
             return _this.fetch({
               add: true,
               success: function(models) {
-                if (models.length > 0) {
-                  _this.timestampNew = models.at(0).get("dateValueOf");
-                }
                 if (callback != null) return callback(null, data);
               },
               error: function() {
@@ -2384,7 +2377,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
           }
           return this.addOne(mail);
         } else {
-          if (dateValueOf > this.collection.timestampNew) {
+          if (dateValueOf >= this.collection.timestampNew) {
             this.collection.timestampNew = dateValueOf;
             this.collection.lastIdNew = mail.get("id");
           }
@@ -3230,7 +3223,7 @@ window.require.register("views/message_box_element", function(exports, require, 
       };
 
       MessageBoxElement.prototype.onCloseClicked = function() {
-        if (!(this.model.get("type") === "info" && this.model.get("type") === "check")) {
+        if (!(this.model.get("type") === "info" && this.model.get("subtype") === "check")) {
           this.model.url = "logs/" + this.model.id;
           this.model.destroy();
         }
