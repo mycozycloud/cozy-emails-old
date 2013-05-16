@@ -34,3 +34,6 @@ https://cozycloud.cc
 
 Feel free to check out our IRC channel (#cozycloud on irc.freenode.org) if you have any technical issues/inquiries or simply to speak about Cozy cloud in general.
 
+# Icons
+
+Icons come from Boostrap Twitter and [iconmonstr](http://iconmonstr.com/).
