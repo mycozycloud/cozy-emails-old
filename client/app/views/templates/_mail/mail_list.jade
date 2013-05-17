@@ -1,5 +1,5 @@
-td(title=mailbox.get('name'), style='width: 5px; padding: 0; background-color: ' + model.getColor() + ';')
-td(title=mailbox.get('name'))
+td(title=mailboxName, style='width: 5px; padding: 0; background-color: ' + model.getColor() + ';')
+td(title=mailboxName)
     p
         if model.isUnread()
             strong #{model.fromShort()}

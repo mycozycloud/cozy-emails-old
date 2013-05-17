@@ -2479,13 +2479,18 @@ window.require.register("views/mails_list_element", function(exports, require, m
       };
 
       MailsListElement.prototype.render = function() {
-        var mailbox, template;
+        var data, mailbox, template;
         mailbox = window.app.appView.mailboxes.get(this.model.get("mailbox"));
+        data = {
+          model: this.model
+        };
+        if (mailbox != null) {
+          data.mailboxName = mailbox.get("name");
+        } else {
+          data.mailboxName = "";
+        }
         template = require('./templates/_mail/mail_list');
-        this.$el.html(template({
-          model: this.model,
-          mailbox: mailbox
-        }));
+        this.$el.html(template(data));
         return this;
       };
 
@@ -3704,9 +3709,9 @@ window.require.register("views/templates/_mail/mail_list", function(exports, req
   with (locals || {}) {
   var interp;
   buf.push('<td');
-  buf.push(attrs({ 'title':(mailbox.get('name')), 'style':('width: 5px; padding: 0; background-color: ' + model.getColor() + ';') }));
+  buf.push(attrs({ 'title':(mailboxName), 'style':('width: 5px; padding: 0; background-color: ' + model.getColor() + ';') }));
   buf.push('></td><td');
-  buf.push(attrs({ 'title':(mailbox.get('name')) }));
+  buf.push(attrs({ 'title':(mailboxName) }));
   buf.push('><p>');
   if ( model.isUnread())
   {

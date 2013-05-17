@@ -33,8 +33,13 @@ class exports.MailsListElement extends Backbone.View
 
     render: ->
         mailbox = window.app.appView.mailboxes.get @model.get("mailbox")
-        template = require('./templates/_mail/mail_list')
-        @$el.html template
+        data =
             model: @model
-            mailbox: mailbox
+        if mailbox?
+            data.mailboxName = mailbox.get("name")
+        else
+            data.mailboxName = ""
+
+        template = require('./templates/_mail/mail_list')
+        @$el.html template(data)
         @
