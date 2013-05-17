@@ -6,14 +6,14 @@
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
     @description:
         Displays the list of configured mailboxes.
-
 ###
 
 class exports.MailboxesList extends Backbone.View
-    id: "mailboxeslist"
+    id: "mailboxes"
+    el: "#mailboxes"
     className: "mailboxes"
 
-    constructor: (@el, @collection) ->
+    constructor: (@collection) ->
         super()
         @collection.view = @
 
@@ -33,3 +33,5 @@ class exports.MailboxesList extends Backbone.View
         if @collection.length is 0
             @$el.append '<p id="no-mailbox-msg">no mailbox found</p>'
         @
+
+        $("#mailboxes").niceScroll()

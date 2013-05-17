@@ -1423,6 +1423,8 @@ window.require.register("views/app", function(exports, require, module) {
         };
         $("body").height(viewport());
         $("#content").height(viewport());
+        $("#box-content").height(viewport());
+        $("#box-content").css('overflow', 'auto');
         $(".column").height(viewport());
         return $("#sidebar").height(viewport());
       };
@@ -1435,8 +1437,8 @@ window.require.register("views/app", function(exports, require, module) {
         var _this = this;
         if (this.boxContainerContent.html() === "") {
           this.boxContainerContent.html(require('./templates/_layouts/layout_mailboxes'));
-          this.mailboxesView = new MailboxesList(this.$("#mail_list_container"), this.mailboxes);
-          this.newMailboxesView = new MailboxesListNew(this.$("#add_mail_button_container"), this.mailboxes);
+          this.mailboxesView = new MailboxesList(this.mailboxes);
+          this.newMailboxesView = new MailboxesListNew(this.mailboxes);
           this.mailboxes.reset();
           this.mailboxes.fetch({
             success: function() {
@@ -1560,12 +1562,13 @@ window.require.register("views/mailboxes_list", function(exports, require, modul
 
       __extends(MailboxesList, _super);
 
-      MailboxesList.prototype.id = "mailboxeslist";
+      MailboxesList.prototype.id = "mailboxes";
+
+      MailboxesList.prototype.el = "#mailboxes";
 
       MailboxesList.prototype.className = "mailboxes";
 
-      function MailboxesList(el, collection) {
-        this.el = el;
+      function MailboxesList(collection) {
         this.collection = collection;
         MailboxesList.__super__.constructor.call(this);
         this.collection.view = this;
@@ -1591,7 +1594,8 @@ window.require.register("views/mailboxes_list", function(exports, require, modul
         if (this.collection.length === 0) {
           this.$el.append('<p id="no-mailbox-msg">no mailbox found</p>');
         }
-        return this;
+        this;
+        return $("#mailboxes").niceScroll();
       };
 
       return MailboxesList;
@@ -1767,16 +1771,15 @@ window.require.register("views/mailboxes_list_new", function(exports, require, m
 
       __extends(MailboxesListNew, _super);
 
-      MailboxesListNew.prototype.id = "mailboxeslist_new";
+      MailboxesListNew.prototype.id = "add_mail_button_container";
 
-      MailboxesListNew.prototype.className = "mailboxes_new";
+      MailboxesListNew.prototype.el = "#add_mail_button_container";
 
       MailboxesListNew.prototype.events = {
         "click #add_mailbox": 'addMailbox'
       };
 
-      function MailboxesListNew(el, collection) {
-        this.el = el;
+      function MailboxesListNew(collection) {
         this.collection = collection;
         MailboxesListNew.__super__.constructor.call(this);
       }
@@ -3300,13 +3303,11 @@ window.require.register("views/templates/_layouts/layout_mailboxes", function(ex
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div');
-  buf.push(attrs({ "class": ('row-fluid') }));
-  buf.push('><div');
-  buf.push(attrs({ 'id':('mail_list_container'), "class": ('span12') }));
-  buf.push('></div><div><div');
+  buf.push('<div><div');
+  buf.push(attrs({ 'id':('mailboxes') }));
+  buf.push('></div><div');
   buf.push(attrs({ 'id':('add_mail_button_container') }));
-  buf.push('></div></div></div>');
+  buf.push('></div></div>');
   }
   return buf.join("");
   };

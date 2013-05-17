@@ -47,6 +47,8 @@ class exports.AppView extends Backbone.View
             e[a + "Height"]
         $("body").height viewport()
         $("#content").height viewport()
+        $("#box-content").height viewport()
+        $("#box-content").css 'overflow', 'auto'
         $(".column").height viewport()
         $("#sidebar").height viewport()
 
@@ -65,9 +67,9 @@ class exports.AppView extends Backbone.View
             @boxContainerContent.html require('./templates/_layouts/layout_mailboxes')
 
             @mailboxesView =
-                new MailboxesList @$("#mail_list_container"), @mailboxes
+                new MailboxesList @mailboxes
             @newMailboxesView =
-                new MailboxesListNew @$("#add_mail_button_container"), @mailboxes
+                new MailboxesListNew @mailboxes
 
             @mailboxes.reset()
             @mailboxes.fetch
@@ -82,16 +84,13 @@ class exports.AppView extends Backbone.View
 
         @resize()
 
-    # put on the layout to display mails:
     setLayoutMails: ->
-        # lay the mails out
         @boxContainerContent.hide()
         @containerContent.show()
         renderScroll = false
         if @containerContent.html() is ""
             @containerContent.html require('./templates/_layouts/layout_mails')
 
-            # create views for the columns
             window.app.viewMailsList =
                 new MailsColumn @$("#column_mails_list"), window.app.mails, @mailboxes
             window.app.viewMailsList.render()
@@ -101,13 +100,10 @@ class exports.AppView extends Backbone.View
             renderScroll = true
 
         @$("#no-mails-message").hide()
-
-        # fetch necessary data
         if @mailboxes.length is 0
             @mailboxes.fetch
                 success: =>
                     if window.app.mails.length is 0
-                        # fetch necessary data
                         @$("#column_mails_list tbody").prepend "<span>loading...</span>"
                         @$("#column_mails_list tbody").spin "small"
                         window.app.mails.fetchOlder =>
