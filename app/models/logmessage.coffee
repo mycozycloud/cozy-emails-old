@@ -1,5 +1,9 @@
+
 module.exports = (compound, LogMessage) ->
     # Helpers
+
+    NotificationHelper = require('cozy-notifications-helper')
+    Notifications = new NotificationHelper('mails')
 
     LogMessage.orderedByDate = (params, callback) ->
         if typeof(params) is "function"
@@ -77,75 +81,59 @@ module.exports = (compound, LogMessage) ->
     LogMessage.createImportInfo = (results, mailbox, callback) ->
         mail_text = "mail"
         mail_text += "s" if results.length > 1
-        msg = "Downloading <strong>#{results.length}</strong> #{mail_text} from "
-        msg += "<strong>#{mailbox.name}</strong> "
+        msg = "Downloading #{results.length} #{mail_text} from #{mailbox.name}"
 
-        data =
-            subtype: "download"
+        Notifications.createOrUpdatePersistent "download-#{mailbox.id}",
             text: msg
-            timeout: 0
-            mailbox: mailbox.id
-            counter: results.length
+            resource:
+                app: 'mails'
+                url: 'mail/#{results[0].id}'
 
-        LogMessage.orderedByDate limit: 1, (err, logMessages) ->
-            callback err if err
-            if logMessages.length > 0 and
-            logMessages[0].subtype is data.subtype and
-            logMessages[0].mailbox is data.mailbox
-                logMessage = logMessages[0]
-                logMessage.createdAt = new Date().valueOf()
-                logMessage.counter += results.length
-
-                msg = "Downloading <strong>#{logMessage.counter}</strong>"
-                msg += " #{mail_text} from "
-                logMessage.text = msg
-                logMessage.save callback
-            else
-                LogMessage.createInfo data, callback
+        callback()
 
     LogMessage.createNewMailInfo = (mailbox, nbNewMails, callback) ->
-        if nbNewMails > 0
+        return callback() if nbNewMails is 0
+
+        mail_text = "mail"
+        mail_text += "s" if nbNewMails > 1
+        msg = "#{nbNewMails} new #{mail_text} in #{mailbox.name}"
+
+        Notifications.createOrUpdatePersistent 'newmail-#{mailbox.id}',
+            text: msg
             msg = "#{nbNewMails} new mail"
             msg += "s" if nbNewMails > 1
             msg += " in #{mailbox.name}"
 
-            data =
-                type: "info"
-                subtype: "check"
-                text: msg
-                timeout: 0
-                mailbox: mailbox.id
-            LogMessage.createInfo data, callback
-        else
-            callback()
+        callback()
 
     LogMessage.createImportStartedInfo = (mailbox, callback) ->
-        data =
-            subtype: "start"
-            text: "Import of <strong>#{mailbox.name}</strong> started."
-            timeout: 0
-            mailbox: mailbox.id
-        LogMessage.createInfo data, callback
+
+        Notifications.createOrUpdatePersistent "importprogress-#{mailbox.id}",
+            text: "Import of #{mailbox.name} started."
+            resource:
+                app: 'mails'
+                url: 'config-mailboxes'
+
+        callback()
 
     LogMessage.createImportProgressInfo = (mailbox, progress, callback) ->
-        data =
-            type: "info",
-            subtype: "progress"
-            text: "Import of <strong>#{mailbox.name}</strong> #{progress}% complete"
-            createdAt: new Date().valueOf(),
-            timeout: 0
-            mailbox: mailbox.id
-        LogMessage.create data, callback
 
+        Notifications.createOrUpdatePersistent "importprogress-#{mailbox.id}",
+            text: "Import of #{mailbox.name} : #{progress}% complete"
+            resource:
+                app: 'mails'
+                url: 'config-mailboxes'
+
+        callback()
 
     # Success
 
     LogMessage.createImportSuccess = (mailbox, callback) ->
-        data =
-            type: "success"
-            subtype: "end"
-            text: "Import of <strong>#{mailbox.name}</strong> complete !"
-            createdAt: new Date().valueOf()
-            timeout: 0
-            mailbox: mailbox.id
-        LogMessage.create data, callback
+
+        Notifications.createOrUpdatePersistent "importprogress-#{mailbox.id}",
+            text: "Import of #{mailbox.name} is complete !"
+            resource:
+                app: 'mails'
+                url: ''
+
+        callback()
