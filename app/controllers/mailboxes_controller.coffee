@@ -6,8 +6,6 @@
         send mails via a mailbox.
 ###
 
-load "application"
-
 mimelib = require "mimelib"
 
 

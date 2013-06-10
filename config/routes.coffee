@@ -1,5 +1,4 @@
 exports.routes = (map) ->
-    map.get '/', 'mails#index'
 
     map.get '/mails/fetch-new/', 'mailboxes#fetchNew'
     map.get '/mails/new/:timestamp/', 'mails#getnewlist'

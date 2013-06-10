@@ -5,9 +5,6 @@
         Railwayjs controller to handle mails CRUD backend and their attachments.
 ###
 
-load 'application'
-
-
 # shared functionnality : find the mail via its ID
 before ->
     Mail.find params.id, (err, mail) =>
@@ -19,12 +16,6 @@ before ->
             @mail = mail
             next()
 , { only: ['show', 'update', 'destroy', 'getattachmentslist'] }
-
-
-# App entry point
-action 'index', ->
-    render
-        title: "Cozy Mails"
 
 
 # GET /mails/:id

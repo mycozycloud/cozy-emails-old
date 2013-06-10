@@ -6,8 +6,6 @@
         interface
 ###
 
-load 'application'
-
 before ->
     LogMessage.find req.params.id, (err, logMessage) =>
         if err or !logMessage
