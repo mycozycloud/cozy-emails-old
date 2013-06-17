@@ -41,7 +41,7 @@
     { "description": "Recovers and stores your mails."
     }
   , "MailBox":
-    { "description": "Configures your mail boxes."
+    { "description": "Configures your mailboxes."
     }
   , "Attachment":
     { "description": "Recovers and stores attachments of your mails."
@@ -50,7 +50,7 @@
     { "description": "Displays errors."
     }
   , "Account":
-    { "description": "Encrypts your mail boxes passwords."
+    { "description": "Encrypts your mailboxes passwords."
     }
   , "MailToBe":
     { "description": "Used for the first step in mails downloading."
