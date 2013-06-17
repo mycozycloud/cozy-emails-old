@@ -38,25 +38,22 @@
   }
 , "cozy-permissions":
   { "Mail":
-    { "description": "Recovers your mails."
-    }
-  , "MailSent":
-    { "description": "Recovers your sent mails."
-    }
-  , "MailToBe":
-    { "description": "Used for the first step in mails downloading."
+    { "description": "Recovers and stores your mails."
     }
   , "MailBox":
-    { "description": "Recovers and configures your mail boxes."
+    { "description": "Configures your mail boxes."
     }
   , "Attachment":
-    { "description": "Recovers attachments of your mails."
+    { "description": "Recovers and stores attachments of your mails."
     }
   , "LogMessage":
     { "description": "Displays errors."
     }
   , "Account":
     { "description": "Encrypts your mail boxes passwords."
+    }
+  , "MailToBe":
+    { "description": "Used for the first step in mails downloading."
     }
   }
 }
