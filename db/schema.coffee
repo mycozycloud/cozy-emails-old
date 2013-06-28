@@ -7,15 +7,11 @@
 ###
 
 # User defines user that can interact with the Cozy instance.
-User = define 'User', ->
-    property 'email', String
-    property 'password', String
-    property 'owner', Boolean, default: false
-    property 'activated', Boolean, default: false
-
 Mail = define 'Mail', ->
     property 'mailbox'
+    property 'folder', Text
     property 'idRemoteMailbox',
+    property 'remoteUID', Text
     property 'createdAt', Number, default: 0
     property 'dateValueOf', Number, default: 0
     property 'date', Date, default: 0
@@ -28,7 +24,7 @@ Mail = define 'Mail', ->
     property 'cc',
     property 'text', Text
     property 'html', Text
-    property 'flags',
+    property 'flags', Object
     property 'read', Boolean, default: false
     property 'flagged', Boolean, default: false
     property 'hasAttachments', Boolean, default: false
@@ -61,6 +57,7 @@ MailSent = define 'MailSent', ->
 MailToBe = define 'MailToBe', ->
     property 'remoteId', Number
     property 'mailbox'
+    property 'folder'
 
 # Mailbox object to store the information on connections to remote servers
 # and have attached mails
@@ -78,7 +75,7 @@ Mailbox = define 'Mailbox', ->
     property 'password'
 
     # data for outbound mails - SMTP
-    property 'smtpSserver'
+    property 'smtpServer'
     property 'smtpSendAs'
     property 'smtpSsl', Boolean, default: true
     property 'smtpPort', Number, default: 465
@@ -103,6 +100,15 @@ Mailbox = define 'Mailbox', ->
     property 'status', String, default: "freezed"
     property 'mailsToImport', Number, default: 0
 
+Folders = define 'Folder', ->
+
+    property 'name'
+    property 'path'
+    property 'specialType'
+    property 'mailbox'
+    property 'imapLastFetchedId', Number, default: 0
+
+    property 'mailsToBe', Object
 
 # logs managment
 LogMessage = define 'LogMessage', ->

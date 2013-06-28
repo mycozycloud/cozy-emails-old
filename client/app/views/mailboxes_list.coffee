@@ -1,5 +1,5 @@
-{Mailbox} = require "../models/mailbox"
-{MailboxesListElement} = require "../views/mailboxes_list_element"
+{Mailbox} = require "models/mailbox"
+ViewCollection = require 'lib/view_collection'
 
 ###
     @file: mailboxes_list.coffee
@@ -8,30 +8,24 @@
         Displays the list of configured mailboxes.
 ###
 
-class exports.MailboxesList extends Backbone.View
+class exports.MailboxesList extends ViewCollection
+
     id: "mailboxes"
-    el: "#mailboxes"
-    className: "mailboxes"
+    itemView: require('views/mailboxes_list_element')
+    template: require('templates/_mailbox/list')
 
-    constructor: (@collection) ->
-        super()
-        @collection.view = @
+    checkIfEmpty: ->
+        super
+        @$('#no-mailbox-msg').toggle(_.size(@views) is 0)
 
-    initialize: ->
-        @collection.on 'reset', @render, @
+    appendView: (view) ->
+        @$el.prepend view.$el
 
-    addOne: (mailbox) ->
-        box = new MailboxesListElement mailbox, @collection
-        @$el.append box.render().el
+    afterRender: ->
+        super
+        @$el.niceScroll()
 
-    render: ->
-        @$el.html ""
-        @collection.each (mailbox) =>
-            mailbox.isEdit = false
-            @addOne mailbox
-
-        if @collection.length is 0
-            @$el.append '<p id="no-mailbox-msg">no mailbox found</p>'
-        @
-
-        $("#mailboxes").niceScroll()
+    activate: (id) ->
+        for cid, view of @views
+            if view.model.id is id then view.$el.addClass 'active'
+            else view.$el.removeClass 'active'

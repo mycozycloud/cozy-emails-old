@@ -1,5 +1,5 @@
-{Mail} = require "../models/mail"
-{MailsListElement} = require "./mails_list_element"
+ViewCollection     = require 'lib/view_collection'
+FolderMenu         = require 'views/folders_menu'
 
 ###
     @file: mails_list.coffee
@@ -9,57 +9,109 @@
         Uses MailsListElement to generate each mail's view
 ###
 
-class exports.MailsList extends Backbone.View
+class exports.MailsList extends ViewCollection
     id: "mails_list"
+    itemView: require("views/mails_list_element").MailsListElement
+    template: require("templates/_mail/list")
 
-    constructor: (@el, @collection) ->
-        super()
-        @collection.view = @
-        @views = []
+    events:
+        "click #add_more_mails"  : 'loadOlderMails'
+        'click #refresh-btn'     : 'refresh'
+        'click #markallread-btn' : 'markAllRead'
 
     initialize: ->
-        @collection.on 'reset', @render, @
-        @collection.on "add", @treatAdd, @
+        super
+        @listenTo window.app.mailboxes, 'change:color', @updateColors
+        @listenTo window.app.mailboxes, 'add', @updateColors
 
-    # this function decides whether to add the new fetched mail on the top (new
-    # mail), or the bottom ("more mails" button) of the list.
-    treatAdd: (mail) ->
-        dateValueOf = mail.get "dateValueOf"
+        @foldermenu = new FolderMenu(collection: app.folders)
+        @foldermenu.render()
 
-        # check if we are adding a new message, or an old one
+    checkIfEmpty: ->
+        super
+        empty = _.size(@views) is 0
+        @noMailMsg?.toggle empty
+        @$('#markallread-btn').toggle not empty
+        @$('#add_more_mails') .toggle not empty
+        @$('#refresh-btn')    .toggle not empty
+
+    afterRender: ->
+        @noMailMsg  = @$('#no-mails-message')
+        @loadmoreBtn = @$ '#add_more_mails'
+        @container   = @$ '#mails_list_container'
+
+        @$('#topbar').append @foldermenu.$el
+        @activate @activated if @activated
+        @$el.niceScroll()
+        super
+
+    remove: ->
+        @$el.getNiceScroll().remove()
+        super
+
+    appendView: (view) ->
+        return unless @container
+        dateValueOf = view.model.get 'dateValueOf'
         if dateValueOf < @collection.timestampNew
             # update timestamp for the list of messages
             if dateValueOf < @collection.timestampOld
                 @collection.timestampOld = dateValueOf
-                @collection.lastIdOld = mail.get("id")
+                @collection.lastIdOld = view.model.id
 
             # add its view at the bottom of the list
-            @addOne mail
+            @container.append view.$el
         else
             # update timestamp for new messages
             if dateValueOf >= @collection.timestampNew
                 @collection.timestampNew = dateValueOf
-                @collection.lastIdNew = mail.get("id")
+                @collection.lastIdNew = view.model.id
 
             # add its view on top of the list
-            @addNew mail
+            @container.prepend view.$el
 
-    addOne: (mail) ->
-        box = new MailsListElement mail, @collection
-        @$el.append box.render().el
-        @views.push box
+    refresh: ->
+        btn = @$ '#refresh-btn'
+        btn.spin().addClass 'disabled'
+        promise = $.ajax 'mails/fetch-new/'
 
-    addNew: (mail) ->
-        box = new MailsListElement mail, @collection
-        @$el.prepend box.render().el
-        @views.splice 0, 0, box
+        promise.error (jqXHR, error) =>
+            btn.text('Connection Error').addClass 'error'
+            alert error
 
-    render: ->
-        @$el.html ""
-        @views = []
-        @collection.each (mail) =>
-            @addOne mail
-        @
+        promise.success =>
+            setTimeout @refresh, 30 * 1000
 
-    updateColors: ->
-        view.render() for view in @views
+        promise.always ->
+            btn.spin().removeClass 'disabled'
+
+    markAllRead: -> @collection.each (model) ->
+        unless model.isRead()
+            model.markRead()
+            model.save()
+
+    # when user clicks on "more mails" button
+    loadOlderMails: () ->
+
+        # if not disabled
+        unless @loadmoreBtn.hasClass('disabled')
+            # disable the button
+            @loadmoreBtn.addClass("disabled").text "Loading..."
+            # fetch new data
+            oldlength = @collection.length
+
+            @collection.fetchOlder
+                success: (collection) =>
+                    @loadmoreBtn.removeClass('disabled').text "more messages"
+                    @loadmoreBtn.hide() if @collection.length is oldlength
+                error: (collection, error) =>
+                    @loadmoreBtn.removeClass('disabled').text "more messages"
+                    console.log error
+
+    updateColors: () ->
+        view.render() for id, view of @views
+
+    activate: (id) ->
+        @activated = id
+        for cid, view of @views
+            if view.model.id is id then view.$el.addClass 'active'
+            else view.$el.removeClass 'active'

@@ -1,0 +1,193 @@
+async = require 'async'
+
+
+module.exports = (compound, Folder) ->
+    {Mail, Folder, Attachment, LogMessage} = compound.models
+
+    Folder::log = (msg) ->
+        console.info "#{@} #{msg?.stack or msg}"
+
+    Folder::toString = ->
+        "[Folder #{@name} #{@id} of Mailbox #{@mailbox}]"
+
+    Folder.findByMailbox = (mailboxid, callback) ->
+        console.log "[findByMailbox] #{mailboxid}"
+        Folder.request "byMailbox", {key: mailboxid}, callback
+
+    Folder::setupImport = (getter, callback) ->
+
+        getter.openBox @path, (err) =>
+            return callback err if err
+
+            abort = (msg, err) =>
+                @log msg
+                @log err.stack if err
+                getter.closeBox -> callback err
+
+            getter.getAllMails (err, results) =>
+                return abort "Can't retrieve emails", err if err
+
+                @log "Search query succeeded"
+
+                return abort "No message to fetch" if results.length is 0
+
+                @log "#{results.length} mails to download"
+                @log "Start grabing mail ids"
+
+                maxId = 0
+
+                ids = []
+                for id in results
+                    id = parseInt id
+                    maxId = id if id > maxId
+                    ids.push id
+
+                data =
+                    mailsToBe: ids
+                    imapLastFetchedId: maxId
+
+                @updateAttributes data, (err) =>
+                    return abort "can't save folder state", err if err
+
+                    @log "Finished saving ids to database"
+                    @log "max id = #{maxId}"
+
+                    getter.closeBox callback
+
+    Folder::doImport = (getter, progress, callback) ->
+
+        if @mailsToBe is null or @mailsToBe.length is 0
+            @log "Import: Nothing to download"
+            return callback null, 0
+
+        getter.openBox @path, (err) =>
+            return callback err, 0 if err
+
+            done       = 0
+            total      = @mailsToBe.length
+            success    = 0
+            oldpercent = 0
+
+            # mailsToBe.forEach (mailToBe) ->
+            async.eachSeries @mailsToBe, (mailToBe, cb) =>
+
+                @fetchMessage getter, mailToBe, (err) =>
+                    done++
+
+                    if err
+                        @log 'Mail creation error, skip this mail'
+                        console.log err
+                        cb() #do not pass error to keep looping
+
+                    else
+                        success++
+                        progress success, done, total
+                        cb()
+
+            , (error) => #after all mails in this folder have been processed
+
+                @updateAttributes mailsToBe: null, (err) =>
+
+                    getter.closeBox (err) =>
+                        @log err if err
+                        @log "Imported #{done}/#{total} : #{success} ok"
+                        callback error, done
+
+    # Get message corresponding to given remote ID, save it to database and
+    # download its attachments.
+    Folder::fetchMessage = (getter, remoteId, callback) ->
+
+        getter.fetchMail remoteId, (err, mail, attachments) =>
+
+            mail.folder = @id
+
+            Mail.create mail, (err, mail) =>
+                return callback err if err
+
+                msg = "New mail created: #{mail.idRemoteMailbox}"
+                msg += " #{mail.id} [#{mail.subject}] "
+                msg += JSON.stringify mail.from
+                @log msg
+
+                mail.saveAttachments attachments, (err) ->
+                    callback err, mail
+
+
+    # Check if new mails arrives in remote inbox (base this on the last email
+    # fetched id). Then it synchronize last recieved mails.
+    Folder::getNewMails = (getter, limit, callback) ->
+
+        id = Number(@imapLastFetchedId) + 1
+        range = "#{id}:#{id + limit}"
+        @log "Fetching new mails: #{range}"
+        getter.openBox @path, (err, getter) =>
+            return callback err if err
+
+            error = (err) =>
+                getter.closeBox (err) =>
+                    @log err
+                    @fetchFailed -> callback err
+
+            success = (nbNewMails) =>
+                getter.closeBox (err) =>
+                    @log err
+                    @fetchFinished nbNewMails, callback
+
+
+            getter.getMails range, (err, results) =>
+                return error err if err
+
+                maxId = id - 1
+
+                results = [] unless results
+
+                async.eachSeries results, (remoteId, callback) =>
+
+                    @log "fetching mail : #{remoteId}"
+                    @fetchMessage getter, remoteId, (err, mail) =>
+                        return callback err if err
+
+                        maxId = remoteId if remoteId > maxId
+                        callback null
+
+                , (getMailsErr) =>
+
+                    # maxId is the last successful id
+                    if maxId isnt id - 1
+                        @folders[folder].imapLastFetchedId = maxId
+                        @updateAttributes folders: @folders, (err) =>
+
+                            return error err         if err
+                            return error getMailsErr if err
+
+                            @synchronizeChanges getter, limit, (err) =>
+                                @log err if err
+                                return success results.length
+
+
+                    else
+                        @synchronizeChanges getter, limit, (err) =>
+                            @log err if err
+                            return success results.length
+
+    # Synchronize 1 mail's flags with the IMAP server.
+    # Called when the model just have been modified in cozy-mail
+    # so fix conflicts with --ours strategy
+    Folder::syncOneMail = (getter, mail, newflags, callback) ->
+
+        @log "Add read flag to mail #{mail.idRemoteMailbox}"
+        return unless mail.changedFlags newflags
+
+        folder = mail.folder or 'INBOX'
+
+        getter.openBox folder, (err, getter) =>
+            console.log err if err
+            return callback err if err
+
+            getter.setFlags mail, newflags, (err) =>
+
+                getter.closeBox (e) =>
+
+                    unless err
+                        @log "mail #{mail.idRemoteMailbox} marked as seen"
+                        mail.updateAttributes flags: newflags, callback

@@ -14,11 +14,7 @@ module.exports = (compound) ->
                 box.log "no account find"
             else
                 box.password = account.password
-                box.setupImport (err) =>
-                    if err
-                        box.log err
-                    else
-                        box.doImport()
+                box.fullImport()
 
     Mailbox.all (err, boxes) ->
         if err

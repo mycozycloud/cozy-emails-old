@@ -1,4 +1,5 @@
 BaseModel = require("./models").BaseModel
+{AttachmentsCollection} = require 'collections/attachments'
 
 ###
     @file: mail.coffee
@@ -8,27 +9,45 @@ BaseModel = require("./models").BaseModel
 ###
 class exports.Mail extends BaseModel
 
-    initialize: ->
-        @on "destroy", @removeView, @
-        @on "change", @redrawView, @
+    urlRoot: "mails/"
 
-    mailbox: ->
-        if not @mailbox
-            @mailbox = window.app.appView.mailboxes.get @get "mailbox"
+    initialize: ->
+        super
+        @url = BaseModel::url
+        @attachments = new AttachmentsCollection [],
+            comparator: 'filename'
+            model: require('models/attachment').Attachment
+            url: @url() + '/attachments'
+
+    getMailbox: ->
+        @mailbox ?= window.app.mailboxes.get @get "mailbox"
         @mailbox
 
     getColor: ->
-        box = window.app.appView.mailboxes.get @get "mailbox"
-        if box
-            box.get "color"
-        else
-            "white"
+        @getMailbox()?.get("color") or "white"
 
-    redrawView: ->
-        @view.render() if @view?
+    parse: (attributes) ->
+        if 'string' is typeof attributes.flags
+            attributes.flags = JSON.parse(attributes.flags)
 
-    removeView: ->
-        @view.remove() if @view?
+        attributes
+
+
+    ###
+        Changing mail properties - read and flagged
+    ###
+
+    isRead: ->    -1 isnt _.indexOf @get('flags'), "\\Seen"
+    isFlagged: -> -1 isnt _.indexOf @get('flags'), "\\Flagged"
+
+    markRead: (read = true) ->
+        if read then @set 'flags', _.union @get('flags'), ["\\Seen"]
+        else @set 'flags', _.without @get('flags'), "\\Seen"
+
+    markFlagged: (flagged=true) ->
+        if flagged then @set 'flags', _.union @get('flags'), ["\\Flagged"]
+        else @set 'flags', _.without @get('flags'), "\\Flagged"
+
 
     ###
         RENDERING - these functions attr() replace @get "attr", and add
@@ -109,9 +128,6 @@ class exports.Mail extends BaseModel
 
     html: ->
         expression = new RegExp("(<style>(.|\s)*?</style>)", "gi")
-        exp = ///
-            /(<style>(.|\s)*?</style>)/ig
-            ///
         string = new String @get("html")
         string.replace expression, ""
 
@@ -127,58 +143,7 @@ class exports.Mail extends BaseModel
         @get "hasAttachments"
 
     htmlOrText: ->
-        if @hasHtml()
-            @html()
-        else
-            @text()
+        if @hasHtml() then @html() else @text()
 
     textOrHtml: ->
-        if @hasText()
-            @text()
-        else
-            @html()
-
-    ###
-        Changing mail properties - read and flagged
-    ###
-
-    isUnread: ->
-        not @get("read")
-
-    setRead: (read=true) ->
-        stringFlags = @get "flags"
-        if  typeof(stringFlags) is "object" then flags = []
-        else if typeof(stringFlags) is "string"
-            flags = JSON.parse stringFlags
-
-        if read
-            unless "\\Seen" in flags
-                flags.push("\\Seen")
-                box = window.app.appView.mailboxes.get @get("mailbox")
-                box?.set "newMessages", (parseInt(box.get("newMessages")) - 1)
-            @set read: true
-        else
-            flagsPrev = flags.length
-            flags = $.grep flags, (val) ->
-                val isnt "\\Seen"
-            unless flagsPrev is flags.length
-                box = window.app.appView.mailboxes.get @get("mailbox")
-                box?.set "newMessages", ((parseInt box?.get "newMessages") + 1)
-            @set read: false
-        @set flags: JSON.stringify(flags)
-
-    isFlagged: ->
-        @get "flagged"
-
-    setFlagged: (flagged=true) ->
-        flags = JSON.parse @get("flags")
-
-        if flagged
-            unless "\\Flagged" in flags
-                flags.push("\\Flagged")
-        else
-            flags = $.grep flags, (val) ->
-                val isnt "\\Flagged"
-
-        @set flagged: flagged
-        @set flags: JSON.stringify(flags)
+        if @hasText() then @text() else @html()

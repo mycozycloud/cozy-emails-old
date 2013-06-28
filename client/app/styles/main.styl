@@ -1,7 +1,7 @@
 // ###
 //   @file: main.styl
 //   @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-//   @description: 
+//   @description:
 //     The application-wide styling.
 // ###
 
@@ -31,10 +31,14 @@ grey = #AAA
   background: orange
 
 html
-  overflow: hidden
+  // overflow: hidden
   box-sizing: border-box
+  width: 100%
+  height: 100%
 
 body
+  width: 100%
+  height: 100%
   padding: 0
   margin: 0
   overflow: hidden
@@ -45,30 +49,30 @@ legend
     font-family: styled
 
 fieldset
-font-weight: normal
+    font-weight: normal
 
 .sidebar-nav
     padding: 9px 0
 
 iframe
-    border-top-width: 0px
-    border-right-width: 0px
-    border-bottom-width: 0px
-    border-left-width: 0px
+    border: 0px
+    // -top-width: 0px
+    // border-right-width: 0px
+    // border-bottom-width: 0px
+    // border-left-width: 0px
     width: 100%
     overflow-y: hidden
 
 textarea#html
     width: 100%
-    
-    
+
 blockquote
     border-left: 5px gray solid
     margin-left: 15px
     padding-left: 10px
- 
+
 .mailbox_well
-    
+
     input
         border: 1px solid lightgrey
         box-shadow: 0
@@ -110,29 +114,6 @@ blockquote
     border-color: orange
     text-shadow: none
 
-
-#mails_list_container
-    tr:hover
-        background: lightorange
-
-        td
-            background: lightorange
-
-    tr.active
-        background: lightblue
-
-        td
-            background: lightblue
-
-    i.date
-        color: grey
-        margin-right: 10px
-
-    p.subject
-        font-family: styled
-        font-size: 16px
-
-
 .row-fluid
     overflow: hidden
     margin: 0
@@ -151,11 +132,9 @@ blockquote
 
 #newmailbutton
 #sentbutton
-#additional_bar
-.btn-toolbar
     display: none
 
-.nav 
+.nav
     li
         .active
             a
@@ -194,18 +173,35 @@ blockquote
         font-family: styled
         font-size: 22px
 
-#column_mail
+#mail_content_html
+    margin: 0
+    padding: 0
+
+.date
+    margin: 0
+    padding: 0
+    margin-left: 10px
+    color: grey
+
+
+#mail
+    position absolute
+    top 0px
+    left 45%
+    bottom 0px
+    width 55%
+    box-sizing border-box
+    padding 20px
     background-image: url('../img/background-mail.jpg')
+    overflow hidden
+    box-shadow: 6px 0px 3px -2px lightblue inset
 
     h3.attachments-title
         font-family: styled
         font-size: 14px
 
     a
-    a:visited
-    a:hover
-        color: blue
-
+        margin-right 5px
     i
         margin-right: 5px
 
@@ -219,37 +215,101 @@ blockquote
     #attachments_list
         margin: 0
 
-.date
-    margin: 0
-    padding: 0
-    margin-left: 10px
-    color: grey
 
-#sidebar
-    background: #F5F5F5
-    height: 100%
-    border-right: 1px solid lightgrey
-    border-bottom: 1px solid lightgrey
-
-    .well
-        background: #F5F5F5
-        padding-right: 0
-
-#no-mails-message
-    padding-top: 0px
-
-#add_more_mails
-#get_new_mails
-    margin: 10px
-    border-radius: 0
-
-#column_mail
+#mails_list
+    position absolute
+    top 0px
+    left 5%
+    bottom 0px
+    width 40%
     margin-left: 0
-    box-shadow: inset 2px 0px 3px 1px lightgrey
-    padding: 0 20px
-    
+    z-index 3
+    padding: 0 0px
+
+    #topbar
+        padding 10px
+
+        .btn
+            margin-right 10px
+
+        #folders-menu
+            float right
+            a, .dropdown-menu
+                border-radius 0px !important
+
+
+
+    tr:hover
+        background: lightorange
+
+        td
+            background: lightorange
+
+    tr.active
+        background: lightblue
+
+        td
+            background: lightblue
+
+    td.toggleflag
+        cursor pointer
+        line-height 3em
+        padding 5px
+
+        i
+            margin auto
+
+    i.date
+        color: grey
+        margin-right: 10px
+        font-weight normal
+
+    p.subject
+        font-family: styled
+        font-size: 16px
+
+    #no-mails-message
+        padding-top: 0px
+
+    #add_more_mails
+    #get_new_mails
+        margin: 10px
+        border-radius: 0px
+
+    #no-mails-message
+        margin-top: 20px
+
+    .icon-star
+        margin-right 10px
+
+    h4
+        font-weight normal
+
+.mailslist-element .unread
+    h4
+        font-weight bold
+    .subject
+        font-weight bold
+
+
+
 
 #menu_container
+    position absolute
+    top 0px
+    left 0px
+    bottom 0px
+    width 5%
+    box-sizing border-box
+    background: #F5F5F5
+    border-right: 1px solid lightgrey
+    border-bottom: 1px solid lightgrey
+    padding 19px
+    padding-right 0px
+
+    .nav-list li a
+        padding 0px
+
     .active
         a
             background: lightblue
@@ -258,35 +318,61 @@ blockquote
     a
         cursor: pointer
 
-#mail_content_html
-    margin: 0
-    padding: 0
 
-#no-mailbox-msg
-    margin: 20px
+#mailboxes
+    position absolute
+    top 0px
+    left 5%
+    bottom 0px
+    width 40%
+    z-index 3
 
-#no-mails-message
-    margin-top: 20px
+    #no-mailbox-msg
+        margin: 20px
 
-.mailbox_well
-    border-bottom: 1px solid lightgrey
-    border-radius: 0
-    margin-bottom: 0
-    font-family: styled
+    #add_mailbox
+        margin: 10px
+        margin-top: 10px
 
-    span
-        font-family: main
-        color: grey
+    .mailbox_well
+        border-bottom: 1px solid lightgrey
+        border-radius: 0
+        margin-bottom: 0
+        font-family: styled
 
-.edit-mailbox
-    margin-left: 20px
-    margin-right: 5px
+        h3
+            display inline-block
+            margin-left 10px
+            width 30%
 
-.mailbox-status
-    margin-left: 10px
-    font-weight: normal
-    font-size: 14px
+        span
+            font-family: main
+            color: grey
 
-#add_mailbox
-    margin: 10px
-    margin-top: 10px
+        .edit-mailbox
+            margin-left: 20px
+            margin-right: 5px
+            float right
+
+        .delete-mailbox
+            float right
+
+        .mailbox-status
+            margin-left: 10px
+            font-weight: normal
+            font-size: 14px
+    .mailbox_well.active
+        background-color lightblue
+        .edit-mailbox
+            visibility hidden
+
+#mailbox-form
+    position absolute
+    overflow hidden
+    box-sizing border-box
+    top 0px
+    left 45%
+    bottom 0px
+    width 55%
+    padding 20px
+    box-shadow: 6px 0px 3px -2px lightblue inset

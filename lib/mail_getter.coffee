@@ -1,19 +1,22 @@
-imap = require "imap"
-mailparser = require "mailparser"
+{ImapConnection} = require "imap"
+{MailParser} = require "mailparser"
 
 # Utility class to get mails.
 class MailGetter
 
-    constructor: (@mailbox) ->
+    SPECIALUSEFOLDERS = ['INBOX', 'SENT', 'TRASH', 'DRAFTS',
+        'IMPORTANT', 'SPAM', 'STARRED', 'ALLMAIL', 'ALL']
+
+    constructor: (@mailbox, @password) ->
 
     # Start connection with the server describe in the mailbox configuration.
     connect: (callback) ->
-        @server = new imap.ImapConnection
+        @server = new ImapConnection
             username: @mailbox.login
-            password: @mailbox.password
-            host: @mailbox.imapServer
-            port: @mailbox.imapPort
-            secure: @mailbox.imapSecure
+            password: @password
+            host:     @mailbox.imapServer
+            port:     @mailbox.imapPort
+            secure:   @mailbox.imapSecure
 
         @server.on "alert", (alert) =>
             @mailbox.log "[SERVER ALERT] #{alert}"
@@ -43,28 +46,59 @@ class MailGetter
             @mailbox.log 'No host defined'
             callback new Error 'No host defined'
 
-    # Start a connexion with remote IMAP server and open INBOX.
-    openInbox: (callback) =>
-        @connect (err) =>
-            if err
-                # error is not directly returned because in case of wrong
-                # credentials it displays password in logs.
-                @mailbox.log "[Error] #{err.message}"
-                callback new Error("Connection failed")
-            else
-                @server.openBox 'INBOX', false, (err, box) =>
-                    callback err, @server
+    listFolders: (callback) =>
+        @server.getBoxes (err, boxes) =>
 
-    # Close INBOX and stop server connection.
+            folders = []
+            @flattenBoxesIntoFolders '', boxes, folders
+
+            callback null, folders
+
+    flattenBoxesIntoFolders: (parentpath, obj, folders) ->
+
+        for key, value of obj
+            path = parentpath + key
+
+            unless 'NOSELECT' in value.attribs
+
+                type = null
+
+                for specialType in SPECIALUSEFOLDERS
+                    if specialType in value.attribs
+                        type = specialType
+
+                folders.push
+                    name: key
+                    path: path
+                    specialType: type
+                    attribs: value.attribs
+
+            if value.children
+                childpath = path + value.delimiter
+                @flattenBoxesIntoFolders childpath, value.children, folders
+
+
+    # Start a connexion with remote IMAP server and open INBOX.
+    openBox: (folder, callback) =>
+        @server.openBox require('utf7').decode(folder), false, (err, box) =>
+            callback err, @server
+
+    # Close INBOX
     closeBox: (callback) =>
-        @server.closeBox (err) =>
-            if err
-                @mailbox.log "cant close box"
-                callback err if callback?
-            else
-               @server.logout =>
-                    @mailbox.log "logged out from IMAP server"
-                    callback() if callback?
+        @mailbox.log "closing box"
+        @server.closeBox callback
+
+    logout: (callback) =>
+        @mailbox.log "logging out"
+        @server.logout callback
+        # (err) =>
+        #     if err
+        #         @mailbox.log "cant close box"
+        #         callback err if callback?
+        #     else
+        #        @server.logout =>
+        #             @mailbox.log "logged out from IMAP server"
+        #             callback() if callback?
 
     # Retrieve all mails.
     getAllMails: (callback) =>
@@ -85,12 +119,12 @@ class MailGetter
             cb: (fetch) =>
                 messageFlags = []
                 fetch.on 'message', (message) =>
-                    parser = new mailparser.MailParser()
+                    parser = new MailParser()
 
                     parser.on "end", (mailParsed) =>
                         dateSent = @getDateSent mailParsed
-                        attachments = mailParsed.attachments
-                        hasAttachments = if attachments then true else false
+                        attachments    = mailParsed.attachments
+                        hasAttachments = not not attachments
 
                         mail =
                             mailbox: @mailbox.id
@@ -105,6 +139,7 @@ class MailGetter
                             text: mailParsed.text
                             html: mailParsed.html
                             idRemoteMailbox: new String(remoteId)
+                            remoteUID: remoteId
                             headersRaw: JSON.stringify mailParsed.headers
                             references: mailParsed.references or ""
                             inReplyTo: mailParsed.inReplyTo or ""
@@ -138,14 +173,14 @@ class MailGetter
             dateSent = new Date()
 
     # Get last 100 mails flags.
-    getLastFlags: (callback) ->
-        start = @mailbox.imapLastFetchedId - 100
+    getLastFlags: (folder, limit, callback) ->
+        start = folder.imapLastFetchedId - limit
         start = 1 if start < 1
-        @getFlags "#{start}:#{@mailbox.imapLastFetchedId}", callback
+        @getFlags "#{start}:#{folder.imapLastFetchedId}", callback
 
     # Get all the mailbox flags
     getAllFlags: (callback) ->
-        @getFlags "1:#{@mailbox.imapLastFetchedId}", callback
+        @getFlags "1:#{@folder.imapLastFetchedId}", callback
 
     # Get flags for a given range of IDs.
     getFlags: (range, callback) ->
@@ -164,8 +199,38 @@ class MailGetter
             callback err, flagDict
         )
 
-    # Mark given mail as read by adding remotely the Seen flag to its flags.
-    markRead: (mail, callback) ->
-        @server.addFlags mail.idRemoteMailbox, 'Seen', callback
+
+    setFlags: (mail, newflags, callback) ->
+        @getFlags mail.remoteUID, (err, dict) =>
+            return callback err if err
+            console.log dict
+            oldflags = dict[mail.remoteUID]
+
+            console.log newflags, oldflags
+
+            toAdd = []
+            toDel = []
+
+            for flag in oldflags
+                unless flag in newflags
+                    toDel.push flag
+
+            for flag in newflags
+                unless flag in oldflags
+                    toAdd.push flag
+
+            console.log toAdd, toDel
+
+            @delFlags mail.idRemoteMailbox, toDel, (err) =>
+                return callback err if err
+                @addFlags mail.idRemoteMailbox, toAdd, callback
+
+    delFlags: (uid, flags, callback) ->
+        return callback null if flags.length is 0
+        @server.delFlags uid, flags, callback
+
+    addFlags: (uid, flags, callback) ->
+        return callback null if flags.length is 0
+        @server.addFlags uid, flags, callback
 
 module.exports = MailGetter

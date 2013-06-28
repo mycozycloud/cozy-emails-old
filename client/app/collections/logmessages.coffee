@@ -1,4 +1,4 @@
-{LogMessage} = require "../models/logmessage"
+{LogMessage} = require "models/logmessage"
 
 ###
     @file: logmessages.coffee
@@ -10,21 +10,20 @@
 class exports.LogMessagesCollection extends Backbone.Collection
 
     model: LogMessage
-    lastCreatedAt: 0
-    urlRoot: 'logs'
+    # lastCreatedAt: 0
+    urlRoot: 'logs/'
 
-    comparator: (msg) ->
-        msg.get "createdAt"
+    comparator: "createdAt"
 
-    initialize: ->
-        @fetchNew()
-        setInterval @fetchNew, 5 * 1000
+    # initialize: ->
+        # @fetchNew()
+        # setInterval @fetchNew, 5 * 1000
 
     # fetches new log messages from server
-    fetchNew: =>
-        @url = "#{@urlRoot}/#{@lastCreatedAt}"
-        @fetch
-            add: true
-            success: (models) =>
-                if models.length > 0
-                    @lastCreatedAt = models.last().get "createdAt"
+    # fetchNew: =>
+    #     @url = "#{@urlRoot}/#{@lastCreatedAt}"
+    #     @fetch
+    #         add: true
+    #         success: (models) =>
+    #             if models.length > 0
+    #                 @lastCreatedAt = models.last().get "createdAt"

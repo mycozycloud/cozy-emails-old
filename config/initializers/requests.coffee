@@ -1,7 +1,7 @@
 requests = require "../../common/requests"
 
 module.exports = (compound) ->
-    {Mail, Mailbox, MailToBe, LogMessage, Attachment} = compound.models
+    {Mail, Mailbox, Folder, MailToBe, LogMessage, Attachment} = compound.models
 
     ## Requests required to query couchdb documents
 
@@ -11,12 +11,15 @@ module.exports = (compound) ->
     dateIdRequest = -> emit [doc.dateValueOf, doc._id], doc
     dateRequest = -> emit doc.dateValueOf, doc
     dateMailboxRequest = -> emit [doc.mailbox, doc.dateValueOf], doc
+    folderDateRequest = -> emit [doc.folder, doc.dateValueOf], doc
 
     Mail.defineRequest "all", requests.all, requests.checkError
     Mail.defineRequest "date", dateRequest, requests.checkError
     Mail.defineRequest "dateId", dateIdRequest, requests.checkError
     Mail.defineRequest "byMailbox", mailboxRequest, requests.checkError
     Mail.defineRequest "dateByMailbox", dateMailboxRequest, requests.checkError
+    Mail.defineRequest "folderDate", folderDateRequest, requests.checkError
+
 
 
     # Attachments
@@ -30,9 +33,10 @@ module.exports = (compound) ->
 
     # MailToBe
     mailboxRequest = -> emit [doc.mailbox, doc.remoteId], doc
-
+    folderRequest = -> emit [doc.mailbox, doc.folder], doc
     MailToBe.defineRequest "all", requests.all, requests.checkError
     MailToBe.defineRequest "byMailbox", mailboxRequest, requests.checkError
+    MailToBe.defineRequest "byMailboxAndFolder", folderRequest, requests.checkError
 
 
     # Mailboxes
@@ -40,6 +44,10 @@ module.exports = (compound) ->
     Mailbox.defineRequest "all", requests.all, requests.checkError
     Mailbox.defineRequest "byEmail", byEmailRequest, requests.checkError
 
+    # Folders
+    byMailboxRequest = -> emit doc.mailbox, doc
+    Folder.defineRequest "all", requests.all, requests.checkError
+    Folder.defineRequest "byMailbox", byMailboxRequest, requests.checkError
 
     # Log messages
     dateRequestLog = -> emit doc.createdAt, doc

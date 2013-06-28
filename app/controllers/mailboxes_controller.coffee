@@ -7,6 +7,7 @@
 ###
 
 mimelib = require "mimelib"
+async = require "async"
 
 
 # shared functionnality : find the mailbox via its ID
@@ -37,69 +38,76 @@ before ->
 action 'index', ->
     mailboxes = []
 
-    addPassword = (boxes, callback) ->
-        if boxes.length > 0
-            box = boxes.pop()
-            box.getAccount (err, account) =>
-                if err
-                    console.log "[addPassword] err: #{err}"
-
-                if account?
-                    box.password = account.password
-
-                mailboxes.push box
-                addPassword boxes, callback
-        else
-            callback()
-
     Mailbox.all (err, boxes) ->
         if err
             console.log "[Mailbox.all] err: #{err}"
-            send 500
-        else
-            addPassword boxes, (err) =>
-                if err
-                    send "Can't decrypt password", 500
-                else
-                    send mailboxes
+            return send 500
+
+        boxes = [] unless boxes
+
+        async.eachSeries boxes, (box, cb) ->
+
+            box.getAccount (err, account) ->
+                console.log "[addPassword] err: #{err}" if err
+
+                box.password = account.password if account
+
+                cb()
+
+        , (err) ->
+            if err
+                send "Can't decrypt password", 500
+            else
+                send boxes
 
 
 # POST /mailboxes
 # Create a new mailbox and start a new import.
 action 'create', ->
     password = body.password
-    body.password = null
+    delete body.password
 
     Mailbox.findByEmail body.login, (err, box) ->
-        if err
-            send error: err, 500
-        else if box? then send error: "Box already exists", 400
-        else
-            Mailbox.create body, (err, mailbox) ->
-                if err then send error: err, 500
-                else
-                    mailbox.createAccount password: password, (err, account) ->
-                        if err then send error: "Cannot save box password", 500
-                        else
-                            mailbox.password = password
-                            mailbox.setupImport (err) =>
-                                mailbox.doImport() unless err
-                            send mailbox
+        return send error: err, 500 if err
+        return send error: "Box already exists", 400 if box?
+
+        Mailbox.create body, (err, mailbox) ->
+            return send error: err, 500 if err
+
+            mailbox.createAccount password: password, (err, account) ->
+                return send error: "Cannot save box password", 500 if err
+
+                send mailbox
+                mailbox.fullImport()
+
 
 # GET /mailboxes/:id
 # Get mailbox with given id and set decrypted password on it.
 action 'show', ->
-    if not @box
-        send new Mailbox
-    else
-        @box.getAccount (account, err) =>
-            if err
-                send 500
-            else if not account
-                send 404
-            else
-                @box.account = account.password
-                send @box
+
+    send @box
+
+    # @box.getFolders (err, folders) =>
+
+    #     @box.folders = folders
+
+    #     send @box
+
+
+    # @box.getAccount (err, account) =>
+    #     # realtime requests for the box occurs before the
+    #     # account have been set, send the box anyway
+    #     # it will get updated when the createAccount complete
+    #      if err or not account
+
+    #     @box.password = account.password
+
+action 'folders', ->
+
+    Folder.all (err, folders) ->
+        return send error: err, 500 if err
+        send folders
+
 
 
 # PUT /mailboxes/:id
@@ -110,101 +118,74 @@ action 'update', ->
     delete body.password
 
     @box.updateAttributes body, (err) =>
-        if err
-            send error: true, 500
-        else
-            @box.getAccount (err, account) =>
-                if err
-                    send error: true, 500
-                else
-                    if password isnt account.password
-                        @box.password = password
-                        @box.mergeAccount password: password, (err) =>
-                            if err
-                                send error: true, 500
-                            else
-                                send success: true
+        return send error: true, 500 if err
 
-                    unless @box.status is "imported" or
-                    @box.status is "importing"
-                        @box.setupImport (err) =>
-                            @box.doImport() unless err
+        @box.getAccount (err, account) =>
+            return send error: true, 500 if err
+            if password is account.password
+                send success: true
+                @box.fullImport() unless @box.status in ["imported","importing"]
+                return
 
-            send success: true
+            # if the password has changed, update the account
+            @box.mergeAccount password: password, (err) =>
+                return send error: true, 500 if err
+
+                send success: true
+
+                @box.fullImport() unless @box.status in ["imported","importing"]
 
 
 # DELETE /mailboxes/:id
 # Delete given mailbox and all related stuff (mails, attachments...)
 action 'destroy', ->
-    unless @box.status is "importing"
-        @box.remove ->
-            send sucess: true, 204
-    else
-        send error: "Cannot delete a mailbox while importing", 400
+    if @box.status is "importing"
+        return send error: "Cannot delete a mailbox while importing", 400
 
-# post /sendmail
+    @box.remove (err) ->
+        if err then send error: err, 500
+        else send sucess: true, 204
+
+# POST /sendmail
 action 'sendmail', ->
     body.createdAt = new Date().valueOf()
-    @box.getAccount (err, account) =>
-        if err
-            send error: err, 500
-        else if not account
-            send error: "not found", 404
-        else
-            @box.password = account.password
-            @box.sendMail body, (err) =>
-                if err
-                    send error: err, 500
-                else
-                    body.to = JSON.stringify mimelib.parseAddresses data.to
-                    body.bcc = JSON.stringify mimelib.parseAddresses data.bcc
-                    body.cc = JSON.stringify mimelib.parseAddresses data.cc
+    @box.sendMail body, (err) =>
+        return send error: err, 500 if err
 
-                    body.mailbox = @box.id
-                    body.sentAt = new Date().valueOf()
-                    body.from = @box.smtpSendAs
+        body.to = JSON.stringify mimelib.parseAddresses data.to
+        body.bcc = JSON.stringify mimelib.parseAddresses data.bcc
+        body.cc = JSON.stringify mimelib.parseAddresses data.cc
 
-                    MailSent.create body, (err) =>
-                        if err
-                            send error: err, 500
-                        else
-                            send success: true
+        body.mailbox = @box.id
+        body.sentAt = new Date().valueOf()
+        body.from = @box.smtpSendAs
+
+        MailSent.create body, (err) =>
+            if err then send error: err, 500
+            else send sucess: true, 204
 
 
 # Get account information for all mailbox (decrypted passwords) and load last
 # mails (+ synchronize last recieved mails). Do nothing if the mailbox is not
 # fully imported.
 action 'fetchNew', ->
-    fetchBoxes = (boxes, callback) ->
-        if boxes.length > 0
-            box = boxes.pop()
-            box.getAccount (err, account) =>
-                if err
-                    callback err
-                else if not account
-                    fetchBoxes boxes, callbacks
-                else
-                    box.password = account.password
-
-                    if box.status is "imported"
-                        box.getNewMails 200, (err) ->
-                            if err
-                                callback err
-                            else
-                                fetchBoxes boxes, callback
-                    else
-                        fetchBoxes boxes, callback
-        else
-            callback()
 
     Mailbox.all (err, boxes) ->
-        if err
-            console.log err
-            send error: true, 500
-        else
-            fetchBoxes boxes, (err) ->
-                if err
-                    console.log err
-                    send error: true, 500
-                else
-                    send success: true, 200
+
+        return send error: err, 500 if err
+
+        boxes = [] unless boxes
+
+        async.eachSeries boxes, (box, callback) -> # for each box
+            return callback() if box.status isnt "imported"
+
+            Folder.fromMailBox box.id, (err, folders) ->
+                return callback err if err
+
+                async.eachSeries box.folders, (folder, cb) ->
+                    box.getNewMails folder.path, 200, cb
+                , callback
+
+        , (err) -> # once all box have been processed
+            if err then send error: err, 500
+            else        send success: true

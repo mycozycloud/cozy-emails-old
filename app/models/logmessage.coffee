@@ -18,7 +18,7 @@ module.exports = (compound, LogMessage) ->
     # todo: update date if error is still present
     LogMessage.createError = (data, callback) ->
         LogMessage.orderedByDate limit: 1, (err, logMessages) ->
-            callback err if err
+            return callback err if err
 
             if logMessages.length > 0 and
             logMessages[0].subtype is data.subtype and
@@ -92,7 +92,9 @@ module.exports = (compound, LogMessage) ->
         callback()
 
     LogMessage.createNewMailInfo = (mailbox, nbNewMails, callback) ->
-        return callback() if nbNewMails is 0
+        if nbNewMails is 0
+            Notifications.destroy 'newmail-#{mailbox.id}'
+            return callback()
 
         mail_text = "mail"
         mail_text += "s" if nbNewMails > 1
@@ -100,9 +102,6 @@ module.exports = (compound, LogMessage) ->
 
         Notifications.createOrUpdatePersistent 'newmail-#{mailbox.id}',
             text: msg
-            msg = "#{nbNewMails} new mail"
-            msg += "s" if nbNewMails > 1
-            msg += " in #{mailbox.name}"
 
         callback()
 
@@ -124,7 +123,7 @@ module.exports = (compound, LogMessage) ->
                 app: 'mails'
                 url: 'config-mailboxes'
 
-        callback()
+        callback?()
 
     # Success
 

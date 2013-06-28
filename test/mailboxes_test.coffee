@@ -1,26 +1,32 @@
 ###
   @file: mailboxes_test.coffee
   @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-  @description: 
+  @description:
     Tests set for mailboxes CRUD
 
 ###
 should = require('should')
 async = require('async')
 Client = require('request-json').JsonClient
-app = require('../server')
+instantiator = require('../server')
 
 client = new Client("http://localhost:8888/")
+Mailbox = null
 
- 
 describe "Test of mailboxes", ->
 
     before (done) ->
-        app.listen(8888)
+        @app = instantiator()
+        @app.compound.on 'models', (models) ->
+            {Mailbox} = models
+            done()
+        @app.listen 8888
+
+    before (done) ->
         Mailbox.destroyAll done
 
     after (done) ->
-        app.close()
+        @app.compound.server.close()
         done()
 
     describe "Creation and update of a mailbox", ->
@@ -29,13 +35,13 @@ describe "Test of mailboxes", ->
             mailbox =
                 name: "test.smpt.fr"
                 login: "logintest"
-                pass: "password"
-                SMTP_server: "test.smpt.fr"
-                SMTP_send_as: "mailman"
-                SMTP_ssl: "true"
-                IMAP_host: "localhost"
-                IMAP_port: 993
-                IMAP_secure: "true"
+                password: "password"
+                smtpServer: "test.smpt.fr"
+                smtpSendAs: "mailman"
+                smtpSsl: "true"
+                imapServer: "localhost"
+                imapPort: 993
+                imapSecure: "true"
 
 
             client.post "mailboxes/", mailbox, (error, response, body) =>
@@ -44,23 +50,24 @@ describe "Test of mailboxes", ->
                 done(error)
 
         it "Then a success is returned that contains a mailbox with an id", (done) ->
+            console.log @body
             should.exist @body
             should.exist @body.id
             @response.statusCode.should.equal 200
 
             @body.login.should.equal "logintest"
-            
+
             @idToRetrieve = @body.id
-            
+
             done()
-            
+
     describe "Now let's check the update", ->
-            
+
         it "Once it's stored, we can retrieve it by its id (show)", (done) ->
                 client.get "mailboxes/" + @idToRetrieve, (error, response, body) =>
                     @body = body
                     done()
-        
+
         it "And the data should be the same, as stored in the beginning", (done) ->
             should.exist @body
 
@@ -69,7 +76,7 @@ describe "Test of mailboxes", ->
             @body.name.should.equal "test.smpt.fr"
 
             done()
-            
+
         it "Also, it's nice to be able to update the object, via its id", (done) ->
             attrs = {
               checked: false
@@ -89,13 +96,13 @@ describe "Test of mailboxes", ->
                 @response = response
                 @body = body
                 done()
-                
+
         it "And make sure it was updated", (done) ->
             client.get "mailboxes/" + @idToRetrieve, (error, response, body) =>
                 @response = response
                 @body = body
                 done()
-                
+
         it "And all of the values are changed", (done) ->
             should.exist @body
             should.exist @body.id
@@ -187,7 +194,7 @@ describe "Test of mailboxes", ->
             Mail.fromMailbox key: @mailbox.id, (err, mails) ->
                 mails.length.should.equal 0
                 done()
-                
+
         it "And no mailToBes related to this box", (done) ->
             params =
                 startKey: @mailbox.id

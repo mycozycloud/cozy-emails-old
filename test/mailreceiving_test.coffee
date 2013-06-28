@@ -1,7 +1,7 @@
 ###
   @file: mailreceiving_test.coffee
   @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-  @description: 
+  @description:
     The set of test to receive a mail (IMAP).
 
 ###
@@ -19,11 +19,14 @@ server = new IMAPFake 8899
 describe "Test of mailboxes; ", ->
 
   before (done) ->
-    app.listen(8888)
-    done()
+    @app = instantiator()
+    @app.compound.on 'models', (models) ->
+        {Mailbox} = models
+        done()
+    @app.listen 8888
 
   after (done) ->
-    app.close()
+    @app.compound.server.close()
     done()
 
   describe "Create a mailbox; ", ->
@@ -80,9 +83,9 @@ describe "Test of mailboxes; ", ->
     it "Then a list is returned", (done) ->
       should.exist @body
       should.exist @body[0]
-      
+
       mail = @body[0]
-      
+
       mail.text.should.equal 'html body'
       # mail.cc.should.equal ''
       mail.to.should.equal '[{"address":"support@mycozycloud.com","name":""}]'

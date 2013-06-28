@@ -11,9 +11,7 @@ BaseModel = require("./models").BaseModel
 ###
 class exports.Mailbox extends BaseModel
 
-    @urlRoot: 'mailboxes/'
-
-    @url: 'mailboxes/'
+    urlRoot: 'mailboxes/'
 
     defaults:
         checked: true
@@ -29,12 +27,10 @@ class exports.Mailbox extends BaseModel
         imapSecure: true
         color: "orange"
 
-    redrawView: ->
-        @view.render() if @view?
-
-    removeView: ->
-        @view.remove() if @view?
-
     imapLastFetchedDate: ->
         parsed = new Date @get("IMapLastFetchedDate")
         parsed.toUTCString()
+
+    deltaNewMessages: (delta) ->
+        current = parseInt @get("newMessages")
+        @set "newMessages", current + delta

@@ -1,4 +1,4 @@
-{Mail} = require "../models/mail"
+{Mail} = require "models/mail"
 
 ###
     @file: mails.coffee
@@ -19,56 +19,28 @@ class exports.MailsCollection extends Backbone.Collection
     #       ask for newer)
     #     * timestampOld - the oldest mail (sort and next quesries ask fof
     #       olders ("load more" button))
-    timestampNew: new Date().valueOf()
-    timestampOld: new Date().valueOf()
+    timestampNew:    new Date().valueOf()
+    timestampOld:    new Date().valueOf()
     timestampMiddle: new Date().valueOf()
 
     # number of mails to fetch at one click on "more mail" button
     mailsAtOnce: 100
 
-    initialize: ->
-        @on "change_active_mail", @navigateMail, @
-        @on "update_number_mails_shown", @calculateMailsShown, @
-        setInterval @fetchNew, 1000 * 30
+    fetchOlder: (options) ->
+        success = options.success or ->
+        options ?= {}
+        options.url = "folders/#{@timestampOld}/#{@mailsAtOnce}/#{@lastIdOld}"
+        options.remove = false
+        options.success = (collection) =>
+            @timestampNew = @at(0).get("dateValueOf") if @length > 0
+            success.call @, arguments
 
-    setActiveMail: (mail) ->
-        @activeMail?.view?.active = false
-        @activeMail?.view?.render()
-        @activeMail = mail
-        @activeMail.view.active = true
+        @fetch options
 
-    setActiveMailAsRead: ->
-        @activeMail.setRead()
-        @activeMail.url = "mails/#{@activeMail.get("id")}"
-        @activeMail.save read: true
-
-    # sets the url to the active mail, chosen by user (for browser history to work, for example)
-    navigateMail: (event) ->
-        if @activeMail?
-            window.app.router.navigate "mail/#{@activeMail.id}"
-        else
-            console.error "NavigateMail without active mail"
-
-    # fetches older mails (the list of mails)
-    fetchOlder: (callback, errorCallback) ->
-        @url = "mails/#{@timestampOld}/#{@mailsAtOnce}/#{@lastIdOld}"
+    fetchFolder: (folderid, limit) ->
         @fetch
-            add: true
-            success: (models) =>
-                if models.length > 0
-                    @timestampNew = models.at(0).get("dateValueOf")
-                callback models.length
-
-            error: errorCallback
-
-    # fetches new mails from server
-    fetchNew: (callback) =>
-        @url = "mails/new/#{@timestampNew}/"
-        $.ajax 'mails/fetch-new/',
-            success: =>
-                @fetch
-                    add: true
-                    success: (models) =>
-                        callback null, data if callback?
-                    error: ->
-                        alert "Fetch new mail failed"
+            url: "folders/#{folderid}/#{limit}/undefined"
+            # remove: false
+            success: (collection) =>
+                @timestampNew = @at(0).get("dateValueOf") if @length > 0
+                @timestampOld = @last().get("dateValueOf") if @length > 0
