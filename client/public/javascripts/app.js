@@ -268,6 +268,7 @@ window.require.register("collections/mails", function(exports, require, module) 
       return this.fetch({
         url: "folders/" + folderid + "/" + limit + "/undefined",
         success: function(collection) {
+          _this.folderId = folderid;
           if (_this.length > 0) {
             _this.timestampNew = _this.at(0).get("dateValueOf");
           }
@@ -514,7 +515,7 @@ window.require.register("lib/realtimer", function(exports, require, module) {
       if (model instanceof Mailbox) {
         this.collections[0].add(model);
       }
-      if (model instanceof Mail) {
+      if (model instanceof Mail && this.collections[1].folderId === model.folder) {
         return this.collections[1].add(model);
       }
     };
@@ -707,13 +708,11 @@ window.require.register("models/logmessage", function(exports, require, module) 
   
 });
 window.require.register("models/mail", function(exports, require, module) {
-  var AttachmentsCollection, BaseModel, _ref,
+  var BaseModel, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   BaseModel = require("./models").BaseModel;
-
-  AttachmentsCollection = require('collections/attachments').AttachmentsCollection;
 
   /*
       @file: mail.coffee
@@ -735,12 +734,7 @@ window.require.register("models/mail", function(exports, require, module) {
 
     Mail.prototype.initialize = function() {
       Mail.__super__.initialize.apply(this, arguments);
-      this.url = BaseModel.prototype.url;
-      return this.attachments = new AttachmentsCollection([], {
-        comparator: 'filename',
-        model: require('models/attachment').Attachment,
-        url: this.url() + '/attachments'
-      });
+      return this.url = BaseModel.prototype.url;
     };
 
     Mail.prototype.getMailbox = function() {
@@ -1522,7 +1516,7 @@ window.require.register("templates/_mail/list", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div id="no-mails-message" class="well"><h3>Hey !</h3><p>It looks like there are no mails to show.</p><p>May be you need to configure your mailboxes :<a href="#config/mailboxes">Click Here</a></p><p>If You just did it, and still see no messages, you may need to wait for\nus to download them for you. Enjoy  :)\n</p></div><div id="topbar"><a id="refresh-btn" class="btn btn-primary">Refresh</a><a id="markallread-btn" class="btn btn-primary">Mark all as read</a></div><table class="table table-striped"><tbody id="mails_list_container"></tbody></table><div id="more-button"><a id="add_more_mails" class="btn btn-primary btn-large">more messages</a></div>');
+  buf.push('<div id="topbar"><a id="refresh-btn" class="btn btn-primary">Refresh</a><a id="markallread-btn" class="btn btn-primary">Mark all as read</a></div><div id="no-mails-message" class="well"><h3>Hey !</h3><p>It looks like there are no mails to show.</p><p>May be you need to configure your mailboxes :<a href="#config/mailboxes">Click Here</a></p><p>If You just did it, and still see no messages, you may need to wait for\nus to download them for you. Enjoy  :)\n</p></div><table class="table table-striped"><tbody id="mails_list_container"></tbody></table><div id="more-button"><a id="add_more_mails" class="btn btn-primary btn-large">more messages</a></div>');
   }
   return buf.join("");
   };
@@ -2946,8 +2940,9 @@ window.require.register("views/mail", function(exports, require, module) {
     };
 
     MailView.prototype.initialize = function() {
+      console.log(this.model.get('_attachments'));
       return this.attachmentsView = new MailAttachmentsList({
-        collection: this.model.attachments
+        model: this.model
       });
     };
 
@@ -2978,7 +2973,6 @@ window.require.register("views/mail", function(exports, require, module) {
         }, 1000);
       }
       if (this.model.get("hasAttachments")) {
-        this.model.attachments.fetch();
         if ((_ref1 = this.attachmentsView) != null) {
           _ref1.render().$el.appendTo(this.$el);
         }
@@ -3038,7 +3032,7 @@ window.require.register("views/mail", function(exports, require, module) {
   
 });
 window.require.register("views/mail_attachments_list", function(exports, require, module) {
-  var MailAttachmentsListElement, ViewCollection, _ref,
+  var MailAttachmentsListElement, ViewCollection,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3057,16 +3051,24 @@ window.require.register("views/mail_attachments_list", function(exports, require
   exports.MailAttachmentsList = (function(_super) {
     __extends(MailAttachmentsList, _super);
 
-    function MailAttachmentsList() {
-      _ref = MailAttachmentsList.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
     MailAttachmentsList.prototype.itemView = MailAttachmentsListElement;
 
     MailAttachmentsList.prototype.template = require('templates/_mail/attachments');
 
     MailAttachmentsList.prototype.className = 'attachments-box';
+
+    function MailAttachmentsList(options) {
+      var attachments, attachmentsarr, key, value;
+      attachments = options.model.get('_attachments');
+      attachmentsarr = [];
+      for (key in attachments) {
+        value = attachments[key];
+        value['fileName'] = key;
+        attachmentsarr.push(value);
+      }
+      this.collection = new Backbone.Collection(attachmentsarr);
+      MailAttachmentsList.__super__.constructor.apply(this, arguments);
+    }
 
     MailAttachmentsList.prototype.initialize = function() {
       MailAttachmentsList.__super__.initialize.apply(this, arguments);
@@ -3074,6 +3076,12 @@ window.require.register("views/mail_attachments_list", function(exports, require
         'request': this.spin,
         'sync': this.spin
       });
+    };
+
+    MailAttachmentsList.prototype.itemViewOptions = function() {
+      return {
+        mail: this.model
+      };
     };
 
     MailAttachmentsList.prototype.spin = function() {
@@ -3113,12 +3121,9 @@ window.require.register("views/mail_attachments_list_element", function(exports,
 
     MailAttachmentsListElement.prototype.getRenderData = function() {
       return {
-        attachment: this.model
+        attachment: this.model,
+        href: "mails/" + this.options.mail.get("id") + "/attachments/" + this.model.get("fileName")
       };
-    };
-
-    MailAttachmentsListElement.prototype.href = function() {
-      return "mails/" + attachment.get("mailId") + "/" + attachment.get("id") + "/" + attachment.get("fileName");
     };
 
     return MailAttachmentsListElement;
