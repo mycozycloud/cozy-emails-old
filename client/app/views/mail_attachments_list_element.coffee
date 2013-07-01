@@ -11,9 +11,7 @@ class exports.MailAttachmentsListElement extends BaseView
 
     id: 'attachments_list'
     template: require 'templates/_attachment/attachment_element'
-    getRenderData: -> attachment: @model
-
-    href: ->
-      "mails/" + attachment.get("mailId") +
-      "/" + attachment.get("id") +
-      "/" + attachment.get("fileName")
+    getRenderData: ->
+        attachment: @model,
+        href: "mails/" + @options.mail.get("id") +
+              "/attachments/" + @model.get("fileName")

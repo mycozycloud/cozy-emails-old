@@ -14,11 +14,25 @@ class exports.MailAttachmentsList extends ViewCollection
     template: require 'templates/_mail/attachments'
     className: 'attachments-box'
 
+    constructor: (options) ->
+
+        attachments = options.model.get '_attachments'
+        attachmentsarr = []
+        for key, value of attachments
+            value['fileName'] = key
+            attachmentsarr.push value
+
+        @collection = new Backbone.Collection attachmentsarr
+        super
+
     initialize: ->
         super
         @listenTo @collection,
             'request' : @spin
             'sync'    : @spin
+
+    itemViewOptions: ->
+        mail: @model
 
     spin: ->
         @$el.spin "small"

@@ -14,6 +14,9 @@ module.exports = (compound, Mail) ->
     Mail.fromMailboxByDate = (params, callback) ->
         Mail.request "dateByMailbox", params, callback
 
+    Mail.fromFolderByDate = (params, callback) ->
+        Mail.request 'folderDate', params, callback
+
     # Get attachments returned by mailparser as parameter.
     # Save them as couchdb attachments.
     Mail::saveAttachments = (attachments, callback) ->
@@ -21,8 +24,9 @@ module.exports = (compound, Mail) ->
         return callback null unless attachments? and attachments.length > 0
 
         async.each attachments, (attachment, callback) =>
+
             params =
-                cid:         attachment.contentId
+                cid:         attachment.contentId or 'null'
                 fileName:    attachment.fileName
                 contentType: attachment.contentType
                 length:      attachment.length
@@ -34,10 +38,13 @@ module.exports = (compound, Mail) ->
             fs.writeFile fileName, attachment.content, (error) =>
                 return callback error if error
                 @attachFile fileName, params, (error) =>
+                    require('eyes').inspect error
                     fs.unlink fileName, (err) =>
+                        require('eyes').inspect err
                         callback(error or err)
 
         , (err) =>
+            require('eyes').inspect err
             console.log err
             callback err
 

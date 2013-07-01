@@ -25,8 +25,9 @@ class exports.MailView extends BaseView
     getRenderData: -> model: @model
 
     initialize: ->
+        console.log @model.get '_attachments'
         @attachmentsView = new MailAttachmentsList
-            collection: @model.attachments
+            model: @model
 
     afterRender: =>
         if @model.hasHtml()
@@ -60,7 +61,6 @@ class exports.MailView extends BaseView
             , 1000
 
         if @model.get "hasAttachments"
-            @model.attachments.fetch()
             @attachmentsView?.render().$el.appendTo @$el
 
 

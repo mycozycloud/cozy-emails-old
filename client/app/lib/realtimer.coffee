@@ -13,7 +13,8 @@ module.exports = class SocketListener extends CozySocketListener
 
     onRemoteCreate: (model) ->
         @collections[0].add model if model instanceof Mailbox
-        @collections[1].add model if model instanceof Mail
+        if model instanceof Mail and @collections[1].folderId is model.folder
+            @collections[1].add model
 
     onRemoteDelete: (model) ->
         model.trigger 'destroy', model, model.collection, {}

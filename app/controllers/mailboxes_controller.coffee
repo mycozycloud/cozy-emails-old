@@ -170,8 +170,8 @@ action 'sendmail', ->
 # fully imported.
 action 'fetchNew', ->
 
-    Mailbox.all (err, boxes) ->
 
+    Mailbox.all (err, boxes) ->
         return send error: err, 500 if err
 
         boxes = [] unless boxes
@@ -179,13 +179,19 @@ action 'fetchNew', ->
         async.eachSeries boxes, (box, callback) -> # for each box
             return callback() if box.status isnt "imported"
 
-            Folder.fromMailBox box.id, (err, folders) ->
+            box.getMailGetter (err, getter) ->
                 return callback err if err
 
-                async.eachSeries box.folders, (folder, cb) ->
-                    box.getNewMails folder.path, 200, cb
-                , callback
+                Folder.findByMailbox box.id, (err, folders) ->
+                    return callback err if err
+
+                    async.eachSeries folders, (folder, cb) ->
+                        folder.getNewMails getter, 200, cb
+                    , callback
+
+
 
         , (err) -> # once all box have been processed
+            console.log err if err
             if err then send error: err, 500
             else        send success: true

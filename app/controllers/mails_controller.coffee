@@ -20,7 +20,7 @@ before ->
         @mail = mail
         next()
 
-, { only: ['show', 'update', 'destroy', 'getattachmentslist'] }
+, { only: ['show', 'update', 'destroy', 'getattachmentslist', 'getattachment'] }
 
 
 # GET /mails/:id
@@ -59,13 +59,14 @@ action 'byFolder', ->
     num = parseInt req.params.num
     timestamp = parseInt req.params.timestamp
 
+    # TODO use timestamp
     query =
         startkey: [req.params.folderId, {}]
         endkey: [req.params.folderId]
         limit: num
         descending: true
 
-    Mail.request 'folderDate', query, (err, mails) ->
+    Mail.fromFolderByDate query, (err, mails) ->
         return handle err if err
         send mails
 
@@ -115,18 +116,12 @@ action 'getattachmentslist', ->
         return handle err if err
         send attachments
 
-# GET '/attachments/:id/'
+# GET 'mails/:id/attachments/:filename'
 # Get file linked to attachement with given id.
 action 'getattachment', ->
-    Attachment.find params.id, (err, attachment) =>
-        return handle err              if err
-        return handle 'not found', 400 if not attachment
 
-        stream = attachment.getFile attachment.fileName, (err, res, body) ->
+    stream = @mail.getFile params.filename, (err, res, body) ->
+        return handle err if err or not res or res.statusCode isnt 200
+        return handle 'File not found', 404 if res.statusCode is 404
 
-            return handle err if err or not res or res.statusCode isnt 200
-            return handle 'File not found', 404 if res.statusCode is 404
-
-            send success: true, 200
-
-        stream.pipe res
+    stream.pipe res

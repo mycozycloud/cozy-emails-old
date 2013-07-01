@@ -1,5 +1,5 @@
 BaseModel = require("./models").BaseModel
-{AttachmentsCollection} = require 'collections/attachments'
+# {AttachmentsCollection} = require 'collections/attachments'
 
 ###
     @file: mail.coffee
@@ -14,10 +14,10 @@ class exports.Mail extends BaseModel
     initialize: ->
         super
         @url = BaseModel::url
-        @attachments = new AttachmentsCollection [],
-            comparator: 'filename'
-            model: require('models/attachment').Attachment
-            url: @url() + '/attachments'
+        # @attachments = new AttachmentsCollection [],
+        #     comparator: 'filename'
+        #     model: require('models/attachment').Attachment
+        #     url: @url() + '/attachments'
 
     getMailbox: ->
         @mailbox ?= window.app.mailboxes.get @get "mailbox"

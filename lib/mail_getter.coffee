@@ -80,7 +80,7 @@ class MailGetter
 
     # Start a connexion with remote IMAP server and open INBOX.
     openBox: (folder, callback) =>
-        @server.openBox require('utf7').decode(folder), false, (err, box) =>
+        @server.openBox folder, false, (err, box) =>
             callback err, @server
 
     # Close INBOX
@@ -176,6 +176,7 @@ class MailGetter
     getLastFlags: (folder, limit, callback) ->
         start = folder.imapLastFetchedId - limit
         start = 1 if start < 1
+        return callback null, {} if start > folder.imapLastFetchedId
         @getFlags "#{start}:#{folder.imapLastFetchedId}", callback
 
     # Get all the mailbox flags
@@ -194,8 +195,6 @@ class MailGetter
                         flagDict[msg.uid] = msg.flags
         , (err) =>
             @mailbox.log "fetch modification finished."
-
-
             callback err, flagDict
         )
 

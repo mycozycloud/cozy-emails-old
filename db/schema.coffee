@@ -30,18 +30,19 @@ Mail = define 'Mail', ->
     property 'hasAttachments', Boolean, default: false
     property 'inReplyTo'
     property 'references'
+    property '_attachments'
 
-Attachment = define 'Attachment', ->
-    property 'mailId'
-    property 'cid', Number
-    property 'fileName',
-    property 'contentType',
-    property 'length', Number
-    property 'checksum'
-    property 'content', Text
-    property 'mailbox',
+# Attachment = define 'Attachment', ->
+#     property 'mailId'
+#     property 'cid', Number
+#     property 'fileName',
+#     property 'contentType',
+#     property 'length', Number
+#     property 'checksum'
+#     property 'content', Text
+#     property 'mailbox',
 
-Mail.hasMany Attachment, {as: 'attachments', foreignKey: 'mail_id'}
+# Mail.hasMany Attachment, {as: 'attachments', foreignKey: 'mail_id'}
 
 MailSent = define 'MailSent', ->
     property 'mailbox'

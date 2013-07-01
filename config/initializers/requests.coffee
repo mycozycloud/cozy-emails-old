@@ -23,12 +23,12 @@ module.exports = (compound) ->
 
 
     # Attachments
-    mailRequest = -> emit doc.mailId, doc
-    mailboxRequest = -> emit doc.mailbox, doc
+    # mailRequest = -> emit doc.mailId, doc
+    # mailboxRequest = -> emit doc.mailbox, doc
 
-    Attachment.defineRequest "all", requests.all, requests.checkError
-    Attachment.defineRequest "byMail", mailRequest, requests.checkError
-    Attachment.defineRequest "byMailbox", mailboxRequest, requests.checkError
+    # Attachment.defineRequest "all", requests.all, requests.checkError
+    # Attachment.defineRequest "byMail", mailRequest, requests.checkError
+    # Attachment.defineRequest "byMailbox", mailboxRequest, requests.checkError
 
 
     # MailToBe

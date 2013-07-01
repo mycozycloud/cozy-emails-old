@@ -42,5 +42,6 @@ class exports.MailsCollection extends Backbone.Collection
             url: "folders/#{folderid}/#{limit}/undefined"
             # remove: false
             success: (collection) =>
+                @folderId = folderid
                 @timestampNew = @at(0).get("dateValueOf") if @length > 0
                 @timestampOld = @last().get("dateValueOf") if @length > 0

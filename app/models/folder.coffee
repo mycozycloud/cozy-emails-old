@@ -16,7 +16,9 @@ module.exports = (compound, Folder) ->
 
     Folder::setupImport = (getter, callback) ->
 
-        getter.openBox @path, (err) =>
+        path = if @specialType is 'INBOX' then 'INBOX' else @path
+
+        getter.openBox path, (err) =>
             return callback err if err
 
             abort = (msg, err) =>
@@ -60,7 +62,9 @@ module.exports = (compound, Folder) ->
             @log "Import: Nothing to download"
             return callback null, 0
 
-        getter.openBox @path, (err) =>
+        path = if @specialType is 'INBOX' then 'INBOX' else @path
+
+        getter.openBox path, (err) =>
             return callback err, 0 if err
 
             done       = 0
@@ -120,19 +124,21 @@ module.exports = (compound, Folder) ->
         id = Number(@imapLastFetchedId) + 1
         range = "#{id}:#{id + limit}"
         @log "Fetching new mails: #{range}"
-        getter.openBox @path, (err, getter) =>
+
+        path = if @specialType is 'INBOX' then 'INBOX' else @path
+
+        getter.openBox path, (err) =>
             return callback err if err
 
             error = (err) =>
                 getter.closeBox (err) =>
                     @log err
-                    @fetchFailed -> callback err
+                    callback err
 
             success = (nbNewMails) =>
                 getter.closeBox (err) =>
                     @log err
-                    @fetchFinished nbNewMails, callback
-
+                    callback null, nbNewMails
 
             getter.getMails range, (err, results) =>
                 return error err if err
@@ -154,8 +160,8 @@ module.exports = (compound, Folder) ->
 
                     # maxId is the last successful id
                     if maxId isnt id - 1
-                        @folders[folder].imapLastFetchedId = maxId
-                        @updateAttributes folders: @folders, (err) =>
+
+                        @updateAttributes imapLastFetchedId: maxId, (err) =>
 
                             return error err         if err
                             return error getMailsErr if err
@@ -170,6 +176,31 @@ module.exports = (compound, Folder) ->
                             @log err if err
                             return success results.length
 
+
+    # Get last changes from remote inbox (defined by limit, get the limit latest
+    # mails...) and update the current mailbox mails if needed.
+    # Changes are based upon flags. If a mail has no flag it is considered as
+    # deleted. Else it updates read and starred status if they change.
+    # Called when the user hit refresh, so --theirs strategy
+    Folder::synchronizeChanges = (getter, limit, callback) ->
+        getter.getLastFlags this, limit, (err, flagDict) =>
+            return callback err if err
+            query =
+                startkey: [@id, {}]
+                endkey: [@id]
+                limit: limit
+                descending: true
+
+            Mail.fromFolderByDate query, (err, mails) =>
+                return callback err if err
+                for mail in mails
+                    flags = flagDict[mail.idRemoteMailbox]
+
+                    if flags? then mail.updateFlags flags
+                    else           mail.destroy()
+
+                callback()
+
     # Synchronize 1 mail's flags with the IMAP server.
     # Called when the model just have been modified in cozy-mail
     # so fix conflicts with --ours strategy
@@ -178,9 +209,9 @@ module.exports = (compound, Folder) ->
         @log "Add read flag to mail #{mail.idRemoteMailbox}"
         return unless mail.changedFlags newflags
 
-        folder = mail.folder or 'INBOX'
+        path = if @specialType is 'INBOX' then 'INBOX' else @path
 
-        getter.openBox folder, (err, getter) =>
+        getter.openBox path, (err) =>
             console.log err if err
             return callback err if err
 

@@ -41,9 +41,8 @@ module.exports = (compound, Mailbox) ->
 
         async.parallel [
             (cb) => Mail.requestDestroy "bymailbox", key: @id, cb
-            (cb) => Attachment.requestDestroy "bymailbox", key: @id, cb
             (cb) => Folder.requestDestroy "bymailbox", key: @id, cb
-            @destroyMailsToBe.bind this
+            @destroyMailsToBe
             @destroyAccount.bind   this
         ], (err) =>
             @log "destroying finished..."
@@ -59,7 +58,7 @@ module.exports = (compound, Mailbox) ->
         Attachment.requestDestroy "bymailbox", key: @id, callback
 
     # Destroy mail to bes linked to current mailbox
-    Mailbox::destroyMailsToBe = (callback) ->
+    Mailbox::destroyMailsToBe = (callback) =>
         params =
             startkey: [@id]
             endkey: [@id + "0"]
@@ -183,19 +182,17 @@ module.exports = (compound, Mailbox) ->
                 getter.listFolders (err, folders) =>
                     return @importFailed err, callback if err
 
-                    #forEach folder in folders
-                    folders = [] unless folders
-                    async.eachSeries folders, (folder, cb) =>
-
+                    for folder in folders
                         folder.mailbox = @id
 
+                    setupImportOneFolder = (folder, cb) =>
                         Folder.create folder, (err, folder) =>
-
                             folder.setupImport getter, (err) =>
                                 @log err if err
                                 cb()
 
-                    , (err) => # when all folders have been processed
+                    # Import each folder
+                    async.eachSeries folders, setupImportOneFolder, (err) =>
 
                         data =
                             activated: true
@@ -205,8 +202,6 @@ module.exports = (compound, Mailbox) ->
                             return @importFailed err, callback if err
 
                             getter.logout callback
-
-
 
 
     # Run the real import grab all mailtobes from database and fetch message one by
@@ -255,30 +250,11 @@ module.exports = (compound, Mailbox) ->
     #setup then do
     Mailbox::fullImport = (callback) ->
         @setupImport (err) =>
-            if err then @log err
-            else @doImport callback
-
-
-    # Get last changes from remote inbox (defined by limit, get the limit latest
-    # mails...) and update the current mailbox mails if needed.
-    # Changes are based upon flags. If a mail has no flag it is considered as
-    # deleted. Else it updates read and starred status if they change.
-    # Called when the user hit refresh, so --theirs strategy
-    Mailbox::synchronizeChanges = (getter, limit, callback) ->
-        getter.getLastFlags limit, (err, flagDict) =>
-            return callback err if err
-            params =
-                startkey: [@id]
-                limit: limit
-            Mail.fromMailboxByDate params, (err, mails) =>
-                return callback err if err
-                for mail in mails
-                    flags = flagDict[mail.idRemoteMailbox]
-
-                    if flags? then mail.updateFlags flags
-                    else           mail.destroy()
-
-                callback()
+            if err
+                @log err
+                callback err
+            else
+                @doImport callback
 
 
     Mailbox::syncOneMail = (mail, newflags, callback) ->
