@@ -45,3 +45,11 @@ class exports.MailsCollection extends Backbone.Collection
                 @folderId = folderid
                 @timestampNew = @at(0).get("dateValueOf") if @length > 0
                 @timestampOld = @last().get("dateValueOf") if @length > 0
+
+    fetchRainbow: (limit) ->
+        @fetch
+            url: "mails/rainbow/#{limit}"
+            success: (collection) =>
+                @folderId = 'rainbow'
+                @timestampNew = @at(0).get("dateValueOf") if @length > 0
+                @timestampOld = @last().get("dateValueOf") if @length > 0

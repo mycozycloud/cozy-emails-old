@@ -47,24 +47,15 @@ class exports.Application extends BrunchApplication
 
         @folders = new FolderCollection()
         @folders.fetch
-            success: =>
-                @folders.each (folder) =>
-                    console.log folder
-                    if folder.get('specialType') is 'ALLMAIL'
-                        return @mails.fetchFolder folder.id, 100
+            # success: => console.log
             error: =>   alert "Error while loading folders"
-        # @realtimer.watch @folder
+        @realtimer.watch @folders
 
         @mails = new MailsCollection()
         @realtimer.watch @mails
         @views.mailList = new MailsList collection: @mails
         @views.mailList.$el.appendTo $('body')
         @views.mailList.render()
-
-        # @mails.fetchOlder
-        #     # success: => @views.mailList.refresh()
-        #     error: =>   alert "Error while loading mails"
-
         @views.modal = new Modal()
         @views.modal.render().$el.appendTo $('body')
 

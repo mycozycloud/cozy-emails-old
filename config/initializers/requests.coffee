@@ -46,8 +46,10 @@ module.exports = (compound) ->
 
     # Folders
     byMailboxRequest = -> emit doc.mailbox, doc
+    byTypeRequest = -> emit doc.specialType, doc
     Folder.defineRequest "all", requests.all, requests.checkError
     Folder.defineRequest "byMailbox", byMailboxRequest, requests.checkError
+    Folder.defineRequest "byType", byTypeRequest, requests.checkError
 
     # Log messages
     dateRequestLog = -> emit doc.createdAt, doc

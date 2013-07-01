@@ -14,8 +14,8 @@
 class exports.MainRouter extends Backbone.Router
 
     routes:
-        ''                          : 'index'
-        'inbox'                     : 'inbox'
+        ''                          : 'rainbow'
+        'rainbow'                   : 'rainbow'
         'folder/:id'                : 'folder'
         'mail/:id'                  : 'mail'
         # 'new-mail'         : 'new'
@@ -25,37 +25,40 @@ class exports.MainRouter extends Backbone.Router
         'config/mailboxes/new'      : 'newMailbox'
         'config/mailboxes/:id'      : 'editMailbox'
 
-    index : -> @navigate 'inbox', true
-
     clear: ->
+        console.log "clear"
         app.views.mailboxList.activate null
         app.views.mailList.activate null
+        app.views.mailList.$el.hide()
+        app.views.mailboxList.$el.hide()
         app.views.mail?.remove()
         app.views.mailboxform?.remove()
         app.views.mail = null
         app.views.mailboxform = null
 
-    inbox : ->
-
-        if firstmail = app.mails.at 0
-            @navigate "mail/#{firstmail.id}", true
-            return
-
-        app.mails.once 'sync', => @inbox()
+    rainbow : =>
+        console.log "rainbow"
 
         @clear()
 
+
+        if app.mails.length is 0
+            app.mails.once 'sync', @rainbow
+
+
+        app.mails.fetchRainbow 100
         app.views.menu.select 'inboxbutton'
         app.views.mailboxList.$el.hide()
         app.views.mailList.$el.show()
 
     folder: (folderid) ->
 
-        @inbox()
+        @rainbow()
 
         app.mails.fetchFolder folderid, 100
 
     config : ->
+        console.log "config"
 
         @clear()
 
@@ -84,6 +87,8 @@ class exports.MainRouter extends Backbone.Router
 
 
     mail : (id) ->
+
+        console.log "mail"
 
         # wait for maillist to load
         if app.mails.length is 0

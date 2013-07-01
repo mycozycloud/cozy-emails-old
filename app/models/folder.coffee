@@ -14,6 +14,9 @@ module.exports = (compound, Folder) ->
         console.log "[findByMailbox] #{mailboxid}"
         Folder.request "byMailbox", {key: mailboxid}, callback
 
+    Folder.byType = (type, callback) ->
+        Folder.request "byType", {key: type}, callback
+
     Folder::setupImport = (getter, callback) ->
 
         path = if @specialType is 'INBOX' then 'INBOX' else @path

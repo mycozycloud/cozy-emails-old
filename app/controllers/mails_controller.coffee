@@ -5,6 +5,7 @@
         Railwayjs controller to handle mails CRUD backend and their attachments.
 ###
 
+async = require('async')
 
 handle = (err, code=500) ->
     console.log err.stack or err
@@ -70,6 +71,32 @@ action 'byFolder', ->
         return handle err if err
         send mails
 
+action 'rainbow', ->
+    limit = parseInt req.params.limit
+
+    Folder.byType 'INBOX', (err, inboxes) ->
+        return handle err if err
+        outMails = []
+
+        async.each inboxes, (inbox, cb) ->
+
+            query =
+                startkey: [inbox.id, {}]
+                endkey: [inbox.id]
+                limit: limit
+                descending: true
+
+            Mail.fromFolderByDate query, (err, mails) ->
+                return cb err if err
+                outMails.push mail for mail in mails
+                cb null
+
+        , (err) ->
+            return handle err if err
+
+            outMails.sort (a, b) -> return a.dateValueOf - b.dateValueOf
+
+            send outMails[0..99]
 
 
 # GET '/mails/:timestamp/:num'

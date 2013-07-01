@@ -15,5 +15,14 @@ module.exports = class FolderMenu extends ViewCollection
     itemView:  require 'views/folders_menu_element'
     template:  require 'templates/folders_menu'
 
-    appendView: (view) ->
+    initialize: =>
+        @currentMailbox = ''
+
+    appendView: (view) =>
+        if @currentMailbox isnt view.model.get 'mailbox'
+            @currentMailbox = view.model.get 'mailbox'
+            console.log app.mailboxes.length, @currentMailbox
+            title = app.mailboxes.get(@currentMailbox).get 'name'
+            @$('#folderlist').append "<li class='title'>#{title}</li>"
+
         @$('#folderlist').append view.$el
