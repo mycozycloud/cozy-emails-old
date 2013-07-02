@@ -32,18 +32,6 @@ Mail = define 'Mail', ->
     property 'references'
     property '_attachments'
 
-# Attachment = define 'Attachment', ->
-#     property 'mailId'
-#     property 'cid', Number
-#     property 'fileName',
-#     property 'contentType',
-#     property 'length', Number
-#     property 'checksum'
-#     property 'content', Text
-#     property 'mailbox',
-
-# Mail.hasMany Attachment, {as: 'attachments', foreignKey: 'mail_id'}
-
 MailSent = define 'MailSent', ->
     property 'mailbox'
     property 'createdAt', Number, default: 0
@@ -54,11 +42,6 @@ MailSent = define 'MailSent', ->
     property 'cc',
     property 'bcc',
     property 'html', Text
-
-MailToBe = define 'MailToBe', ->
-    property 'remoteId', Number
-    property 'mailbox'
-    property 'folder'
 
 # Mailbox object to store the information on connections to remote servers
 # and have attached mails
@@ -101,8 +84,7 @@ Mailbox = define 'Mailbox', ->
     property 'status', String, default: "freezed"
     property 'mailsToImport', Number, default: 0
 
-Folders = define 'Folder', ->
-
+MailFolder = define 'MailFolder', ->
     property 'name'
     property 'path'
     property 'specialType'
@@ -110,23 +92,3 @@ Folders = define 'Folder', ->
     property 'imapLastFetchedId', Number, default: 0
 
     property 'mailsToBe', Object
-
-# logs managment
-LogMessage = define 'LogMessage', ->
-
-    # type:
-    #   "info" - standard message
-    #   "success" - success message
-    #   "warning" - warning message
-    #   "error" - error message
-    property 'type', String, default: "info"
-    property 'subtype', String, default: "info"
-
-    # timeout:
-    #   0 - message will be displayed until user click OK to discard it
-    #   > 0 - message will be displayed only once, and will disappear after x seconds
-    property 'timeout', Number, default: 5 * 60
-    property 'text',
-    property 'createdAt', Number
-    property 'mailbox', String
-    property 'counter', Number

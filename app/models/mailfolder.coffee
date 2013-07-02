@@ -1,23 +1,27 @@
 async = require 'async'
 
 
-module.exports = (compound, Folder) ->
-    {Mail, Folder, Attachment, LogMessage} = compound.models
+# MailFolder is a IMAP Mailbox, it contains mails.
+module.exports = (compound, MailFolder) ->
+    {Mail} = compound.models
 
-    Folder::log = (msg) ->
+    MailFolder::log = (msg) ->
         console.info "#{@} #{msg?.stack or msg}"
 
-    Folder::toString = ->
+    MailFolder::toString = ->
         "[Folder #{@name} #{@id} of Mailbox #{@mailbox}]"
 
-    Folder.findByMailbox = (mailboxid, callback) ->
+    MailFolder.findByMailbox = (mailboxid, callback) ->
         console.log "[findByMailbox] #{mailboxid}"
-        Folder.request "byMailbox", {key: mailboxid}, callback
+        MailFolder.request "byMailbox", {key: mailboxid}, callback
 
-    Folder.byType = (type, callback) ->
-        Folder.request "byType", {key: type}, callback
+    MailFolder.byType = (type, callback) ->
+        MailFolder.request "byType", {key: type}, callback
 
-    Folder::setupImport = (getter, callback) ->
+
+    # Setup import: open box, fetch ids to download
+    # and store them in folders mailToBe field
+    MailFolder::setupImport = (getter, callback) ->
 
         path = if @specialType is 'INBOX' then 'INBOX' else @path
 
@@ -59,11 +63,16 @@ module.exports = (compound, Folder) ->
 
                     getter.closeBox callback
 
-    Folder::doImport = (getter, progress, callback) ->
+    # do the actual import
+    # fetch mailToBe one by one
+    MailFolder::doImport = (getter, progress, callback) ->
 
         if @mailsToBe is null or @mailsToBe.length is 0
             @log "Import: Nothing to download"
             return callback null, 0
+
+
+        # TODO : delete all mails from this folder, in case the import failed
 
         path = if @specialType is 'INBOX' then 'INBOX' else @path
 
@@ -102,7 +111,7 @@ module.exports = (compound, Folder) ->
 
     # Get message corresponding to given remote ID, save it to database and
     # download its attachments.
-    Folder::fetchMessage = (getter, remoteId, callback) ->
+    MailFolder::fetchMessage = (getter, remoteId, callback) ->
 
         getter.fetchMail remoteId, (err, mail, attachments) =>
 
@@ -122,7 +131,7 @@ module.exports = (compound, Folder) ->
 
     # Check if new mails arrives in remote inbox (base this on the last email
     # fetched id). Then it synchronize last recieved mails.
-    Folder::getNewMails = (getter, limit, callback) ->
+    MailFolder::getNewMails = (getter, limit, callback) ->
 
         id = Number(@imapLastFetchedId) + 1
         range = "#{id}:#{id + limit}"
@@ -173,7 +182,6 @@ module.exports = (compound, Folder) ->
                                 @log err if err
                                 return success results.length
 
-
                     else
                         @synchronizeChanges getter, limit, (err) =>
                             @log err if err
@@ -185,7 +193,7 @@ module.exports = (compound, Folder) ->
     # Changes are based upon flags. If a mail has no flag it is considered as
     # deleted. Else it updates read and starred status if they change.
     # Called when the user hit refresh, so --theirs strategy
-    Folder::synchronizeChanges = (getter, limit, callback) ->
+    MailFolder::synchronizeChanges = (getter, limit, callback) ->
         getter.getLastFlags this, limit, (err, flagDict) =>
             return callback err if err
             query =
@@ -207,7 +215,7 @@ module.exports = (compound, Folder) ->
     # Synchronize 1 mail's flags with the IMAP server.
     # Called when the model just have been modified in cozy-mail
     # so fix conflicts with --ours strategy
-    Folder::syncOneMail = (getter, mail, newflags, callback) ->
+    MailFolder::syncOneMail = (getter, mail, newflags, callback) ->
 
         @log "Add read flag to mail #{mail.idRemoteMailbox}"
         return unless mail.changedFlags newflags

@@ -3,7 +3,6 @@ class exports.BrunchApplication
     constructor: ->
         $ =>
             @initialize this
-            Backbone.history.start()
 
 
     # Initialize Spin JS the lib that displays loading indicators

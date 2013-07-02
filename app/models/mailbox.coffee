@@ -1,12 +1,11 @@
 MailSender = require '../../lib/mail_sender'
 MailGetter = require '../../lib/mail_getter'
 async = require('async')
-NotificationHelper = require('cozy-notifications-helper')
-Notifications = new NotificationHelper('mails')
+LogMessage = require '../../lib/logmessage'
 
 
 module.exports = (compound, Mailbox) ->
-    {Mail, MailToBe, Folder, Attachment, LogMessage} = compound.models
+    {Mail, MailFolder} = compound.models
 
     # helpers
 
@@ -16,75 +15,19 @@ module.exports = (compound, Mailbox) ->
     Mailbox::toString = ->
         "[Mailbox #{@name} #{@id}]"
 
-    Mailbox.findByEmail = (email, callback) ->
-        Mailbox.request 'byEmail', key: email, (err, boxes) ->
-            console.log boxes
-
-            if err then callback err
-            else if boxes?.length is 0
-                callback null, null
-            else
-                callback null, boxes[0]
-
-
-    # Destroy helpers
-
-    # Delete mailbox and everthing related mails, mailToBes, attachments,
-    # accounts...
+    # Delete mailbox and everthing related
     Mailbox::remove = (callback) ->
         @log "destroying box..."
 
-        # Destroy Notifications
-        Notifications.destroy "newmail-#{@id}"
-        Notifications.destroy "download-#{@id}"
-        Notifications.destroy "importprogress-#{@id}"
-
         async.parallel [
             (cb) => Mail.requestDestroy "bymailbox", key: @id, cb
-            (cb) => Folder.requestDestroy "bymailbox", key: @id, cb
-            @destroyMailsToBe
+            (cb) => MailFolder.requestDestroy "bymailbox", key: @id, cb
+            (cb) => LogMessage.destroy this, cb
             @destroyAccount.bind   this
         ], (err) =>
             @log "destroying finished..."
             @log err if err
             @destroy callback
-
-    # Destroy mails linked to current mailbox
-    Mailbox::destroyMails = (callback) ->
-        Mail.requestDestroy "bymailbox", key: @id, callback
-
-    # Destroy attachments linked to current mailbox
-    Mailbox::destroyAttachments = (callback) ->
-        Attachment.requestDestroy "bymailbox", key: @id, callback
-
-    # Destroy mail to bes linked to current mailbox
-    Mailbox::destroyMailsToBe = (callback) =>
-        params =
-            startkey: [@id]
-            endkey: [@id + "0"]
-        MailToBe.requestDestroy "bymailbox", params, callback
-
-    # Mark last fetched date to current mailbox and store a notification about it.
-    Mailbox::fetchFinished = (nbNewMails, callback) ->
-        @updateAttributes imapLastFetchedDate: new Date(), (err) =>
-            return callback err if err
-            LogMessage.createNewMailInfo @, nbNewMails, callback
-
-    # Mark fetch failed error and store a notification about it.
-    Mailbox::fetchFailed = (callback) ->
-        LogMessage.createCheckMailError @, callback
-
-    # Mark import as failed and stores a notification message about it.
-    Mailbox::importError = (callback) ->
-        data =
-            status: "prepare_failed"
-            statusMsg: "import preparation failed"
-
-        @updateAttributes data, (error) =>
-            if error
-                return callback error if callback?
-            else
-                LogMessage.createImportPreparationError @, callback
 
     Mailbox::importStarted = (callback) ->
         data =
@@ -95,7 +38,7 @@ module.exports = (compound, Mailbox) ->
             if error
                 callback error
             else
-                LogMessage.createImportStartedInfo @, callback
+                LogMessage.createImportStartedInfo this, callback
 
     # Mark import as successfull and stores a notification message about it.
     Mailbox::importSuccessfull = (callback) ->
@@ -107,7 +50,7 @@ module.exports = (compound, Mailbox) ->
             if error
                 callback error
             else
-                LogMessage.createImportSuccess @, callback
+                LogMessage.createImportSuccess this, callback
 
 
     # Mark import as failed and stores a notification message about it.
@@ -117,15 +60,13 @@ module.exports = (compound, Mailbox) ->
 
         data =
             status: "import_failed"
-            statusMsg: "import failed"
+            statusMsg: "import failed" + err.message
 
         @updateAttributes data, (error) =>
             if error
-                @log 'cant mark import as failed'
-                @log error
-                callback err
+                callback error
             else
-                LogMessage.createBoxImportError @
+                LogMessage.createImportFailed this, callback
 
     # Update box status with given progress and stores a notification about it.
     Mailbox::progress = (progress, callback) ->
@@ -136,6 +77,7 @@ module.exports = (compound, Mailbox) ->
 
         @updateAttributes data, (error) =>
             LogMessage.createImportProgressInfo @, progress, callback
+
 
     Mailbox::getMailSender = (callback) ->
         @getAccount (err, account) =>
@@ -164,8 +106,6 @@ module.exports = (compound, Mailbox) ->
                     callback()
 
 
-
-
     # Prepare import of current mailbox. Grab and store all ids that should be
     # retrieved. This is useful in case of crash if the import should be start
     # again.
@@ -174,19 +114,22 @@ module.exports = (compound, Mailbox) ->
         # no need to initialize import again if it was importing.
         return callback() if @status is "importing"
 
+        # change mailbox state
         @importStarted =>
 
+            # get connected getter
             @getMailGetter (err, getter) =>
                 return @importFailed err, callback if err
 
+                # list folders in remote account
                 getter.listFolders (err, folders) =>
                     return @importFailed err, callback if err
 
-                    for folder in folders
-                        folder.mailbox = @id
+                    folder.mailbox = @id for folder in folders
 
                     setupImportOneFolder = (folder, cb) =>
-                        Folder.create folder, (err, folder) =>
+                        MailFolder.create folder, (err, folder) =>
+                            # store mailsToBeFetched in the folder
                             folder.setupImport getter, (err) =>
                                 @log err if err
                                 cb()
@@ -201,6 +144,7 @@ module.exports = (compound, Mailbox) ->
                         @updateAttributes data, (err) =>
                             return @importFailed err, callback if err
 
+                            # disconnect from server
                             getter.logout callback
 
 
@@ -212,7 +156,8 @@ module.exports = (compound, Mailbox) ->
         @getMailGetter (err, getter)  =>
             return callback err if err
 
-            Folder.findByMailbox @id, (err, folders) =>
+            # List folders in this mailbox
+            MailFolder.findByMailbox @id, (err, folders) =>
                 return callback err if err
 
                 folders = [] unless folders
@@ -227,6 +172,7 @@ module.exports = (compound, Mailbox) ->
 
                 @log "total mails to import : #{total}"
 
+                # forEachFolder
                 async.eachSeries folders, (folder, cb) =>
 
                     @log "Importing folder #{folder.path}"
@@ -237,6 +183,7 @@ module.exports = (compound, Mailbox) ->
                             oldPercent = percent
                             @progress percent
 
+                    # do Import at folder level
                     folder.doImport getter, progressHandler, (err, doneNb) =>
                         done += doneNb
                         @log err if err
@@ -247,12 +194,13 @@ module.exports = (compound, Mailbox) ->
                     getter.logout (err) =>
                         @log err if err
 
+                        # change mailbox state
                         @importSuccessfull (err) =>
                             @log err if err
 
                             callback()
 
-    #setup then do
+    # dry function : setup import then do it immediately
     Mailbox::fullImport = (callback) ->
         @setupImport (err) =>
             if err
@@ -261,12 +209,13 @@ module.exports = (compound, Mailbox) ->
             else
                 @doImport callback
 
-
+    # Synchronize one mail after it have been changed on cozy side
+    # Open a connection, delegate sync to folder, close connection
     Mailbox::syncOneMail = (mail, newflags, callback) ->
         @getMailGetter (err, getter) ->
             return callback err if err
 
-            Folder.find mail.folder, (err, folder) ->
+            MailFolder.find mail.folder, (err, folder) ->
                 return callback err if err
 
                 folder.syncOneMail getter, mail, newflags, (err, folder) ->

@@ -1,7 +1,7 @@
 requests = require "../../common/requests"
 
 module.exports = (compound) ->
-    {Mail, Mailbox, Folder, MailToBe, LogMessage, Attachment} = compound.models
+    {Mail, Mailbox, MailFolder} = compound.models
 
     ## Requests required to query couchdb documents
 
@@ -32,11 +32,11 @@ module.exports = (compound) ->
 
 
     # MailToBe
-    mailboxRequest = -> emit [doc.mailbox, doc.remoteId], doc
-    folderRequest = -> emit [doc.mailbox, doc.folder], doc
-    MailToBe.defineRequest "all", requests.all, requests.checkError
-    MailToBe.defineRequest "byMailbox", mailboxRequest, requests.checkError
-    MailToBe.defineRequest "byMailboxAndFolder", folderRequest, requests.checkError
+    # mailboxRequest = -> emit [doc.mailbox, doc.remoteId], doc
+    # folderRequest = -> emit [doc.mailbox, doc.folder], doc
+    # MailToBe.defineRequest "all", requests.all, requests.checkError
+    # MailToBe.defineRequest "byMailbox", mailboxRequest, requests.checkError
+    # MailToBe.defineRequest "byMailboxAndFolder", folderRequest, requests.checkError
 
 
     # Mailboxes
@@ -44,18 +44,18 @@ module.exports = (compound) ->
     Mailbox.defineRequest "all", requests.all, requests.checkError
     Mailbox.defineRequest "byEmail", byEmailRequest, requests.checkError
 
-    # Folders
+    # MailFolders
     byMailboxRequest = -> emit doc.mailbox, doc
     byTypeRequest = -> emit doc.specialType, doc
-    Folder.defineRequest "all", requests.all, requests.checkError
-    Folder.defineRequest "byMailbox", byMailboxRequest, requests.checkError
-    Folder.defineRequest "byType", byTypeRequest, requests.checkError
+    MailFolder.defineRequest "all", requests.all, requests.checkError
+    MailFolder.defineRequest "byMailbox", byMailboxRequest, requests.checkError
+    MailFolder.defineRequest "byType", byTypeRequest, requests.checkError
 
     # Log messages
-    dateRequestLog = -> emit doc.createdAt, doc
+    # dateRequestLog = -> emit doc.createdAt, doc
 
-    LogMessage.defineRequest "all", requests.all, requests.checkError
-    LogMessage.defineRequest "date", dateRequestLog, requests.checkError
+    # LogMessage.defineRequest "all", requests.all, requests.checkError
+    # LogMessage.defineRequest "date", dateRequestLog, requests.checkError
 
 
     # Mails Sent

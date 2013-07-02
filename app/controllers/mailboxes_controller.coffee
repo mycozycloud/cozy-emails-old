@@ -87,28 +87,6 @@ action 'show', ->
 
     send @box
 
-    # @box.getFolders (err, folders) =>
-
-    #     @box.folders = folders
-
-    #     send @box
-
-
-    # @box.getAccount (err, account) =>
-    #     # realtime requests for the box occurs before the
-    #     # account have been set, send the box anyway
-    #     # it will get updated when the createAccount complete
-    #      if err or not account
-
-    #     @box.password = account.password
-
-action 'folders', ->
-
-    Folder.all (err, folders) ->
-        return send error: err, 500 if err
-        send folders
-
-
 
 # PUT /mailboxes/:id
 # Save given mailbox changes and start a new import if previous one did not
@@ -182,7 +160,7 @@ action 'fetchNew', ->
             box.getMailGetter (err, getter) ->
                 return callback err if err
 
-                Folder.findByMailbox box.id, (err, folders) ->
+                MailFolder.findByMailbox box.id, (err, folders) ->
                     return callback err if err
 
                     async.eachSeries folders, (folder, cb) ->

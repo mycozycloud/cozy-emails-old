@@ -49,3 +49,5 @@ class exports.MailboxForm extends BaseView
 
                 alert msg
                 $(event.target).removeClass("disabled").addClass("buttonSave")
+
+        app.router.navigate 'config/mailboxes', true

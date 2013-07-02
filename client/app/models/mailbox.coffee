@@ -34,3 +34,19 @@ class exports.Mailbox extends BaseModel
     deltaNewMessages: (delta) ->
         current = parseInt @get("newMessages")
         @set "newMessages", current + delta
+
+    destroy: (options) ->
+        success = options.success
+        id = @id
+        options.success = ->
+            app.folders.forEach (folder) ->
+                console.log folder, id
+                app.folders.remove folder if folder.get('mailbox') is id
+            app.mails.forEach (mail) ->
+                console.log mail, id
+                app.mails.remove mail if mail.mailbox is id
+
+            success.apply(this, arguments) if success
+
+        super options
+

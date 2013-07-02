@@ -39,8 +39,8 @@ class exports.MainRouter extends Backbone.Router
 
         @clear()
 
-        if app.mails.length is 0
-            app.mails.once 'sync', @rainbow
+        # if app.mails.length is 0
+        #     app.mails.once 'sync', @rainbow
 
         app.views.menu.select 'inboxbutton'
         app.views.mailboxList.$el.hide()
@@ -52,15 +52,15 @@ class exports.MainRouter extends Backbone.Router
         if app.mails.folderId is 'rainbow'
             @mail mailid
         else
-            @rainbow => @mail mailid
+            @rainbow => @mail mailid, 'rainbow'
 
 
     folder: (folderid, callback) ->
 
         @clear()
 
-        if app.mails.length is 0
-            app.mails.once 'sync', => @folder(folderid)
+        # if app.mails.length is 0
+        #     app.mails.once 'sync', => @folder(folderid)
 
         app.views.menu.select 'inboxbutton'
         app.views.mailboxList.$el.hide()
@@ -69,14 +69,14 @@ class exports.MainRouter extends Backbone.Router
 
 
     foldermail: (folderid, mailid) =>
-
         if app.mails.folderId is folderid
             @mail mailid
         else
-            @folder folderid, => @mail mailid
+            @folder folderid, => @mail mailid, "folder/#{folderid}"
 
     mail : (id, list) ->
         if model = app.mails.get(id)
+            app.views.mail?.remove()
             app.views.mail = new MailView model: model
             app.views.mail.$el.appendTo $('body')
             app.views.mail.render()

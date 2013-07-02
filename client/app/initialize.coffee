@@ -45,13 +45,6 @@ class exports.Application extends BrunchApplication
         @folders = new FolderCollection()
         @realtimer.watch @folders
 
-        @mailboxes.fetch
-            success: =>
-                @folders.fetch
-                    # success: => console.log
-                    error: =>   alert "Error while loading folders"
-
-            error: =>   alert "Error while loading mailboxes"
 
         @mails = new MailsCollection()
         @realtimer.watch @mails
@@ -60,6 +53,15 @@ class exports.Application extends BrunchApplication
         @views.mailList.render()
         @views.modal = new Modal()
         @views.modal.render().$el.appendTo $('body')
+
+        @mailboxes.fetch
+            error: =>   alert "Error while loading mailboxes"
+
+            success: =>
+                @folders.fetch
+                    error: =>   alert "Error while loading folders"
+
+                    success: => Backbone.history.start()
 
 
 

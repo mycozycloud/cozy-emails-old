@@ -2,4 +2,4 @@ module.exports = (compound) ->
 
     Realtimer = require 'cozy-realtime-adapter'
 
-    Realtimer compound, ['logmessage.*', 'mail.*', 'mailbox.*']
+    a = Realtimer compound, ['logmessage.*', 'mail.*', 'mailbox.*', 'mailfolder.*']

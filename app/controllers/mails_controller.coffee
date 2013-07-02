@@ -94,7 +94,7 @@ action 'rainbow', ->
 
 
     # get inboxes
-    Folder.byType 'INBOX', (err, inboxes) ->
+    MailFolder.byType 'INBOX', (err, inboxes) ->
         return handle err if err
         outMails = []
 

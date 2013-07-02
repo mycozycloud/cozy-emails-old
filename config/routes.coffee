@@ -9,7 +9,6 @@ exports.routes = (map) ->
 
     map.get '/mails/:timestamp/:num/:id', 'mails#getlist'
 
-    map.get '/folders', 'mailboxes#folders'
     map.get '/folders/:folderId/:num/:timestamp', 'mails#byFolder'
 
     map.get '/mailboxes/:id/fetch-new', 'mailboxes#fetchNew'
@@ -17,7 +16,4 @@ exports.routes = (map) ->
 
     map.resources 'mailboxes'
     map.resources 'mails'
-
-    # map.post '/logs', 'logs#savelog'
-    # map.delete '/logs/:id', 'logs#discard'
-    # map.get '/logs/:createdAt', 'logs#getactivelogs'
+    map.resources 'folders'
