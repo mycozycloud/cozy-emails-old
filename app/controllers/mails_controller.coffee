@@ -54,8 +54,23 @@ action 'update', ->
 
                 send success: true, 200
 
+action 'destroy', ->
+
+    Mailbox.find @mail.mailbox, (err, mailbox) =>
+        return handle err if err
+
+        mailbox.syncOneMail @mail, ["\\Deleted"], (err) =>
+            return handle err if err
+
+            @mail.destroy (err) =>
+                return handle err if err
+
+                send 204
 
 
+# send num mails from folder id: folderId
+# starting after timestamp
+# descending order by date
 action 'byFolder', ->
     num = parseInt req.params.num
     timestamp = parseInt req.params.timestamp
@@ -71,13 +86,19 @@ action 'byFolder', ->
         return handle err if err
         send mails
 
+# send num mails from the rainbow (merged INBOX folders)
+# starting after timestamp
+# descending order by date
 action 'rainbow', ->
     limit = parseInt req.params.limit
 
+
+    # get inboxes
     Folder.byType 'INBOX', (err, inboxes) ->
         return handle err if err
         outMails = []
 
+        # forEach inbox
         async.each inboxes, (inbox, cb) ->
 
             query =
@@ -86,6 +107,7 @@ action 'rainbow', ->
                 limit: limit
                 descending: true
 
+            # get num mails
             Mail.fromFolderByDate query, (err, mails) ->
                 return cb err if err
                 outMails.push mail for mail in mails
@@ -94,54 +116,42 @@ action 'rainbow', ->
         , (err) ->
             return handle err if err
 
-            outMails.sort (a, b) -> return a.dateValueOf - b.dateValueOf
+            # sort by dateValueOf
+            outMails.sort (a, b) -> return b.dateValueOf - a.dateValueOf
 
+            # send only the 100 latest
             send outMails[0..99]
 
 
-# GET '/mails/:timestamp/:num'
-# Get num mails until given timestamp.
-action 'getlist', ->
-    num = parseInt req.params.num
-    timestamp = parseInt req.params.timestamp
+# # GET '/mails/:timestamp/:num'
+# # Get num mails until given timestamp.
+# action 'getlist', ->
+#     num = parseInt req.params.num
+#     timestamp = parseInt req.params.timestamp
 
-    # skip = params.id? and params.id isnt "undefined"
-
-    query =
-        startkey: [timestamp, params.id]
-        limit: num
-        descending: true
-        # skip: if skip then 1 else 0
-
-    Mail.dateId query, (err, mails) ->
-        return handle err if err
-
-        mails = [] if mails.length is 0 # ?
-        send mails
-
-
-# # GET '/mailsnew/:timestamp'
-# # Get all mails after a given timestamp.
-# action 'getnewlist', ->
-#     timestamp = parseInt params.timestamp
+#     # skip = params.id? and params.id isnt "undefined"
 
 #     query =
-#         startkey: [timestamp, undefined]
-#         descending: false
-#         skip: 1
+#         startkey: [timestamp, params.id]
+#         limit: num
+#         descending: true
+#         # skip: if skip then 1 else 0
 
 #     Mail.dateId query, (err, mails) ->
 #         return handle err if err
+
+#         mails = [] if mails.length is 0 # ?
 #         send mails
 
-# GET '/mails/:id/attachments
-# Get all attachements object for given mail.
-action 'getattachmentslist', ->
-    query = key: @mail.id
 
-    Attachment.fromMail query, (err, attachments) ->
-        return handle err if err
-        send attachments
+# # GET '/mails/:id/attachments
+# # Get all attachements object for given mail.
+# action 'getattachmentslist', ->
+#     query = key: @mail.id
+
+#     Attachment.fromMail query, (err, attachments) ->
+#         return handle err if err
+#         send attachments
 
 # GET 'mails/:id/attachments/:filename'
 # Get file linked to attachement with given id.

@@ -244,8 +244,13 @@ module.exports = (compound, Mailbox) ->
 
                 , (err) =>
 
-                    @importSuccessfull (err) =>
+                    getter.logout (err) =>
                         @log err if err
+
+                        @importSuccessfull (err) =>
+                            @log err if err
+
+                            callback()
 
     #setup then do
     Mailbox::fullImport = (callback) ->
@@ -264,4 +269,10 @@ module.exports = (compound, Mailbox) ->
             Folder.find mail.folder, (err, folder) ->
                 return callback err if err
 
-                folder.syncOneMail getter, mail, newflags, callback
+                folder.syncOneMail getter, mail, newflags, (err, folder) ->
+                    return callback err if err
+
+                    getter.logout (err) ->
+                        return callback err if err
+
+                        callback null, folder

@@ -27,6 +27,10 @@ class exports.MailsList extends ViewCollection
         @foldermenu = new FolderMenu(collection: app.folders)
         @foldermenu.render()
 
+    itemViewOptions: ->
+        console.log "itemVOpt", @collection.folderId
+        folderId: @collection.folderId
+
     checkIfEmpty: ->
         super
         empty = _.size(@views) is 0

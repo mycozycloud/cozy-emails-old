@@ -41,15 +41,17 @@ class exports.Application extends BrunchApplication
         @views.mailboxList = new MailboxesList collection: @mailboxes
         @views.mailboxList.$el.appendTo $('body')
         @views.mailboxList.render()
-        @mailboxes.fetch
-            # success: =>
-            error: =>   alert "Error while loading mailboxes"
 
         @folders = new FolderCollection()
-        @folders.fetch
-            # success: => console.log
-            error: =>   alert "Error while loading folders"
         @realtimer.watch @folders
+
+        @mailboxes.fetch
+            success: =>
+                @folders.fetch
+                    # success: => console.log
+                    error: =>   alert "Error while loading folders"
+
+            error: =>   alert "Error while loading mailboxes"
 
         @mails = new MailsCollection()
         @realtimer.watch @mails

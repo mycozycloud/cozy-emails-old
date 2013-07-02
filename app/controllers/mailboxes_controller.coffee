@@ -187,8 +187,10 @@ action 'fetchNew', ->
 
                     async.eachSeries folders, (folder, cb) ->
                         folder.getNewMails getter, 200, cb
-                    , callback
+                    , (err) ->
+                        return callback err if err
 
+                        getter.logout callback
 
 
         , (err) -> # once all box have been processed

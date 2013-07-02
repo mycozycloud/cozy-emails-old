@@ -48,6 +48,16 @@ module.exports = (compound, Mail) ->
             console.log err
             callback err
 
+
+    Mail::remove = (getter, callback) ->
+
+        getter.addFlags @idRemoteMailbox, ['\\Deleted'], (err) ->
+            return callback err if err
+
+            @destroy callback
+
+
+
     Mail::updateAndSync = (attributes, callback) ->
 
         needSync = @changedFlags attributes.flags

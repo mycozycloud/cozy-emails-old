@@ -17,7 +17,7 @@ class exports.MailView extends BaseView
     id: 'mail'
 
     events:
-        "click #btn-read"   : 'buttonUnread'
+        "click #btn-unread" : 'buttonUnread'
         "click #btn-flagged": 'buttonFlagged'
         "click #btn-delete" :  'buttonDelete'
 
@@ -25,7 +25,6 @@ class exports.MailView extends BaseView
     getRenderData: -> model: @model
 
     initialize: ->
-        console.log @model.get '_attachments'
         @attachmentsView = new MailAttachmentsList
             model: @model
 
@@ -56,7 +55,6 @@ class exports.MailView extends BaseView
             @timeout2 = setTimeout () =>
                 @timeout2 = null
                 @iframe = @$("#mail_content_html")
-                console.log
                 @iframe.height @iframehtml.height()
             , 1000
 
@@ -92,6 +90,7 @@ class exports.MailView extends BaseView
 
     # handles unread button
     buttonUnread: ->
+        console.log "UNREAD"
         @model.markRead not @model.isRead()
         @model.save()
 
@@ -101,4 +100,7 @@ class exports.MailView extends BaseView
         @model.save()
 
     buttonDelete: ->
-        @model.destroy()
+        @model.destroy().then ->
+            base = if app.mails.folderId is 'rainbow' then 'rainbow'
+            else "folder/#{app.mails.folderId}"
+            app.router.navigate base, true

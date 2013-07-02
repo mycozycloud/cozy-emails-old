@@ -19,8 +19,8 @@ class exports.MailsListElement extends Backbone.View
 
     initialize: ->
         super
-        @collection = @model.collection
         @listenTo @model, 'change', @render
+        @folderId = @options.folderId
 
     setActiveMail: (event) ->
         $(".table tr").removeClass "active"
@@ -30,7 +30,13 @@ class exports.MailsListElement extends Backbone.View
             @model.markRead()
             @model.save()
 
-        window.app.router.navigate "mail/#{@model.get 'id'}", true
+        window.app.router.navigate @href(), true
+
+    href: () =>
+        base = if @folderId is 'rainbow' then 'rainbow/'
+        else "folder/#{@folderId}/"
+
+        return base + "mail/#{@model.get 'id'}"
 
     toggleFlag: (event) ->
         event.preventDefault()

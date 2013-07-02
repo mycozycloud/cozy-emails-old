@@ -38,18 +38,20 @@ class exports.MailsCollection extends Backbone.Collection
         @fetch options
 
     fetchFolder: (folderid, limit) ->
+        @reset []
+        @folderId = folderid
         @fetch
             url: "folders/#{folderid}/#{limit}/undefined"
-            # remove: false
+            remove: true
             success: (collection) =>
-                @folderId = folderid
                 @timestampNew = @at(0).get("dateValueOf") if @length > 0
                 @timestampOld = @last().get("dateValueOf") if @length > 0
 
     fetchRainbow: (limit) ->
+        @reset []
+        @folderId = 'rainbow'
         @fetch
             url: "mails/rainbow/#{limit}"
             success: (collection) =>
-                @folderId = 'rainbow'
                 @timestampNew = @at(0).get("dateValueOf") if @length > 0
                 @timestampOld = @last().get("dateValueOf") if @length > 0
