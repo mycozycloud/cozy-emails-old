@@ -265,10 +265,12 @@ window.require.register("collections/mails", function(exports, require, module) 
 
     MailsCollection.prototype.fetchFolder = function(folderid, limit) {
       var _this = this;
+      this.reset([]);
+      this.folderId = folderid;
       return this.fetch({
         url: "folders/" + folderid + "/" + limit + "/undefined",
+        remove: true,
         success: function(collection) {
-          _this.folderId = folderid;
           if (_this.length > 0) {
             _this.timestampNew = _this.at(0).get("dateValueOf");
           }
@@ -281,10 +283,11 @@ window.require.register("collections/mails", function(exports, require, module) 
 
     MailsCollection.prototype.fetchRainbow = function(limit) {
       var _this = this;
+      this.reset([]);
+      this.folderId = 'rainbow';
       return this.fetch({
         url: "mails/rainbow/" + limit,
         success: function(collection) {
-          _this.folderId = 'rainbow';
           if (_this.length > 0) {
             _this.timestampNew = _this.at(0).get("dateValueOf");
           }
@@ -428,18 +431,20 @@ window.require.register("initialize", function(exports, require, module) {
       });
       this.views.mailboxList.$el.appendTo($('body'));
       this.views.mailboxList.render();
+      this.folders = new FolderCollection();
+      this.realtimer.watch(this.folders);
       this.mailboxes.fetch({
+        success: function() {
+          return _this.folders.fetch({
+            error: function() {
+              return alert("Error while loading folders");
+            }
+          });
+        },
         error: function() {
           return alert("Error while loading mailboxes");
         }
       });
-      this.folders = new FolderCollection();
-      this.folders.fetch({
-        error: function() {
-          return alert("Error while loading folders");
-        }
-      });
-      this.realtimer.watch(this.folders);
       this.mails = new MailsCollection();
       this.realtimer.watch(this.mails);
       this.views.mailList = new MailsList({
@@ -1298,6 +1303,8 @@ window.require.register("routers/main_router", function(exports, require, module
     __extends(MainRouter, _super);
 
     function MainRouter() {
+      this.foldermail = __bind(this.foldermail, this);
+      this.rainbowmail = __bind(this.rainbowmail, this);
       this.rainbow = __bind(this.rainbow, this);
       _ref = MainRouter.__super__.constructor.apply(this, arguments);
       return _ref;
@@ -1306,8 +1313,9 @@ window.require.register("routers/main_router", function(exports, require, module
     MainRouter.prototype.routes = {
       '': 'rainbow',
       'rainbow': 'rainbow',
+      'rainbow/mail/:id': 'rainbowmail',
       'folder/:id': 'folder',
-      'mail/:id': 'mail',
+      'folder/:id/mail/:mid': 'foldermail',
       'config': 'config',
       'config/mailboxes': 'config',
       'config/mailboxes/new': 'newMailbox',
@@ -1316,7 +1324,6 @@ window.require.register("routers/main_router", function(exports, require, module
 
     MainRouter.prototype.clear = function() {
       var _ref1, _ref2;
-      console.log("clear");
       app.views.mailboxList.activate(null);
       app.views.mailList.activate(null);
       app.views.mailList.$el.hide();
@@ -1331,25 +1338,67 @@ window.require.register("routers/main_router", function(exports, require, module
       return app.views.mailboxform = null;
     };
 
-    MainRouter.prototype.rainbow = function() {
-      console.log("rainbow");
+    MainRouter.prototype.rainbow = function(callback) {
       this.clear();
       if (app.mails.length === 0) {
         app.mails.once('sync', this.rainbow);
       }
-      app.mails.fetchRainbow(100);
       app.views.menu.select('inboxbutton');
       app.views.mailboxList.$el.hide();
-      return app.views.mailList.$el.show();
+      app.views.mailList.$el.show();
+      return app.mails.fetchRainbow(100).then(callback);
     };
 
-    MainRouter.prototype.folder = function(folderid) {
-      this.rainbow();
-      return app.mails.fetchFolder(folderid, 100);
+    MainRouter.prototype.rainbowmail = function(mailid) {
+      var _this = this;
+      if (app.mails.folderId === 'rainbow') {
+        return this.mail(mailid);
+      } else {
+        return this.rainbow(function() {
+          return _this.mail(mailid);
+        });
+      }
+    };
+
+    MainRouter.prototype.folder = function(folderid, callback) {
+      var _this = this;
+      this.clear();
+      if (app.mails.length === 0) {
+        app.mails.once('sync', function() {
+          return _this.folder(folderid);
+        });
+      }
+      app.views.menu.select('inboxbutton');
+      app.views.mailboxList.$el.hide();
+      app.views.mailList.$el.show();
+      return app.mails.fetchFolder(folderid, 100).then(callback);
+    };
+
+    MainRouter.prototype.foldermail = function(folderid, mailid) {
+      var _this = this;
+      if (app.mails.folderId === folderid) {
+        return this.mail(mailid);
+      } else {
+        return this.folder(folderid, function() {
+          return _this.mail(mailid);
+        });
+      }
+    };
+
+    MainRouter.prototype.mail = function(id, list) {
+      var model;
+      if (model = app.mails.get(id)) {
+        app.views.mail = new MailView({
+          model: model
+        });
+        app.views.mail.$el.appendTo($('body'));
+        return app.views.mail.render();
+      } else {
+        return this.navigate(list, true);
+      }
     };
 
     MainRouter.prototype.config = function() {
-      console.log("config");
       this.clear();
       app.views.menu.select('mailboxesbutton');
       app.views.mailList.$el.hide();
@@ -1377,45 +1426,6 @@ window.require.register("routers/main_router", function(exports, require, module
       });
       app.views.mailboxform.$el.appendTo($('body'));
       return app.views.mailboxform.render();
-    };
-
-    MainRouter.prototype.mail = function(id) {
-      var model, _ref1,
-        _this = this;
-      console.log("mail");
-      if (app.mails.length === 0) {
-        return app.mails.on('sync', function() {
-          return _this.mail(id);
-        });
-      }
-      app.views.menu.select('inboxbutton');
-      app.views.mailboxList.$el.hide();
-      app.views.mailList.activate(id);
-      app.views.mailList.$el.show();
-      if ((_ref1 = app.views.mail) != null) {
-        _ref1.remove();
-      }
-      if (model = app.mails.get(id)) {
-        app.views.mail = new MailView({
-          model: model
-        });
-        app.views.mail.$el.appendTo($('body'));
-        return app.views.mail.render();
-      } else {
-        model = new Mail({
-          id: id
-        });
-        model.fetch({
-          success: function() {
-            return app.views.mail.render();
-          }
-        });
-        app.views.mail = new MailView({
-          model: model
-        });
-        app.views.mail.$el.appendTo($('body'));
-        return app.views.mail.render();
-      }
     };
 
     return MainRouter;
@@ -1502,7 +1512,7 @@ window.require.register("templates/_mail/big", function(exports, require, module
   }
   else
   {
-  buf.push('<i class="icon-eye-open icon-white"></i>Read');
+  buf.push('<i class="icon-eye-open icon-white"></i>Mark read');
   }
   buf.push('</a><a id="btn-delete" class="btn btn-danger"><i class="icon-remove icon-white"></i>Delete</a></div><div class="well mail-panel"><p>' + escape((interp = model.fromShort()) == null ? '' : interp) + '<i class="date">' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
   if ( model.get("cc"))
@@ -1872,7 +1882,7 @@ window.require.register("templates/folders_menu", function(exports, require, mod
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<a data-toggle="dropdown" href="#" class="btn dropdown-toggle"><span id="currentfolder">Choose Folder</span><span class="caret"></span></a><ul id="folderlist" class="dropdown-menu pull-right"><li><a href="#rainbow">The Rainbow</a></li></ul>');
+  buf.push('<a data-toggle="dropdown" href="#" class="btn dropdown-toggle"><span id="currentfolder">Choose Folder</span><span class="caret"></span></a><ul id="folderlist" class="dropdown-menu pull-right nav"><li><a href="#rainbow">The Rainbow</a></li></ul>');
   }
   return buf.join("");
   };
@@ -2868,6 +2878,7 @@ window.require.register("views/folders_menu", function(exports, require, module)
     FolderMenu.prototype.template = require('templates/folders_menu');
 
     FolderMenu.prototype.initialize = function() {
+      FolderMenu.__super__.initialize.apply(this, arguments);
       return this.currentMailbox = '';
     };
 
@@ -2877,7 +2888,7 @@ window.require.register("views/folders_menu", function(exports, require, module)
         this.currentMailbox = view.model.get('mailbox');
         console.log(app.mailboxes.length, this.currentMailbox);
         title = app.mailboxes.get(this.currentMailbox).get('name');
-        this.$('#folderlist').append("<li class='title'>" + title + "</li>");
+        this.$('#folderlist').append("<li class='nav-header'>" + title + "</li>");
       }
       return this.$('#folderlist').append(view.$el);
     };
@@ -2953,7 +2964,7 @@ window.require.register("views/mail", function(exports, require, module) {
     MailView.prototype.id = 'mail';
 
     MailView.prototype.events = {
-      "click #btn-read": 'buttonUnread',
+      "click #btn-unread": 'buttonUnread',
       "click #btn-flagged": 'buttonFlagged',
       "click #btn-delete": 'buttonDelete'
     };
@@ -2967,7 +2978,6 @@ window.require.register("views/mail", function(exports, require, module) {
     };
 
     MailView.prototype.initialize = function() {
-      console.log(this.model.get('_attachments'));
       return this.attachmentsView = new MailAttachmentsList({
         model: this.model
       });
@@ -2995,7 +3005,6 @@ window.require.register("views/mail", function(exports, require, module) {
         this.timeout2 = setTimeout(function() {
           _this.timeout2 = null;
           _this.iframe = _this.$("#mail_content_html");
-          console.log;
           return _this.iframe.height(_this.iframehtml.height());
         }, 1000);
       }
@@ -3040,6 +3049,7 @@ window.require.register("views/mail", function(exports, require, module) {
     };
 
     MailView.prototype.buttonUnread = function() {
+      console.log("UNREAD");
       this.model.markRead(!this.model.isRead());
       return this.model.save();
     };
@@ -3050,7 +3060,11 @@ window.require.register("views/mail", function(exports, require, module) {
     };
 
     MailView.prototype.buttonDelete = function() {
-      return this.model.destroy();
+      return this.model.destroy().then(function() {
+        var base;
+        base = app.mails.folderId === 'rainbow' ? 'rainbow' : "folder/" + app.mails.folderId;
+        return app.router.navigate(base, true);
+      });
     };
 
     return MailView;
@@ -3425,6 +3439,13 @@ window.require.register("views/mails_list", function(exports, require, module) {
       return this.foldermenu.render();
     };
 
+    MailsList.prototype.itemViewOptions = function() {
+      console.log("itemVOpt", this.collection.folderId);
+      return {
+        folderId: this.collection.folderId
+      };
+    };
+
     MailsList.prototype.checkIfEmpty = function() {
       var empty, _ref1;
       MailsList.__super__.checkIfEmpty.apply(this, arguments);
@@ -3564,6 +3585,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
   */
 
   var _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3571,6 +3593,7 @@ window.require.register("views/mails_list_element", function(exports, require, m
     __extends(MailsListElement, _super);
 
     function MailsListElement() {
+      this.href = __bind(this.href, this);
       _ref = MailsListElement.__super__.constructor.apply(this, arguments);
       return _ref;
     }
@@ -3590,8 +3613,8 @@ window.require.register("views/mails_list_element", function(exports, require, m
 
     MailsListElement.prototype.initialize = function() {
       MailsListElement.__super__.initialize.apply(this, arguments);
-      this.collection = this.model.collection;
-      return this.listenTo(this.model, 'change', this.render);
+      this.listenTo(this.model, 'change', this.render);
+      return this.folderId = this.options.folderId;
     };
 
     MailsListElement.prototype.setActiveMail = function(event) {
@@ -3601,7 +3624,13 @@ window.require.register("views/mails_list_element", function(exports, require, m
         this.model.markRead();
         this.model.save();
       }
-      return window.app.router.navigate("mail/" + (this.model.get('id')), true);
+      return window.app.router.navigate(this.href(), true);
+    };
+
+    MailsListElement.prototype.href = function() {
+      var base;
+      base = this.folderId === 'rainbow' ? 'rainbow/' : "folder/" + this.folderId + "/";
+      return base + ("mail/" + (this.model.get('id')));
     };
 
     MailsListElement.prototype.toggleFlag = function(event) {
