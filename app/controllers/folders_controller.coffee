@@ -15,7 +15,7 @@ before ->
 action 'index', ->
     MailFolder.all (err, folders) ->
         return send error: err, 500 if err
-        send folders
+        send folders or []
 
 # find folder with given id
 action 'show', ->

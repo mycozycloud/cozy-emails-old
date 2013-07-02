@@ -15,6 +15,13 @@ module.exports = (compound, Mailbox) ->
     Mailbox::toString = ->
         "[Mailbox #{@name} #{@id}]"
 
+
+    # To ensure unique mailbox
+    Mailbox.findByEmail = (email, callback) ->
+        Mailbox.request 'byEmail', key: email, (err, boxes) ->
+            if err then callback err
+            else callback null, (boxes[0] or null)
+
     # Delete mailbox and everthing related
     Mailbox::remove = (callback) ->
         @log "destroying box..."
