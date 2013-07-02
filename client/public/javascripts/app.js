@@ -308,8 +308,7 @@ window.require.register("helpers", function(exports, require, module) {
     function BrunchApplication() {
       var _this = this;
       $(function() {
-        _this.initialize(_this);
-        return Backbone.history.start();
+        return _this.initialize(_this);
       });
     }
 
@@ -433,18 +432,6 @@ window.require.register("initialize", function(exports, require, module) {
       this.views.mailboxList.render();
       this.folders = new FolderCollection();
       this.realtimer.watch(this.folders);
-      this.mailboxes.fetch({
-        success: function() {
-          return _this.folders.fetch({
-            error: function() {
-              return alert("Error while loading folders");
-            }
-          });
-        },
-        error: function() {
-          return alert("Error while loading mailboxes");
-        }
-      });
       this.mails = new MailsCollection();
       this.realtimer.watch(this.mails);
       this.views.mailList = new MailsList({
@@ -453,7 +440,22 @@ window.require.register("initialize", function(exports, require, module) {
       this.views.mailList.$el.appendTo($('body'));
       this.views.mailList.render();
       this.views.modal = new Modal();
-      return this.views.modal.render().$el.appendTo($('body'));
+      this.views.modal.render().$el.appendTo($('body'));
+      return this.mailboxes.fetch({
+        error: function() {
+          return alert("Error while loading mailboxes");
+        },
+        success: function() {
+          return _this.folders.fetch({
+            error: function() {
+              return alert("Error while loading folders");
+            },
+            success: function() {
+              return Backbone.history.start();
+            }
+          });
+        }
+      });
     };
 
     return Application;
@@ -688,6 +690,8 @@ window.require.register("models/folder", function(exports, require, module) {
       _ref = Folder.__super__.constructor.apply(this, arguments);
       return _ref;
     }
+
+    Folder.prototype.urlRoot = 'folders/';
 
     return Folder;
 
@@ -1253,6 +1257,30 @@ window.require.register("models/mailbox", function(exports, require, module) {
       return this.set("newMessages", current + delta);
     };
 
+    Mailbox.prototype.destroy = function(options) {
+      var id, success;
+      success = options.success;
+      id = this.id;
+      options.success = function() {
+        app.folders.forEach(function(folder) {
+          console.log(folder, id);
+          if (folder.get('mailbox') === id) {
+            return app.folders.remove(folder);
+          }
+        });
+        app.mails.forEach(function(mail) {
+          console.log(mail, id);
+          if (mail.mailbox === id) {
+            return app.mails.remove(mail);
+          }
+        });
+        if (success) {
+          return success.apply(this, arguments);
+        }
+      };
+      return Mailbox.__super__.destroy.call(this, options);
+    };
+
     return Mailbox;
 
   })(BaseModel);
@@ -1340,9 +1368,6 @@ window.require.register("routers/main_router", function(exports, require, module
 
     MainRouter.prototype.rainbow = function(callback) {
       this.clear();
-      if (app.mails.length === 0) {
-        app.mails.once('sync', this.rainbow);
-      }
       app.views.menu.select('inboxbutton');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
@@ -1355,19 +1380,13 @@ window.require.register("routers/main_router", function(exports, require, module
         return this.mail(mailid);
       } else {
         return this.rainbow(function() {
-          return _this.mail(mailid);
+          return _this.mail(mailid, 'rainbow');
         });
       }
     };
 
     MainRouter.prototype.folder = function(folderid, callback) {
-      var _this = this;
       this.clear();
-      if (app.mails.length === 0) {
-        app.mails.once('sync', function() {
-          return _this.folder(folderid);
-        });
-      }
       app.views.menu.select('inboxbutton');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
@@ -1380,14 +1399,17 @@ window.require.register("routers/main_router", function(exports, require, module
         return this.mail(mailid);
       } else {
         return this.folder(folderid, function() {
-          return _this.mail(mailid);
+          return _this.mail(mailid, "folder/" + folderid);
         });
       }
     };
 
     MainRouter.prototype.mail = function(id, list) {
-      var model;
+      var model, _ref1;
       if (model = app.mails.get(id)) {
+        if ((_ref1 = app.views.mail) != null) {
+          _ref1.remove();
+        }
         app.views.mail = new MailView({
           model: model
         });
@@ -2882,11 +2904,14 @@ window.require.register("views/folders_menu", function(exports, require, module)
       return this.currentMailbox = '';
     };
 
+    FolderMenu.prototype.checkIfEmpty = function() {
+      return this.$el.toggle(_.size(this.views) !== 0);
+    };
+
     FolderMenu.prototype.appendView = function(view) {
       var title;
       if (this.currentMailbox !== view.model.get('mailbox')) {
         this.currentMailbox = view.model.get('mailbox');
-        console.log(app.mailboxes.length, this.currentMailbox);
         title = app.mailboxes.get(this.currentMailbox).get('name');
         this.$('#folderlist').append("<li class='nav-header'>" + title + "</li>");
       }
@@ -3366,7 +3391,7 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
         return data[input[i].id] = input[i].value;
       });
       this.model.isEdit = false;
-      return this.model.save(data, {
+      this.model.save(data, {
         success: function() {
           $("#add_mailbox").show();
           $("#no-mailbox-msg").hide();
@@ -3384,6 +3409,7 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
           return $(event.target).removeClass("disabled").addClass("buttonSave");
         }
       });
+      return app.router.navigate('config/mailboxes', true);
     };
 
     return MailboxForm;
@@ -3440,7 +3466,6 @@ window.require.register("views/mails_list", function(exports, require, module) {
     };
 
     MailsList.prototype.itemViewOptions = function() {
-      console.log("itemVOpt", this.collection.folderId);
       return {
         folderId: this.collection.folderId
       };
