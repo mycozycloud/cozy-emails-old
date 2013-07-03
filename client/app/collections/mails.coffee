@@ -26,32 +26,28 @@ class exports.MailsCollection extends Backbone.Collection
     # number of mails to fetch at one click on "more mail" button
     mailsAtOnce: 100
 
-    fetchOlder: (options) ->
-        success = options.success or ->
-        options ?= {}
-        options.url = "folders/#{@timestampOld}/#{@mailsAtOnce}/#{@lastIdOld}"
-        options.remove = false
-        options.success = (collection) =>
-            @timestampNew = @at(0).get("dateValueOf") if @length > 0
-            success.call @, arguments
+    fetchOlder: () =>
+        if @folderId is 'rainbow'
+            @fetchRainbow @mailsAtOnce, @last().get "dateValueOf"
+        else
+            @fetchFolder @folderId, @mailsAtOnce, @last().get "dateValueOf"
 
-        @fetch options
-
-    fetchFolder: (folderid, limit) ->
-        @reset []
+    fetchFolder: (folderid, limit, from) =>
+        @reset [] unless from
         @folderId = folderid
         @fetch
-            url: "folders/#{folderid}/#{limit}/undefined"
-            remove: true
+            url: "folders/#{folderid}/#{limit}/#{from}"
+            remove: false
             success: (collection) =>
                 @timestampNew = @at(0).get("dateValueOf") if @length > 0
                 @timestampOld = @last().get("dateValueOf") if @length > 0
 
-    fetchRainbow: (limit) ->
-        @reset []
+    fetchRainbow: (limit, from) =>
+        @reset [] unless from
         @folderId = 'rainbow'
         @fetch
-            url: "mails/rainbow/#{limit}"
+            url: "mails/rainbow/#{limit}/#{from}"
+            remove: false
             success: (collection) =>
                 @timestampNew = @at(0).get("dateValueOf") if @length > 0
                 @timestampOld = @last().get("dateValueOf") if @length > 0

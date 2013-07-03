@@ -211,6 +211,7 @@ window.require.register("collections/mailboxes", function(exports, require, modu
 });
 window.require.register("collections/mails", function(exports, require, module) {
   var Mail, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -229,6 +230,9 @@ window.require.register("collections/mails", function(exports, require, module) 
     __extends(MailsCollection, _super);
 
     function MailsCollection() {
+      this.fetchRainbow = __bind(this.fetchRainbow, this);
+      this.fetchFolder = __bind(this.fetchFolder, this);
+      this.fetchOlder = __bind(this.fetchOlder, this);
       _ref = MailsCollection.__super__.constructor.apply(this, arguments);
       return _ref;
     }
@@ -245,31 +249,23 @@ window.require.register("collections/mails", function(exports, require, module) 
 
     MailsCollection.prototype.mailsAtOnce = 100;
 
-    MailsCollection.prototype.fetchOlder = function(options) {
-      var success,
-        _this = this;
-      success = options.success || function() {};
-      if (options == null) {
-        options = {};
+    MailsCollection.prototype.fetchOlder = function() {
+      if (this.folderId === 'rainbow') {
+        return this.fetchRainbow(this.mailsAtOnce, this.last().get("dateValueOf"));
+      } else {
+        return this.fetchFolder(this.folderId, this.mailsAtOnce, this.last().get("dateValueOf"));
       }
-      options.url = "folders/" + this.timestampOld + "/" + this.mailsAtOnce + "/" + this.lastIdOld;
-      options.remove = false;
-      options.success = function(collection) {
-        if (_this.length > 0) {
-          _this.timestampNew = _this.at(0).get("dateValueOf");
-        }
-        return success.call(_this, arguments);
-      };
-      return this.fetch(options);
     };
 
-    MailsCollection.prototype.fetchFolder = function(folderid, limit) {
+    MailsCollection.prototype.fetchFolder = function(folderid, limit, from) {
       var _this = this;
-      this.reset([]);
+      if (!from) {
+        this.reset([]);
+      }
       this.folderId = folderid;
       return this.fetch({
-        url: "folders/" + folderid + "/" + limit + "/undefined",
-        remove: true,
+        url: "folders/" + folderid + "/" + limit + "/" + from,
+        remove: false,
         success: function(collection) {
           if (_this.length > 0) {
             _this.timestampNew = _this.at(0).get("dateValueOf");
@@ -281,12 +277,15 @@ window.require.register("collections/mails", function(exports, require, module) 
       });
     };
 
-    MailsCollection.prototype.fetchRainbow = function(limit) {
+    MailsCollection.prototype.fetchRainbow = function(limit, from) {
       var _this = this;
-      this.reset([]);
+      if (!from) {
+        this.reset([]);
+      }
       this.folderId = 'rainbow';
       return this.fetch({
-        url: "mails/rainbow/" + limit,
+        url: "mails/rainbow/" + limit + "/" + from,
+        remove: false,
         success: function(collection) {
           if (_this.length > 0) {
             _this.timestampNew = _this.at(0).get("dateValueOf");
@@ -3549,24 +3548,22 @@ window.require.register("views/mails_list", function(exports, require, module) {
     };
 
     MailsList.prototype.loadOlderMails = function() {
-      var oldlength,
+      var oldlength, promise,
         _this = this;
-      if (!this.loadmoreBtn.hasClass('disabled')) {
-        this.loadmoreBtn.addClass("disabled").text("Loading...");
-        oldlength = this.collection.length;
-        return this.collection.fetchOlder({
-          success: function(collection) {
-            _this.loadmoreBtn.removeClass('disabled').text("more messages");
-            if (_this.collection.length === oldlength) {
-              return _this.loadmoreBtn.hide();
-            }
-          },
-          error: function(collection, error) {
-            _this.loadmoreBtn.removeClass('disabled').text("more messages");
-            return console.log(error);
-          }
-        });
+      if (this.loadmoreBtn.hasClass('disabled')) {
+        return null;
       }
+      oldlength = this.collection.length;
+      this.loadmoreBtn.addClass("disabled").text("Loading...");
+      promise = this.collection.fetchOlder();
+      promise.always(function() {
+        return _this.loadmoreBtn.removeClass('disabled').text("more messages");
+      });
+      return promise.done(function() {
+        if (_this.collection.length === oldlength) {
+          return _this.loadmoreBtn.hide();
+        }
+      });
     };
 
     MailsList.prototype.updateColors = function() {

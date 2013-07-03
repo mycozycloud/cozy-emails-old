@@ -95,19 +95,17 @@ class exports.MailsList extends ViewCollection
     loadOlderMails: () ->
 
         # if not disabled
-        unless @loadmoreBtn.hasClass('disabled')
-            # disable the button
-            @loadmoreBtn.addClass("disabled").text "Loading..."
-            # fetch new data
-            oldlength = @collection.length
+        return null if @loadmoreBtn.hasClass 'disabled'
 
-            @collection.fetchOlder
-                success: (collection) =>
-                    @loadmoreBtn.removeClass('disabled').text "more messages"
-                    @loadmoreBtn.hide() if @collection.length is oldlength
-                error: (collection, error) =>
-                    @loadmoreBtn.removeClass('disabled').text "more messages"
-                    console.log error
+        oldlength = @collection.length
+        @loadmoreBtn.addClass("disabled").text "Loading..."
+
+        promise = @collection.fetchOlder()
+        promise.always =>
+            @loadmoreBtn.removeClass('disabled').text "more messages"
+
+        # hide button if it was useless
+        promise.done => @loadmoreBtn.hide() if @collection.length is oldlength
 
     updateColors: () ->
         view.render() for id, view of @views

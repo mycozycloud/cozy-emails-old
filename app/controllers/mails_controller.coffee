@@ -73,13 +73,16 @@ action 'destroy', ->
 # descending order by date
 action 'byFolder', ->
     num = parseInt req.params.num
-    timestamp = parseInt req.params.timestamp
+    if req.params.timestamp and req.params.timestamp != 'undefined'
+        timestamp = parseInt req.params.timestamp
+    else timestamp = {}
 
     # TODO use timestamp
     query =
-        startkey: [req.params.folderId, {}]
+        startkey: [req.params.folderId, timestamp]
         endkey: [req.params.folderId]
         limit: num
+        skip: if timestamp then 1 else 0
         descending: true
 
     Mail.fromFolderByDate query, (err, mails) ->
@@ -91,6 +94,9 @@ action 'byFolder', ->
 # descending order by date
 action 'rainbow', ->
     limit = parseInt req.params.limit
+    if req.params.timestamp and req.params.timestamp != 'undefined'
+        timestamp = parseInt req.params.timestamp
+    else timestamp = {}
 
 
     # get inboxes
@@ -102,13 +108,14 @@ action 'rainbow', ->
         async.each inboxes, (inbox, cb) ->
 
             query =
-                startkey: [inbox.id, {}]
+                startkey: [inbox.id, timestamp]
                 endkey: [inbox.id]
                 limit: limit
                 descending: true
 
             # get num mails
             Mail.fromFolderByDate query, (err, mails) ->
+                console.log err
                 return cb err if err
                 outMails.push mail for mail in mails
                 cb null
@@ -116,11 +123,14 @@ action 'rainbow', ->
         , (err) ->
             return handle err if err
 
-            # sort by dateValueOf
+            # sort by dateValueOf descending
             outMails.sort (a, b) -> return b.dateValueOf - a.dateValueOf
+            i = 0
+            while outMails[i].dateValueOf > timestamp
+                i++
 
             # send only the 100 latest
-            send outMails[0..99]
+            send outMails[i..i+99]
 
 
 # # GET '/mails/:timestamp/:num'
