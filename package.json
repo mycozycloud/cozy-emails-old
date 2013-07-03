@@ -45,19 +45,16 @@
     { "description": "Recovers and stores your mails."
     }
   , "MailBox":
-    { "description": "Configures your mailboxes."
+    { "description": "Configures your mailboxes. Beware, this contains your email credentials"
     }
-  , "Attachment":
-    { "description": "Recovers and stores attachments of your mails."
+  , "MailFolder":
+    { "description": "Folders that contains emails (ex. Inbox, Sent Mails)."
     }
-  , "LogMessage":
-    { "description": "Displays errors."
+  , "MailSent":
+    { "description": "A mail waiting to be sent"
     }
   , "Account":
     { "description": "Encrypts your mailboxes passwords."
-    }
-  , "MailToBe":
-    { "description": "Used for the first step in mails downloading."
     }
   }
 }
