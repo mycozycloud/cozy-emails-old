@@ -25,6 +25,7 @@ class exports.MailView extends BaseView
     getRenderData: -> model: @model
 
     initialize: ->
+        @listenTo @model, 'change', @render
         @attachmentsView = new MailAttachmentsList
             model: @model
 
@@ -92,15 +93,18 @@ class exports.MailView extends BaseView
     buttonUnread: ->
         console.log "UNREAD"
         @model.markRead not @model.isRead()
-        @model.save()
+        @model.save null,
+            ignoreMySocketNotification: true
 
     # handles flagged button
     buttonFlagged: ->
         @model.markFlagged not @model.isFlagged()
-        @model.save()
+        @model.save null,
+            ignoreMySocketNotification: true
 
     buttonDelete: ->
-        @model.destroy().then ->
-            base = if app.mails.folderId is 'rainbow' then 'rainbow'
-            else "folder/#{app.mails.folderId}"
-            app.router.navigate base, true
+        base = if app.mails.folderId is 'rainbow' then 'rainbow'
+        else "folder/#{app.mails.folderId}"
+        app.router.navigate base, true
+
+        @model.destroy()

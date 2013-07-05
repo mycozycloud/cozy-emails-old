@@ -38,13 +38,10 @@ module.exports = (compound, Mail) ->
             fs.writeFile fileName, attachment.content, (error) =>
                 return callback error if error
                 @attachFile fileName, params, (error) =>
-                    require('eyes').inspect error
                     fs.unlink fileName, (err) =>
-                        require('eyes').inspect err
                         callback(error or err)
 
         , (err) =>
-            require('eyes').inspect err
             console.log err
             callback err
 

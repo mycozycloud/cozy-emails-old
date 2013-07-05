@@ -1370,6 +1370,7 @@ window.require.register("routers/main_router", function(exports, require, module
       app.views.menu.select('inboxbutton');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
+      app.views.mailList.$el.getNiceScroll().show();
       return app.mails.fetchRainbow(100).then(callback);
     };
 
@@ -1389,6 +1390,7 @@ window.require.register("routers/main_router", function(exports, require, module
       app.views.menu.select('inboxbutton');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
+      app.views.mailList.$el.getNiceScroll().show();
       return app.mails.fetchFolder(folderid, 100).then(callback);
     };
 
@@ -3002,6 +3004,7 @@ window.require.register("views/mail", function(exports, require, module) {
     };
 
     MailView.prototype.initialize = function() {
+      this.listenTo(this.model, 'change', this.render);
       return this.attachmentsView = new MailAttachmentsList({
         model: this.model
       });
@@ -3075,20 +3078,23 @@ window.require.register("views/mail", function(exports, require, module) {
     MailView.prototype.buttonUnread = function() {
       console.log("UNREAD");
       this.model.markRead(!this.model.isRead());
-      return this.model.save();
+      return this.model.save(null, {
+        ignoreMySocketNotification: true
+      });
     };
 
     MailView.prototype.buttonFlagged = function() {
       this.model.markFlagged(!this.model.isFlagged());
-      return this.model.save();
+      return this.model.save(null, {
+        ignoreMySocketNotification: true
+      });
     };
 
     MailView.prototype.buttonDelete = function() {
-      return this.model.destroy().then(function() {
-        var base;
-        base = app.mails.folderId === 'rainbow' ? 'rainbow' : "folder/" + app.mails.folderId;
-        return app.router.navigate(base, true);
-      });
+      var base;
+      base = app.mails.folderId === 'rainbow' ? 'rainbow' : "folder/" + app.mails.folderId;
+      app.router.navigate(base, true);
+      return this.model.destroy();
     };
 
     return MailView;
@@ -3418,6 +3424,7 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
 });
 window.require.register("views/mails_list", function(exports, require, module) {
   var FolderMenu, ViewCollection, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3438,6 +3445,8 @@ window.require.register("views/mails_list", function(exports, require, module) {
     __extends(MailsList, _super);
 
     function MailsList() {
+      this.stopSpinContainer = __bind(this.stopSpinContainer, this);
+      this.spinContainer = __bind(this.spinContainer, this);
       _ref = MailsList.__super__.constructor.apply(this, arguments);
       return _ref;
     }
@@ -3456,8 +3465,10 @@ window.require.register("views/mails_list", function(exports, require, module) {
 
     MailsList.prototype.initialize = function() {
       MailsList.__super__.initialize.apply(this, arguments);
-      this.listenTo(window.app.mailboxes, 'change:color', this.updateColors);
-      this.listenTo(window.app.mailboxes, 'add', this.updateColors);
+      this.listenTo(app.mailboxes, 'change:color', this.updateColors);
+      this.listenTo(app.mailboxes, 'add', this.updateColors);
+      this.listenTo(app.mails, 'request', this.spinContainer);
+      this.listenTo(app.mails, 'sync', this.stopSpinContainer);
       this.foldermenu = new FolderMenu({
         collection: app.folders
       });
@@ -3471,12 +3482,9 @@ window.require.register("views/mails_list", function(exports, require, module) {
     };
 
     MailsList.prototype.checkIfEmpty = function() {
-      var empty, _ref1;
+      var empty;
       MailsList.__super__.checkIfEmpty.apply(this, arguments);
       empty = _.size(this.views) === 0;
-      if ((_ref1 = this.noMailMsg) != null) {
-        _ref1.toggle(empty);
-      }
       this.$('#markallread-btn').toggle(!empty);
       this.$('#add_more_mails').toggle(!empty);
       return this.$('#refresh-btn').toggle(!empty);
@@ -3484,6 +3492,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
 
     MailsList.prototype.afterRender = function() {
       this.noMailMsg = this.$('#no-mails-message');
+      this.noMailMsg.hide();
       this.loadmoreBtn = this.$('#add_more_mails');
       this.container = this.$('#mails_list_container');
       this.$('#topbar').append(this.foldermenu.$el);
@@ -3510,27 +3519,29 @@ window.require.register("views/mails_list", function(exports, require, module) {
           this.collection.timestampOld = dateValueOf;
           this.collection.lastIdOld = view.model.id;
         }
-        return this.container.append(view.$el);
+        this.container.append(view.$el);
       } else {
         if (dateValueOf >= this.collection.timestampNew) {
           this.collection.timestampNew = dateValueOf;
           this.collection.lastIdNew = view.model.id;
         }
-        return this.container.prepend(view.$el);
+        this.container.prepend(view.$el);
       }
+      return this.$el.getNiceScroll().resize();
     };
 
     MailsList.prototype.refresh = function() {
       var btn, promise,
         _this = this;
       btn = this.$('#refresh-btn');
-      btn.spin().addClass('disabled');
+      btn.spin('small').addClass('disabled');
       promise = $.ajax('mails/fetch-new/');
       promise.error(function(jqXHR, error) {
-        btn.text('Connection Error').addClass('error');
-        return alert(error);
+        btn.text('Retry').addClass('error');
+        return alert("Connection Error : " + (error.message || error));
       });
       promise.success(function() {
+        btn.text('Refresh').removeClass('error');
         return setTimeout(_this.refresh, 30 * 1000);
       });
       return promise.always(function() {
@@ -3564,6 +3575,19 @@ window.require.register("views/mails_list", function(exports, require, module) {
           return _this.loadmoreBtn.hide();
         }
       });
+    };
+
+    MailsList.prototype.spinContainer = function() {
+      var _ref1;
+      return (_ref1 = this.container) != null ? _ref1.spin() : void 0;
+    };
+
+    MailsList.prototype.stopSpinContainer = function() {
+      var _ref1, _ref2;
+      if ((_ref1 = this.container) != null) {
+        _ref1.spin(false);
+      }
+      return (_ref2 = this.noMailMsg) != null ? _ref2.toggle(_.size(this.views) === 0) : void 0;
     };
 
     MailsList.prototype.updateColors = function() {

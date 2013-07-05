@@ -22,15 +22,26 @@ module.exports = (compound, Mailbox) ->
             if err then callback err
             else callback null, (boxes[0] or null)
 
+    Mailbox::destroyMailsToBe = (callback) ->
+        MailFolder.findByMailbox @id, (err, folders) =>
+            return callback err if err
+            folders = [] unless folders
+
+            async.each folders, (folder, cb) ->
+                folder.updateAttributes mailsToBe: null, cb
+
+    Mailbox::destroyMails = (callback) ->
+        Mail.requestDestroy "bymailbox", key: @id, callback
+
     # Delete mailbox and everthing related
     Mailbox::remove = (callback) ->
         @log "destroying box..."
 
         async.parallel [
-            (cb) => Mail.requestDestroy "bymailbox", key: @id, cb
             (cb) => MailFolder.requestDestroy "bymailbox", key: @id, cb
             (cb) => LogMessage.destroy this, cb
-            @destroyAccount.bind   this
+            @destroyMails.bind this
+            @destroyAccount.bind this
         ], (err) =>
             @log "destroying finished..."
             @log err if err
@@ -67,7 +78,7 @@ module.exports = (compound, Mailbox) ->
 
         data =
             status: "import_failed"
-            statusMsg: "import failed" + err.message
+            statusMsg: "import failed : #{err.message}"
 
         @updateAttributes data, (error) =>
             if error

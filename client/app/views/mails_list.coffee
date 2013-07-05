@@ -21,8 +21,11 @@ class exports.MailsList extends ViewCollection
 
     initialize: ->
         super
-        @listenTo window.app.mailboxes, 'change:color', @updateColors
-        @listenTo window.app.mailboxes, 'add', @updateColors
+        @listenTo app.mailboxes, 'change:color', @updateColors
+        @listenTo app.mailboxes, 'add', @updateColors
+
+        @listenTo app.mails, 'request', @spinContainer
+        @listenTo app.mails, 'sync', @stopSpinContainer
 
         @foldermenu = new FolderMenu(collection: app.folders)
         @foldermenu.render()
@@ -32,13 +35,13 @@ class exports.MailsList extends ViewCollection
     checkIfEmpty: ->
         super
         empty = _.size(@views) is 0
-        @noMailMsg?.toggle empty
         @$('#markallread-btn').toggle not empty
         @$('#add_more_mails') .toggle not empty
         @$('#refresh-btn')    .toggle not empty
 
     afterRender: ->
         @noMailMsg  = @$('#no-mails-message')
+        @noMailMsg.hide()
         @loadmoreBtn = @$ '#add_more_mails'
         @container   = @$ '#mails_list_container'
 
@@ -71,16 +74,19 @@ class exports.MailsList extends ViewCollection
             # add its view on top of the list
             @container.prepend view.$el
 
+        @$el.getNiceScroll().resize()
+
     refresh: ->
         btn = @$ '#refresh-btn'
-        btn.spin().addClass 'disabled'
+        btn.spin('small').addClass 'disabled'
         promise = $.ajax 'mails/fetch-new/'
 
         promise.error (jqXHR, error) =>
-            btn.text('Connection Error').addClass 'error'
-            alert error
+            btn.text('Retry').addClass 'error'
+            alert "Connection Error : #{error.message or error}"
 
         promise.success =>
+            btn.text('Refresh').removeClass 'error'
             setTimeout @refresh, 30 * 1000
 
         promise.always ->
@@ -106,6 +112,13 @@ class exports.MailsList extends ViewCollection
 
         # hide button if it was useless
         promise.done => @loadmoreBtn.hide() if @collection.length is oldlength
+
+    spinContainer: =>
+        @container?.spin()
+
+    stopSpinContainer: =>
+        @container?.spin false
+        @noMailMsg?.toggle _.size(@views) is 0
 
     updateColors: () ->
         view.render() for id, view of @views

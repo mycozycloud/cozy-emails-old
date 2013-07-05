@@ -39,12 +39,10 @@ class exports.MainRouter extends Backbone.Router
 
         @clear()
 
-        # if app.mails.length is 0
-        #     app.mails.once 'sync', @rainbow
-
         app.views.menu.select 'inboxbutton'
         app.views.mailboxList.$el.hide()
         app.views.mailList.$el.show()
+        app.views.mailList.$el.getNiceScroll().show()
         app.mails.fetchRainbow(100).then callback
 
     rainbowmail: (mailid) =>
@@ -59,12 +57,10 @@ class exports.MainRouter extends Backbone.Router
 
         @clear()
 
-        # if app.mails.length is 0
-        #     app.mails.once 'sync', => @folder(folderid)
-
         app.views.menu.select 'inboxbutton'
         app.views.mailboxList.$el.hide()
         app.views.mailList.$el.show()
+        app.views.mailList.$el.getNiceScroll().show()
         app.mails.fetchFolder(folderid, 100).then callback
 
 
