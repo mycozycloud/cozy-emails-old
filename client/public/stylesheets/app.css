@@ -5400,6 +5400,7 @@ blockquote {
   margin-left: 0;
   z-index: 3;
   padding: 0 0px;
+  outline: 0px;
 }
 #mails_list #topbar {
   padding: 10px;
@@ -5467,6 +5468,9 @@ blockquote {
 }
 .mailslist-element .unread .subject {
   font-weight: bold;
+}
+#mails_list:focus {
+  outline: 0px;
 }
 #menu_container {
   position: absolute;
