@@ -78,24 +78,37 @@ class exports.MailsList extends ViewCollection
 
     refresh: ->
         btn = @$ '#refresh-btn'
-        btn.spin('tiny').addClass 'disabled'
-        promise = $.ajax 'mails/fetch-new/'
+        unless btn.hasClass 'disable'
+            btn.addClass 'disable'
+            btn.html '&nbsp;'
+            btn.spin 'tiny'
+            promise = $.ajax 'mails/fetch-new/'
 
-        promise.error (jqXHR, error) =>
-            btn.text('Retry').addClass 'error'
-            alert "Connection Error : #{error.message or error}"
+            promise.error (jqXHR, error) =>
+                btn.text('Retry').addClass 'error'
+                alert "Connection Error : #{error.message or error}"
 
-        promise.success =>
-            btn.text('Refresh').removeClass 'error'
-            setTimeout @refresh, 30 * 1000
+            promise.success =>
+                btn.text('Refresh').removeClass 'error'
+                setTimeout @refresh, 30 * 1000
 
-        promise.always ->
-            btn.spin('tiny').removeClass 'disabled'
+            promise.always ->
+                btn.spin().removeClass 'disable'
 
-    markAllRead: -> @collection.each (model) ->
-        unless model.isRead()
-            model.markRead()
-            model.save()
+    markAllRead: ->
+        btn = @$ '#markallread-btn'
+        unless btn.hasClass 'disable'
+            btn.addClass 'disable'
+            btn.html '&nbsp;'
+            btn.spin 'tiny'
+
+            @collection.each (model) ->
+                unless model.isRead()
+                    model.markRead()
+                    model.save()
+
+            btn.removeClass 'disable'
+            btn.spin 'tiny'
 
     # when user clicks on "more mails" button
     loadOlderMails: () ->

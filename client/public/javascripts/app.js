@@ -3994,28 +3994,41 @@ window.require.register("views/mails_list", function(exports, require, module) {
         var btn, promise,
           _this = this;
         btn = this.$('#refresh-btn');
-        btn.spin('tiny').addClass('disabled');
-        promise = $.ajax('mails/fetch-new/');
-        promise.error(function(jqXHR, error) {
-          btn.text('Retry').addClass('error');
-          return alert("Connection Error : " + (error.message || error));
-        });
-        promise.success(function() {
-          btn.text('Refresh').removeClass('error');
-          return setTimeout(_this.refresh, 30 * 1000);
-        });
-        return promise.always(function() {
-          return btn.spin('tiny').removeClass('disabled');
-        });
+        if (!btn.hasClass('disable')) {
+          btn.addClass('disable');
+          btn.html('&nbsp;');
+          btn.spin('tiny');
+          promise = $.ajax('mails/fetch-new/');
+          promise.error(function(jqXHR, error) {
+            btn.text('Retry').addClass('error');
+            return alert("Connection Error : " + (error.message || error));
+          });
+          promise.success(function() {
+            btn.text('Refresh').removeClass('error');
+            return setTimeout(_this.refresh, 30 * 1000);
+          });
+          return promise.always(function() {
+            return btn.spin().removeClass('disable');
+          });
+        }
       };
 
       MailsList.prototype.markAllRead = function() {
-        return this.collection.each(function(model) {
-          if (!model.isRead()) {
-            model.markRead();
-            return model.save();
-          }
-        });
+        var btn;
+        btn = this.$('#markallread-btn');
+        if (!btn.hasClass('disable')) {
+          btn.addClass('disable');
+          btn.html('&nbsp;');
+          btn.spin('tiny');
+          this.collection.each(function(model) {
+            if (!model.isRead()) {
+              model.markRead();
+              return model.save();
+            }
+          });
+          btn.removeClass('disable');
+          return btn.spin('tiny');
+        }
       };
 
       MailsList.prototype.loadOlderMails = function() {
