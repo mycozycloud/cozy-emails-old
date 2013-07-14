@@ -15,4 +15,4 @@ module.exports = (compound) ->
                                     process.exit 0
                 break
             else
-                console.log 'Usage: compound database [cleanuser|cleanapps]'
+                console.log 'Usage: compound database [cleandb]'
