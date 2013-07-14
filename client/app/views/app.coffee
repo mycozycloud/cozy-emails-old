@@ -4,14 +4,6 @@
 {MailsList}          = require 'views/mails_list'
 {Menu}               = require 'views/menu'
 
-###
-    @file: app.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description:
-        The application's main view - creates other views, lays things out.
-
-###
-
 class exports.AppView extends Backbone.View
 
     el: 'body'

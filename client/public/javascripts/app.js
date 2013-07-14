@@ -3267,13 +3267,6 @@ window.require.register("views/app", function(exports, require, module) {
 
     Menu = require('views/menu').Menu;
 
-    /*
-        @file: app.coffee
-        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description:
-            The application's main view - creates other views, lays things out.
-    */
-
     exports.AppView = (function(_super) {
 
       __extends(AppView, _super);
