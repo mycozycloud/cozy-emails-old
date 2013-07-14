@@ -1622,9 +1622,9 @@ window.require.register("templates/_mail/list", function(exports, require, modul
   buf.push(attrs({ 'id':('markallread-btn'), "class": ('btn') + ' ' + ('btn-primary') }));
   buf.push('>Mark all as read</a></div><div');
   buf.push(attrs({ 'id':('no-mails-message'), "class": ('well') }));
-  buf.push('><h3>Hey !</h3><p>It looks like there are no mails to show.</p><p>May be you need to configure your mailboxes :<a');
+  buf.push('><h3>Hey !</h3><p>It looks like there are no mails to show.</p><p>May be you need to \n<a');
   buf.push(attrs({ 'href':("#config/mailboxes") }));
-  buf.push('>Click Here</a></p><p>If You just did it, and still see no messages, you may need to wait for\nus to download them for you. Enjoy  :)\n\n</p></div><table');
+  buf.push('>configure your mailboxes</a>?\n</p><p>If You just did it, and still see no messages, you may need to wait for\nus to download them for you. Enjoy  :)\n\n</p></div><table');
   buf.push(attrs({ "class": ('table') + ' ' + ('table-striped') }));
   buf.push('><tbody');
   buf.push(attrs({ 'id':('mails_list_container') }));
@@ -3989,7 +3989,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
         var btn, promise,
           _this = this;
         btn = this.$('#refresh-btn');
-        btn.spin('small').addClass('disabled');
+        btn.spin('tiny').addClass('disabled');
         promise = $.ajax('mails/fetch-new/');
         promise.error(function(jqXHR, error) {
           btn.text('Retry').addClass('error');
@@ -4000,7 +4000,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
           return setTimeout(_this.refresh, 30 * 1000);
         });
         return promise.always(function() {
-          return btn.spin().removeClass('disabled');
+          return btn.spin('tiny').removeClass('disabled');
         });
       };
 
@@ -4030,7 +4030,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
 
       MailsList.prototype.spinContainer = function() {
         var _ref;
-        return (_ref = this.container) != null ? _ref.spin() : void 0;
+        return (_ref = this.container) != null ? _ref.spin("tiny") : void 0;
       };
 
       MailsList.prototype.stopSpinContainer = function() {

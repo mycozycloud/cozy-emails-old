@@ -78,7 +78,7 @@ class exports.MailsList extends ViewCollection
 
     refresh: ->
         btn = @$ '#refresh-btn'
-        btn.spin('small').addClass 'disabled'
+        btn.spin('tiny').addClass 'disabled'
         promise = $.ajax 'mails/fetch-new/'
 
         promise.error (jqXHR, error) =>
@@ -90,7 +90,7 @@ class exports.MailsList extends ViewCollection
             setTimeout @refresh, 30 * 1000
 
         promise.always ->
-            btn.spin().removeClass 'disabled'
+            btn.spin('tiny').removeClass 'disabled'
 
     markAllRead: -> @collection.each (model) ->
         unless model.isRead()
@@ -114,7 +114,7 @@ class exports.MailsList extends ViewCollection
         promise.done => @loadmoreBtn.hide() if @collection.length is oldlength
 
     spinContainer: =>
-        @container?.spin()
+        @container?.spin("tiny")
 
     stopSpinContainer: =>
         @container?.spin false

@@ -5221,8 +5221,12 @@ iframe{border:0;width:100%;overflow-y:hidden}
 textarea#html{width:100%}
 blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 .column{height:770px;overflow:auto}
+a{color:#34a6ff}
+body a:hover{color:#fe8800}
+a:visited{color:#34a6ff}
 .btn{border:1px solid #34a6ff;background:#34a6ff;color:#fff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none;text-shadow:none;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;font-family:main;font-weight:bold}
 .btn:hover{background:#fe8800;color:#fff;border-color:#fe8800;text-shadow:none}
+.btn:visited{color:#fff}
 .row-fluid{overflow:hidden;margin:0;padding:0}
 #content{overflow:hidden;margin:0;padding:0}
 #message_box{position:absolute;top:15px;right:15px;z-index:9}
@@ -5280,7 +5284,7 @@ blockquote{border-left:5px #808080 solid;margin-left:15px;padding-left:10px}
 #mailboxes .mailbox_well .mailbox-status{margin-left:10px;font-weight:normal;font-size:14px}
 #mailboxes .mailbox_well.active{background-color:#cbe4fb;}
 #mailboxes .mailbox_well.active .edit-mailbox{visibility:hidden}
-#mailbox-form{position:absolute;overflow:hidden;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;top:0;left:45%;bottom:0;width:55%;padding:20px;-webkit-box-shadow:6px 0 3px -2px #cbe4fb inset;-moz-box-shadow:6px 0 3px -2px #cbe4fb inset;box-shadow:6px 0 3px -2px #cbe4fb inset;}
+#mailbox-form{position:absolute;overflow:hidden;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;top:0;left:45%;bottom:0;width:55%;padding:20px;-webkit-box-shadow:6px 0 3px -4px #d6d6d6 inset;-moz-box-shadow:6px 0 3px -4px #d6d6d6 inset;box-shadow:6px 0 3px -4px #d6d6d6 inset;}
 #mailbox-form input{border:1px solid #ccc;-webkit-box-shadow:0;-moz-box-shadow:0;box-shadow:0;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:none;font-family:styled,helvetica}
 #mailbox-form input:hover{border:1px solid #fe8800;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:inset 1px 1px 2px rgba(100,100,100,0.10);color:#333}
 #mailbox-form input:focus,#mailbox-form input:active{border:1px solid #34a6ff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
