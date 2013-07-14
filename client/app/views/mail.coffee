@@ -98,8 +98,15 @@ class exports.MailView extends BaseView
             ignoreMySocketNotification: true
 
     buttonDelete: ->
-        base = if app.mails.folderId is 'rainbow' then 'rainbow'
-        else "folder/#{app.mails.folderId}"
-        app.router.navigate base, true
-
-        @model.destroy()
+        @$("#btn-delete").html '&nbsp;&nbsp;&nbsp;'
+        @$("#btn-delete").spin 'tiny'
+        @model.destroy
+            success: =>
+                @$("#btn-delete").spin()
+                app.mails.remove @model.get 'id'
+                @$el.fadeOut =>
+                    @remove()
+            error: =>
+                @$("#btn-delete").html 'Delete'
+                @$("#btn-delete").spin()
+                alert 'Mail deletion failed'

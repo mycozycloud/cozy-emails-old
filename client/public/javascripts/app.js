@@ -3526,10 +3526,23 @@ window.require.register("views/mail", function(exports, require, module) {
       };
 
       MailView.prototype.buttonDelete = function() {
-        var base;
-        base = app.mails.folderId === 'rainbow' ? 'rainbow' : "folder/" + app.mails.folderId;
-        app.router.navigate(base, true);
-        return this.model.destroy();
+        var _this = this;
+        this.$("#btn-delete").html('&nbsp;&nbsp;&nbsp;');
+        this.$("#btn-delete").spin('tiny');
+        return this.model.destroy({
+          success: function() {
+            _this.$("#btn-delete").spin();
+            app.mails.remove(_this.model.get('id'));
+            return _this.$el.fadeOut(function() {
+              return _this.remove();
+            });
+          },
+          error: function() {
+            _this.$("#btn-delete").html('Delete');
+            _this.$("#btn-delete").spin();
+            return alert('Mail deletion failed');
+          }
+        });
       };
 
       return MailView;
