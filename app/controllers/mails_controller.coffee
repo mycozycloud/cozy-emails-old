@@ -1,10 +1,3 @@
-###
-    @file: mails_controller.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description:
-        Railwayjs controller to handle mails CRUD backend and their attachments.
-###
-
 async = require('async')
 
 handle = (err, code=500) ->
@@ -94,7 +87,7 @@ action 'byFolder', ->
 # descending order by date
 action 'rainbow', ->
     limit = parseInt req.params.limit
-    if req.params.timestamp and req.params.timestamp != 'undefined'
+    if req.params.timestamp and req.params.timestamp isnt 'undefined'
         timestamp = parseInt req.params.timestamp
     else timestamp = {}
 
@@ -126,42 +119,12 @@ action 'rainbow', ->
             # sort by dateValueOf descending
             outMails.sort (a, b) -> return b.dateValueOf - a.dateValueOf
             i = 0
-            while outMails[i].dateValueOf > timestamp
+            while outMails[i]?.dateValueOf > timestamp
                 i++
 
             # send only the 100 latest
             send outMails[i..i+99]
 
-
-# # GET '/mails/:timestamp/:num'
-# # Get num mails until given timestamp.
-# action 'getlist', ->
-#     num = parseInt req.params.num
-#     timestamp = parseInt req.params.timestamp
-
-#     # skip = params.id? and params.id isnt "undefined"
-
-#     query =
-#         startkey: [timestamp, params.id]
-#         limit: num
-#         descending: true
-#         # skip: if skip then 1 else 0
-
-#     Mail.dateId query, (err, mails) ->
-#         return handle err if err
-
-#         mails = [] if mails.length is 0 # ?
-#         send mails
-
-
-# # GET '/mails/:id/attachments
-# # Get all attachements object for given mail.
-# action 'getattachmentslist', ->
-#     query = key: @mail.id
-
-#     Attachment.fromMail query, (err, attachments) ->
-#         return handle err if err
-#         send attachments
 
 # GET 'mails/:id/attachments/:filename'
 # Get file linked to attachement with given id.
