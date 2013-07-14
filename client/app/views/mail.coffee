@@ -32,7 +32,6 @@ class exports.MailView extends BaseView
     afterRender: =>
         if @model.hasHtml()
 
-
             # this timeout is a walkaround the firefox empty iframe onLoad issue.
             @timeout1 = setTimeout () =>
                 @timeout1 = null
@@ -47,8 +46,6 @@ class exports.MailView extends BaseView
                 @iframehtml.find('head').append basetarget
 
                 @iframe.height @iframehtml.height()
-
-                $("#additional_bar").hide() if @iframehtml.height() > 600
 
             , 50
 
@@ -83,8 +80,6 @@ class exports.MailView extends BaseView
             window.app.viewAnswer.render()
 
     scrollDown: ->
-        # console.log "scroll: " + $("#column_mail").outerHeight true
-        # scroll down
         setTimeout () ->
             $("#column_mail").animate({scrollTop: 2 * $("#column_mail").outerHeight true}, 750)
         , 250

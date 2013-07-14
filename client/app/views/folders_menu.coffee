@@ -1,12 +1,5 @@
 ViewCollection = require 'lib/view_collection'
 
-###
-    @file: mailboxes_list.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description:
-        Displays the list of configured mailboxes.
-###
-
 module.exports = class FolderMenu extends ViewCollection
 
     id:        "folders-menu"

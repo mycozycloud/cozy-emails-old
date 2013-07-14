@@ -184,7 +184,7 @@ a:visited
     padding 20px
     background-image: url('../img/background-mail.jpg')
     overflow hidden
-    box-shadow: 6px 0px 3px -2px lightblue inset
+    box-shadow: 6px 0px 3px -4px lightgrey + 20% inset
 
     h3.attachments-title
         font-family: styled
@@ -225,9 +225,24 @@ a:visited
 
         #folders-menu
             float right
+
+            span#currentfolder
+                margin-right: 10px
+
+            .dropdown-toggle
+                box-shadow: none
+
             a, .dropdown-menu
                 border-radius 0px !important
 
+
+        #folders-menu.open
+            .btn
+                background: lightblue
+
+            span#currentfolder
+                color: #666
+                background: lightblue
 
 
     tr:hover
@@ -389,3 +404,6 @@ a:visited
 
     .controls p
         font-size: 11px
+
+.dropdown-toggle
+    padding-right: 30px

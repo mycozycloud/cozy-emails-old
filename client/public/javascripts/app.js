@@ -3318,13 +3318,6 @@ window.require.register("views/folders_menu", function(exports, require, module)
 
     ViewCollection = require('lib/view_collection');
 
-    /*
-        @file: mailboxes_list.coffee
-        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description:
-            Displays the list of configured mailboxes.
-    */
-
     module.exports = FolderMenu = (function(_super) {
 
       __extends(FolderMenu, _super);
@@ -3474,8 +3467,7 @@ window.require.register("views/mail", function(exports, require, module) {
             _this.iframehtml.html(_this.model.html());
             _this.iframehtml.find('head').append(csslink);
             _this.iframehtml.find('head').append(basetarget);
-            _this.iframe.height(_this.iframehtml.height());
-            if (_this.iframehtml.height() > 600) return $("#additional_bar").hide();
+            return _this.iframe.height(_this.iframehtml.height());
           }, 50);
           this.timeout2 = setTimeout(function() {
             _this.timeout2 = null;

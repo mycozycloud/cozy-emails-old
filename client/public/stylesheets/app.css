@@ -5242,7 +5242,7 @@ a:visited{color:#34a6ff}
 .mail-panel h3{margin-top:20px;font-family:styled;font-size:22px}
 #mail_content_html{margin:0;padding:0}
 .date{margin:0;padding:0;margin-left:10px;color:#aaa}
-#mail{position:absolute;top:0;left:45%;bottom:0;width:55%;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;padding:20px;background-image:url("../img/background-mail.jpg");overflow:hidden;-webkit-box-shadow:6px 0 3px -2px #cbe4fb inset;-moz-box-shadow:6px 0 3px -2px #cbe4fb inset;box-shadow:6px 0 3px -2px #cbe4fb inset;}
+#mail{position:absolute;top:0;left:45%;bottom:0;width:55%;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;padding:20px;background-image:url("../img/background-mail.jpg");overflow:hidden;-webkit-box-shadow:6px 0 3px -4px #d6d6d6 inset;-moz-box-shadow:6px 0 3px -4px #d6d6d6 inset;box-shadow:6px 0 3px -4px #d6d6d6 inset;}
 #mail h3.attachments-title{font-family:styled;font-size:14px}
 #mail a{margin-right:5px}
 #mail i{margin-right:5px}
@@ -5252,7 +5252,11 @@ a:visited{color:#34a6ff}
 #mails_list #topbar{padding:10px;}
 #mails_list #topbar .btn{margin-right:10px}
 #mails_list #topbar #folders-menu{float:right;}
+#mails_list #topbar #folders-menu span#currentfolder{margin-right:10px}
+#mails_list #topbar #folders-menu .dropdown-toggle{-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
 #mails_list #topbar #folders-menu a,#mails_list #topbar #folders-menu .dropdown-menu{-webkit-border-radius:0 !important;-moz-border-radius:0 !important;border-radius:0 !important}
+#mails_list #topbar #folders-menu.open .btn{background:#cbe4fb}
+#mails_list #topbar #folders-menu.open span#currentfolder{color:#666;background:#cbe4fb}
 #mails_list tr:hover{background:#ffc47f;}
 #mails_list tr:hover td{background:#ffc47f}
 #mails_list tr.active{background:#cbe4fb;}
@@ -5289,6 +5293,7 @@ a:visited{color:#34a6ff}
 #mailbox-form input:hover{border:1px solid #fe8800;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:inset 1px 1px 2px rgba(100,100,100,0.10);color:#333}
 #mailbox-form input:focus,#mailbox-form input:active{border:1px solid #34a6ff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
 #mailbox-form .controls p{font-size:11px}
+.dropdown-toggle{padding-right:30px}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */
