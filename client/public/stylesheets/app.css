@@ -5213,7 +5213,7 @@ a[data-wysihtml5-command-value="blue"] {
 ::selection{background:#fe8800}
 ::-moz-selection{background:#fe8800}
 html{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;width:100%;height:100%}
-body{width:100%;height:100%;padding:0;margin:0;overflow:hidden;font-family:main;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box}
+body{width:100%;height:100%;padding:0;margin:0;overflow:hidden;font-family:main;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;background-image:url("../img/background-mail.jpg")}
 legend{font-family:styled}
 fieldset{font-weight:normal}
 .sidebar-nav{padding:9px 0}
@@ -5248,7 +5248,7 @@ a:visited{color:#34a6ff}
 #mail i{margin-right:5px}
 #mail .attachments-box{border:1px solid #ccc;-webkit-box-shadow:1px 1px 2px #ddd;-moz-box-shadow:1px 1px 2px #ddd;box-shadow:1px 1px 2px #ddd;-webkit-border-radius:1px;-moz-border-radius:1px;border-radius:1px;padding:20px;background:#fff}
 #mail #attachments_list{margin:0}
-#mails_list{position:absolute;top:0;left:5%;bottom:0;width:40%;margin-left:0;z-index:3;padding:0 0;outline:0;}
+#mails_list{position:absolute;top:0;left:5%;bottom:0;width:40%;margin-left:0;z-index:3;padding:0 0;outline:0;background:#fff;-webkit-box-shadow:0 0 2px 2px #d6d6d6;-moz-box-shadow:0 0 2px 2px #d6d6d6;box-shadow:0 0 2px 2px #d6d6d6;}
 #mails_list #topbar{padding:10px;}
 #mails_list #topbar .btn{margin-right:10px}
 #mails_list #topbar #folders-menu{float:right;}
@@ -5277,7 +5277,7 @@ a:visited{color:#34a6ff}
 #menu_container .nav-list li a{padding:0}
 #menu_container .active a{background:#cbe4fb;color:#333;text-shadow:none}
 #menu_container a{cursor:pointer}
-#mailboxes{position:absolute;top:0;left:5%;bottom:0;width:40%;z-index:3;}
+#mailboxes{position:absolute;top:0;left:5%;bottom:0;width:40%;z-index:3;background:#fff;-webkit-box-shadow:0 0 2px 2px #d6d6d6;-moz-box-shadow:0 0 2px 2px #d6d6d6;box-shadow:0 0 2px 2px #d6d6d6;outline:0;}
 #mailboxes #no-mailbox-msg{margin:20px}
 #mailboxes #add_mailbox{margin:10px;margin-top:10px}
 #mailboxes .mailbox_well{border-bottom:1px solid #ccc;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;margin-bottom:0;font-family:styled;}
@@ -5288,7 +5288,7 @@ a:visited{color:#34a6ff}
 #mailboxes .mailbox_well .mailbox-status{margin-left:10px;font-weight:normal;font-size:14px}
 #mailboxes .mailbox_well.active{background-color:#cbe4fb;}
 #mailboxes .mailbox_well.active .edit-mailbox{visibility:hidden}
-#mailbox-form{position:absolute;overflow:hidden;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;top:0;left:45%;bottom:0;width:55%;padding:20px;-webkit-box-shadow:6px 0 3px -4px #d6d6d6 inset;-moz-box-shadow:6px 0 3px -4px #d6d6d6 inset;box-shadow:6px 0 3px -4px #d6d6d6 inset;}
+#mailbox-form{position:absolute;overflow:hidden;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;top:0;left:45%;bottom:0;width:55%;padding:20px;-webkit-box-shadow:6px 0 3px -4px #d6d6d6 inset;-moz-box-shadow:6px 0 3px -4px #d6d6d6 inset;box-shadow:6px 0 3px -4px #d6d6d6 inset;background:#fff;}
 #mailbox-form input{border:1px solid #ccc;-webkit-box-shadow:0;-moz-box-shadow:0;box-shadow:0;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:none;font-family:styled,helvetica}
 #mailbox-form input:hover{border:1px solid #fe8800;-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;shadow:inset 1px 1px 2px rgba(100,100,100,0.10);color:#333}
 #mailbox-form input:focus,#mailbox-form input:active{border:1px solid #34a6ff;-webkit-box-shadow:none;-moz-box-shadow:none;box-shadow:none}
