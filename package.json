@@ -1,5 +1,6 @@
 { "name": "cozy-mails"
 , "version": "0.0.1"
+, "displayName": "mail"
 , "engine": { "node": "0.8.x" }
 , "description": "A simple mail aggregator to backup your inbox and read efficiently your emails."
 , "repository":
