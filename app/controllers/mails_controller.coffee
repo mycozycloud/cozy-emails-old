@@ -5,26 +5,23 @@
         Railwayjs controller to handle mails CRUD backend and their attachments.
 ###
 
-load 'application'
+async = require('async')
 
+handle = (err, code=500) ->
+    console.log err.stack or err
+    out = err.message or err or 'Server Error'
+    send error: out, code
 
 # shared functionnality : find the mail via its ID
 before ->
     Mail.find params.id, (err, mail) =>
-        if err
-            send error: err, 500
-        else if not mail?
-            send error: "not found", 404
-        else
-            @mail = mail
-            next()
-, { only: ['show', 'update', 'destroy', 'getattachmentslist'] }
+        return handle err if err
+        return handle "not found" if not mail?
 
+        @mail = mail
+        next()
 
-# App entry point
-action 'index', ->
-    render
-        title: "Cozy Mails"
+, { only: ['show', 'update', 'destroy', 'getattachmentslist', 'getattachment'] }
 
 
 # GET /mails/:id
@@ -38,100 +35,140 @@ action 'show', ->
 # updated too.
 action 'update', ->
     markRead = false
-    if body.read and not @mail.read
-        markRead = true
+
+    flagsChanged = @mail.changedFlags body.flags
+    newflags = body.flags
+
+    # flags will be updated after the sync on IMAP succeeds
+    delete body.flags
 
     @mail.updateAttributes body, (err) =>
-        if err
-            send error: err, 500
-        else
-            if markRead
-                Mailbox.find @mail.mailbox, (err, mailbox) =>
-                    if err or not mailbox?
-                        send error: "unknown mailbox can't update read flag", 500
-                    else
-                        mailbox.getAccount (err, account) =>
-                            mailbox.password = account.password
-                            mailbox.markMailAsRead @mail, (err) ->
-                                if err
-                                    send error: "can't update read flag", 500
-                                else
-                                    send 200
-            else
-                send success: true
+        return handle err if err
+        return send success: true, 200 unless flagsChanged
+
+        Mailbox.find @mail.mailbox, (err, mailbox) =>
+            return handle err if err
+
+            mailbox.syncOneMail @mail, newflags, (err) =>
+                return handle err if err
+
+                send success: true, 200
+
+action 'destroy', ->
+
+    Mailbox.find @mail.mailbox, (err, mailbox) =>
+        return handle err if err
+
+        mailbox.syncOneMail @mail, ["\\Deleted"], (err) =>
+            return handle err if err
+
+            @mail.destroy (err) =>
+                return handle err if err
+
+                send 204
 
 
-# GET '/mailslist/:timestamp/:num'
-# Get num mails until given timestamp.
-action 'getlist', ->
+# send num mails from folder id: folderId
+# starting after timestamp
+# descending order by date
+action 'byFolder', ->
     num = parseInt req.params.num
-    timestamp = parseInt req.params.timestamp
+    if req.params.timestamp and req.params.timestamp != 'undefined'
+        timestamp = parseInt req.params.timestamp
+    else timestamp = {}
 
-    if params.id? and params.id isnt "undefined"
-        skip = 1
-    else
-        skip = 0
-
+    # TODO use timestamp
     query =
-        startkey: [timestamp, params.id]
+        startkey: [req.params.folderId, timestamp]
+        endkey: [req.params.folderId]
         limit: num
+        skip: if timestamp then 1 else 0
         descending: true
-        skip: skip
 
-    Mail.dateId query, (err, mails) ->
-        if err
-            send error: err, 500
-        else
-            if mails.length is 0
-                send []
-            else
-                send mails
+    Mail.fromFolderByDate query, (err, mails) ->
+        return handle err if err
+        send mails
+
+# send num mails from the rainbow (merged INBOX folders)
+# starting after timestamp
+# descending order by date
+action 'rainbow', ->
+    limit = parseInt req.params.limit
+    if req.params.timestamp and req.params.timestamp != 'undefined'
+        timestamp = parseInt req.params.timestamp
+    else timestamp = {}
 
 
-# GET '/mailsnew/:timestamp'
-# Get all mails after a given timestamp.
-action 'getnewlist', ->
-    timestamp = parseInt params.timestamp
+    # get inboxes
+    MailFolder.byType 'INBOX', (err, inboxes) ->
+        return handle err if err
+        outMails = []
 
-    query =
-        startkey: [timestamp, undefined]
-        descending: false
-        skip: 1
+        # forEach inbox
+        async.each inboxes, (inbox, cb) ->
 
-    Mail.dateId query, (err, mails) ->
-        if err
-            send error: err, 500
-        else
-            send mails
+            query =
+                startkey: [inbox.id, timestamp]
+                endkey: [inbox.id]
+                limit: limit
+                descending: true
 
-# GET '/mails/:id/attachments
-# Get all attachements object for given mail.
-action 'getattachmentslist', ->
-    query =
-        key: @mail.id
+            # get num mails
+            Mail.fromFolderByDate query, (err, mails) ->
+                console.log err
+                return cb err if err
+                outMails.push mail for mail in mails
+                cb null
 
-    Attachment.fromMail query, (err, attachments) ->
-        if err
-            send error: err, 500
-        else
-            send attachments
+        , (err) ->
+            return handle err if err
 
-# GET '/attachments/:id/'
+            # sort by dateValueOf descending
+            outMails.sort (a, b) -> return b.dateValueOf - a.dateValueOf
+            i = 0
+            while outMails[i].dateValueOf > timestamp
+                i++
+
+            # send only the 100 latest
+            send outMails[i..i+99]
+
+
+# # GET '/mails/:timestamp/:num'
+# # Get num mails until given timestamp.
+# action 'getlist', ->
+#     num = parseInt req.params.num
+#     timestamp = parseInt req.params.timestamp
+
+#     # skip = params.id? and params.id isnt "undefined"
+
+#     query =
+#         startkey: [timestamp, params.id]
+#         limit: num
+#         descending: true
+#         # skip: if skip then 1 else 0
+
+#     Mail.dateId query, (err, mails) ->
+#         return handle err if err
+
+#         mails = [] if mails.length is 0 # ?
+#         send mails
+
+
+# # GET '/mails/:id/attachments
+# # Get all attachements object for given mail.
+# action 'getattachmentslist', ->
+#     query = key: @mail.id
+
+#     Attachment.fromMail query, (err, attachments) ->
+#         return handle err if err
+#         send attachments
+
+# GET 'mails/:id/attachments/:filename'
 # Get file linked to attachement with given id.
 action 'getattachment', ->
-    Attachment.find params.id, (err, attachment) =>
-        if err
-            send error: err, 500
-        else if not attachment
-            send error: true, 400
-        else
-            attachment.getFile attachment.fileName, (err, res, body) ->
-                if err or not res?
-                    send error: true, 500
-                else if res.statusCode is 404
-                    send 'File not found', 404
-                else if res.statusCode isnt 200
-                    send error: true, 500
-                else
-                    send success: true, 200
-            .pipe res
+
+    stream = @mail.getFile params.filename, (err, res, body) ->
+        return handle err if err or not res or res.statusCode isnt 200
+        return handle 'File not found', 404 if res.statusCode is 404
+
+    stream.pipe res

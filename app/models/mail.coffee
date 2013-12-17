@@ -14,49 +14,75 @@ module.exports = (compound, Mail) ->
     Mail.fromMailboxByDate = (params, callback) ->
         Mail.request "dateByMailbox", params, callback
 
+    Mail.fromFolderByDate = (params, callback) ->
+        Mail.request 'folderDate', params, callback
 
-    # Get attachments returned by mailparser as parameter. Save them as couchdb
-    # attachments wrapped in a dedicated model.
+    # Get attachments returned by mailparser as parameter.
+    # Save them as couchdb attachments.
     Mail::saveAttachments = (attachments, callback) ->
 
-        if attachments? and attachments.length > 0
-            attachment = attachments.pop()
+        return callback null unless attachments? and attachments.length > 0
+
+        async.each attachments, (attachment, callback) =>
+
             params =
-                cid: attachment.contentId
-                fileName: attachment.fileName
+                cid:         attachment.contentId or 'null'
+                fileName:    attachment.fileName
                 contentType: attachment.contentType
-                length: attachment.length
-                mailId: @id
-                checksum: attachment.checksum
-                mailbox: @mailbox
-            Attachment.create params, (error, attach) =>
-                fileName =  "/tmp/#{attachment.fileName}"
-                fs.writeFile fileName, attachment.content, (error) =>
-                    attach.attachFile fileName, (error) =>
-                        fs.unlink fileName, (error) =>
-                            @saveAttachments attachments, callback
-        else
-            callback()
+                length:      attachment.length
+                checksum:    attachment.checksum
+                mailbox:     @mailbox
+                mailId:      @id
+
+            fileName =  "/tmp/#{attachment.fileName}"
+            fs.writeFile fileName, attachment.content, (error) =>
+                return callback error if error
+                @attachFile fileName, params, (error) =>
+                    require('eyes').inspect error
+                    fs.unlink fileName, (err) =>
+                        require('eyes').inspect err
+                        callback(error or err)
+
+        , (err) =>
+            require('eyes').inspect err
+            console.log err
+            callback err
+
+
+    Mail::remove = (getter, callback) ->
+
+        getter.addFlags @idRemoteMailbox, ['\\Deleted'], (err) ->
+            return callback err if err
+
+            @destroy callback
+
+
+
+    Mail::updateAndSync = (attributes, callback) ->
+
+        needSync = @changedFlags attributes.flags
+
+        @updateAttributes attributes, (err) =>
+            return callback err if err
+
+            if needSync then @sync callback
+            else callback null
+
+    Mail::changedFlags = (newflags) ->
+        oldseen    = '\\Seen'    in @flags
+        oldflagged = '\\Flagged' in @flags
+
+        newseen    = '\\Seen'    in newflags
+        newflagged = '\\Flagged' in newflags
+
+        oldseen isnt newseen or oldflagged isnt newflagged
 
     # Update mail attributes with given flags. Save model if changes occured.
-    Mail::updateFlags = (flags, callback) ->
-        seen = '\\Seen' in flags
-        flagged = '\\Flagged' in flags
-        @flags = flags
-
-        isModification = false
-        if @read isnt seen
-            @read = seen
-            isModification = true
-
-        if @flagged isnt flagged
-            @flagged = flagged
-            isModification = true
-
-        if isModification
-            @save callback
+    Mail::updateFlags = (flags, callback=->) ->
+        if @changedFlags flags
+            @updateAttributes flags: flags, callback
         else
-            callback() if callback?
+            callback null
 
     Mail::toString = (callback) ->
         "mail: #{@mailbox} #{@id}"

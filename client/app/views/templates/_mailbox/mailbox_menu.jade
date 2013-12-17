@@ -1,8 +1,0 @@
-a.menu_choose(style="border-left: 3px solid #{model.color}; padding-left: 5px;").change_mailboxes_list
-  if model.checked == true
-    input(type='checkbox', checked="checked").change_mailboxes_list
-  else
-    input(type='checkbox').change_mailboxes_list
-  |  #{model.name}
-  if model.newMessages > 0
-    span.badge.badge-warning #{model.newMessages}

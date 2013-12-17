@@ -1,4 +1,4 @@
-{Mail} = require "../models/mail"
+{Mail} = require "models/mail"
 
 ###
     @file: mails_list_more.coffee

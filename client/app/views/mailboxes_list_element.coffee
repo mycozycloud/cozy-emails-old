@@ -1,5 +1,3 @@
-{Mailbox} = require "../models/mailbox"
-
 ###
     @file: mailboxes_list_element.coffee
     @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
@@ -8,97 +6,35 @@
         mailboxes_list -> mailboxes_list_element
 
 ###
+BaseView = require 'lib/base_view'
 
-class exports.MailboxesListElement extends Backbone.View
+module.exports = class MailboxesListElement extends BaseView
 
     className: "mailbox_well well"
+    template: require('templates/_mailbox/thumb')
     isEdit: false
 
     events:
-        "click .edit-mailbox" : "buttonEdit"
-        "click .cancel_edit_mailbox" : "buttonCancel"
-        "click .save_mailbox" : "buttonSave"
-        "click .delete-mailbox" : "buttonDelete"
-        "input input#name" : "updateName"
-        "change #color" : "updateColor"
+        "click .edit-mailbox"        : "buttonEdit"
+        "click .delete-mailbox"      : "buttonDelete"
 
-    constructor: (@model, @collection) ->
-        super()
-        @model.view = @
-
-    # updates the name of the mailbox
-    updateName: (event) ->
-        @model.set "name", $(event.target).val()
-
-    # updates the color of the mailbox
-    updateColor: (event) ->
-        @model.set "color", $(event.target).val()
+    initialize: () ->
+        super
+        @listenTo @model, 'change', @render
 
     # enter edit mode
-    buttonEdit: (event) ->
-        @model.isEdit = true
-        $("#add_mailbox").hide()
-        @render()
-
-    # quit edit mode, no changes saved
-    buttonCancel: (event) ->
-        @model.isEdit = false
-        @model.destroy() if @model.isNew()
-        $("#add_mailbox").show()
-        @render()
-
-    # save changes to server
-    buttonSave: (event) ->
-        if $(event.target).hasClass("disabled") then return false
-
-        $(event.target).addClass("disabled").removeClass("buttonSave")
-        input = @$(".content")
-        data = {}
-        input.each (i) ->
-            data[input[i].id] = input[i].value
-        @model.isEdit = false
-        @model.save data,
-            success: =>
-                $("#add_mailbox").show()
-                $("#no-mailbox-msg").hide()
-
-                window.app.viewMailsList?.viewMailsList.updateColors()
-                @render()
-            error: (model, xhr) ->
-                msg = "Server error occured"
-                if xhr.status is 400
-                    data = JSON.parse xhr.responseText
-                    msg = data.error
-
-                alert msg
-                $(event.target).removeClass("disabled").addClass("buttonSave")
+    buttonEdit: (event) =>
+        app.router.navigate "config/mailboxes/#{@model.id}", true
 
     buttonDelete: (event) =>
-        deleteMailbox = =>
-            $(event.target).addClass("disabled").removeClass("delete_mailbox")
+        app.views.modal.showAndThen =>
+            $(event.target).addClass("disabled")
             @model.destroy
-                success: =>
-                    @model.removeView()
-                 error: (model, xhr) ->
+                error: (model, xhr) ->
                     msg = "Server error occured"
                     if xhr.status is 400
                         data = JSON.parse xhr.responseText
                         msg = data.error
 
                     alert msg
-                    $(event.target).removeClass("disabled").addClass("delete_mailbox")
-
-        $("#confirm-delete-modal .yes-button").bind 'click', deleteMailbox
-        $("#confirm-delete-modal").modal()
-        $("#confirm-delete-modal").bind 'hide', =>
-            $("#confirm-delete-modal .yes-button").unbind 'click', deleteMailbox
-
-
-    render: =>
-        # whether we should activate the edit mode or not
-        if @model.isEdit
-            template = require('./templates/_mailbox/mailbox_edit')
-        else
-            template = require('./templates/_mailbox/mailbox')
-        @$el.html template(model: @model)
-        @
+                    $(event.target).removeClass("disabled")

@@ -1,15 +1,17 @@
 exports.routes = (map) ->
-    map.get '/', 'mails#index'
 
+    # map.get '/mails/new/:timestamp/', 'mails#getnewlist'
     map.get '/mails/fetch-new/', 'mailboxes#fetchNew'
-    map.get '/mails/new/:timestamp/', 'mails#getnewlist'
+    map.get 'mails/rainbow/:limit/:timestamp', 'mails#rainbow'
+
     map.get '/mails/:id/attachments', 'mails#getattachmentslist'
-    map.get '/mails/:timestamp/:num/:id', 'mails#getlist'
+    map.get '/mails/:id/attachments/:filename', 'mails#getattachment'
+
+    map.get '/folders/:folderId/:num/:timestamp', 'mails#byFolder'
+
+    map.get '/mailboxes/:id/fetch-new', 'mailboxes#fetchNew'
+    map.get '/mailboxes/:id/folders/:id/fetch-new',   'mailboxes#fetchFolder'
+
     map.resources 'mailboxes'
     map.resources 'mails'
-
-    map.get '/attachments/:id/:filename', 'mails#getattachment'
-
-    map.post '/logs', 'logs#savelog'
-    map.delete '/logs/:id', 'logs#discard'
-    map.get '/logs/:createdAt', 'logs#getactivelogs'
+    map.resources 'folders'

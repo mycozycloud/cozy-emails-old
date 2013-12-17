@@ -1,7 +1,7 @@
 ###
   @file: mailsending_test.coffee
   @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-  @description: 
+  @description:
     Tests set to verify CozyMail send well the messages.
 
 ###
@@ -19,11 +19,15 @@ server = new SMTPFake 8889
 describe "Test of mailboxes; ", ->
 
     before (done) ->
-        app.listen(8888)
+        @app = instantiator()
+        @app.compound.on 'models', (models) ->
+            {Mailbox} = models
+            done()
+        @app.listen 8888
         done()
 
     after (done) ->
-        app.close()
+        @app.compound.server.close()
         done()
 
     describe "Create a mailbox; ", ->
@@ -51,9 +55,9 @@ describe "Test of mailboxes; ", ->
             @response.statusCode.should.equal 200
 
             @body.login.should.equal "logintest"
-            
+
             @idToRetrieve = @body.id
-            
+
             done()
 
     describe "Send a mail; ", ->

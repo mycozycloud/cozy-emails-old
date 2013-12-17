@@ -1,5 +1,5 @@
-{MessageBoxElement} = require "./message_box_element"
-{LogMessage} = require "../models/logmessage"
+{MessageBoxElement} = require "views/message_box_element"
+{LogMessage} = require "models/logmessage"
 
 ###
         @file: message_box.coffee

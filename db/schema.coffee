@@ -7,15 +7,11 @@
 ###
 
 # User defines user that can interact with the Cozy instance.
-User = define 'User', ->
-    property 'email', String
-    property 'password', String
-    property 'owner', Boolean, default: false
-    property 'activated', Boolean, default: false
-
 Mail = define 'Mail', ->
     property 'mailbox'
+    property 'folder', Text
     property 'idRemoteMailbox',
+    property 'remoteUID', Text
     property 'createdAt', Number, default: 0
     property 'dateValueOf', Number, default: 0
     property 'date', Date, default: 0
@@ -28,24 +24,13 @@ Mail = define 'Mail', ->
     property 'cc',
     property 'text', Text
     property 'html', Text
-    property 'flags',
+    property 'flags', Object
     property 'read', Boolean, default: false
     property 'flagged', Boolean, default: false
     property 'hasAttachments', Boolean, default: false
     property 'inReplyTo'
     property 'references'
-
-Attachment = define 'Attachment', ->
-    property 'mailId'
-    property 'cid', Number
-    property 'fileName',
-    property 'contentType',
-    property 'length', Number
-    property 'checksum'
-    property 'content', Text
-    property 'mailbox',
-
-Mail.hasMany Attachment, {as: 'attachments', foreignKey: 'mail_id'}
+    property '_attachments'
 
 MailSent = define 'MailSent', ->
     property 'mailbox'
@@ -57,10 +42,6 @@ MailSent = define 'MailSent', ->
     property 'cc',
     property 'bcc',
     property 'html', Text
-
-MailToBe = define 'MailToBe', ->
-    property 'remoteId', Number
-    property 'mailbox'
 
 # Mailbox object to store the information on connections to remote servers
 # and have attached mails
@@ -78,7 +59,7 @@ Mailbox = define 'Mailbox', ->
     property 'password'
 
     # data for outbound mails - SMTP
-    property 'smtpSserver'
+    property 'smtpServer'
     property 'smtpSendAs'
     property 'smtpSsl', Boolean, default: true
     property 'smtpPort', Number, default: 465
@@ -103,23 +84,11 @@ Mailbox = define 'Mailbox', ->
     property 'status', String, default: "freezed"
     property 'mailsToImport', Number, default: 0
 
+MailFolder = define 'MailFolder', ->
+    property 'name'
+    property 'path'
+    property 'specialType'
+    property 'mailbox'
+    property 'imapLastFetchedId', Number, default: 0
 
-# logs managment
-LogMessage = define 'LogMessage', ->
-
-    # type:
-    #   "info" - standard message
-    #   "success" - success message
-    #   "warning" - warning message
-    #   "error" - error message
-    property 'type', String, default: "info"
-    property 'subtype', String, default: "info"
-
-    # timeout:
-    #   0 - message will be displayed until user click OK to discard it
-    #   > 0 - message will be displayed only once, and will disappear after x seconds
-    property 'timeout', Number, default: 5 * 60
-    property 'text',
-    property 'createdAt', Number
-    property 'mailbox', String
-    property 'counter', Number
+    property 'mailsToBe', Object

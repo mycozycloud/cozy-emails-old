@@ -1,0 +1,18 @@
+#topbar
+  a#refresh-btn.btn.btn-primary Refresh
+  a#markallread-btn.btn.btn-primary Mark all as read
+
+#no-mails-message.well
+    h3 Hey !
+    p It looks like there are no mails to show.
+    p May be you need to configure your mailboxes :
+      a(href="#config/mailboxes") Click Here
+    p.
+      If You just did it, and still see no messages, you may need to wait for
+      us to download them for you. Enjoy  :)
+
+table.table.table-striped
+  tbody#mails_list_container
+
+#more-button
+    a#add_more_mails.btn.btn-primary.btn-large more messages

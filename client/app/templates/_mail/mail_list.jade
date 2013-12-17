@@ -1,0 +1,17 @@
+td(title=mailboxName, style='width: 5px; padding: 0; background-color: ' + model.getColor() + ';')
+td.toggleflag(title=model.isFlagged()?'Unstar':'Star')
+    if model.isFlagged()
+        i.icon-star
+    else
+        i.icon-star-empty
+
+td(title=mailboxName, class=model.isRead()?'read':'unread')
+    h4 #{model.fromShort()}
+
+        i.date #{model.date()}
+
+        if model.hasAttachments()
+            i.icon-file
+
+    p.subject
+        | #{model.get("subject")}
