@@ -1,6 +1,8 @@
 mimelib = require "mimelib"
 async = require "async"
 
+Mailbox = require '../models/mailbox'
+
 
 module.exports =
 

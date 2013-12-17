@@ -1,4 +1,5 @@
 async = require('async')
+Mail = require '../models/mail'
 
 module.exports =
 

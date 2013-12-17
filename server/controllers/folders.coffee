@@ -1,3 +1,5 @@
+MailFolder = require '../models/mailfolder'
+
 module.exports =
 
     getFolder:  (req, res, next, id) ->

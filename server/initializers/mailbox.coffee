@@ -1,9 +1,8 @@
-requests = require "../../common/requests"
+Mailbox = require '../models/mailbox'
 
 # Check if some mailboxes should were importing during last app shutdown.
 # If it is the case, it starts the import again.
-module.exports = (compound) ->
-    {Mailbox} = compound.models
+module.exports = ->
 
     importBox = (box) ->
         box.getAccount (err, account) =>

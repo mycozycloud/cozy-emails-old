@@ -1,6 +1,7 @@
 americano = require 'americano'
-initMailboxes = require './server/initializers/mailboxes'
-setupRealtime = require './server/initializers/realtime'
+
+initMailboxes = require './server/initializers/mailbox'
+setupRealtime = require './server/initializers/realtimer'
 
 
 process.on 'uncaughtException', (err) ->
