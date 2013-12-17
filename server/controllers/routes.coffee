@@ -1,17 +1,38 @@
-exports.routes = (map) ->
+mails = require './mails'
+folders = requires './folders'
 
-    # map.get '/mails/new/:timestamp/', 'mails#getnewlist'
-    map.get '/mails/fetch-new/', 'mailboxes#fetchNew'
-    map.get 'mails/rainbow/:limit/:timestamp', 'mails#rainbow'
 
-    map.get '/mails/:id/attachments', 'mails#getattachmentslist'
-    map.get '/mails/:id/attachments/:filename', 'mails#getattachment'
+module.exports =
 
-    map.get '/folders/:folderId/:num/:timestamp', 'mails#byFolder'
 
-    map.get '/mailboxes/:id/fetch-new', 'mailboxes#fetchNew'
-    map.get '/mailboxes/:id/folders/:id/fetch-new',   'mailboxes#fetchFolder'
+    'mailId':
+        param: mailbs.getMail
+    'mails/:mailId':
+        get: mails.show
+        update: mails.update
+        destroy: mails.destroy
+    'mails/:mailId/attachments/:filename':
+        get: mails.getattachment
+    'mails/rainbow/:limit/:timestamp':
+        get: mails.rainbow
+    'folders/:folderId/:num/:timestamp':
+        get: mails.byFolder
 
-    map.resources 'mailboxes'
-    map.resources 'mails'
-    map.resources 'folders'
+    'mailboxId':
+        param: mailboxes.getFolder
+    'mailboxes':
+        get: mailboxes.index
+        post: mailboxes.create
+    'mailboxes/:mailboxId':
+        get: mailboxes.show
+        put: mailboxes.update
+        del: mailboxes.destroy
+    'mailboxes/:mailboxId/fetch-new':
+        get: mailboxes.fetchNew
+
+    'folderId':
+        param: folders.getFolder
+    'folders':
+        get: folders.index
+    'folders/:folderId':
+        get: folders.show
