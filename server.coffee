@@ -1,15 +1,17 @@
-#!/usr/bin/env coffee
-app = module.exports = (params) ->
-    params = params || {}
-    params.root = params.root || __dirname
-    return require('compound').createServer params
+americano = require 'americano'
+initMailboxes = require './server/initializers/mailboxes'
+setupRealtime = require './server/initializers/realtime'
 
-if not module.parent
-    port = process.env.PORT or 9203
-    host = process.env.HOST or "127.0.0.1"
-    server = app()
 
-    server.listen port, host, ->
-        console.log(
-            "Compound server listening on %s:%d within %s environment",
-            host, port, server.set 'env')
+process.on 'uncaughtException', (err) ->
+    console.error err
+    console.error err.stack
+
+port = process.env.PORT || 9282
+americano.start name: 'Cozy Mails', port: port, (app, server) ->
+    app.server = server
+    setupRealtime app
+
+    if process.env.NODE_ENV isnt "test"
+        initMailboxes()
+
