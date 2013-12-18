@@ -1,6 +1,8 @@
 async = require('async')
 americano = require('americano-cozy')
 
+Mail = require './mail'
+MailFolder = require './mailfolder'
 MailSender = require '../lib/mail_sender'
 MailGetter = require '../lib/mail_getter'
 LogMessage = require '../lib/logmessage'

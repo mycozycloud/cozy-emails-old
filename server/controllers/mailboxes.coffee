@@ -2,6 +2,8 @@ mimelib = require "mimelib"
 async = require "async"
 
 Mailbox = require '../models/mailbox'
+MailFolder = require '../models/mailfolder'
+MailSent = require '../models/mailsent'
 
 
 module.exports =
@@ -12,12 +14,14 @@ module.exports =
             if err
                 next err
             else if not box
-                send error: 'not found', 404
+                res.send error: 'not found', 404
             else
                 req.box = box
                 req.box.getAccount (err, account) =>
                     if err
-                        next err
+                        console.log err
+                        next()
+
                     else if not account
                         req.box.log "no account object set on this mailbox"
                         next()
@@ -47,32 +51,34 @@ module.exports =
                     if err
                         next err
                     else
-                        send boxes
+                        res.send boxes
 
 
     create: (req, res, next) ->
-        password = req.body.password
+        body = req.body
+        password = body.password
         delete body.password
 
         Mailbox.findByEmail req.body.login, (err, box) ->
-            return send error: err, 500 if err
-            return send error: "Box already exists", 400 if box?
+            return res.send error: err, 500 if err
+            return res.send error: "Box already exists", 400 if box?
 
             Mailbox.create req.body, (err, mailbox) ->
-                return send error: err, 500 if err
+                return res.send error: err, 500 if err
 
                 mailbox.createAccount password: password, (err, account) ->
-                    return send error: "Cannot save box password", 500 if err
+                    return res.send error: "Cannot save box password", 500 if err
 
-                    send mailbox
+                    res.send mailbox
                     mailbox.fullImport()
 
 
     show: (req, res, next) ->
-        send req.box
+        res.send req.box
 
 
     update: (req, res, next) ->
+        body = req.body
         password = body.password
         delete body.password
 
@@ -84,7 +90,7 @@ module.exports =
 
                     if err then next err
                     else if password is account.password
-                        send success: true
+                        res.send success: true
                         unless @box.status in ["imported", "importing"]
                             req.box.fullImport()
 
@@ -93,24 +99,26 @@ module.exports =
                         req.box.mergeAccount password: password, (err) =>
                             if err then next err
                             else
-                                send success: true
+                                res.send success: true
                                 unless @box.status in ["imported", "importing"]
                                     req.box.fullImport()
 
 
     destroy: (req, res, next) ->
         if req.box.status is "importing"
-            send error: "Cannot delete a mailbox while importing", 400
+            res.send error: "Cannot delete a mailbox while importing", 400
         else
             req.box.remove (err) ->
                 if err then next err
-                else send sucess: true, 204
+                else res.send sucess: true, 204
 
 
     sendMail: (req, res, next) ->
+        body = req.body
         body.createdAt = new Date().valueOf()
-        req.box.sendMail body, (err) =>
+        req.box.res.sendMail body, (err) =>
             if err then next err
+            else
 
                 body.to = JSON.stringify mimelib.parseAddresses data.to
                 body.bcc = JSON.stringify mimelib.parseAddresses data.bcc
@@ -122,7 +130,7 @@ module.exports =
 
                 MailSent.create body, (err) =>
                     if err then next err
-                    else send sucess: true, 204
+                    else res.send sucess: true, 204
 
 
     # Get account information for all mailbox (decrypted passwords) and load last
@@ -155,4 +163,4 @@ module.exports =
                 , (err) -> # once all box have been processed
                     console.log err if err
                     if err then next err
-                    else send success: true
+                    else res.send success: true

@@ -1,81 +1,68 @@
-fs     = require 'fs'
+fs = require 'fs'
 {exec} = require 'child_process'
 
-option '-f', '--file [FILE*]', 'test file to run'
-option '', '--dir [DIR*]', 'directory where to grab test files'
-option '-d', '--debug', 'run node in debug mode'
-option '-b', '--debug-brk', 'run node in --debug-brk mode (stops on first line)'
-
-options =  # defaults, will be overwritten by command line options
-    file        : no
-    dir         : no
-    debug       : no
-    'debug-brk' : no
-
-
-# Grab test files of a directory
+# Grab test files
 walk = (dir, fileList) ->
-    list = fs.readdirSync(dir)
+    list = fs.readdirSync dir
     if list
         for file in list
-            if file
-                filename = dir + '/' + file
-                stat = fs.statSync(filename)
-                if stat and stat.isDirectory()
-                    walk(filename, fileList)
-                else if filename.substr(-6) == "coffee"
-                    fileList.push(filename)
-    return fileList
+            filename = dir + '/' + file
+            stat = fs.statSync filename
+            if stat and stat.isDirectory()
+                walk filename, fileList
+            else if filename.substr(-6) is "coffee"
+                fileList.push filename
+    fileList
 
+testFiles = walk "test", []
 
-task 'tests', \
-     'run server tests, ./test is default dir, otherwise use -f or --dir', \
-     (opts) ->
-    options   = opts
-    testFiles = []
-    if options.dir
-        dirList   = options.dir
-        testFiles = walk(dir, testFiles) for dir in dirList
-    if options.file
-        testFiles  = testFiles.concat(options.file)
-    if not(options.dir or options.file)
-        testFiles = walk("test", [])
+task 'tests', 'run tests through mocha', ->
     runTests testFiles
-    
-task 'tests:client', 'run client tests through mocha', (opts) ->
-    options     = opts
-    uiTestFiles = walk("client/test", [])
-    runTests uiTestFiles
-
 
 runTests = (fileList) ->
-    command = "mocha " + fileList.join(" ") + " "
-    if options['debug-brk']
-        command += "--debug-brk --forward-io --profile "
-    if options.debug
-        command += "--debug --forward-io --profile "
-    command += " --reporter spec --require should --compilers "
-    command += "coffee:coffee-script --colors"
+    console.log "Run tests with Mocha for #{fileList.join(" ")}"
+    command = "mocha #{fileList.join(" ")} --reporter spec "
+    command += "--compilers coffee:coffee-script --colors"
+    exec command, (err, stdout, stderr) ->
+        console.log stdout
+        if err
+            console.log "Running mocha caught exception: \n" + err
+            process.exit 1
+        else
+            process.exit 0
+
+
+option '-f', '--file [FILE]', 'test file to run'
+
+task 'tests:file', 'run test through mocha for a given file', (options) ->
+    file = options.file
+    console.log "Run tests with Mocha for #{file}"
+    command = "mocha #{file} --reporter spec "
+    command += "--compilers coffee:coffee-script --colors"
     exec command, (err, stdout, stderr) ->
         if err
             console.log "Running mocha caught exception: \n" + err
+            process.exit 1
         console.log stdout
 
 
-task "xunit", "", ->
+task "lint", "Run coffeelint on backend files", ->
     process.env.TZ = "Europe/Paris"
-    command = "mocha "
-    command += " --require should --compilers coffee:coffee-script "
-    command += "-R xunit > xunit.xml"
+    command = "coffeelint -f coffeelint.json -r server.coffee server/"
+    exec command, (err, stdout, stderr) ->
+        console.log err
+        console.log stdout
+
+
+task 'convert', 'convert from coffee to JS', ->
+    files = walk "server", []
+    console.log "Convert to JS..."
+    command = "coffee -cb server.coffee #{files.join ' '} "
     exec command, (err, stdout, stderr) ->
         console.log stdout
-
-
-task "xunit:client", "", ->
-    process.env.TZ = "Europe/Paris"
-    command = "mocha client/test/*"
-    command += " --require should --compilers coffee:coffee-script -R "
-    command += "xunit > xunitclient.xml"
-    exec command, (err, stdout, stderr) ->
-        console.log stdout
-
+        if err
+            console.log "Running convertion caught exception: \n" + err
+            process.exit 1
+        else
+            console.log "Convertion succeeded."
+            process.exit 0

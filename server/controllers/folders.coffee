@@ -7,7 +7,7 @@ module.exports =
             if err
                 next err
             else if not folder
-                send error: 'not found', 404
+                res.send error: 'not found', 404
             else
                 req.folder = folder
                 next()
@@ -17,7 +17,7 @@ module.exports =
             if err
                 next err
             else
-                send folders or []
+                res.send folders or []
 
     show: (req, res, next) ->
-        send req.folder
+        res.send req.folder

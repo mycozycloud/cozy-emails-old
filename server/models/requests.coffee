@@ -12,14 +12,13 @@ byMailboxRequest = -> emit doc.mailbox, doc
 byTypeRequest = -> emit doc.specialType, doc
 
 module.exports =
-
     mail:
         all: americano.defaultRequests.all
         date: dateRequest
         dateId: dateIdRequest
         byMailbox: mailboxRequest
         dateByMailbox: dateMailboxRequest
-        folderDate: folderDate
+        folderDate: folderDateRequest
 
     mailbox:
         all: americano.defaultRequests.all

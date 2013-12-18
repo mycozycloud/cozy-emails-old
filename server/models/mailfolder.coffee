@@ -72,7 +72,7 @@ MailFolder::setupImport = (getter, callback) ->
 # fetch mailToBe one by one
 MailFolder::doImport = (getter, progress, callback) ->
 
-    if @mailsToBe is null or @mailsToBe.length is 0
+    if not @mailsToBe? or @mailsToBe.length is 0
         @log "Import: Nothing to download"
         return callback null, 0
 

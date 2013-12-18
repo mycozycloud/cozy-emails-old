@@ -13,6 +13,4 @@ americano.start name: 'Cozy Mails', port: port, (app, server) ->
     app.server = server
     setupRealtime app
 
-    if process.env.NODE_ENV isnt "test"
-        initMailboxes()
-
+    initMailboxes() if process.env.NODE_ENV isnt "test"

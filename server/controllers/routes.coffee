@@ -1,25 +1,25 @@
 mails = require './mails'
-folders = requires './folders'
+folders = require './folders'
+mailboxes = require './mailboxes'
 
 
 module.exports =
 
-
     'mailId':
-        param: mailbs.getMail
+        param: mails.getMail
     'mails/:mailId':
         get: mails.show
-        update: mails.update
-        destroy: mails.destroy
+        put: mails.update
+        del: mails.destroy
     'mails/:mailId/attachments/:filename':
-        get: mails.getattachment
+        get: mails.getAttachment
     'mails/rainbow/:limit/:timestamp':
         get: mails.rainbow
     'folders/:folderId/:num/:timestamp':
         get: mails.byFolder
 
     'mailboxId':
-        param: mailboxes.getFolder
+        param: mailboxes.getMailbox
     'mailboxes':
         get: mailboxes.index
         post: mailboxes.create

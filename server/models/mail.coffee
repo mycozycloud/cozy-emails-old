@@ -22,8 +22,8 @@ module.exports = Mail = americano.getModel 'Mail',
     html: String
     flags: Object
     read: {type: Boolean, default: false}
-    flagged: {Boolean, default: false}
-    hasAttachments: {Boolean, default: false}
+    flagged: {type: Boolean, default: false}
+    hasAttachments: {type: Boolean, default: false}
     inReplyTo: String
     references: String
     _attachments: Object

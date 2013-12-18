@@ -1,19 +1,23 @@
 async = require('async')
 Mail = require '../models/mail'
+MailFolder = require '../models/mailfolder'
 
 module.exports =
+
 
     getMail: (req, res, next, id) ->
         Mail.find id, (err, mail) =>
             if err then next err
             else if not mail?
-                send error: "mail not found", 404
+                res.send error: "mail not found", 404
             else
                 req.mail = mail
                 next()
 
+
     show: (req, res, next) ->
-        send req.mail
+        res.send req.mail
+
 
     update: (req, res, next) ->
         markRead = false
@@ -26,14 +30,16 @@ module.exports =
 
         req.mail.updateAttributes body, (err) =>
             if err then next err
-                return send success: true, 200 unless flagsChanged
+            else
+                return res.send success: true, 200 unless flagsChanged
 
                 Mailbox.find req.mail.mailbox, (err, mailbox) =>
                     return next err if err
 
                     mailbox.syncOneMail req.mail, newflags, (err) =>
                         return next err if err
-                        send success: true, 200
+                        res.send success: true, 200
+
 
     destroy: (req, res, next) ->
         Mailbox.find req.mail.mailbox, (err, mailbox) =>
@@ -45,10 +51,10 @@ module.exports =
                 req.mail.destroy (err) =>
                     return next err if err
 
-                    send 204
+                    res.send 204
 
 
-    # send num mails from folder id: folderId
+    # res.send num mails from folder id: folderId
     # starting after timestamp
     # descending order by date
     byFolder: (req, res, next) ->
@@ -68,12 +74,13 @@ module.exports =
         Mail.fromFolderByDate query, (err, mails) ->
             if err then next err
             else
-                send mails
+                res.send mails
 
-    # send num mails from the rainbow (merged INBOX folders)
+
+    # res.send num mails from the rainbow (merged INBOX folders)
     # starting after timestamp
     # descending order by date
-    rainbow: (err, req, res) ->
+    rainbow: (req, res, next) ->
         limit = parseInt req.params.limit
         if req.params.timestamp and req.params.timestamp isnt 'undefined'
             timestamp = parseInt req.params.timestamp
@@ -111,14 +118,15 @@ module.exports =
                 while outMails[i].dateValueOf > timestamp
                     i++
 
-                # send only the 100 latest
-                send outMails[i..i+99]
+                # res.send only the 100 latest
+                res.send outMails[i..i+99]
 
 
-action 'getattachment', ->
-
-    stream = @mail.getFile params.filename, (err, res, body) ->
-        return handle err if err or not res or res.statusCode isnt 200
-        return handle 'File not found', 404 if res.statusCode is 404
-
-    stream.pipe res
+    getAttachment: (req, res, next) ->
+        stream = @mail.getFile params.filename, (err, res, body) ->
+            if err
+                next err
+            else if res.statusCode is 404
+                Res.res.send error 'File not found', 404
+            else
+                stream.pipe res
