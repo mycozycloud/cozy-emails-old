@@ -5633,6 +5633,10 @@ a.btn:visited {
   background-color: #5c5;
   border-color: #5c5;
 }
+#refresh-btn:hover {
+  background-color: #fe8800;
+  border-color: #fe8800;
+}
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.
    ========================================================================== */
