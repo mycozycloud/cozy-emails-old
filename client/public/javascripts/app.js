@@ -1914,7 +1914,7 @@ window.require.register("templates/menu", function(exports, require, module) {
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<ul class="nav nav-list"><li id="inboxbutton" class="menu_option"><a href="#rainbow"><img src="img/icon-mails.png"/></a></li><li id="mailboxesbutton" class="menu_option"><a href="#config/mailboxes"><img src="img/icon-config.png"/></a></li></ul>');
+  buf.push('<a href="#rainbow" class="menu-option"><img src="img/icon-mails.png"/></a><a href="#config/mailboxes" class="menu-option"><img src="img/icon-config.png"/></a>');
   }
   return buf.join("");
   };

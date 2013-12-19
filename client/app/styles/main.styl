@@ -30,6 +30,21 @@ grey = #AAA
 ::-moz-selection
   background: orange
 
+// Bootsrap fix
+
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus
+a:focus,
+div:focus,
+.btn:focus
+     outline:0px !important
+     -webkit-appearance:none
+
+
 html
   // overflow: hidden
   box-sizing: border-box
@@ -70,6 +85,9 @@ blockquote
     border-left: 5px gray solid
     margin-left: 15px
     padding-left: 10px
+
+a.btn:visited
+    color: white
 
 .mailbox_well
 
@@ -194,7 +212,7 @@ blockquote
     padding 20px
     background-image: url('../img/background-mail.jpg')
     overflow hidden
-    box-shadow: 6px 0px 3px -2px lightblue inset
+    box-shadow: 4px 0px 3px -2px #DDD inset
 
     h3.attachments-title
         font-family: styled
@@ -218,13 +236,15 @@ blockquote
 
 #mails_list
     position absolute
-    top 0px
-    left 5%
+    top 40px
+    left 0
     bottom 0px
-    width 40%
+    width 45%
     margin-left: 0
     z-index 3
     padding: 0 0px
+    border-right: 1px solid #CCC
+    box-shadow: none
 
     #topbar
         padding 10px
@@ -295,37 +315,55 @@ blockquote
 
 
 #menu_container
-    position absolute
+    position: absolute
     top 0px
     left 0px
     bottom 0px
-    width 5%
+    height: 40px
+    width 45%
     box-sizing border-box
     background: #F5F5F5
-    border-right: 1px solid lightgrey
     border-bottom: 1px solid lightgrey
-    padding 19px
-    padding-right 0px
+    border-right: 1px solid lightgrey
+    padding: 2px
+    padding-right: 0px
+
+    img
+        max-width: 40px
 
     .nav-list li a
         padding 0px
+        display: inline
 
     .active
         a
             background: lightblue
             color: darkgrey
             text-shadow: none
+
+    .menu-option
+        height: 40px
+        width: 45px
+        display: inline
+
+        .menu_option:hover
+            background: lightorange
+
+    .menu-option.active
+        background: lightblue
+
     a
         cursor: pointer
 
 
 #mailboxes
     position absolute
-    top 0px
-    left 5%
+    top 40px
+    left 0
     bottom 0px
-    width 40%
+    width 45%
     z-index 3
+    border-right: 1px solid #CCC
 
     #no-mailbox-msg
         margin: 20px
@@ -375,4 +413,4 @@ blockquote
     bottom 0px
     width 55%
     padding 20px
-    box-shadow: 6px 0px 3px -2px lightblue inset
+    box-shadow: 4px 0px 3px -2px #DDD inset

@@ -60,17 +60,17 @@ Mail::saveAttachments = (attachments, callback) ->
             mailId:      @id
 
         fileName =  "/tmp/#{attachment.fileName}"
-        fs.writeFile fileName, attachment.content, (error) =>
-            return callback error if error
+        fs.writeFile fileName, attachment.content, (err) =>
+            return callback err if err
             @attachFile fileName, params, (error) =>
-                require('eyes').inspect error
+                console.log error if error
+
                 fs.unlink fileName, (err) =>
-                    require('eyes').inspect err
+                    console.log err if err
                     callback(error or err)
 
     , (err) =>
-        require('eyes').inspect err
-        console.log err
+        console.log err if err
         callback err
 
 

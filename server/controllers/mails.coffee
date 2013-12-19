@@ -115,7 +115,8 @@ module.exports =
                 # sort by dateValueOf descending
                 outMails.sort (a, b) -> return b.dateValueOf - a.dateValueOf
                 i = 0
-                while outMails[i].dateValueOf > timestamp
+                while outMails.length < i \
+                and outMails[i].dateValueOf > timestamp
                     i++
 
                 # res.send only the 100 latest

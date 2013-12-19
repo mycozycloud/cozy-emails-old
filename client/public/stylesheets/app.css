@@ -5222,6 +5222,18 @@ a[data-wysihtml5-command-value="blue"] {
 ::-moz-selection {
   background: #fe8800;
 }
+textarea:hover,
+input:hover,
+textarea:active,
+input:active,
+textarea:focus,
+input:focus,
+a:focus,
+div:focus,
+.btn:focus {
+  outline: 0px !important;
+  -webkit-appearance: none;
+}
 html {
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -5261,6 +5273,9 @@ blockquote {
   border-left: 5px #808080 solid;
   margin-left: 15px;
   padding-left: 10px;
+}
+a.btn:visited {
+  color: #fff;
 }
 .mailbox_well input {
   border: 1px solid #ccc;
@@ -5391,8 +5406,8 @@ blockquote {
   padding: 20px;
   background-image: url("../img/background-mail.jpg");
   overflow: hidden;
-  -webkit-box-shadow: 6px 0px 3px -2px #cbe4fb inset;
-  box-shadow: 6px 0px 3px -2px #cbe4fb inset;
+  -webkit-box-shadow: 4px 0px 3px -2px #ddd inset;
+  box-shadow: 4px 0px 3px -2px #ddd inset;
 }
 #mail h3.attachments-title {
   font-family: styled;
@@ -5418,13 +5433,16 @@ blockquote {
 }
 #mails_list {
   position: absolute;
-  top: 0px;
-  left: 5%;
+  top: 40px;
+  left: 0;
   bottom: 0px;
-  width: 40%;
+  width: 45%;
   margin-left: 0;
   z-index: 3;
   padding: 0 0px;
+  border-right: 1px solid #ccc;
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 #mails_list #topbar {
   padding: 10px;
@@ -5498,34 +5516,51 @@ blockquote {
   top: 0px;
   left: 0px;
   bottom: 0px;
-  width: 5%;
+  height: 40px;
+  width: 45%;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   background: #f5f5f5;
-  border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
-  padding: 19px;
+  border-right: 1px solid #ccc;
+  padding: 2px;
   padding-right: 0px;
+}
+#menu_container img {
+  max-width: 40px;
 }
 #menu_container .nav-list li a {
   padding: 0px;
+  display: inline;
 }
 #menu_container .active a {
   background: #cbe4fb;
   color: #333;
   text-shadow: none;
 }
+#menu_container .menu-option {
+  height: 40px;
+  width: 45px;
+  display: inline;
+}
+#menu_container .menu-option .menu_option:hover {
+  background: #ffc47f;
+}
+#menu_container .menu-option.active {
+  background: #cbe4fb;
+}
 #menu_container a {
   cursor: pointer;
 }
 #mailboxes {
   position: absolute;
-  top: 0px;
-  left: 5%;
+  top: 40px;
+  left: 0;
   bottom: 0px;
-  width: 40%;
+  width: 45%;
   z-index: 3;
+  border-right: 1px solid #ccc;
 }
 #mailboxes #no-mailbox-msg {
   margin: 20px;
@@ -5580,8 +5615,8 @@ blockquote {
   bottom: 0px;
   width: 55%;
   padding: 20px;
-  -webkit-box-shadow: 6px 0px 3px -2px #cbe4fb inset;
-  box-shadow: 6px 0px 3px -2px #cbe4fb inset;
+  -webkit-box-shadow: 4px 0px 3px -2px #ddd inset;
+  box-shadow: 4px 0px 3px -2px #ddd inset;
 }
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.

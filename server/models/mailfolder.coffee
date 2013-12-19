@@ -1,6 +1,8 @@
 async = require 'async'
 americano = require 'americano-cozy'
 
+Mail = require './mail'
+
 # MailFolder is a IMAP Mailbox, it contains mails.
 module.exports = MailFolder = americano.getModel 'MailFolder',
     name: String
