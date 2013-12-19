@@ -39,10 +39,7 @@ class exports.MainRouter extends Backbone.Router
 
         @clear()
 
-        # if app.mails.length is 0
-        #     app.mails.once 'sync', @rainbow
-
-        app.views.menu.select 'inboxbutton'
+        app.views.menu.select 'rainbow-button'
         app.views.mailboxList.$el.hide()
         app.views.mailList.$el.show()
         app.mails.fetchRainbow(100).then callback
@@ -62,7 +59,7 @@ class exports.MainRouter extends Backbone.Router
         # if app.mails.length is 0
         #     app.mails.once 'sync', => @folder(folderid)
 
-        app.views.menu.select 'inboxbutton'
+        app.views.menu.select 'rainbow-button'
         app.views.mailboxList.$el.hide()
         app.views.mailList.$el.show()
         app.mails.fetchFolder(folderid, 100).then callback
@@ -88,7 +85,7 @@ class exports.MainRouter extends Backbone.Router
 
         @clear()
 
-        app.views.menu.select 'mailboxesbutton'
+        app.views.menu.select 'config-button'
         app.views.mailList.$el.hide()
         app.views.mailboxList.$el.show()
 

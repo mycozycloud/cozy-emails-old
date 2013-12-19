@@ -5527,6 +5527,22 @@ a.btn:visited {
   padding: 2px;
   padding-right: 0px;
 }
+#menu_container #rainbow-button {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 4px;
+}
+#menu_container #config-button {
+  position: absolute;
+  top: 0;
+  left: 45px;
+  padding: 4px;
+}
+#menu_container #config-button:hover,
+#menu_container #rainbow-button:hover {
+  background: #ffc47f;
+}
 #menu_container img {
   max-width: 40px;
 }
@@ -5534,17 +5550,15 @@ a.btn:visited {
   padding: 0px;
   display: inline;
 }
-#menu_container .active a {
+#menu_container .active {
   background: #cbe4fb;
-  color: #333;
-  text-shadow: none;
 }
 #menu_container .menu-option {
-  height: 40px;
-  width: 45px;
+  height: 32px;
+  width: 40px;
   display: inline;
 }
-#menu_container .menu-option .menu_option:hover {
+#menu_container .menu_option:hover {
   background: #ffc47f;
 }
 #menu_container .menu-option.active {

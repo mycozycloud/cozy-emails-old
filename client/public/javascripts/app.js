@@ -1367,7 +1367,7 @@ window.require.register("routers/main_router", function(exports, require, module
 
     MainRouter.prototype.rainbow = function(callback) {
       this.clear();
-      app.views.menu.select('inboxbutton');
+      app.views.menu.select('rainbow-button');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
       return app.mails.fetchRainbow(100).then(callback);
@@ -1386,7 +1386,7 @@ window.require.register("routers/main_router", function(exports, require, module
 
     MainRouter.prototype.folder = function(folderid, callback) {
       this.clear();
-      app.views.menu.select('inboxbutton');
+      app.views.menu.select('rainbow-button');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
       return app.mails.fetchFolder(folderid, 100).then(callback);
@@ -1421,7 +1421,7 @@ window.require.register("routers/main_router", function(exports, require, module
 
     MainRouter.prototype.config = function() {
       this.clear();
-      app.views.menu.select('mailboxesbutton');
+      app.views.menu.select('config-button');
       app.views.mailList.$el.hide();
       return app.views.mailboxList.$el.show();
     };
@@ -1560,7 +1560,7 @@ window.require.register("templates/_mail/list", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div id="topbar"><a id="refresh-btn" class="btn btn-primary">Refresh</a><a id="markallread-btn" class="btn btn-primary">Mark all as read</a></div><div id="no-mails-message" class="well"><h3>Hey !</h3><p>It looks like there are no mails to show.</p><p>May be you need to configure your mailboxes :<a href="#config/mailboxes">Click Here</a></p><p>If You just did it, and still see no messages, you may need to wait for\nus to download them for you. Enjoy  :)\n</p></div><table class="table table-striped"><tbody id="mails_list_container"></tbody></table><div id="more-button"><a id="add_more_mails" class="btn btn-primary btn-large">more messages</a></div>');
+  buf.push('<div id="topbar"><a id="refresh-btn" class="btn btn-primary">Refresh</a><a id="markallread-btn" class="btn btn-primary">Mark all as read</a></div><div id="no-mails-message" class="well"><h3>Hey !</h3><p>It looks like there is no email to show.</p><p> \nTo see your emails, you must&nbsp;<a href="#config/mailboxes">configure your mailboxes</a>.</p><p>If you just did it, and still see no emails, you have to wait the import\nfinished.\n</p></div><table class="table table-striped"><tbody id="mails_list_container"></tbody></table><div id="more-button"><a id="add_more_mails" class="btn btn-primary btn-large">more messages</a></div>');
   }
   return buf.join("");
   };
@@ -1914,7 +1914,7 @@ window.require.register("templates/menu", function(exports, require, module) {
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<a href="#rainbow" class="menu-option"><img src="img/icon-mails.png"/></a><a href="#config/mailboxes" class="menu-option"><img src="img/icon-config.png"/></a>');
+  buf.push('<a href="#rainbow" id="rainbow-button" class="menu-option"><img src="img/icon-mails.png"/></a><a href="#config/mailboxes" id="config-button" class="menu-option"><img src="img/icon-config.png"/></a>');
   }
   return buf.join("");
   };
@@ -3791,7 +3791,7 @@ window.require.register("views/menu", function(exports, require, module) {
     Menu.prototype.template = require('templates/menu');
 
     Menu.prototype.select = function(activeid) {
-      this.$(".menu_option").removeClass("active");
+      this.$(".menu-option").removeClass("active");
       return this.$("#" + activeid).addClass("active");
     };
 

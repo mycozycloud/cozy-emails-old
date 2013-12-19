@@ -19,20 +19,16 @@ class exports.AppView extends Backbone.View
     initialize: ->
         # capture the resize event, to adjust the size of UI
         # window.onresize = @resize
-
         @views = {}
-
-
 
         @mails = new MailsCollection()
         @mailboxes = new MailboxCollection()
         @mailboxes.fetch
             success: => @views.mailboxList.render()
-            error: =>   alert "Error while loading mailboxes"
+            error: => alert "Error while loading mailboxes"
 
         @views.menu = new Menu()
         @views.menu.render().$el.appendTo $('body')
-
 
         @views.mailboxList = new MailboxesList collection: @mailboxes
         @views.mailboxList.render().$el.hide().appendTo $('body')
