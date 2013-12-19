@@ -5445,10 +5445,7 @@ a.btn:visited {
   box-shadow: none;
 }
 #mails_list #topbar {
-  padding: 10px;
-}
-#mails_list #topbar .btn {
-  margin-right: 10px;
+  padding: 5px;
 }
 #mails_list #topbar #folders-menu {
   float: right;
@@ -5631,6 +5628,10 @@ a.btn:visited {
   padding: 20px;
   -webkit-box-shadow: 4px 0px 3px -2px #ddd inset;
   box-shadow: 4px 0px 3px -2px #ddd inset;
+}
+#refresh-btn {
+  background-color: #5c5;
+  border-color: #5c5;
 }
 /* ==|== non-semantic helper classes ========================================
    Please define your styles before this section.

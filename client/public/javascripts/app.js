@@ -1560,7 +1560,7 @@ window.require.register("templates/_mail/list", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div id="topbar"><a id="refresh-btn" class="btn btn-primary">Refresh</a><a id="markallread-btn" class="btn btn-primary">Mark all as read</a></div><div id="no-mails-message" class="well"><h3>Hey !</h3><p>It looks like there is no email to show.</p><p> \nTo see your emails, you must&nbsp;<a href="#config/mailboxes">configure your mailboxes</a>.</p><p>If you just did it, and still see no emails, you have to wait the import\nfinished.\n</p></div><table class="table table-striped"><tbody id="mails_list_container"></tbody></table><div id="more-button"><a id="add_more_mails" class="btn btn-primary btn-large">more messages</a></div>');
+  buf.push('<div id="topbar"><a id="refresh-btn" class="btn btn-primary">Refresh</a></div><div id="no-mails-message" class="well"><h3>Hey !</h3><p>It looks like there is no email to show.</p><p> \nTo see your emails, you must&nbsp;<a href="#config/mailboxes">configure your mailboxes</a>.</p><p>If you just did it, and still see no emails, you have to wait the import\nfinished.\n</p></div><table class="table table-striped"><tbody id="mails_list_container"></tbody></table><div id="more-button"><a id="add_more_mails" class="btn btn-primary btn-large">more messages</a></div>');
   }
   return buf.join("");
   };
