@@ -23,18 +23,23 @@ module.exports = ->
             for box in boxes
                 if box.status is "import_preparing"
                     box.log "start again import from scracth"
-                    box.destroyMailsToBe (err) =>
+                    box.reset (err) =>
                         if err
                             box.log err
                         else
                             importBox box
                 else if box.status is "import_failed"
-                    box.destroyMailsToBe (err) =>
-                        box.destroyMails (err) =>
+                    box.reset (err) =>
+                        if err
+                            box.log err
+                        else
                             importBox box
                 else if box.status is "importing" or box.status is "freezed"
-                    box.log "try to finish the import"
-                    importBox box
+                    box.reset (err) =>
+                        if err
+                            box.log err
+                        else
+                            importBox box
                 else
                     box.log "status #{box.status}"
                     box.log "already imported"

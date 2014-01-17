@@ -70,11 +70,23 @@ Mailbox::remove = (callback) ->
         (cb) => Mail.requestDestroy "bymailbox", key: @id, cb
         (cb) => MailFolder.requestDestroy "bymailbox", key: @id, cb
         (cb) => LogMessage.destroy this, cb
-        @destroyAccount.bind   this
+        @destroyAccount.bind this
     ], (err) =>
         @log "destroying finished..."
         @log err if err
         @destroy callback
+
+Mailbox::reset = (callback) ->
+
+    async.parallel [
+        (cb) => Mail.requestDestroy "bymailbox", key: @id, cb
+        (cb) => MailFolder.requestDestroy "bymailbox", key: @id, cb
+        (cb) => LogMessage.destroy this, cb
+    ], (err) =>
+        @log "reset finished..."
+        @log err if err
+        callback()
+
 
 Mailbox::importStarted = (callback) ->
     data =

@@ -1,5 +1,6 @@
-async = require('async')
+async = require 'async'
 Mail = require '../models/mail'
+Mailbox = require '../models/mailbox'
 MailFolder = require '../models/mailfolder'
 
 module.exports =

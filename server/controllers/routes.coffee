@@ -7,6 +7,7 @@ module.exports =
 
     'mailId':
         param: mails.getMail
+
     'mails/:mailId':
         get: mails.show
         put: mails.update
@@ -15,8 +16,6 @@ module.exports =
         get: mails.getAttachment
     'mails/rainbow/:limit/:timestamp':
         get: mails.rainbow
-    'folders/:folderId/:num/:timestamp':
-        get: mails.byFolder
 
     'mailboxId':
         param: mailboxes.getMailbox
@@ -27,7 +26,7 @@ module.exports =
         get: mailboxes.show
         put: mailboxes.update
         del: mailboxes.destroy
-    'mailboxes/:mailboxId/fetch-new':
+    'mails/fetch/new':
         get: mailboxes.fetchNew
 
     'folderId':
@@ -36,3 +35,7 @@ module.exports =
         get: folders.index
     'folders/:folderId':
         get: folders.show
+
+    'folders/:folderId/:num/:timestamp':
+        get: mails.byFolder
+

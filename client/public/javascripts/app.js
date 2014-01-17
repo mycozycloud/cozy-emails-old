@@ -3521,11 +3521,13 @@ window.require.register("views/mails_list", function(exports, require, module) {
     };
 
     MailsList.prototype.refresh = function() {
-      var btn, promise,
+      var btn, oldbtnVal, promise,
         _this = this;
       btn = this.$('#refresh-btn');
-      btn.spin().addClass('disabled');
-      promise = $.ajax('mails/fetch-new/');
+      oldbtnVal = btn.html();
+      btn.html('&nbsp;&nbsp;&nbsp;&nbsp;');
+      btn.spin('small').addClass('disabled');
+      promise = $.ajax('mails/fetch/new');
       promise.error(function(jqXHR, error) {
         btn.text('Connection Error').addClass('error');
         return alert(error);
@@ -3534,7 +3536,8 @@ window.require.register("views/mails_list", function(exports, require, module) {
         return setTimeout(_this.refresh, 30 * 1000);
       });
       return promise.always(function() {
-        return btn.spin().removeClass('disabled');
+        btn.spin().removeClass('disabled');
+        return btn.html(oldbtnVal);
       });
     };
 

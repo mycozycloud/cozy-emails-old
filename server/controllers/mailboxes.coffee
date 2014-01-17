@@ -91,7 +91,7 @@ module.exports =
                     if err then next err
                     else if password is account.password
                         res.send success: true
-                        unless @box.status in ["imported", "importing"]
+                        if @box? and not @box.status in ["imported", "importing"]
                             req.box.fullImport()
 
                     else

@@ -11,16 +11,16 @@
   },
   "main": "server.coffee",
   "dependencies": {
-    "americano": "= 0.2.13",
-    "americano-cozy": "= 0.1.10",
+    "americano": "= 0.3.0",
+    "americano-cozy": "= 0.2.0",
+    "cozy-notifications-helper": "= 0.0.2",
+    "cozy-realtime-adapter": "= 0.11.0",
     "async": "= 0.2.9",
     "nodemailer": "= 0.3.29",
     "imap": "= 0.7.7",
     "mailparser": "= 0.3.0",
     "mimelib": ">= 0",
-    "request-json": ">= 0",
-    "cozy-notifications-helper": "= 0.0.2",
-    "cozy-realtime-adapter": "= 0.11.0"
+    "request-json": "0.4.5"
   },
   "devDependencies": {
     "should": "= 1.2.0",

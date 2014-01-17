@@ -73,8 +73,10 @@ class exports.MailsList extends ViewCollection
 
     refresh: ->
         btn = @$ '#refresh-btn'
-        btn.spin().addClass 'disabled'
-        promise = $.ajax 'mails/fetch-new/'
+        oldbtnVal = btn.html()
+        btn.html '&nbsp;&nbsp;&nbsp;&nbsp;'
+        btn.spin('small').addClass 'disabled'
+        promise = $.ajax 'mails/fetch/new'
 
         promise.error (jqXHR, error) =>
             btn.text('Connection Error').addClass 'error'
@@ -85,6 +87,7 @@ class exports.MailsList extends ViewCollection
 
         promise.always ->
             btn.spin().removeClass 'disabled'
+            btn.html oldbtnVal
 
     markAllRead: -> @collection.each (model) ->
         unless model.isRead()

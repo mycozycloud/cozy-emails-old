@@ -91,7 +91,6 @@ MailFolder::doImport = (getter, progress, callback) ->
         success    = 0
         oldpercent = 0
 
-        # mailsToBe.forEach (mailToBe) ->
         async.eachSeries @mailsToBe, (mailToBe, cb) =>
 
             @fetchMessage getter, mailToBe, (err) =>
@@ -109,12 +108,20 @@ MailFolder::doImport = (getter, progress, callback) ->
 
         , (error) => #after all mails in this folder have been processed
 
-            @updateAttributes mailsToBe: null, (err) =>
-
+            if error
+                @log 'An error occured while importing mails'
+                console.log error
                 getter.closeBox (err) =>
                     @log err if err
-                    @log "Imported #{done}/#{total} : #{success} ok"
                     callback error, done
+
+            else
+                @updateAttributes mailsToBe: null, (err) =>
+
+                    getter.closeBox (err) =>
+                        @log err if err
+                        @log "Imported #{done}/#{total} : #{success} ok"
+                        callback error, done
 
 # Get message corresponding to given remote ID, save it to database and
 # download its attachments.
