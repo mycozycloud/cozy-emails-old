@@ -125,10 +125,7 @@ module.exports =
 
 
     getAttachment: (req, res, next) ->
-        stream = @mail.getFile params.filename, (err, res, body) ->
+        stream = req.mail.getFile req.params.filename, (err) ->
             if err
                 next err
-            else if res.statusCode is 404
-                Res.res.send error 'File not found', 404
-            else
-                stream.pipe res
+        stream.pipe res

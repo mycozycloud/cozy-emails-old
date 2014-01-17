@@ -16,7 +16,6 @@ class exports.MailsList extends ViewCollection
 
     events:
         "click #add_more_mails"  : 'loadOlderMails'
-        'click #refresh-btn'     : 'refresh'
         'click #markallread-btn' : 'markAllRead'
 
     initialize: ->
@@ -34,8 +33,10 @@ class exports.MailsList extends ViewCollection
         empty = _.size(@views) is 0
         @noMailMsg?.toggle empty
         @$('#markallread-btn').toggle not empty
-        @$('#add_more_mails') .toggle not empty
-        @$('#refresh-btn')    .toggle not empty
+        @$('#add_more_mails').toggle not empty
+        $('#refresh-btn').toggle not empty
+        $('#refresh-btn').unbind 'click'
+        $('#refresh-btn').click @refresh
 
     afterRender: ->
         @noMailMsg  = @$('#no-mails-message')
@@ -71,10 +72,10 @@ class exports.MailsList extends ViewCollection
             # add its view on top of the list
             @container.prepend view.$el
 
-    refresh: ->
-        btn = @$ '#refresh-btn'
+    refresh: =>
+        btn = $ '#refresh-btn'
         oldbtnVal = btn.html()
-        btn.html '&nbsp;&nbsp;&nbsp;&nbsp;'
+        btn.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         btn.spin('small').addClass 'disabled'
         promise = $.ajax 'mails/fetch/new'
 
@@ -82,11 +83,13 @@ class exports.MailsList extends ViewCollection
             btn.text('Connection Error').addClass 'error'
             alert error
 
-        promise.success =>
-            setTimeout @refresh, 30 * 1000
+        promise.success (models) =>
+            console.log "TODO: import new mails in the view"
+            setTimeout @refresh, 600 * 1000
 
         promise.always ->
-            btn.spin().removeClass 'disabled'
+            btn.spin()
+            btn.removeClass 'disabled'
             btn.html oldbtnVal
 
     markAllRead: -> @collection.each (model) ->

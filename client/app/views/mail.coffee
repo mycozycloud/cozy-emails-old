@@ -45,18 +45,16 @@ class exports.MailView extends BaseView
                 @iframehtml.find('head').append csslink
                 @iframehtml.find('head').append basetarget
 
-                @iframe.height @iframehtml.height()
+                @iframe.height $(window).height() - 180 - $('.mail-panel h3').height()
 
-                $("#additional_bar").hide() if @iframehtml.height() > 600
-
-            , 50
+            , 100
 
             # this timeout is a walkaround for content, which takes a while to load
-            @timeout2 = setTimeout () =>
-                @timeout2 = null
-                @iframe = @$("#mail_content_html")
-                @iframe.height @iframehtml.height()
-            , 1000
+            #@timeout2 = setTimeout () =>
+                #@timeout2 = null
+                #@iframe = @$("#mail_content_html")
+                #@iframe.height @iframehtml.height()
+            #, 1000
 
         if @model.get "hasAttachments"
             @attachmentsView?.render().$el.appendTo @$el

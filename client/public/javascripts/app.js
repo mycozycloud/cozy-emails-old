@@ -1370,7 +1370,12 @@ window.require.register("routers/main_router", function(exports, require, module
       app.views.menu.select('rainbow-button');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
-      return app.mails.fetchRainbow(100).then(callback);
+      return app.mails.fetchRainbow(100).then(function() {
+        setTimeout(function() {
+          return $("#mailboxes").niceScroll();
+        }, 200);
+        return typeof callback === "function" ? callback() : void 0;
+      });
     };
 
     MainRouter.prototype.rainbowmail = function(mailid) {
@@ -1413,7 +1418,8 @@ window.require.register("routers/main_router", function(exports, require, module
           model: model
         });
         app.views.mail.$el.appendTo($('body'));
-        return app.views.mail.render();
+        app.views.mail.render();
+        return $("#mailboxes").niceScroll();
       } else {
         return this.navigate(list, true);
       }
@@ -1560,7 +1566,7 @@ window.require.register("templates/_mail/list", function(exports, require, modul
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<div id="topbar"><a id="refresh-btn" class="btn btn-primary">Refresh</a></div><div id="no-mails-message" class="well"><h3>Hey !</h3><p>It looks like there is no email to show.</p><p> \nTo see your emails, you must&nbsp;<a href="#config/mailboxes">configure your mailboxes</a>.</p><p>If you just did it, and still see no emails, you have to wait the import\nfinished.\n</p></div><table class="table table-striped"><tbody id="mails_list_container"></tbody></table><div id="more-button"><a id="add_more_mails" class="btn btn-primary btn-large">more messages</a></div>');
+  buf.push('<div id="no-mails-message" class="well"><h3>Hey !</h3><p>It looks like there is no email to show.</p><p> \nTo see your emails, you must&nbsp;<a href="#config/mailboxes">configure your mailboxes</a>.</p><p>If you just did it, and still see no emails, you have to wait the import\nfinished.\n</p></div><table class="table table-striped"><tbody id="mails_list_container"></tbody></table><div id="more-button"><a id="add_more_mails" class="btn btn-primary btn-large">more messages</a></div>');
   }
   return buf.join("");
   };
@@ -1728,7 +1734,7 @@ window.require.register("templates/_mailbox/form", function(exports, require, mo
   buf.push(attrs({ 'id':("imapServer"), 'type':("text"), 'value':(model.get("imapServer")), "class": ('content') + ' ' + ('input-xlarge') }, {"id":true,"type":true,"value":true}));
   buf.push('/><p class="help-block">The inbound server address. Say imap.gmail.com ..</p></div></div><div class="control-group"><label for="imapPort" class="control-label">IMAP port</label><div class="controls"><input');
   buf.push(attrs({ 'id':("imapPort"), 'type':("text"), 'value':(model.get("imapPort")), "class": ('content') + ' ' + ('input-xlarge') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><p class="help-block">Usually 993.</p></div></div></fieldset><div class="form-actions"><button class="save_mailbox isEdit btn btn-success">save</button><button class="cancel_edit_mailbox isEdit btn btn-warning">cancel</button></div></from>');
+  buf.push('/><p class="help-block">Usually 993.</p></div></div></fieldset><div class="form-actions"><button class="save_mailbox isEdit btn btn-success">save</button><button class="cancel_edit_mailbox isEdit btn btn-warning">cancel</button></div><fieldset><legend>Administration</legend><button class="delete-mailbox btn btn-danger">delete</button></fieldset></from>');
   }
   return buf.join("");
   };
@@ -1768,7 +1774,6 @@ window.require.register("templates/_mailbox/thumb", function(exports, require, m
   {
   buf.push('<span class="mailbox-status"> ' + escape((interp = model.get('statusMsg')) == null ? '' : interp) + '</span>');
   }
-  buf.push('<button class="edit-mailbox btn">edit</button><button class="delete-mailbox btn btn-danger">delete</button>');
   }
   return buf.join("");
   };
@@ -1914,7 +1919,7 @@ window.require.register("templates/menu", function(exports, require, module) {
   var buf = [];
   with (locals || {}) {
   var interp;
-  buf.push('<a href="#rainbow" id="rainbow-button" class="menu-option"><img src="img/icon-mails.png"/></a><a href="#config/mailboxes" id="config-button" class="menu-option"><img src="img/icon-config.png"/></a>');
+  buf.push('<a href="#rainbow" id="rainbow-button" class="menu-option"><img src="img/icon-mails.png"/></a><a href="#config/mailboxes" id="config-button" class="menu-option"><img src="img/icon-config.png"/></a><div class="right"><a id="refresh-btn" class="btn btn-primary"><img src="img/refresh.png"/></a></div>');
   }
   return buf.join("");
   };
@@ -3021,16 +3026,8 @@ window.require.register("views/mail", function(exports, require, module) {
           _this.iframehtml.html(_this.model.html());
           _this.iframehtml.find('head').append(csslink);
           _this.iframehtml.find('head').append(basetarget);
-          _this.iframe.height(_this.iframehtml.height());
-          if (_this.iframehtml.height() > 600) {
-            return $("#additional_bar").hide();
-          }
-        }, 50);
-        this.timeout2 = setTimeout(function() {
-          _this.timeout2 = null;
-          _this.iframe = _this.$("#mail_content_html");
-          return _this.iframe.height(_this.iframehtml.height());
-        }, 1000);
+          return _this.iframe.height($(window).height() - 180 - $('.mail-panel h3').height());
+        }, 100);
       }
       if (this.model.get("hasAttachments")) {
         if ((_ref1 = this.attachmentsView) != null) {
@@ -3281,7 +3278,6 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
     __extends(MailboxesListElement, _super);
 
     function MailboxesListElement() {
-      this.buttonDelete = __bind(this.buttonDelete, this);
       this.buttonEdit = __bind(this.buttonEdit, this);
       _ref = MailboxesListElement.__super__.constructor.apply(this, arguments);
       return _ref;
@@ -3294,8 +3290,7 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
     MailboxesListElement.prototype.isEdit = false;
 
     MailboxesListElement.prototype.events = {
-      "click .edit-mailbox": "buttonEdit",
-      "click .delete-mailbox": "buttonDelete"
+      "click": "buttonEdit"
     };
 
     MailboxesListElement.prototype.initialize = function() {
@@ -3307,25 +3302,6 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
       return app.router.navigate("config/mailboxes/" + this.model.id, true);
     };
 
-    MailboxesListElement.prototype.buttonDelete = function(event) {
-      var _this = this;
-      return app.views.modal.showAndThen(function() {
-        $(event.target).addClass("disabled");
-        return _this.model.destroy({
-          error: function(model, xhr) {
-            var data, msg;
-            msg = "Server error occured";
-            if (xhr.status === 400) {
-              data = JSON.parse(xhr.responseText);
-              msg = data.error;
-            }
-            alert(msg);
-            return $(event.target).removeClass("disabled");
-          }
-        });
-      });
-    };
-
     return MailboxesListElement;
 
   })(BaseView);
@@ -3333,6 +3309,7 @@ window.require.register("views/mailboxes_list_element", function(exports, requir
 });
 window.require.register("views/mailboxes_list_form", function(exports, require, module) {
   var BaseView, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3342,6 +3319,7 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
     __extends(MailboxForm, _super);
 
     function MailboxForm() {
+      this.buttonDelete = __bind(this.buttonDelete, this);
       _ref = MailboxForm.__super__.constructor.apply(this, arguments);
       return _ref;
     }
@@ -3352,7 +3330,8 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
 
     MailboxForm.prototype.events = {
       "click .cancel_edit_mailbox": "buttonCancel",
-      "click .save_mailbox": "buttonSave"
+      "click .save_mailbox": "buttonSave",
+      "click .delete-mailbox": "buttonDelete"
     };
 
     MailboxForm.prototype.initialize = function() {
@@ -3411,6 +3390,25 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
       return app.router.navigate('config/mailboxes', true);
     };
 
+    MailboxForm.prototype.buttonDelete = function(event) {
+      var _this = this;
+      return app.views.modal.showAndThen(function() {
+        $(event.target).addClass("disabled");
+        return _this.model.destroy({
+          error: function(model, xhr) {
+            var data, msg;
+            msg = "Server error occured";
+            if (xhr.status === 400) {
+              data = JSON.parse(xhr.responseText);
+              msg = data.error;
+            }
+            alert(msg);
+            return $(event.target).removeClass("disabled");
+          }
+        });
+      });
+    };
+
     return MailboxForm;
 
   })(BaseView);
@@ -3418,6 +3416,7 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
 });
 window.require.register("views/mails_list", function(exports, require, module) {
   var FolderMenu, ViewCollection, _ref,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -3438,6 +3437,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
     __extends(MailsList, _super);
 
     function MailsList() {
+      this.refresh = __bind(this.refresh, this);
       _ref = MailsList.__super__.constructor.apply(this, arguments);
       return _ref;
     }
@@ -3450,7 +3450,6 @@ window.require.register("views/mails_list", function(exports, require, module) {
 
     MailsList.prototype.events = {
       "click #add_more_mails": 'loadOlderMails',
-      'click #refresh-btn': 'refresh',
       'click #markallread-btn': 'markAllRead'
     };
 
@@ -3479,7 +3478,9 @@ window.require.register("views/mails_list", function(exports, require, module) {
       }
       this.$('#markallread-btn').toggle(!empty);
       this.$('#add_more_mails').toggle(!empty);
-      return this.$('#refresh-btn').toggle(!empty);
+      $('#refresh-btn').toggle(!empty);
+      $('#refresh-btn').unbind('click');
+      return $('#refresh-btn').click(this.refresh);
     };
 
     MailsList.prototype.afterRender = function() {
@@ -3523,20 +3524,22 @@ window.require.register("views/mails_list", function(exports, require, module) {
     MailsList.prototype.refresh = function() {
       var btn, oldbtnVal, promise,
         _this = this;
-      btn = this.$('#refresh-btn');
+      btn = $('#refresh-btn');
       oldbtnVal = btn.html();
-      btn.html('&nbsp;&nbsp;&nbsp;&nbsp;');
+      btn.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
       btn.spin('small').addClass('disabled');
       promise = $.ajax('mails/fetch/new');
       promise.error(function(jqXHR, error) {
         btn.text('Connection Error').addClass('error');
         return alert(error);
       });
-      promise.success(function() {
-        return setTimeout(_this.refresh, 30 * 1000);
+      promise.success(function(models) {
+        console.log("TODO: import new mails in the view");
+        return setTimeout(_this.refresh, 600 * 1000);
       });
       return promise.always(function() {
-        btn.spin().removeClass('disabled');
+        btn.spin();
+        btn.removeClass('disabled');
         return btn.html(oldbtnVal);
       });
     };

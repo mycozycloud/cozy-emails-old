@@ -5,8 +5,9 @@ class exports.MailboxForm extends BaseView
     template: require 'templates/_mailbox/form'
 
     events:
-        "click .cancel_edit_mailbox" : "buttonCancel"
-        "click .save_mailbox" : "buttonSave"
+        "click .cancel_edit_mailbox": "buttonCancel"
+        "click .save_mailbox": "buttonSave"
+        "click .delete-mailbox": "buttonDelete"
 
     initialize: ->
         super
@@ -51,3 +52,16 @@ class exports.MailboxForm extends BaseView
                 $(event.target).removeClass("disabled").addClass("buttonSave")
 
         app.router.navigate 'config/mailboxes', true
+
+    buttonDelete: (event) =>
+        app.views.modal.showAndThen =>
+            $(event.target).addClass("disabled")
+            @model.destroy
+                error: (model, xhr) ->
+                    msg = "Server error occured"
+                    if xhr.status is 400
+                        data = JSON.parse xhr.responseText
+                        msg = data.error
+
+                    alert msg
+                    $(event.target).removeClass("disabled")

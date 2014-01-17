@@ -15,8 +15,7 @@ module.exports = class MailboxesListElement extends BaseView
     isEdit: false
 
     events:
-        "click .edit-mailbox"        : "buttonEdit"
-        "click .delete-mailbox"      : "buttonDelete"
+        "click": "buttonEdit"
 
     initialize: () ->
         super
@@ -25,16 +24,3 @@ module.exports = class MailboxesListElement extends BaseView
     # enter edit mode
     buttonEdit: (event) =>
         app.router.navigate "config/mailboxes/#{@model.id}", true
-
-    buttonDelete: (event) =>
-        app.views.modal.showAndThen =>
-            $(event.target).addClass("disabled")
-            @model.destroy
-                error: (model, xhr) ->
-                    msg = "Server error occured"
-                    if xhr.status is 400
-                        data = JSON.parse xhr.responseText
-                        msg = data.error
-
-                    alert msg
-                    $(event.target).removeClass("disabled")

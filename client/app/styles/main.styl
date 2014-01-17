@@ -7,6 +7,8 @@
 
 @import 'nib'
 
+@import './_cozy'
+
 blue = #34A6FF
 lightblue = #CBE4FB
 green = #5C5
@@ -56,7 +58,7 @@ body
   height: 100%
   padding: 0
   margin: 0
-  overflow: hidden
+  background-image: url('../img/background-mail.jpg')
   font-family: main
   box-sizing: border-box
 
@@ -88,6 +90,9 @@ blockquote
 
 a.btn:visited
     color: white
+
+.right
+    float: right 
 
 .mailbox_well
 
@@ -203,16 +208,9 @@ a.btn:visited
 
 
 #mail
-    position absolute
-    top 0px
-    left 45%
-    bottom 0px
-    width 55%
+    margin-left 45%
     box-sizing border-box
     padding 20px
-    background-image: url('../img/background-mail.jpg')
-    overflow hidden
-    box-shadow: 4px 0px 3px -2px #DDD inset
 
     h3.attachments-title
         font-family: styled
@@ -235,7 +233,7 @@ a.btn:visited
 
 
 #mails_list
-    position absolute
+    position fixed
     top 40px
     left 0
     bottom 0px
@@ -245,6 +243,7 @@ a.btn:visited
     padding: 0 0px
     border-right: 1px solid #CCC
     box-shadow: none
+    background: #FCFCFC
 
     #topbar
         padding 5px
@@ -302,6 +301,9 @@ a.btn:visited
     h4
         font-weight normal
 
+.mailslist-element
+    cursor: pointer
+
 .mailslist-element .unread
     h4
         font-weight bold
@@ -309,21 +311,20 @@ a.btn:visited
         font-weight bold
 
 
-
-
 #menu_container
-    position: absolute
+    position: fixed
     top 0px
-    left 0px
+    left 1px
     bottom 0px
-    height: 40px
+    height: 41px
     width 45%
+    padding: 2px
     box-sizing border-box
-    background: #F5F5F5
+    background: #FFF
     border-bottom: 1px solid lightgrey
     border-right: 1px solid lightgrey
-    padding: 2px
-    padding-right: 0px
+    box-shadow: 0px 2px 2px #DDD
+    z-index: 100
 
     #rainbow-button
         position: absolute
@@ -374,6 +375,7 @@ a.btn:visited
     width 45%
     z-index 3
     border-right: 1px solid #CCC
+    background: #FCFCFC
 
     #no-mailbox-msg
         margin: 20px
@@ -425,9 +427,35 @@ a.btn:visited
     padding 20px
     box-shadow: 4px 0px 3px -2px #DDD inset
 
+    input
+    select
+    textarea
+        border: 1px solid blue
+        border-radius: 0
+        font-family: styled
+        box-shadow: none
+
+    input:hover
+    select:hover
+    textarea:hover
+        border: 1px solid orange
+
+    input:active
+    select:active
+    textarea:active
+        box-shadow: none
+
+    input:focus
+    select:focus
+    textarea:focus
+        box-shadow: none
+
+
 #refresh-btn
-    background-color: green
-    border-color: green
+    background-color: blue
+    border-color: blue
+    margin-right: 2px
+    height: 25px
 
 #refresh-btn:hover
     background-color: orange

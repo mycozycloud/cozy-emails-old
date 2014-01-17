@@ -5216,6 +5216,122 @@ a[data-wysihtml5-command-value="blue"] {
   font-family: main;
   src: url("/fonts/signika-regular.ttf");
 }
+a {
+  color: #34a6ff;
+}
+a:hover {
+  color: #fe8800;
+}
+input,
+select,
+textarea {
+  border: 1px solid #34a6ff;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  font-family: styled;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+input:hover,
+select:hover,
+textarea:hover {
+  border: 1px solid #fe8800;
+}
+input:active,
+select:active,
+textarea:active {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.button {
+  border: 0;
+  background: #34a6ff;
+  color: #fff;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  text-shadow: none;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  font-family: main;
+  font-weight: bold;
+  padding: 10px;
+  cursor: pointer;
+}
+.button:hover {
+  background: #fe8800;
+  border: 0;
+  color: #fff;
+  text-decoration: none;
+}
+.button:active {
+  background: #f68400;
+  border: 0;
+  -webkit-box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset, 0 1px 2px rgba(0,0,0,0);
+  box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset, 0 1px 2px rgba(0,0,0,0);
+  color: #fff;
+}
+.button.disabled,
+.button.disabled:hover,
+.button.disabled:active,
+.button.disabled:focus {
+  background-color: #808080;
+  padding: 10px;
+  cursor: default;
+  text-decoration: none;
+}
+.button.toggled {
+  background-color: #008af6;
+  -webkit-box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset, 0 1px 2px rgba(0,0,0,0);
+  box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset, 0 1px 2px rgba(0,0,0,0);
+}
+.minor-button {
+  padding: 10px;
+}
+.modal-header {
+  background-color: #34a6bb;
+  color: #fff;
+  font-family: styled;
+  font-size: 26px;
+  padding: 20px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+}
+.modal-body {
+  font-family: main;
+}
+.modal-body input,
+.modal-body select {
+  border: 1px solid #34a6ff;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  font-family: styled;
+}
+.modal-body input:hover,
+.modal-body select:hover {
+  border: 1px solid #fe8800;
+}
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body input:active,
+.modal-body select:active {
+  border: 1px solid #34a6ff;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+@font-face {
+  font-family: styled;
+  src: url("/fonts/maven-pro-light-300.otf");
+}
+@font-face {
+  font-family: main;
+  src: url("/fonts/signika-regular.ttf");
+}
 ::selection {
   background: #fe8800;
 }
@@ -5246,7 +5362,7 @@ body {
   height: 100%;
   padding: 0;
   margin: 0;
-  overflow: hidden;
+  background-image: url("../img/background-mail.jpg");
   font-family: main;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
@@ -5276,6 +5392,9 @@ blockquote {
 }
 a.btn:visited {
   color: #fff;
+}
+.right {
+  float: right;
 }
 .mailbox_well input {
   border: 1px solid #ccc;
@@ -5395,19 +5514,11 @@ a.btn:visited {
   color: #aaa;
 }
 #mail {
-  position: absolute;
-  top: 0px;
-  left: 45%;
-  bottom: 0px;
-  width: 55%;
+  margin-left: 45%;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   padding: 20px;
-  background-image: url("../img/background-mail.jpg");
-  overflow: hidden;
-  -webkit-box-shadow: 4px 0px 3px -2px #ddd inset;
-  box-shadow: 4px 0px 3px -2px #ddd inset;
 }
 #mail h3.attachments-title {
   font-family: styled;
@@ -5432,7 +5543,7 @@ a.btn:visited {
   margin: 0;
 }
 #mails_list {
-  position: absolute;
+  position: fixed;
   top: 40px;
   left: 0;
   bottom: 0px;
@@ -5443,6 +5554,7 @@ a.btn:visited {
   border-right: 1px solid #ccc;
   -webkit-box-shadow: none;
   box-shadow: none;
+  background: #fcfcfc;
 }
 #mails_list #topbar {
   padding: 5px;
@@ -5502,6 +5614,9 @@ a.btn:visited {
 #mails_list h4 {
   font-weight: normal;
 }
+.mailslist-element {
+  cursor: pointer;
+}
 .mailslist-element .unread h4 {
   font-weight: bold;
 }
@@ -5509,20 +5624,22 @@ a.btn:visited {
   font-weight: bold;
 }
 #menu_container {
-  position: absolute;
+  position: fixed;
   top: 0px;
-  left: 0px;
+  left: 1px;
   bottom: 0px;
-  height: 40px;
+  height: 41px;
   width: 45%;
+  padding: 2px;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  background: #f5f5f5;
+  background: #fff;
   border-bottom: 1px solid #ccc;
   border-right: 1px solid #ccc;
-  padding: 2px;
-  padding-right: 0px;
+  -webkit-box-shadow: 0px 2px 2px #ddd;
+  box-shadow: 0px 2px 2px #ddd;
+  z-index: 100;
 }
 #menu_container #rainbow-button {
   position: absolute;
@@ -5572,6 +5689,7 @@ a.btn:visited {
   width: 45%;
   z-index: 3;
   border-right: 1px solid #ccc;
+  background: #fcfcfc;
 }
 #mailboxes #no-mailbox-msg {
   margin: 20px;
@@ -5629,9 +5747,38 @@ a.btn:visited {
   -webkit-box-shadow: 4px 0px 3px -2px #ddd inset;
   box-shadow: 4px 0px 3px -2px #ddd inset;
 }
+#mailbox-form input,
+#mailbox-form select,
+#mailbox-form textarea {
+  border: 1px solid #34a6ff;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  font-family: styled;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+#mailbox-form input:hover,
+#mailbox-form select:hover,
+#mailbox-form textarea:hover {
+  border: 1px solid #fe8800;
+}
+#mailbox-form input:active,
+#mailbox-form select:active,
+#mailbox-form textarea:active {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+#mailbox-form input:focus,
+#mailbox-form select:focus,
+#mailbox-form textarea:focus {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
 #refresh-btn {
-  background-color: #5c5;
-  border-color: #5c5;
+  background-color: #34a6ff;
+  border-color: #34a6ff;
+  margin-right: 2px;
+  height: 25px;
 }
 #refresh-btn:hover {
   background-color: #fe8800;

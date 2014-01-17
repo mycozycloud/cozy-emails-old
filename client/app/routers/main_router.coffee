@@ -42,7 +42,12 @@ class exports.MainRouter extends Backbone.Router
         app.views.menu.select 'rainbow-button'
         app.views.mailboxList.$el.hide()
         app.views.mailList.$el.show()
-        app.mails.fetchRainbow(100).then callback
+        app.mails.fetchRainbow(100).then ->
+            setTimeout ->
+                $("#mailboxes").niceScroll()
+            , 200
+            callback?()
+
 
     rainbowmail: (mailid) =>
 
@@ -71,17 +76,19 @@ class exports.MainRouter extends Backbone.Router
         else
             @folder folderid, => @mail mailid, "folder/#{folderid}"
 
-    mail : (id, list) ->
+    mail: (id, list) ->
         if model = app.mails.get(id)
             app.views.mail?.remove()
             app.views.mail = new MailView model: model
             app.views.mail.$el.appendTo $('body')
+
             app.views.mail.render()
+            $("#mailboxes").niceScroll()
 
         else
             @navigate list, true
 
-    config : ->
+    config: ->
 
         @clear()
 
