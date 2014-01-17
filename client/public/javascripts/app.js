@@ -1555,7 +1555,7 @@ window.require.register("templates/_mail/big", function(exports, require, module
   {
   buf.push('<i class="icon-eye-open icon-white"></i>Mark read');
   }
-  buf.push('</a><a id="btn-delete" class="btn btn-danger"><i class="icon-remove icon-white"></i>Delete</a></div></div>');
+  buf.push('</a><a id="btn-delete" class="btn btn-danger"><i class="icon-remove icon-white"></i>Delete</a></div><div class="clearfix">&nbsp;</div></div>');
   }
   return buf.join("");
   };

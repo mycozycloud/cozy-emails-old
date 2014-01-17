@@ -196,10 +196,6 @@ a.btn:visited
         font-family: styled
         font-size: 22px
 
-#mail_content_html
-    margin: 0
-    padding: 0
-
 .date
     margin: 0
     padding: 0
@@ -244,9 +240,15 @@ a.btn:visited
         box-sizing: border-box
 
     #mail_content_html
+        margin: 0
+        padding: 0
         height: 86%
         overflow-y: scroll
 
+    #additional_bar
+        margin: 10px 0
+        a
+            float: right
 
 #mails_list
     margin-top 41px
@@ -382,14 +384,15 @@ a.btn:visited
 
 
 #mailboxes
-    position absolute
-    top 40px
-    left 0
+    margin-top 41px
+    margin-left 55%
     bottom 0px
     width 45%
     z-index 3
-    border-right: 1px solid #CCC
+    border-left: 1px solid #EEE
+    border-bottom: 1px solid #EEE
     background: #FCFCFC
+    box-sizing: border-box
 
     #no-mailbox-msg
         margin: 20px
