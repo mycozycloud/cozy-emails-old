@@ -1523,6 +1523,20 @@ window.require.register("templates/_mail/big", function(exports, require, module
   var buf = [];
   with (locals || {}) {
   var interp;
+  buf.push('<div class="well mail-panel"><p>' + escape((interp = model.fromShort()) == null ? '' : interp) + '<i class="date">' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
+  if ( model.get("cc"))
+  {
+  buf.push('<p>CC:  ' + escape((interp = model.cc()) == null ? '' : interp) + '</p>');
+  }
+  buf.push('</p><h3>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</h3><br/>');
+  if ( model.hasHtml())
+  {
+  buf.push('<iframe id="mail_content_html" name="mail_content_html">' + ((interp = model.html()) == null ? '' : interp) + '</iframe>');
+  }
+  else
+  {
+  buf.push('<div id="mail_content_text">' + ((interp = model.text()) == null ? '' : interp) + '</div>');
+  }
   buf.push('<div id="additional_bar" class="btn-toolbar"><a id="btn-flagged" class="btn btn-warning">');
   if ( model.isFlagged())
   {
@@ -1541,21 +1555,7 @@ window.require.register("templates/_mail/big", function(exports, require, module
   {
   buf.push('<i class="icon-eye-open icon-white"></i>Mark read');
   }
-  buf.push('</a><a id="btn-delete" class="btn btn-danger"><i class="icon-remove icon-white"></i>Delete</a></div><div class="well mail-panel"><p>' + escape((interp = model.fromShort()) == null ? '' : interp) + '<i class="date">' + escape((interp = model.date()) == null ? '' : interp) + '</i>');
-  if ( model.get("cc"))
-  {
-  buf.push('<p>CC:  ' + escape((interp = model.cc()) == null ? '' : interp) + '</p>');
-  }
-  buf.push('</p><h3>' + escape((interp = model.get("subject")) == null ? '' : interp) + '</h3><br/>');
-  if ( model.hasHtml())
-  {
-  buf.push('<iframe id="mail_content_html" name="mail_content_html">' + ((interp = model.html()) == null ? '' : interp) + '</iframe>');
-  }
-  else
-  {
-  buf.push('<div id="mail_content_text">' + ((interp = model.text()) == null ? '' : interp) + '</div>');
-  }
-  buf.push('</div><div id="answer_form"></div>');
+  buf.push('</a><a id="btn-delete" class="btn btn-danger"><i class="icon-remove icon-white"></i>Delete</a></div></div>');
   }
   return buf.join("");
   };
@@ -3025,8 +3025,7 @@ window.require.register("views/mail", function(exports, require, module) {
           basetarget = '<base target="_blank">';
           _this.iframehtml.html(_this.model.html());
           _this.iframehtml.find('head').append(csslink);
-          _this.iframehtml.find('head').append(basetarget);
-          return _this.iframe.height($(window).height() - 180 - $('.mail-panel h3').height());
+          return _this.iframehtml.find('head').append(basetarget);
         }, 100);
       }
       if (this.model.get("hasAttachments")) {

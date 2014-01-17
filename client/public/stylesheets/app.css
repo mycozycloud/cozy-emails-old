@@ -5514,11 +5514,15 @@ a.btn:visited {
   color: #aaa;
 }
 #mail {
-  margin-left: 45%;
+  width: 55%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  padding: 1%;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  padding: 20px;
 }
 #mail h3.attachments-title {
   font-family: styled;
@@ -5542,16 +5546,28 @@ a.btn:visited {
 #mail #attachments_list {
   margin: 0;
 }
-#mails_list {
+#mail .mail-panel {
   position: fixed;
-  top: 40px;
-  left: 0;
+  top: 1%;
+  left: 1%;
+  bottom: 1%;
+  width: 53%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+#mail #mail_content_html {
+  height: 86%;
+  overflow-y: scroll;
+}
+#mails_list {
+  margin-top: 41px;
+  margin-left: 55%;
   bottom: 0px;
   width: 45%;
-  margin-left: 0;
   z-index: 3;
-  padding: 0 0px;
-  border-right: 1px solid #ccc;
+  padding: 0;
+  border-right: 0;
   -webkit-box-shadow: none;
   box-shadow: none;
   background: #fcfcfc;
@@ -5626,7 +5642,7 @@ a.btn:visited {
 #menu_container {
   position: fixed;
   top: 0px;
-  left: 1px;
+  left: 55%;
   bottom: 0px;
   height: 41px;
   width: 45%;
@@ -5740,7 +5756,7 @@ a.btn:visited {
   -moz-box-sizing: border-box;
   box-sizing: border-box;
   top: 0px;
-  left: 45%;
+  left: 0;
   bottom: 0px;
   width: 55%;
   padding: 20px;

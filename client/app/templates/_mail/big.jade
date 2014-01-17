@@ -1,24 +1,3 @@
-.btn-toolbar#additional_bar
-    a#btn-flagged.btn.btn-warning
-      if model.isFlagged()
-        i.icon-star-empty.icon-white
-        | Unflag
-      else
-        i.icon-star.icon-white
-        | Flag
-
-    a#btn-unread.btn
-        if model.isRead()
-          i.icon-eye-close.icon-white
-          | Keep unread
-        else
-          i.icon-eye-open.icon-white
-          | Mark read
-
-    a#btn-delete.btn.btn-danger
-      i.icon-remove.icon-white
-      | Delete
-
 .well.mail-panel
   p
     | #{model.fromShort()}
@@ -38,5 +17,23 @@
     #mail_content_text
       !{model.text()}
 
+  .btn-toolbar#additional_bar
+    a#btn-flagged.btn.btn-warning
+      if model.isFlagged()
+        i.icon-star-empty.icon-white
+        | Unflag
+      else
+        i.icon-star.icon-white
+        | Flag
 
-#answer_form
+    a#btn-unread.btn
+        if model.isRead()
+          i.icon-eye-close.icon-white
+          | Keep unread
+        else
+          i.icon-eye-open.icon-white
+          | Mark read
+
+    a#btn-delete.btn.btn-danger
+      i.icon-remove.icon-white
+      | Delete

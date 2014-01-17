@@ -25,6 +25,7 @@ class exports.MainRouter extends Backbone.Router
         'config/mailboxes/new'      : 'newMailbox'
         'config/mailboxes/:id'      : 'editMailbox'
 
+
     clear: ->
         app.views.mailboxList.activate null
         app.views.mailList.activate null
@@ -35,8 +36,8 @@ class exports.MainRouter extends Backbone.Router
         app.views.mail = null
         app.views.mailboxform = null
 
-    rainbow : (callback) =>
 
+    rainbow : (callback) =>
         @clear()
 
         app.views.menu.select 'rainbow-button'
@@ -58,7 +59,6 @@ class exports.MainRouter extends Backbone.Router
 
 
     folder: (folderid, callback) ->
-
         @clear()
 
         # if app.mails.length is 0

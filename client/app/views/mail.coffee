@@ -45,7 +45,7 @@ class exports.MailView extends BaseView
                 @iframehtml.find('head').append csslink
                 @iframehtml.find('head').append basetarget
 
-                @iframe.height $(window).height() - 180 - $('.mail-panel h3').height()
+                #@iframe.height $(window).height() - 220 - $('.mail-panel h3').height()
 
             , 100
 
