@@ -1317,15 +1317,6 @@ window.require.register("routers/main_router", function(exports, require, module
 
   Mailbox = require("models/mailbox").Mailbox;
 
-  /*
-      @file: main_router.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description:
-          The application router.
-          Trying to recreate the minimum of object on every reroute.
-  */
-
-
   exports.MainRouter = (function(_super) {
     __extends(MainRouter, _super);
 
@@ -2875,14 +2866,6 @@ window.require.register("views/folders_menu", function(exports, require, module)
 
   ViewCollection = require('lib/view_collection');
 
-  /*
-      @file: mailboxes_list.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description:
-          Displays the list of configured mailboxes.
-  */
-
-
   module.exports = FolderMenu = (function(_super) {
     __extends(FolderMenu, _super);
 
@@ -3486,7 +3469,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
       this.noMailMsg = this.$('#no-mails-message');
       this.loadmoreBtn = this.$('#add_more_mails');
       this.container = this.$('#mails_list_container');
-      this.$('#topbar').append(this.foldermenu.$el);
+      $('#menu_container .right').append(this.foldermenu.$el);
       if (this.activated) {
         this.activate(this.activated);
       }

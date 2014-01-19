@@ -3,7 +3,7 @@ MailFolder = require '../models/mailfolder'
 module.exports =
 
     getFolder:  (req, res, next, id) ->
-        MailFolder.find req.params.id, (err, folder) =>
+        MailFolder.find id, (err, folder) =>
             if err
                 next err
             else if not folder

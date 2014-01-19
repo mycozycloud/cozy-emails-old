@@ -12,7 +12,7 @@ FolderMenu         = require 'views/folders_menu'
 class exports.MailsList extends ViewCollection
     id: "mails_list"
     itemView: require("views/mails_list_element").MailsListElement
-    template: require("templates/_mail/list")
+    template: require "templates/_mail/list"
 
     events:
         "click #add_more_mails"  : 'loadOlderMails'
@@ -25,6 +25,7 @@ class exports.MailsList extends ViewCollection
 
         @foldermenu = new FolderMenu(collection: app.folders)
         @foldermenu.render()
+
 
     itemViewOptions: -> folderId: @collection.folderId
 
@@ -39,11 +40,11 @@ class exports.MailsList extends ViewCollection
         $('#refresh-btn').click @refresh
 
     afterRender: ->
-        @noMailMsg  = @$('#no-mails-message')
+        @noMailMsg = @$ '#no-mails-message'
         @loadmoreBtn = @$ '#add_more_mails'
-        @container   = @$ '#mails_list_container'
+        @container = @$ '#mails_list_container'
 
-        @$('#topbar').append @foldermenu.$el
+        $('#menu_container .right').append @foldermenu.$el
         @activate @activated if @activated
         @$el.niceScroll()
         super

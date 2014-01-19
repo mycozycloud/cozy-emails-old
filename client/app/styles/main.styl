@@ -250,6 +250,24 @@ a.btn:visited
         a
             float: right
 
+#folders-menu
+    display: inline-block
+    box-shadow: 0 0 0
+    float: right
+
+    a, .dropdown-menu
+        border-radius 0px !important
+        box-shadow: 0 0 0
+        
+    .btn.dropdown-toggle
+        height: 25px
+
+#folders-menu.open
+    .btn.dropdown-toggle
+        box-shadow: inset 2px 2px 3px blue - 60%
+        background-color: blue - 40%
+        display: inline-block
+
 #mails_list
     margin-top 41px
     margin-left: 55%
@@ -263,13 +281,6 @@ a.btn:visited
 
     #topbar
         padding 5px
-
-        #folders-menu
-            float right
-            a, .dropdown-menu
-                border-radius 0px !important
-
-
 
     tr:hover
         background: lightorange
@@ -469,6 +480,7 @@ a.btn:visited
 
 
 #refresh-btn
+    float: left
     background-color: blue
     border-color: blue
     margin-right: 2px
