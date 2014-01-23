@@ -17,7 +17,6 @@ module.exports = Mailbox = americano.getModel 'Mailbox',
 
     # shared credentails for in and out bound
     login: String
-    account: String
     password: String
 
     # data for outbound mails - SMTP
@@ -70,7 +69,6 @@ Mailbox::remove = (callback) ->
         (cb) => Mail.requestDestroy "bymailbox", key: @id, cb
         (cb) => MailFolder.requestDestroy "bymailbox", key: @id, cb
         (cb) => LogMessage.destroy this, cb
-        @destroyAccount.bind this
     ], (err) =>
         @log "destroying finished..."
         @log err if err
@@ -138,17 +136,13 @@ Mailbox::progress = (progress, callback) ->
 
 
 Mailbox::getMailSender = (callback) ->
-    @getAccount (err, account) =>
-        return callback err if err
-        callback null, new MailSender this, account.password
+    callback null, new MailSender this, @password
 
 Mailbox::getMailGetter = (callback) ->
-    @getAccount (err, account) =>
-        return callback err if err
-        mg = new MailGetter this, account.password
-        mg.connect (err) ->
-            if err then callback err
-            else callback null, mg
+    mg = new MailGetter this, @password
+    mg.connect (err) ->
+        if err then callback err
+        else callback null, mg
 
 # Send a mail by using smpt server set in the configuration of the current
 # mailbox.

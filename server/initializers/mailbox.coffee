@@ -5,15 +5,7 @@ Mailbox = require '../models/mailbox'
 module.exports = ->
 
     importBox = (box) ->
-        box.getAccount (err, account) =>
-            if err
-                box.log "error occured while retrieving account"
-                box.log err
-            else if not account
-                box.log "no account find"
-            else
-                box.password = account.password
-                box.fullImport()
+        box.fullImport()
 
     Mailbox.all (err, boxes) ->
         if err
