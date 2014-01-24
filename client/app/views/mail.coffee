@@ -45,10 +45,11 @@ class exports.MailView extends BaseView
                 @iframehtml.find('head').append csslink
                 @iframehtml.find('head').append basetarget
 
-                #@iframe.height $(window).height() - 220 - $('.mail-panel h3').height()
-
+                @resize()
             , 100
 
+            $(window).unbind 'resize', @resize
+            $(window).bind 'resize', @resize
             # this timeout is a walkaround for content, which takes a while to load
             #@timeout2 = setTimeout () =>
                 #@timeout2 = null
@@ -60,7 +61,22 @@ class exports.MailView extends BaseView
             @attachmentsView?.render().$el.appendTo @$el
 
 
-        @$el.niceScroll()
+    resize: =>
+        panelHeight = $('.mail-panel').height()
+        titleHeight = $('.mail-panel h3').height()
+        infoHeight =  $('.mail-panel p:first').height()
+        buttonBarHeight = $('.mail-panel .clearfix').height()
+
+        if panelHeight < @iframehtml.height()
+            $('.mail-panel').height @iframehtml.height() + titleHeight + infoHeight + buttonBarHeight + 100
+            panelHeight = $('.mail-panel').height()
+
+        if panelHeight > $(window).height()
+            $('.mail-panel').height $(window).height()
+            panelHeight = $('.mail-panel').height()
+
+        @iframe.height panelHeight - titleHeight - infoHeight - buttonBarHeight - 50
+
 
     remove: =>
         @$el.getNiceScroll().remove()
