@@ -5597,6 +5597,7 @@ a.btn:visited {
   -webkit-box-shadow: none;
   box-shadow: none;
   background: #fcfcfc;
+  border: 1px solid #eee;
 }
 #mails_list #topbar {
   padding: 5px;

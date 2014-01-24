@@ -19,7 +19,7 @@ module.exports = class FolderMenu extends ViewCollection
     appendView: (view) =>
         if @currentMailbox isnt view.model.get 'mailbox'
             @currentMailbox = view.model.get 'mailbox'
-            title = app.mailboxes.get(@currentMailbox).get 'name'
+            title = app.mailboxes.get(@currentMailbox)?.get 'name'
             @$('#folderlist').append "<li class='nav-header'>#{title}</li>"
 
         @$('#folderlist').append view.$el

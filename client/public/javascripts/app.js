@@ -2896,10 +2896,10 @@ window.require.register("views/folders_menu", function(exports, require, module)
     };
 
     FolderMenu.prototype.appendView = function(view) {
-      var title;
+      var title, _ref1;
       if (this.currentMailbox !== view.model.get('mailbox')) {
         this.currentMailbox = view.model.get('mailbox');
-        title = app.mailboxes.get(this.currentMailbox).get('name');
+        title = (_ref1 = app.mailboxes.get(this.currentMailbox)) != null ? _ref1.get('name') : void 0;
         this.$('#folderlist').append("<li class='nav-header'>" + title + "</li>");
       }
       return this.$('#folderlist').append(view.$el);
@@ -3301,7 +3301,7 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
     __extends(MailboxForm, _super);
 
     function MailboxForm() {
-      this.buttonDelete = __bind(this.buttonDelete, this);
+      this.onDeleteClicked = __bind(this.onDeleteClicked, this);
       _ref = MailboxForm.__super__.constructor.apply(this, arguments);
       return _ref;
     }
@@ -3313,7 +3313,7 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
     MailboxForm.prototype.events = {
       "click .cancel_edit_mailbox": "buttonCancel",
       "click .save_mailbox": "buttonSave",
-      "click .delete-mailbox": "buttonDelete"
+      "click .delete-mailbox": "onDeleteClicked"
     };
 
     MailboxForm.prototype.initialize = function() {
@@ -3372,9 +3372,10 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
       return app.router.navigate('config/mailboxes', true);
     };
 
-    MailboxForm.prototype.buttonDelete = function(event) {
+    MailboxForm.prototype.onDeleteClicked = function(event) {
       var _this = this;
-      return app.views.modal.showAndThen(function() {
+      $("#confirm-delete-modal .yes-button").spin('tiny');
+      return app.views.modal.showAndThen(function(callback) {
         $(event.target).addClass("disabled");
         return _this.model.destroy({
           error: function(model, xhr) {
@@ -3386,6 +3387,9 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
             }
             alert(msg);
             return $(event.target).removeClass("disabled");
+          },
+          complete: function() {
+            return $("#confirm-delete-modal .yes-button").spin();
           }
         });
       });
@@ -3797,14 +3801,6 @@ window.require.register("views/message_box", function(exports, require, module) 
   MessageBoxElement = require("views/message_box_element").MessageBoxElement;
 
   LogMessage = require("models/logmessage").LogMessage;
-
-  /*
-          @file: message_box.coffee
-          @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-          @description:
-              Serves a place to display messages which are meant to be seen by user.
-  */
-
 
   exports.MessageBox = (function(_super) {
     __extends(MessageBox, _super);
