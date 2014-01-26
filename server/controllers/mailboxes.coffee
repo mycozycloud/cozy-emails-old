@@ -33,18 +33,20 @@ module.exports =
 
 
     create: (req, res, next) ->
-        body = req.body
-        password = body.password
-        delete body.password
-
         Mailbox.findByEmail req.body.login, (err, box) ->
-            return res.send error: err, 500 if err
-            return res.send error: "Box already exists", 400 if box?
-
-            Mailbox.create req.body, (err, mailbox) ->
-                return res.send error: err, 500 if err
-                res.send mailbox
-                mailbox.fullImport()
+            if err
+                console.log err
+                return res.send error: err, 500
+            else if box?
+                res.send error: "Box already exists", 400 if box?
+            else
+                Mailbox.create req.body, (err, mailbox) ->
+                    if err
+                        console.log err
+                        return res.send error: err, 500
+                    else
+                        res.send mailbox
+                        mailbox.fullImport()
 
 
     show: (req, res, next) ->
@@ -53,8 +55,6 @@ module.exports =
 
     update: (req, res, next) ->
         body = req.body
-        password = body.password
-        delete body.password
 
         req.box.updateAttributes body, (err) =>
 
@@ -62,13 +62,12 @@ module.exports =
             else
                 res.send success: true
                 if @box? and not @box.status in ["imported", "importing"]
-                    req.box.fullImport()
+                    req.box.reset ->
+                        req.box.fullImport()
 
 
     destroy: (req, res, next) ->
-        if req.box.status is "importing"
-            res.send error: "Cannot delete a mailbox while importing", 400
-        else
+        req.box.stopImport (err) ->
             req.box.remove (err) ->
                 if err then next err
                 else res.send sucess: true, 204
@@ -122,6 +121,6 @@ module.exports =
 
 
                 , (err) -> # once all box have been processed
-                    console.log err if err
-                    if err then next err
-                    else res.send success: true
+                      console.log err if err
+                      if err then next err
+                      else res.send success: true
