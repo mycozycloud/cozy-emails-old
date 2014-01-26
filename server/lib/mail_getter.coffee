@@ -1,4 +1,4 @@
-{ImapConnection} = require "imap"
+ImapConnection = require "imap"
 {MailParser} = require "mailparser"
 
 # Utility class to get mails.
@@ -12,7 +12,7 @@ class MailGetter
     # Start connection with the server describe in the mailbox configuration.
     connect: (callback) ->
         @server = new ImapConnection
-            username: @mailbox.login
+            user: @mailbox.login
             password: @password
             host:     @mailbox.imapServer
             port:     @mailbox.imapPort
@@ -34,17 +34,20 @@ class MailGetter
                 @mailbox.log "Server connection closed."
 
         @mailbox.log "Try to connect..."
-        if @mailbox.imapServer?
-            @server.connect (err) =>
+        @server.connect (err) =>
+            console.log err
+            @mailbox.log 'ready!'
+
+            if @mailbox.imapServer?
                 if err
                     @mailbox.log "Connection failed"
                     callback err
                 else
                     @mailbox.log "Connection established successfully"
                     callback null
-        else
-            @mailbox.log 'No host defined'
-            callback new Error 'No host defined'
+            else
+                @mailbox.log 'No host defined'
+                callback new Error 'No host defined'
 
     listFolders: (callback) =>
         @server.getBoxes (err, boxes) =>
