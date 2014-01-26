@@ -140,6 +140,18 @@ Mailbox::progress = (progress, callback) ->
     @updateAttributes data, (error) =>
         LogMessage.createImportProgressInfo @, progress, callback
 
+Mailbox::importStarted = (callback) ->
+    data =
+        status: "deleting"
+        statusMsg: "deletion in progress..."
+
+    @updateAttributes data, (error) =>
+        if error
+            callback error
+        else
+            LogMessage.boxDeleted this, callback
+
+
 
 Mailbox::getMailSender = (callback) ->
     callback null, new MailSender this, @password

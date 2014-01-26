@@ -11,6 +11,10 @@ module.exports =
 
     getMailbox: (req, res, next, id) ->
         Mailbox.find id, (err, box) =>
+            console.log err
+            console.log box
+
+
             if err
                 next err
             else if not box
