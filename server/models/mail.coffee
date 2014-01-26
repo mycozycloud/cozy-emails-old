@@ -53,9 +53,9 @@ Mail::saveAttachments = (attachments, callback) ->
         params =
             cid:         attachment.contentId or 'null'
             fileName:    attachment.fileName
-            contentType: attachment.contentType
-            length:      attachment.length
-            checksum:    attachment.checksum
+            contentType: attachment.contentType or ''
+            length:      attachment.length or 0
+            checksum:    attachment.checksum or ''
             mailbox:     @mailbox
             mailId:      @id
 
