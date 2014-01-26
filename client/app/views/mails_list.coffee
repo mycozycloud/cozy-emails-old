@@ -1,14 +1,6 @@
 ViewCollection     = require 'lib/view_collection'
 FolderMenu         = require 'views/folders_menu'
 
-###
-    @file: mails_list.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description:
-        View to generate the list of mails - the second column from the left.
-        Uses MailsListElement to generate each mail's view
-###
-
 class exports.MailsList extends ViewCollection
     id: "mails_list"
     itemView: require("views/mails_list_element").MailsListElement
@@ -46,11 +38,9 @@ class exports.MailsList extends ViewCollection
 
         $('#menu_container .right').append @foldermenu.$el
         @activate @activated if @activated
-        @$el.niceScroll()
         super
 
     remove: ->
-        @$el.getNiceScroll().remove()
         super
 
     appendView: (view) ->
@@ -122,3 +112,10 @@ class exports.MailsList extends ViewCollection
         for cid, view of @views
             if view.model.id is id then view.$el.addClass 'active'
             else view.$el.removeClass 'active'
+
+    showLoading: ->
+        $("#no-mails-message").hide()
+        @$el.spin 'small'
+
+    hideLoading: ->
+        @$el.spin()
