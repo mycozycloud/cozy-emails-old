@@ -11,8 +11,8 @@ ViewCollection = require 'lib/view_collection'
 class exports.MailboxesList extends ViewCollection
 
     id: "mailboxes"
-    itemView: require('views/mailboxes_list_element')
-    template: require('templates/_mailbox/list')
+    itemView: require 'views/mailboxes_list_element'
+    template: require 'templates/_mailbox/list'
 
     checkIfEmpty: ->
         super
