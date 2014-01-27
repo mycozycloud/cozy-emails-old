@@ -20,13 +20,7 @@ module.exports = ->
                             box.log err
                         else
                             importBox box
-                else if box.status is "import_failed"
-                    box.reset (err) =>
-                        if err
-                            box.log err
-                        else
-                            importBox box
-                else if box.status is "importing" or box.status is "freezed"
+                else if box.status in ["import_failed", "importing", "freezed"]
                     box.reset (err) =>
                         if err
                             box.log err

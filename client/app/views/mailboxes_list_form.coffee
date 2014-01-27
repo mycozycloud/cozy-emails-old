@@ -54,7 +54,6 @@ class exports.MailboxForm extends BaseView
         app.router.navigate 'config/mailboxes', true
 
     onDeleteClicked: (event) =>
-        $("#confirm-delete-modal .yes-button").spin 'tiny'
         app.views.modal.showAndThen (callback) =>
             $(event.target).addClass("disabled")
             @model.destroy
@@ -66,5 +65,3 @@ class exports.MailboxForm extends BaseView
 
                     alert msg
                     $(event.target).removeClass("disabled")
-                complete: ->
-                    $("#confirm-delete-modal .yes-button").spin()

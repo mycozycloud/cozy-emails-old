@@ -24,6 +24,7 @@ class exports.MailsList extends ViewCollection
     checkIfEmpty: ->
         super
         empty = _.size(@views) is 0
+
         @noMailMsg?.toggle empty
         @$('#markallread-btn').toggle not empty
         @$('#add_more_mails').toggle not empty
@@ -68,7 +69,7 @@ class exports.MailsList extends ViewCollection
         oldbtnVal = btn.html()
         btn.html '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'
         btn.spin('small').addClass 'disabled'
-        promise = $.ajax 'mails/fetch/new'
+        promise = $.ajax 'emails/fetch/new'
 
         promise.error (jqXHR, error) =>
             btn.text('Connection Error').addClass 'error'

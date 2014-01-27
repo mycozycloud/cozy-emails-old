@@ -2,7 +2,7 @@ async = require 'async'
 americano = require 'americano-cozy'
 queue = require '../lib/queue'
 
-Mail = require './mail'
+Email = require './email'
 
 # MailFolder is a IMAP Mailbox, it contains mails.
 module.exports = MailFolder = americano.getModel 'MailFolder',
@@ -100,7 +100,7 @@ MailFolder::pushFetchTasks = (getter) ->
                 getter.fetchMail remoteId, (err, mail, attachments) =>
                     mail.folder = folder.id
 
-                    Mail.create mail, (err, mail) =>
+                    Email.create mail, (err, mail) =>
                         return done err if err
 
                         msg =  "New mail created: #{mail.idRemoteMailbox}"
@@ -134,7 +134,7 @@ MailFolder::fetchMessage = (getter, remoteId, callback) ->
 
         mail.folder = @id
 
-        Mail.create mail, (err, mail) =>
+        Email.create mail, (err, mail) =>
             return callback err if err
 
             msg = "New mail created: #{mail.idRemoteMailbox}"
@@ -219,7 +219,7 @@ MailFolder::synchronizeChanges = (getter, limit, callback) ->
             limit: limit
             descending: true
 
-        Mail.fromFolderByDate query, (err, mails) =>
+        Email.fromFolderByDate query, (err, mails) =>
             return callback err if err
             for mail in mails
                 flags = flagDict[mail.idRemoteMailbox]

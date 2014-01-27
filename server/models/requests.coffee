@@ -12,7 +12,7 @@ byMailboxRequest = -> emit doc.mailbox, doc
 byTypeRequest = -> emit doc.specialType, doc
 
 module.exports =
-    mail:
+    email:
         all: americano.defaultRequests.all
         date: dateRequest
         dateId: dateIdRequest

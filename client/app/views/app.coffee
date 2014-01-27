@@ -1,16 +1,10 @@
+MailListener = require 'views/mail_listener'
 {MailsCollection}    = require 'collections/mails'
 {MailboxCollection}  = require 'collections/mailboxes'
 {MailboxesList}      = require 'views/mailboxes_list'
 {MailsList}          = require 'views/mails_list'
 {Menu}               = require 'views/menu'
 
-###
-    @file: app.coffee
-    @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-    @description:
-        The application's main view - creates other views, lays things out.
-
-###
 
 class exports.AppView extends Backbone.View
 
@@ -35,3 +29,6 @@ class exports.AppView extends Backbone.View
 
         @views.mailList = new MailsList collection: @mails
         @views.mailList.render().$el.hide().appendTo $('body')
+
+        mailListener = new MailListener()
+        mailListener.watch @mails

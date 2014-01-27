@@ -1,4 +1,4 @@
-{Mail} = require "models/mail"
+{Email} = require "models/email"
 # {MailsAnswer} = require "views/mails_answer"
 {MailAttachmentsList} = require "views/mail_attachments_list"
 BaseView = require 'lib/base_view'

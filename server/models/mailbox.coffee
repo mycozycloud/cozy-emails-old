@@ -2,7 +2,7 @@ queue = require '../lib/queue'
 async = require 'async'
 americano = require('americano-cozy')
 
-Mail = require './mail'
+Mail = require './email'
 MailFolder = require './mailfolder'
 MailSender = require '../lib/mail_sender'
 MailGetter = require '../lib/mail_getter'
@@ -140,7 +140,7 @@ Mailbox::progress = (progress, callback) ->
     @updateAttributes data, (error) =>
         LogMessage.createImportProgressInfo @, progress, callback
 
-Mailbox::importStarted = (callback) ->
+Mailbox::boxDeleting = (callback) ->
     data =
         status: "deleting"
         statusMsg: "deletion in progress..."
@@ -149,7 +149,7 @@ Mailbox::importStarted = (callback) ->
         if error
             callback error
         else
-            LogMessage.boxDeleted this, callback
+            callback()
 
 
 

@@ -7,9 +7,9 @@ BaseModel = require("./models").BaseModel
     @description:
         Model which defines the MAIL object.
 ###
-class exports.Mail extends BaseModel
+class exports.Email extends BaseModel
 
-    urlRoot: "mails/"
+    urlRoot: "emails/"
 
     initialize: ->
         super

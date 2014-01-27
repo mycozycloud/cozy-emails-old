@@ -210,12 +210,12 @@ window.require.register("collections/mailboxes", function(exports, require, modu
   
 });
 window.require.register("collections/mails", function(exports, require, module) {
-  var Mail, _ref,
+  var Email, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  Mail = require("models/mail").Mail;
+  Email = require("models/email").Email;
 
   /*
       @file: mails.coffee
@@ -237,9 +237,9 @@ window.require.register("collections/mails", function(exports, require, module) 
       return _ref;
     }
 
-    MailsCollection.prototype.model = Mail;
+    MailsCollection.prototype.model = Email;
 
-    MailsCollection.prototype.url = 'mails/';
+    MailsCollection.prototype.url = 'emails/';
 
     MailsCollection.prototype.timestampNew = new Date().valueOf();
 
@@ -284,7 +284,7 @@ window.require.register("collections/mails", function(exports, require, module) 
       }
       this.folderId = 'rainbow';
       return this.fetch({
-        url: "mails/rainbow/" + limit + "/" + from,
+        url: "emails/rainbow/" + limit + "/" + from,
         remove: false,
         success: function(collection) {
           if (_this.length > 0) {
@@ -322,9 +322,9 @@ window.require.register("helpers", function(exports, require, module) {
             radius: 3
           },
           small: {
-            lines: 10,
-            length: 2,
-            width: 3,
+            lines: 8,
+            length: 1,
+            width: 2,
             radius: 5
           },
           large: {
@@ -503,15 +503,17 @@ window.require.register("lib/base_view", function(exports, require, module) {
   
 });
 window.require.register("lib/realtimer", function(exports, require, module) {
-  var Folder, Mail, Mailbox, SocketListener, _ref,
+  var Email, EmailView, Folder, Mailbox, SocketListener, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Mailbox = require('models/mailbox').Mailbox;
 
-  Mail = require('models/mail').Mail;
+  Email = require('models/email').Email;
 
   Folder = require('models/folder').Folder;
+
+  EmailView = require('views/mails_list_element').EmailView;
 
   module.exports = SocketListener = (function(_super) {
     __extends(SocketListener, _super);
@@ -524,10 +526,10 @@ window.require.register("lib/realtimer", function(exports, require, module) {
     SocketListener.prototype.models = {
       'mailbox': Mailbox,
       'folder': Folder,
-      'mail': Mail
+      'email': Email
     };
 
-    SocketListener.prototype.events = ['mailbox.create', 'mailbox.update', 'mailbox.delete', 'folder.create', 'folder.update', 'folder.delete', 'mail.create', 'mail.update', 'mail.delete'];
+    SocketListener.prototype.events = ['mailbox.create', 'mailbox.update', 'mailbox.delete', 'folder.create', 'folder.update', 'folder.delete', 'email.create', 'email.update', 'email.delete'];
 
     SocketListener.prototype.onRemoteCreate = function(model) {
       if (model instanceof Mailbox) {
@@ -535,14 +537,14 @@ window.require.register("lib/realtimer", function(exports, require, module) {
       } else if (model instanceof Folder) {
         app.folders.add(model);
       }
-      if (model instanceof Mail && app.mails.folderId === model.folder) {
-        return app.mails.add(model);
+      if (model instanceof Email) {
+        if (app.mails.folderId === 'rainbow' || app.mails.folderId === model.get('folder')) {
+          return app.mails.add(model);
+        }
       }
     };
 
-    SocketListener.prototype.onRemoteDelete = function(model) {
-      return model.trigger('destroy', model, model.collection, {});
-    };
+    SocketListener.prototype.onRemoteDelete = function(model) {};
 
     return SocketListener;
 
@@ -675,6 +677,270 @@ window.require.register("models/attachment", function(exports, require, module) 
   })(BaseModel);
   
 });
+window.require.register("models/email", function(exports, require, module) {
+  var BaseModel, _ref,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  BaseModel = require("./models").BaseModel;
+
+  /*
+      @file: mail.coffee
+      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
+      @description:
+          Model which defines the MAIL object.
+  */
+
+
+  exports.Email = (function(_super) {
+    __extends(Email, _super);
+
+    function Email() {
+      _ref = Email.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    Email.prototype.urlRoot = "emails/";
+
+    Email.prototype.initialize = function() {
+      Email.__super__.initialize.apply(this, arguments);
+      return this.url = BaseModel.prototype.url;
+    };
+
+    Email.prototype.getMailbox = function() {
+      if (this.mailbox == null) {
+        this.mailbox = window.app.mailboxes.get(this.get("mailbox"));
+      }
+      return this.mailbox;
+    };
+
+    Email.prototype.getColor = function() {
+      var _ref1;
+      return ((_ref1 = this.getMailbox()) != null ? _ref1.get("color") : void 0) || "white";
+    };
+
+    Email.prototype.parse = function(attributes) {
+      if ('string' === typeof attributes.flags) {
+        attributes.flags = JSON.parse(attributes.flags);
+      }
+      return attributes;
+    };
+
+    /*
+        Changing mail properties - read and flagged
+    */
+
+
+    Email.prototype.isRead = function() {
+      return -1 !== _.indexOf(this.get('flags'), "\\Seen");
+    };
+
+    Email.prototype.isFlagged = function() {
+      return -1 !== _.indexOf(this.get('flags'), "\\Flagged");
+    };
+
+    Email.prototype.markRead = function(read) {
+      if (read == null) {
+        read = true;
+      }
+      if (read) {
+        return this.set('flags', _.union(this.get('flags'), ["\\Seen"]));
+      } else {
+        return this.set('flags', _.without(this.get('flags'), "\\Seen"));
+      }
+    };
+
+    Email.prototype.markFlagged = function(flagged) {
+      if (flagged == null) {
+        flagged = true;
+      }
+      if (flagged) {
+        return this.set('flags', _.union(this.get('flags'), ["\\Flagged"]));
+      } else {
+        return this.set('flags', _.without(this.get('flags'), "\\Flagged"));
+      }
+    };
+
+    /*
+        RENDERING - these functions attr() replace @get "attr", and add
+        some parsing logic.  To be used in views, to keep the maximum of
+        logic related to mails in one place.
+    */
+
+
+    Email.prototype.asEmailList = function(field, out) {
+      var obj, parsed, _i, _len;
+      parsed = JSON.parse(this.get(field));
+      for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+        obj = parsed[_i];
+        out += "" + obj.name + " <" + obj.address + ">, ";
+      }
+      return out.substring(0, out.length - 2);
+    };
+
+    Email.prototype.from = function() {
+      var out;
+      out = "";
+      if (this.get("from")) {
+        this.asEmailList("from", out);
+      }
+      return out;
+    };
+
+    Email.prototype.fromShort = function() {
+      var obj, out, parsed, _i, _len;
+      out = "";
+      if (this.get("from")) {
+        parsed = JSON.parse(this.get("from"));
+        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+          obj = parsed[_i];
+          if (obj.name) {
+            out += obj.name + " ";
+          } else {
+            out += obj.address + " ";
+          }
+        }
+      }
+      return out;
+    };
+
+    Email.prototype.cc = function() {
+      var out;
+      out = "";
+      if (this.get("cc")) {
+        out = this.asEmailList("cc", out);
+      }
+      console.log(out);
+      return out;
+    };
+
+    Email.prototype.ccShort = function() {
+      var obj, out, parsed, _i, _len;
+      out = "";
+      if (this.get("cc")) {
+        parsed = JSON.parse(this.get("cc"));
+        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
+          obj = parsed[_i];
+          out += obj.name + " ";
+        }
+      }
+      return out;
+    };
+
+    Email.prototype.fromAndCc = function() {
+      var out;
+      out = "";
+      if (this.get("from")) {
+        this.asEmailList("from", out);
+      }
+      if (this.get("cc")) {
+        this.asEmailList("cc", out);
+      }
+      return out;
+    };
+
+    Email.prototype.date = function() {
+      var parsed;
+      parsed = moment(this.get("date"));
+      return parsed.calendar();
+    };
+
+    Email.prototype.respondingToText = function() {
+      return "" + (this.fromShort()) + " on " + (this.date()) + " wrote:";
+    };
+
+    Email.prototype.subjectResponse = function(mode) {
+      var subject;
+      if (mode == null) {
+        mode = "answer";
+      }
+      subject = this.get("subject");
+      switch (mode) {
+        case "answer":
+          return "RE: " + subject.replace(/RE:?/, "");
+        case "answer_all":
+          return "RE: " + subject.replace(/RE:?/, "");
+        case "forward":
+          return "FWD: " + subject.replace(/FWD:?/, "");
+        default:
+          return subject;
+      }
+    };
+
+    Email.prototype.ccResponse = function(mode) {
+      if (mode == null) {
+        mode = "answer";
+      }
+      switch (mode) {
+        case "answer_all":
+          return this.cc();
+        default:
+          return "";
+      }
+    };
+
+    Email.prototype.toResponse = function(mode) {
+      if (mode == null) {
+        mode = "answer";
+      }
+      switch (mode) {
+        case "answer":
+          return this.from();
+        case "answer_all":
+          return this.from();
+        default:
+          return "";
+      }
+    };
+
+    Email.prototype.text = function() {
+      return this.get("text").replace(/\r\n|\r|\n/g, "<br />");
+    };
+
+    Email.prototype.html = function() {
+      var expression, string;
+      expression = new RegExp("(<style>(.|\s)*?</style>)", "gi");
+      string = new String(this.get("html"));
+      return string.replace(expression, "");
+    };
+
+    Email.prototype.hasHtml = function() {
+      var html;
+      html = this.get("html");
+      return (html != null) && html !== "";
+    };
+
+    Email.prototype.hasText = function() {
+      var text;
+      text = this.get("text");
+      return (text != null) && text !== "";
+    };
+
+    Email.prototype.hasAttachments = function() {
+      return this.get("hasAttachments");
+    };
+
+    Email.prototype.htmlOrText = function() {
+      if (this.hasHtml()) {
+        return this.html();
+      } else {
+        return this.text();
+      }
+    };
+
+    Email.prototype.textOrHtml = function() {
+      if (this.hasText()) {
+        return this.text();
+      } else {
+        return this.html();
+      }
+    };
+
+    return Email;
+
+  })(BaseModel);
+  
+});
 window.require.register("models/folder", function(exports, require, module) {
   var BaseModel, _ref,
     __hasProp = {}.hasOwnProperty,
@@ -725,270 +991,6 @@ window.require.register("models/logmessage", function(exports, require, module) 
     LogMessage.prototype.idAttribute = "id";
 
     return LogMessage;
-
-  })(BaseModel);
-  
-});
-window.require.register("models/mail", function(exports, require, module) {
-  var BaseModel, _ref,
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-
-  BaseModel = require("./models").BaseModel;
-
-  /*
-      @file: mail.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description:
-          Model which defines the MAIL object.
-  */
-
-
-  exports.Mail = (function(_super) {
-    __extends(Mail, _super);
-
-    function Mail() {
-      _ref = Mail.__super__.constructor.apply(this, arguments);
-      return _ref;
-    }
-
-    Mail.prototype.urlRoot = "mails/";
-
-    Mail.prototype.initialize = function() {
-      Mail.__super__.initialize.apply(this, arguments);
-      return this.url = BaseModel.prototype.url;
-    };
-
-    Mail.prototype.getMailbox = function() {
-      if (this.mailbox == null) {
-        this.mailbox = window.app.mailboxes.get(this.get("mailbox"));
-      }
-      return this.mailbox;
-    };
-
-    Mail.prototype.getColor = function() {
-      var _ref1;
-      return ((_ref1 = this.getMailbox()) != null ? _ref1.get("color") : void 0) || "white";
-    };
-
-    Mail.prototype.parse = function(attributes) {
-      if ('string' === typeof attributes.flags) {
-        attributes.flags = JSON.parse(attributes.flags);
-      }
-      return attributes;
-    };
-
-    /*
-        Changing mail properties - read and flagged
-    */
-
-
-    Mail.prototype.isRead = function() {
-      return -1 !== _.indexOf(this.get('flags'), "\\Seen");
-    };
-
-    Mail.prototype.isFlagged = function() {
-      return -1 !== _.indexOf(this.get('flags'), "\\Flagged");
-    };
-
-    Mail.prototype.markRead = function(read) {
-      if (read == null) {
-        read = true;
-      }
-      if (read) {
-        return this.set('flags', _.union(this.get('flags'), ["\\Seen"]));
-      } else {
-        return this.set('flags', _.without(this.get('flags'), "\\Seen"));
-      }
-    };
-
-    Mail.prototype.markFlagged = function(flagged) {
-      if (flagged == null) {
-        flagged = true;
-      }
-      if (flagged) {
-        return this.set('flags', _.union(this.get('flags'), ["\\Flagged"]));
-      } else {
-        return this.set('flags', _.without(this.get('flags'), "\\Flagged"));
-      }
-    };
-
-    /*
-        RENDERING - these functions attr() replace @get "attr", and add
-        some parsing logic.  To be used in views, to keep the maximum of
-        logic related to mails in one place.
-    */
-
-
-    Mail.prototype.asEmailList = function(field, out) {
-      var obj, parsed, _i, _len;
-      parsed = JSON.parse(this.get(field));
-      for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-        obj = parsed[_i];
-        out += "" + obj.name + " <" + obj.address + ">, ";
-      }
-      return out.substring(0, out.length - 2);
-    };
-
-    Mail.prototype.from = function() {
-      var out;
-      out = "";
-      if (this.get("from")) {
-        this.asEmailList("from", out);
-      }
-      return out;
-    };
-
-    Mail.prototype.fromShort = function() {
-      var obj, out, parsed, _i, _len;
-      out = "";
-      if (this.get("from")) {
-        parsed = JSON.parse(this.get("from"));
-        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-          obj = parsed[_i];
-          if (obj.name) {
-            out += obj.name + " ";
-          } else {
-            out += obj.address + " ";
-          }
-        }
-      }
-      return out;
-    };
-
-    Mail.prototype.cc = function() {
-      var out;
-      out = "";
-      if (this.get("cc")) {
-        out = this.asEmailList("cc", out);
-      }
-      console.log(out);
-      return out;
-    };
-
-    Mail.prototype.ccShort = function() {
-      var obj, out, parsed, _i, _len;
-      out = "";
-      if (this.get("cc")) {
-        parsed = JSON.parse(this.get("cc"));
-        for (_i = 0, _len = parsed.length; _i < _len; _i++) {
-          obj = parsed[_i];
-          out += obj.name + " ";
-        }
-      }
-      return out;
-    };
-
-    Mail.prototype.fromAndCc = function() {
-      var out;
-      out = "";
-      if (this.get("from")) {
-        this.asEmailList("from", out);
-      }
-      if (this.get("cc")) {
-        this.asEmailList("cc", out);
-      }
-      return out;
-    };
-
-    Mail.prototype.date = function() {
-      var parsed;
-      parsed = moment(this.get("date"));
-      return parsed.calendar();
-    };
-
-    Mail.prototype.respondingToText = function() {
-      return "" + (this.fromShort()) + " on " + (this.date()) + " wrote:";
-    };
-
-    Mail.prototype.subjectResponse = function(mode) {
-      var subject;
-      if (mode == null) {
-        mode = "answer";
-      }
-      subject = this.get("subject");
-      switch (mode) {
-        case "answer":
-          return "RE: " + subject.replace(/RE:?/, "");
-        case "answer_all":
-          return "RE: " + subject.replace(/RE:?/, "");
-        case "forward":
-          return "FWD: " + subject.replace(/FWD:?/, "");
-        default:
-          return subject;
-      }
-    };
-
-    Mail.prototype.ccResponse = function(mode) {
-      if (mode == null) {
-        mode = "answer";
-      }
-      switch (mode) {
-        case "answer_all":
-          return this.cc();
-        default:
-          return "";
-      }
-    };
-
-    Mail.prototype.toResponse = function(mode) {
-      if (mode == null) {
-        mode = "answer";
-      }
-      switch (mode) {
-        case "answer":
-          return this.from();
-        case "answer_all":
-          return this.from();
-        default:
-          return "";
-      }
-    };
-
-    Mail.prototype.text = function() {
-      return this.get("text").replace(/\r\n|\r|\n/g, "<br />");
-    };
-
-    Mail.prototype.html = function() {
-      var expression, string;
-      expression = new RegExp("(<style>(.|\s)*?</style>)", "gi");
-      string = new String(this.get("html"));
-      return string.replace(expression, "");
-    };
-
-    Mail.prototype.hasHtml = function() {
-      var html;
-      html = this.get("html");
-      return (html != null) && html !== "";
-    };
-
-    Mail.prototype.hasText = function() {
-      var text;
-      text = this.get("text");
-      return (text != null) && text !== "";
-    };
-
-    Mail.prototype.hasAttachments = function() {
-      return this.get("hasAttachments");
-    };
-
-    Mail.prototype.htmlOrText = function() {
-      if (this.hasHtml()) {
-        return this.html();
-      } else {
-        return this.text();
-      }
-    };
-
-    Mail.prototype.textOrHtml = function() {
-      if (this.hasText()) {
-        return this.text();
-      } else {
-        return this.html();
-      }
-    };
-
-    return Mail;
 
   })(BaseModel);
   
@@ -1304,12 +1306,12 @@ window.require.register("models/models", function(exports, require, module) {
   
 });
 window.require.register("routers/main_router", function(exports, require, module) {
-  var Mail, MailView, Mailbox, MailboxForm, _ref,
+  var Email, MailView, Mailbox, MailboxForm, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  Mail = require("models/mail").Mail;
+  Email = require("models/email").Email;
 
   MailView = require("views/mail").MailView;
 
@@ -1361,10 +1363,10 @@ window.require.register("routers/main_router", function(exports, require, module
       app.views.menu.select('rainbow-button');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
+      app.views.mailList.showLoading();
       return app.mails.fetchRainbow(100).then(function() {
-        setTimeout(function() {
-          return $("#mailboxes").niceScroll();
-        }, 200);
+        app.views.mailList.hideLoading();
+        app.views.mailList.checkIfEmpty();
         return typeof callback === "function" ? callback() : void 0;
       });
     };
@@ -1385,7 +1387,11 @@ window.require.register("routers/main_router", function(exports, require, module
       app.views.menu.select('rainbow-button');
       app.views.mailboxList.$el.hide();
       app.views.mailList.$el.show();
-      return app.mails.fetchFolder(folderid, 100).then(callback);
+      app.views.mailList.showLoading();
+      return app.mails.fetchFolder(folderid, 100).then(function() {
+        app.views.mailList.hideLoading();
+        return callback();
+      });
     };
 
     MainRouter.prototype.foldermail = function(folderid, mailid) {
@@ -1409,8 +1415,7 @@ window.require.register("routers/main_router", function(exports, require, module
           model: model
         });
         app.views.mail.$el.appendTo($('body'));
-        app.views.mail.render();
-        return $("#mailboxes").niceScroll();
+        return app.views.mail.render();
       } else {
         return this.navigate(list, true);
       }
@@ -1418,6 +1423,7 @@ window.require.register("routers/main_router", function(exports, require, module
 
     MainRouter.prototype.config = function() {
       this.clear();
+      $("#add_mailbox").removeClass('pressed');
       app.views.menu.select('config-button');
       app.views.mailList.$el.hide();
       return app.views.mailboxList.$el.show();
@@ -1425,6 +1431,7 @@ window.require.register("routers/main_router", function(exports, require, module
 
     MainRouter.prototype.newMailbox = function() {
       this.config();
+      $("#add_mailbox").addClass('pressed');
       app.views.mailboxform = new MailboxForm({
         model: new Mailbox()
       });
@@ -1438,6 +1445,7 @@ window.require.register("routers/main_router", function(exports, require, module
         return this.navigate('config/mailboxes', true);
       }
       this.config();
+      $("#add_mailbox").removeClass('pressed');
       app.views.mailboxList.activate(id);
       app.views.mailboxform = new MailboxForm({
         model: model
@@ -1546,7 +1554,7 @@ window.require.register("templates/_mail/big", function(exports, require, module
   {
   buf.push('<i class="icon-eye-open icon-white"></i>Mark read');
   }
-  buf.push('</a><a id="btn-delete" class="btn btn-danger"><i class="icon-remove icon-white"></i>Delete</a></div><div class="clearfix">&nbsp;</div></div>');
+  buf.push('</a><a id="btn-delete" class="btn btn-danger"><i class="icon-remove icon-white"></i>Delete</a><div class="clearfix">&nbsp;</div></div></div>');
   }
   return buf.join("");
   };
@@ -1725,7 +1733,7 @@ window.require.register("templates/_mailbox/form", function(exports, require, mo
   buf.push(attrs({ 'id':("imapServer"), 'type':("text"), 'value':(model.get("imapServer")), "class": ('content') + ' ' + ('input-xlarge') }, {"id":true,"type":true,"value":true}));
   buf.push('/><p class="help-block">The inbound server address. Say imap.gmail.com ..</p></div></div><div class="control-group"><label for="imapPort" class="control-label">IMAP port</label><div class="controls"><input');
   buf.push(attrs({ 'id':("imapPort"), 'type':("text"), 'value':(model.get("imapPort")), "class": ('content') + ' ' + ('input-xlarge') }, {"id":true,"type":true,"value":true}));
-  buf.push('/><p class="help-block">Usually 993.</p></div></div></fieldset><div class="form-actions"><button class="save_mailbox isEdit btn btn-success">save</button><button class="cancel_edit_mailbox isEdit btn btn-warning">cancel</button></div><fieldset><legend>Administration</legend><button class="delete-mailbox btn btn-danger">delete</button></fieldset></from>');
+  buf.push('/><p class="help-block">Usually 993.</p></div></div></fieldset><div class="form-actions"><button class="save_mailbox isEdit btn btn-success">save</button></div><fieldset><legend>Administration</legend><div class="control-group"><label for="imapServer" class="control-label">Delete box permanently</label><div class="controls"><button class="delete-mailbox btn btn-danger">delete</button></div></div></fieldset></from>');
   }
   return buf.join("");
   };
@@ -2796,9 +2804,11 @@ window.require.register("views/_old/menu_mailboxes_list_element", function(expor
   
 });
 window.require.register("views/app", function(exports, require, module) {
-  var MailboxCollection, MailboxesList, MailsCollection, MailsList, Menu, _ref,
+  var MailListener, MailboxCollection, MailboxesList, MailsCollection, MailsList, Menu, _ref,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  MailListener = require('views/mail_listener');
 
   MailsCollection = require('collections/mails').MailsCollection;
 
@@ -2809,14 +2819,6 @@ window.require.register("views/app", function(exports, require, module) {
   MailsList = require('views/mails_list').MailsList;
 
   Menu = require('views/menu').Menu;
-
-  /*
-      @file: app.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description:
-          The application's main view - creates other views, lays things out.
-  */
-
 
   exports.AppView = (function(_super) {
     __extends(AppView, _super);
@@ -2829,7 +2831,8 @@ window.require.register("views/app", function(exports, require, module) {
     AppView.prototype.el = 'body';
 
     AppView.prototype.initialize = function() {
-      var _this = this;
+      var mailListener,
+        _this = this;
       this.views = {};
       this.mails = new MailsCollection();
       this.mailboxes = new MailboxCollection();
@@ -2850,7 +2853,9 @@ window.require.register("views/app", function(exports, require, module) {
       this.views.mailList = new MailsList({
         collection: this.mails
       });
-      return this.views.mailList.render().$el.hide().appendTo($('body'));
+      this.views.mailList.render().$el.hide().appendTo($('body'));
+      mailListener = new MailListener();
+      return mailListener.watch(this.mails);
     };
 
     return AppView;
@@ -2943,12 +2948,12 @@ window.require.register("views/folders_menu_element", function(exports, require,
   
 });
 window.require.register("views/mail", function(exports, require, module) {
-  var BaseView, Mail, MailAttachmentsList, _ref,
+  var BaseView, Email, MailAttachmentsList, _ref,
     __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  Mail = require("models/mail").Mail;
+  Email = require("models/email").Email;
 
   MailAttachmentsList = require("views/mail_attachments_list").MailAttachmentsList;
 
@@ -2968,6 +2973,7 @@ window.require.register("views/mail", function(exports, require, module) {
 
     function MailView() {
       this.remove = __bind(this.remove, this);
+      this.resize = __bind(this.resize, this);
       this.afterRender = __bind(this.afterRender, this);
       _ref = MailView.__super__.constructor.apply(this, arguments);
       return _ref;
@@ -3008,15 +3014,32 @@ window.require.register("views/mail", function(exports, require, module) {
           basetarget = '<base target="_blank">';
           _this.iframehtml.html(_this.model.html());
           _this.iframehtml.find('head').append(csslink);
-          return _this.iframehtml.find('head').append(basetarget);
+          _this.iframehtml.find('head').append(basetarget);
+          return _this.resize();
         }, 100);
+        $(window).unbind('resize', this.resize);
+        $(window).bind('resize', this.resize);
       }
       if (this.model.get("hasAttachments")) {
-        if ((_ref1 = this.attachmentsView) != null) {
-          _ref1.render().$el.appendTo(this.$el);
-        }
+        return (_ref1 = this.attachmentsView) != null ? _ref1.render().$el.appendTo(this.$el) : void 0;
       }
-      return this.$el.niceScroll();
+    };
+
+    MailView.prototype.resize = function() {
+      var buttonBarHeight, infoHeight, panelHeight, titleHeight;
+      panelHeight = $('.mail-panel').height();
+      titleHeight = $('.mail-panel h3').height();
+      infoHeight = $('.mail-panel p:first').height();
+      buttonBarHeight = $('.mail-panel .clearfix').height();
+      if (panelHeight < this.iframehtml.height()) {
+        $('.mail-panel').height(this.iframehtml.height() + titleHeight + infoHeight + buttonBarHeight + 100);
+        panelHeight = $('.mail-panel').height();
+      }
+      if (panelHeight > $(window).height()) {
+        $('.mail-panel').height($(window).height());
+        panelHeight = $('.mail-panel').height();
+      }
+      return this.iframe.height(panelHeight - titleHeight - infoHeight - buttonBarHeight - 50);
     };
 
     MailView.prototype.remove = function() {
@@ -3374,7 +3397,6 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
 
     MailboxForm.prototype.onDeleteClicked = function(event) {
       var _this = this;
-      $("#confirm-delete-modal .yes-button").spin('tiny');
       return app.views.modal.showAndThen(function(callback) {
         $(event.target).addClass("disabled");
         return _this.model.destroy({
@@ -3387,9 +3409,6 @@ window.require.register("views/mailboxes_list_form", function(exports, require, 
             }
             alert(msg);
             return $(event.target).removeClass("disabled");
-          },
-          complete: function() {
-            return $("#confirm-delete-modal .yes-button").spin();
           }
         });
       });
@@ -3409,15 +3428,6 @@ window.require.register("views/mails_list", function(exports, require, module) {
   ViewCollection = require('lib/view_collection');
 
   FolderMenu = require('views/folders_menu');
-
-  /*
-      @file: mails_list.coffee
-      @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-      @description:
-          View to generate the list of mails - the second column from the left.
-          Uses MailsListElement to generate each mail's view
-  */
-
 
   exports.MailsList = (function(_super) {
     __extends(MailsList, _super);
@@ -3477,12 +3487,10 @@ window.require.register("views/mails_list", function(exports, require, module) {
       if (this.activated) {
         this.activate(this.activated);
       }
-      this.$el.niceScroll();
       return MailsList.__super__.afterRender.apply(this, arguments);
     };
 
     MailsList.prototype.remove = function() {
-      this.$el.getNiceScroll().remove();
       return MailsList.__super__.remove.apply(this, arguments);
     };
 
@@ -3514,7 +3522,7 @@ window.require.register("views/mails_list", function(exports, require, module) {
       oldbtnVal = btn.html();
       btn.html('&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;');
       btn.spin('small').addClass('disabled');
-      promise = $.ajax('mails/fetch/new');
+      promise = $.ajax('emails/fetch/new');
       promise.error(function(jqXHR, error) {
         btn.text('Connection Error').addClass('error');
         return alert(error);
@@ -3583,6 +3591,15 @@ window.require.register("views/mails_list", function(exports, require, module) {
         }
       }
       return _results;
+    };
+
+    MailsList.prototype.showLoading = function() {
+      $("#no-mails-message").hide();
+      return this.$el.spin('small');
+    };
+
+    MailsList.prototype.hideLoading = function() {
+      return this.$el.spin();
     };
 
     return MailsList;
@@ -3678,11 +3695,11 @@ window.require.register("views/mails_list_element", function(exports, require, m
   
 });
 window.require.register("views/mails_list_more", function(exports, require, module) {
-  var Mail,
+  var Email,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  Mail = require("models/mail").Mail;
+  Email = require("models/email").Email;
 
   /*
       @file: mails_list_more.coffee

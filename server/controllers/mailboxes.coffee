@@ -11,10 +11,6 @@ module.exports =
 
     getMailbox: (req, res, next, id) ->
         Mailbox.find id, (err, box) =>
-            console.log err
-            console.log box
-
-
             if err
                 next err
             else if not box
@@ -71,10 +67,15 @@ module.exports =
 
 
     destroy: (req, res, next) ->
-        req.box.stopImport (err) ->
-            req.box.remove (err) ->
-                if err then next err
-                else res.send sucess: true, 204
+        req.box.boxDeleting (err) ->
+            if err then next err
+            else
+                req.box.stopImport (err) ->
+                    if err then next err
+                    else
+                        req.box.remove (err) ->
+                            if err then next err
+                            else res.send sucess: true, 204
 
 
     sendMail: (req, res, next) ->

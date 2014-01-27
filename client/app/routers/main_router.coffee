@@ -1,4 +1,4 @@
-{Mail} = require "models/mail"
+{Email} = require "models/email"
 {MailView} = require "views/mail"
 {MailboxForm} = require "views/mailboxes_list_form"
 {Mailbox} = require "models/mailbox"
@@ -39,6 +39,7 @@ class exports.MainRouter extends Backbone.Router
 
         app.mails.fetchRainbow(100).then ->
             app.views.mailList.hideLoading()
+            app.views.mailList.checkIfEmpty()
             callback?()
 
 
@@ -52,9 +53,6 @@ class exports.MainRouter extends Backbone.Router
 
     folder: (folderid, callback) ->
         @clear()
-
-        # if app.mails.length is 0
-        #     app.mails.once 'sync', => @folder(folderid)
 
         app.views.menu.select 'rainbow-button'
         app.views.mailboxList.$el.hide()
