@@ -7,7 +7,7 @@ class exports.MailboxForm extends BaseView
     events:
         "click .cancel_edit_mailbox": "buttonCancel"
         "click .save_mailbox": "buttonSave"
-        "click .delete-mailbox": "buttonDelete"
+        "click .delete-mailbox": "onDeleteClicked"
 
     initialize: ->
         super
@@ -53,8 +53,8 @@ class exports.MailboxForm extends BaseView
 
         app.router.navigate 'config/mailboxes', true
 
-    buttonDelete: (event) =>
-        app.views.modal.showAndThen =>
+    onDeleteClicked: (event) =>
+        app.views.modal.showAndThen (callback) =>
             $(event.target).addClass("disabled")
             @model.destroy
                 error: (model, xhr) ->

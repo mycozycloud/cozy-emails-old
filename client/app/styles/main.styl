@@ -54,8 +54,8 @@ html
   height: 100%
 
 body
-  width: 100%
-  height: 100%
+  width: auto
+  height: auto
   padding: 0
   margin: 0
   background-image: url('../img/background-mail.jpg')
@@ -208,8 +208,7 @@ a.btn:visited
     position: fixed
     top: 0
     left: 0
-    bottom: 0
-    padding: 1%
+    padding: 0
     box-sizing: border-box
 
     h3.attachments-title
@@ -232,17 +231,14 @@ a.btn:visited
         margin: 0
 
     .mail-panel
-        position: fixed
-        top: 1%
-        left: 1%
-        bottom: 1%
-        width: 53%
+        width: 100%
         box-sizing: border-box
+        margin: 0
+        height: auto
 
     #mail_content_html
         margin: 0
         padding: 0
-        height: 86%
         overflow-y: scroll
 
     #additional_bar
@@ -260,15 +256,17 @@ a.btn:visited
         box-shadow: 0 0 0
         
     .btn.dropdown-toggle
-        height: 25px
+        padding-top: 9px
+        height: 20px
 
 #folders-menu.open
     .btn.dropdown-toggle
-        box-shadow: inset 2px 2px 3px blue - 60%
-        background-color: blue - 40%
+        background-color: blue - 20%
+        box-shadow: 1px 3px 2px rgba(0, 0, 0, 0.2) inset, 0 1px 2px rgba(0, 0, 0, 0.0)
         display: inline-block
 
 #mails_list
+    box-sizing: border-box
     margin-top 41px
     margin-left: 55%
     bottom 0px
@@ -278,6 +276,8 @@ a.btn:visited
     border-right: 0
     box-shadow: none
     background: #FCFCFC
+    border: 1px solid #EEE
+    min-height: 50px
 
     #topbar
         padding 5px
@@ -340,13 +340,13 @@ a.btn:visited
 
 #menu_container
     position: fixed
-    top 0px
+    top: 0px
     left: 55%
-    bottom 0px
+    bottom: 0px
     height: 41px
-    width 45%
+    width: 45%
     padding: 2px
-    box-sizing border-box
+    box-sizing: border-box
     background: #FFF
     border-bottom: 1px solid lightgrey
     border-right: 1px solid lightgrey
@@ -439,8 +439,10 @@ a.btn:visited
             margin-left: 10px
             font-weight: normal
             font-size: 14px
+
     .mailbox_well.active
         background-color lightblue
+
         .edit-mailbox
             visibility hidden
 
@@ -451,9 +453,11 @@ a.btn:visited
     top 0px
     left 0
     bottom 0px
-    width 55%
-    padding 20px
-    box-shadow: 4px 0px 3px -2px #DDD inset
+    width 51%
+    margin: 1%
+    padding: 1%
+    background: white
+    border: 1px solid #CCC
 
     input
     select

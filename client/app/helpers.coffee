@@ -16,9 +16,9 @@ class exports.BrunchApplication
                     radius: 3
 
                 small:
-                    lines: 10
-                    length: 2
-                    width: 3
+                    lines: 8
+                    length: 1
+                    width: 2
                     radius: 5
 
                 large:

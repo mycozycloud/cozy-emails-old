@@ -1,4 +1,4 @@
-mails = require './mails'
+emails = require './emails'
 folders = require './folders'
 mailboxes = require './mailboxes'
 
@@ -6,16 +6,16 @@ mailboxes = require './mailboxes'
 module.exports =
 
     'mailId':
-        param: mails.getMail
+        param: emails.getMail
 
-    'mails/:mailId':
-        get: mails.show
-        put: mails.update
-        del: mails.destroy
-    'mails/:mailId/attachments/:filename':
-        get: mails.getAttachment
-    'mails/rainbow/:limit/:timestamp':
-        get: mails.rainbow
+    'emails/:mailId':
+        get: emails.show
+        put: emails.update
+        del: emails.destroy
+    'emails/:mailId/attachments/:filename':
+        get: emails.getAttachment
+    'emails/rainbow/:limit/:timestamp':
+        get: emails.rainbow
 
     'mailboxId':
         param: mailboxes.getMailbox
@@ -26,7 +26,7 @@ module.exports =
         get: mailboxes.show
         put: mailboxes.update
         del: mailboxes.destroy
-    'mails/fetch/new':
+    'emails/fetch/new':
         get: mailboxes.fetchNew
 
     'folderId':
@@ -37,5 +37,5 @@ module.exports =
         get: folders.show
 
     'folders/:folderId/:num/:timestamp':
-        get: mails.byFolder
+        get: emails.byFolder
 

@@ -1,5 +1,5 @@
 async = require 'async'
-Mail = require '../models/mail'
+Email = require '../models/email'
 Mailbox = require '../models/mailbox'
 MailFolder = require '../models/mailfolder'
 
@@ -7,7 +7,7 @@ module.exports =
 
 
     getMail: (req, res, next, id) ->
-        Mail.find id, (err, mail) =>
+        Email.find id, (err, mail) =>
             if err then next err
             else if not mail?
                 res.send error: "mail not found", 404
@@ -72,7 +72,7 @@ module.exports =
             skip: if timestamp then 1 else 0
             descending: true
 
-        Mail.fromFolderByDate query, (err, mails) ->
+        Email.fromFolderByDate query, (err, mails) ->
             if err then next err
             else
                 res.send mails
@@ -102,7 +102,7 @@ module.exports =
                     descending: true
 
                 # get num mails
-                Mail.fromFolderByDate query, (err, mails) ->
+                Email.fromFolderByDate query, (err, mails) ->
                     if err
                         console.log err
                         callback err

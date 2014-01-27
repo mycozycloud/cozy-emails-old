@@ -73,7 +73,9 @@ LogMessage.createImportFailed = (mailbox, callback) ->
 
     callback()
 
+
 LogMessage.destroy = (mailbox, callback) ->
     Notifications.destroy "newmail-#{mailbox.id}"
     Notifications.destroy "download-#{mailbox.id}"
     Notifications.destroy "importprogress-#{mailbox.id}"
+    callback()

@@ -5,15 +5,7 @@ Mailbox = require '../models/mailbox'
 module.exports = ->
 
     importBox = (box) ->
-        box.getAccount (err, account) =>
-            if err
-                box.log "error occured while retrieving account"
-                box.log err
-            else if not account
-                box.log "no account find"
-            else
-                box.password = account.password
-                box.fullImport()
+        box.fullImport()
 
     Mailbox.all (err, boxes) ->
         if err
@@ -28,13 +20,7 @@ module.exports = ->
                             box.log err
                         else
                             importBox box
-                else if box.status is "import_failed"
-                    box.reset (err) =>
-                        if err
-                            box.log err
-                        else
-                            importBox box
-                else if box.status is "importing" or box.status is "freezed"
+                else if box.status in ["import_failed", "importing", "freezed"]
                     box.reset (err) =>
                         if err
                             box.log err

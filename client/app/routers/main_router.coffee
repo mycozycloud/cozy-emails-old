@@ -1,4 +1,4 @@
-{Mail} = require "models/mail"
+{Email} = require "models/email"
 {MailView} = require "views/mail"
 {MailboxForm} = require "views/mailboxes_list_form"
 {Mailbox} = require "models/mailbox"
@@ -35,10 +35,11 @@ class exports.MainRouter extends Backbone.Router
         app.views.menu.select 'rainbow-button'
         app.views.mailboxList.$el.hide()
         app.views.mailList.$el.show()
+        app.views.mailList.showLoading()
+
         app.mails.fetchRainbow(100).then ->
-            setTimeout ->
-                $("#mailboxes").niceScroll()
-            , 200
+            app.views.mailList.hideLoading()
+            app.views.mailList.checkIfEmpty()
             callback?()
 
 
@@ -53,13 +54,14 @@ class exports.MainRouter extends Backbone.Router
     folder: (folderid, callback) ->
         @clear()
 
-        # if app.mails.length is 0
-        #     app.mails.once 'sync', => @folder(folderid)
-
         app.views.menu.select 'rainbow-button'
         app.views.mailboxList.$el.hide()
         app.views.mailList.$el.show()
-        app.mails.fetchFolder(folderid, 100).then callback
+        app.views.mailList.showLoading()
+
+        app.mails.fetchFolder(folderid, 100).then ->
+            app.views.mailList.hideLoading()
+            callback()
 
 
     foldermail: (folderid, mailid) =>
@@ -68,6 +70,7 @@ class exports.MainRouter extends Backbone.Router
         else
             @folder folderid, => @mail mailid, "folder/#{folderid}"
 
+
     mail: (id, list) ->
         if model = app.mails.get(id)
             app.views.mail?.remove()
@@ -75,7 +78,6 @@ class exports.MainRouter extends Backbone.Router
             app.views.mail.$el.appendTo $('body')
 
             app.views.mail.render()
-            $("#mailboxes").niceScroll()
 
         else
             @navigate list, true
@@ -84,6 +86,7 @@ class exports.MainRouter extends Backbone.Router
 
         @clear()
 
+        $("#add_mailbox").removeClass 'pressed'
         app.views.menu.select 'config-button'
         app.views.mailList.$el.hide()
         app.views.mailboxList.$el.show()
@@ -91,6 +94,7 @@ class exports.MainRouter extends Backbone.Router
     newMailbox: ->
         @config()
 
+        $("#add_mailbox").addClass 'pressed'
         app.views.mailboxform = new MailboxForm(model: new Mailbox())
         app.views.mailboxform.$el.appendTo $('body')
         app.views.mailboxform.render()
@@ -102,6 +106,7 @@ class exports.MainRouter extends Backbone.Router
 
         @config()
 
+        $("#add_mailbox").removeClass 'pressed'
         app.views.mailboxList.activate id
         app.views.mailboxform = new MailboxForm model: model
         app.views.mailboxform.$el.appendTo $('body')

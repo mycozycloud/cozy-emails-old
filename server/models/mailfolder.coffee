@@ -1,7 +1,8 @@
 async = require 'async'
 americano = require 'americano-cozy'
+queue = require '../lib/queue'
 
-Mail = require './mail'
+Email = require './email'
 
 # MailFolder is a IMAP Mailbox, it contains mails.
 module.exports = MailFolder = americano.getModel 'MailFolder',
@@ -19,7 +20,6 @@ MailFolder::toString = ->
     "[Folder #{@name} #{@id} of Mailbox #{@mailbox}]"
 
 MailFolder.findByMailbox = (mailboxid, callback) ->
-    console.log "[findByMailbox] #{mailboxid}"
     MailFolder.request "byMailbox", {key: mailboxid}, callback
 
 MailFolder.byType = (type, callback) ->
@@ -67,61 +67,64 @@ MailFolder::setupImport = (getter, callback) ->
 
                 @log "Finished saving ids to database"
                 @log "max id = #{maxId}"
+                @log "folder #{@name} setup is done"
 
                 getter.closeBox callback
 
 # do the actual import
 # fetch mailToBe one by one
-MailFolder::doImport = (getter, progress, callback) ->
+MailFolder::pushFetchTasks = (getter) ->
 
+    # If folder is empty of remote mails, no action will be performed.
     if not @mailsToBe? or @mailsToBe.length is 0
         @log "Import: Nothing to download"
-        return callback null, 0
-
+        return 0
+    else
+        @log "Import: #{@mailsToBe.length} mails to fetch"
 
     # TODO : delete all mails from this folder, in case the import failed
-
     path = if @specialType is 'INBOX' then 'INBOX' else @path
 
-    getter.openBox path, (err) =>
-        return callback err, 0 if err
+    @done       = 0
+    @total      = @mailsToBe.length
+    @success    = 0
+    @oldpercent = 0
 
-        done       = 0
-        total      = @mailsToBe.length
-        success    = 0
-        oldpercent = 0
+    id = @id
 
-        async.eachSeries @mailsToBe, (mailToBe, cb) =>
+    @queue = queue()
+    folder = @
+    for mailToBe in @mailsToBe
+        getJob = (folder, getter, remoteId, progress) ->
+            (queue, done) ->
+                getter.fetchMail remoteId, (err, mail, attachments) =>
+                    mail.folder = folder.id
 
-            @fetchMessage getter, mailToBe, (err) =>
-                done++
+                    Email.create mail, (err, mail) =>
+                        return done err if err
 
-                if err
-                    @log 'Mail creation error, skip this mail'
-                    console.log err
-                    cb() #do not pass error to keep looping
+                        msg =  "New mail created: #{mail.idRemoteMailbox}"
+                        msg += " #{mail.id} [#{mail.subject}] "
+                        msg += JSON.stringify mail.from
+                        folder.log msg
 
-                else
-                    success++
-                    progress success, done, total
-                    cb()
+                        mail.saveAttachments attachments, (err) ->
+                            folder.done++
+                            if err
+                                folder.log 'Mail creation error, skip this mail'
+                                console.log err
+                                done() # do not pass error to keep looping
+                            else
+                                queue.emit 'success'
+                                folder.success++
+                                folder.log "Imported #{folder.done}/#{folder.total} (#{folder.success} ok)"
+                                done()
 
-        , (error) => #after all mails in this folder have been processed
+        @queue.push getJob(folder, getter, mailToBe)
 
-            if error
-                @log 'An error occured while importing mails'
-                console.log error
-                getter.closeBox (err) =>
-                    @log err if err
-                    callback error, done
+        , false
+    return @queue
 
-            else
-                @updateAttributes mailsToBe: null, (err) =>
-
-                    getter.closeBox (err) =>
-                        @log err if err
-                        @log "Imported #{done}/#{total} : #{success} ok"
-                        callback error, done
 
 # Get message corresponding to given remote ID, save it to database and
 # download its attachments.
@@ -131,7 +134,7 @@ MailFolder::fetchMessage = (getter, remoteId, callback) ->
 
         mail.folder = @id
 
-        Mail.create mail, (err, mail) =>
+        Email.create mail, (err, mail) =>
             return callback err if err
 
             msg = "New mail created: #{mail.idRemoteMailbox}"
@@ -216,13 +219,13 @@ MailFolder::synchronizeChanges = (getter, limit, callback) ->
             limit: limit
             descending: true
 
-        Mail.fromFolderByDate query, (err, mails) =>
+        Email.fromFolderByDate query, (err, mails) =>
             return callback err if err
             for mail in mails
                 flags = flagDict[mail.idRemoteMailbox]
 
-                if flags? then mail.updateFlags flags
-                else           mail.destroy()
+                if flags?
+                    mail.updateFlags flags
 
             callback()
 
@@ -237,7 +240,7 @@ MailFolder::syncOneMail = (getter, mail, newflags, callback) ->
     path = if @specialType is 'INBOX' then 'INBOX' else @path
 
     getter.openBox path, (err) =>
-        console.log err if err
+        @log err if err
         return callback err if err
 
         getter.setFlags mail, newflags, (err) =>

@@ -1,11 +1,13 @@
-async = require('async')
+queue = require '../lib/queue'
+async = require 'async'
 americano = require('americano-cozy')
 
-Mail = require './mail'
+Mail = require './email'
 MailFolder = require './mailfolder'
 MailSender = require '../lib/mail_sender'
 MailGetter = require '../lib/mail_getter'
 LogMessage = require '../lib/logmessage'
+
 
 module.exports = Mailbox = americano.getModel 'Mailbox',
 
@@ -17,7 +19,6 @@ module.exports = Mailbox = americano.getModel 'Mailbox',
 
     # shared credentails for in and out bound
     login: String
-    account: String
     password: String
 
     # data for outbound mails - SMTP
@@ -48,6 +49,7 @@ module.exports = Mailbox = americano.getModel 'Mailbox',
     status: {type: String, default: "freezed"}
     mailsToImport: {type: Number, default: 0}
 
+Mailbox.folderQueues = {}
 
 Mailbox::log = (msg) ->
     console.info "#{@} #{msg?.stack or msg}"
@@ -66,11 +68,10 @@ Mailbox.findByEmail = (email, callback) ->
 Mailbox::remove = (callback) ->
     @log "destroying box..."
 
-    async.parallel [
+    async.series [
         (cb) => Mail.requestDestroy "bymailbox", key: @id, cb
         (cb) => MailFolder.requestDestroy "bymailbox", key: @id, cb
         (cb) => LogMessage.destroy this, cb
-        @destroyAccount.bind this
     ], (err) =>
         @log "destroying finished..."
         @log err if err
@@ -84,8 +85,11 @@ Mailbox::reset = (callback) ->
         (cb) => LogMessage.destroy this, cb
     ], (err) =>
         @log "reset finished..."
-        @log err if err
-        callback()
+        if err
+            @log err
+            callback err
+        else
+            callback()
 
 
 Mailbox::importStarted = (callback) ->
@@ -136,19 +140,27 @@ Mailbox::progress = (progress, callback) ->
     @updateAttributes data, (error) =>
         LogMessage.createImportProgressInfo @, progress, callback
 
+Mailbox::boxDeleting = (callback) ->
+    data =
+        status: "deleting"
+        statusMsg: "deletion in progress..."
+
+    @updateAttributes data, (error) =>
+        if error
+            callback error
+        else
+            callback()
+
+
 
 Mailbox::getMailSender = (callback) ->
-    @getAccount (err, account) =>
-        return callback err if err
-        callback null, new MailSender this, account.password
+    callback null, new MailSender this, @password
 
 Mailbox::getMailGetter = (callback) ->
-    @getAccount (err, account) =>
-        return callback err if err
-        mg = new MailGetter this, account.password
-        mg.connect (err) ->
-            if err then callback err
-            else callback null, mg
+    mg = new MailGetter this, @password
+    mg.connect (err) ->
+        if err then callback err
+        else callback null, mg
 
 # Send a mail by using smpt server set in the configuration of the current
 # mailbox.
@@ -169,9 +181,6 @@ Mailbox::sendMail = (data, callback) ->
 # again.
 Mailbox::setupImport = (callback) ->
 
-    # no need to initialize import again if it was importing.
-    return callback() if @status is "importing"
-
     # change mailbox state
     @importStarted =>
 
@@ -186,11 +195,14 @@ Mailbox::setupImport = (callback) ->
                 folder.mailbox = @id for folder in folders
 
                 setupImportOneFolder = (folder, cb) =>
-                    MailFolder.create folder, (err, folder) =>
-                        # store mailsToBeFetched in the folder
-                        folder.setupImport getter, (err) =>
-                            @log err if err
-                            cb()
+                    if folder.path isnt "[Gmail]/All Mail"
+                        MailFolder.create folder, (err, folder) =>
+                            # store mailsToBeFetched in the folder
+                            folder.setupImport getter, (err) =>
+                                @log err if err
+                                cb()
+                    else
+                        cb()
 
                 # Import each folder
                 async.eachSeries folders, setupImportOneFolder, (err) =>
@@ -209,6 +221,7 @@ Mailbox::setupImport = (callback) ->
 # Run the real import grab all mailtobes from database and fetch message one by
 # one based on this list.
 Mailbox::doImport = (callback = ->) ->
+    Mailbox.folderQueues[@id] = {}
 
     @log "Start import"
     @getMailGetter (err, getter)  =>
@@ -216,47 +229,78 @@ Mailbox::doImport = (callback = ->) ->
 
         # List folders in this mailbox
         MailFolder.findByMailbox @id, (err, folders) =>
-            return callback err if err
+            return @manageErr err, callback if err
 
             folders = [] unless folders
+            total = 0
 
-            success = 0
-            done    = 0
-            total   = 0
-            oldPercent = 0
+            # Total number of emails
 
             for folder in folders
                 total += folder.mailsToBe?.length or 0
 
-            @log "total mails to import : #{total}"
+            @log "total mails to import: #{total}"
 
-            # forEachFolder
+            # Progress manager
+            percent = 0
+            oldPercent = 0
+            done = 0
+            progressHandler = =>
+                done++
+                percent = Math.floor(100 * (done) / total)
+                if percent isnt oldPercent
+                    oldPercent = percent
+                    @progress percent
+
+            for folder in folders
+
+                Mailbox.folderQueues[@id][folder.id] = folder.pushFetchTasks(
+                    getter, progressHandler
+                )
+
             async.eachSeries folders, (folder, cb) =>
+                @log 'import:' + folder.id
+                @log 'import:' + folder.name
 
-                @log "Importing folder #{folder.path}"
+                if folder.mailsToBe?.length > 0
+                    getter.openBox folder.path, (err) =>
+                        return @manageErr err, cb if err
+                        Mailbox.folderQueues[@id][folder.id].on 'success', ->
+                            progressHandler()
 
-                progressHandler = (curSuccess, curDone, curTotal) =>
-                    percent = Math.floor(100 * (done + curDone) / total)
-                    if percent isnt oldPercent
-                        oldPercent = percent
-                        @progress percent
+                        Mailbox.folderQueues[@id][folder.id].run (err) =>
+                            return @manageErr err, cb if err
 
-                # do Import at folder level
-                folder.doImport getter, progressHandler, (err, doneNb) =>
-                    done += doneNb
-                    @log err if err
-                    cb() #do not pass error to keep looping
+                            getter.closeBox (err) =>
+                                return @manageErr err, cb if err
+                                cb()
+                else cb()
 
-            , (err) =>
+            , (error) =>
+                Mailbox.folderQueues[@id] = {}
+                if error
+                    @log 'An error occured while importing mails'
+                    console.log error
+                    callback error, done
 
-                getter.logout (err) =>
-                    @log err if err
+                else
+                    async.eachSeries folders, (folder, cb) =>
+                        folder.updateAttributes mailsToBe: null, (err) =>
+                            @log err if err
+                            cb null, done
+                    , (err) =>
+                        return @manageErr err, callback if err
 
-                    # change mailbox state
-                    @importSuccessfull (err) =>
-                        @log err if err
+                        getter.logout (err) =>
+                            return @manageErr err, callback if err
 
-                        callback()
+                            @importSuccessfull (err) =>
+                                return @manageErr err, callback if err
+                                callback()
+
+Mailbox::manageErr = (err, callback) ->
+    @log err
+    callback err
 
 # dry function : setup import then do it immediately
 Mailbox::fullImport = (callback) ->
@@ -266,6 +310,25 @@ Mailbox::fullImport = (callback) ->
             callback err
         else
             @doImport callback
+
+Mailbox::stopImport = (callback = ->) ->
+    for folder, queue of Mailbox.folderQueues[@id]
+        if queue?.empty?
+            queue.empty()
+    callback()
+        #recClean = =>
+            #if queues.length > 0
+                #queue = queues.pop()
+                #recEmpty = ->
+                    #queue.empty()
+                    #if queue.isRunning
+                        #process.nextTick recEmpty
+                    #else
+                        #recClean()
+                #recEmpty()
+            #else
+                #@queues = {}
+        #recClean()
 
 # Synchronize one mail after it have been changed on cozy side
 # Open a connection, delegate sync to folder, close connection

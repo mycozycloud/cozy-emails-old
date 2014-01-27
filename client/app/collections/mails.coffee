@@ -1,4 +1,4 @@
-{Mail} = require "models/mail"
+{Email} = require "models/email"
 
 ###
     @file: mails.coffee
@@ -9,8 +9,8 @@
 ###
 class exports.MailsCollection extends Backbone.Collection
 
-    model: Mail
-    url: 'mails/'
+    model: Email
+    url: 'emails/'
 
     # timestamps:
     #     * timestampMiddle doesn't change - shows which mails are "new"
@@ -46,7 +46,7 @@ class exports.MailsCollection extends Backbone.Collection
         @reset [] unless from
         @folderId = 'rainbow'
         @fetch
-            url: "mails/rainbow/#{limit}/#{from}"
+            url: "emails/rainbow/#{limit}/#{from}"
             remove: false
             success: (collection) =>
                 @timestampNew = @at(0).get("dateValueOf") if @length > 0

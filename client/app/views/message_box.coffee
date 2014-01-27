@@ -1,13 +1,6 @@
 {MessageBoxElement} = require "views/message_box_element"
 {LogMessage} = require "models/logmessage"
 
-###
-        @file: message_box.coffee
-        @author: Mikolaj Pawlikowski (mikolaj@pawlikowski.pl/seeker89@github)
-        @description:
-            Serves a place to display messages which are meant to be seen by user.
-###
-
 class exports.MessageBox extends Backbone.View
 
     id: "message_box"

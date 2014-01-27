@@ -5285,6 +5285,7 @@ textarea:focus {
   cursor: default;
   text-decoration: none;
 }
+.btn.pressed,
 .button.toggled {
   background-color: #008af6;
   -webkit-box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset, 0 1px 2px rgba(0,0,0,0);
@@ -5358,8 +5359,8 @@ html {
   height: 100%;
 }
 body {
-  width: 100%;
-  height: 100%;
+  width: auto;
+  height: auto;
   padding: 0;
   margin: 0;
   background-image: url("../img/background-mail.jpg");
@@ -5514,8 +5515,7 @@ a.btn:visited {
   position: fixed;
   top: 0;
   left: 0;
-  bottom: 0;
-  padding: 1%;
+  padding: 0;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
@@ -5543,19 +5543,16 @@ a.btn:visited {
   margin: 0;
 }
 #mail .mail-panel {
-  position: fixed;
-  top: 1%;
-  left: 1%;
-  bottom: 1%;
-  width: 53%;
+  width: 100%;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
+  margin: 0;
+  height: auto;
 }
 #mail #mail_content_html {
   margin: 0;
   padding: 0;
-  height: 86%;
   overflow-y: scroll;
 }
 #mail #additional_bar {
@@ -5578,15 +5575,19 @@ a.btn:visited {
   box-shadow: 0 0 0;
 }
 #folders-menu .btn.dropdown-toggle {
-  height: 25px;
+  padding-top: 9px;
+  height: 20px;
 }
 #folders-menu.open .btn.dropdown-toggle {
-  -webkit-box-shadow: inset 2px 2px 3px #00457b;
-  box-shadow: inset 2px 2px 3px #00457b;
-  background-color: #0067b8;
+  background-color: #008af6;
+  -webkit-box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset, 0 1px 2px rgba(0,0,0,0);
+  box-shadow: 1px 3px 2px rgba(0,0,0,0.2) inset, 0 1px 2px rgba(0,0,0,0);
   display: inline-block;
 }
 #mails_list {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
   margin-top: 41px;
   margin-left: 55%;
   bottom: 0px;
@@ -5597,6 +5598,8 @@ a.btn:visited {
   -webkit-box-shadow: none;
   box-shadow: none;
   background: #fcfcfc;
+  border: 1px solid #eee;
+  min-height: 50px;
 }
 #mails_list #topbar {
   padding: 5px;
@@ -5779,10 +5782,11 @@ a.btn:visited {
   top: 0px;
   left: 0;
   bottom: 0px;
-  width: 55%;
-  padding: 20px;
-  -webkit-box-shadow: 4px 0px 3px -2px #ddd inset;
-  box-shadow: 4px 0px 3px -2px #ddd inset;
+  width: 51%;
+  margin: 1%;
+  padding: 1%;
+  background: #fff;
+  border: 1px solid #ccc;
 }
 #mailbox-form input,
 #mailbox-form select,

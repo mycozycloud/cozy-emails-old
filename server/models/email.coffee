@@ -1,12 +1,12 @@
 fs = require 'fs'
 async = require 'async'
-MailGetter = require '../lib/mail_getter'
+EmailGetter = require '../lib/mail_getter'
 americano = require 'americano-cozy'
 
-module.exports = Mail = americano.getModel 'Mail',
+module.exports = Email = americano.getModel 'Email',
     mailbox: String
     folder: String
-    idRemoteMailbox: String
+    idRemoteEmailbox: String
     remoteUID: String
     createdAt: {type: Number, default: 0}
     dateValueOf: {type: Number, default: 0}
@@ -30,21 +30,21 @@ module.exports = Mail = americano.getModel 'Mail',
 
 
 
-Mail.fromMailbox = (params, callback) ->
-    Mail.request "byMailbox", params, callback
+Email.fromMailbox = (params, callback) ->
+    Email.request "byMailbox", params, callback
 
-Mail.dateId = (params, callback) ->
-    Mail.request "dateId", params, callback
+Email.dateId = (params, callback) ->
+    Email.request "dateId", params, callback
 
-Mail.fromMailboxByDate = (params, callback) ->
-    Mail.request "dateByMailbox", params, callback
+Email.fromMailboxByDate = (params, callback) ->
+    Email.request "dateByMailbox", params, callback
 
-Mail.fromFolderByDate = (params, callback) ->
-    Mail.request 'folderDate', params, callback
+Email.fromFolderByDate = (params, callback) ->
+    Email.request 'folderDate', params, callback
 
 # Get attachments returned by mailparser as parameter.
 # Save them as couchdb attachments.
-Mail::saveAttachments = (attachments, callback) ->
+Email::saveAttachments = (attachments, callback) ->
 
     return callback null unless attachments? and attachments.length > 0
 
@@ -53,9 +53,9 @@ Mail::saveAttachments = (attachments, callback) ->
         params =
             cid:         attachment.contentId or 'null'
             fileName:    attachment.fileName
-            contentType: attachment.contentType
-            length:      attachment.length
-            checksum:    attachment.checksum
+            contentType: attachment.contentType or ''
+            length:      attachment.length or 0
+            checksum:    attachment.checksum or ''
             mailbox:     @mailbox
             mailId:      @id
 
@@ -74,15 +74,15 @@ Mail::saveAttachments = (attachments, callback) ->
         callback err
 
 
-Mail::remove = (getter, callback) ->
+Email::remove = (getter, callback) ->
 
-    getter.addFlags @idRemoteMailbox, ['\\Deleted'], (err) ->
+    getter.addFlags @idRemoteEmailbox, ['\\Deleted'], (err) ->
         return callback err if err
 
         @destroy callback
 
 
-Mail::updateAndSync = (attributes, callback) ->
+Email::updateAndSync = (attributes, callback) ->
 
     needSync = @changedFlags attributes.flags
 
@@ -93,7 +93,7 @@ Mail::updateAndSync = (attributes, callback) ->
         else callback null
 
 
-Mail::changedFlags = (newflags) ->
+Email::changedFlags = (newflags) ->
     oldseen    = '\\Seen'    in @flags
     oldflagged = '\\Flagged' in @flags
 
@@ -104,12 +104,12 @@ Mail::changedFlags = (newflags) ->
 
 
 # Update mail attributes with given flags. Save model if changes occured.
-Mail::updateFlags = (flags, callback=->) ->
+Email::updateFlags = (flags, callback=->) ->
     if @changedFlags flags
         @updateAttributes flags: flags, callback
     else
         callback null
 
 
-Mail::toString = (callback) ->
+Email::toString = (callback) ->
     "mail: #{@mailbox} #{@id}"
