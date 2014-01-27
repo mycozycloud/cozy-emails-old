@@ -270,8 +270,6 @@ MailFolder.prototype.synchronizeChanges = function(getter, limit, callback) {
         flags = flagDict[mail.idRemoteMailbox];
         if (flags != null) {
           mail.updateFlags(flags);
-        } else {
-          mail.destroy();
         }
       }
       return callback();

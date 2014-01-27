@@ -224,8 +224,8 @@ MailFolder::synchronizeChanges = (getter, limit, callback) ->
             for mail in mails
                 flags = flagDict[mail.idRemoteMailbox]
 
-                if flags? then mail.updateFlags flags
-                else           mail.destroy()
+                if flags?
+                    mail.updateFlags flags
 
             callback()
 
