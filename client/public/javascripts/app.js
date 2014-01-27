@@ -3528,7 +3528,6 @@ window.require.register("views/mails_list", function(exports, require, module) {
         return alert(error);
       });
       promise.success(function(models) {
-        console.log("TODO: import new mails in the view");
         return setTimeout(_this.refresh, 600 * 1000);
       });
       return promise.always(function() {

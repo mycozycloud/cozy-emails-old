@@ -76,7 +76,6 @@ class exports.MailsList extends ViewCollection
             alert error
 
         promise.success (models) =>
-            console.log "TODO: import new mails in the view"
             setTimeout @refresh, 600 * 1000
 
         promise.always ->
