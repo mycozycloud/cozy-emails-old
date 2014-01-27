@@ -1,5 +1,6 @@
 {
-  "name": "cozy-mails",
+  "name": "cozy-emails",
+  "displayName": "Emails",
   "version": "0.2.0",
   "engine": {
     "node": "0.8.x"
@@ -14,7 +15,7 @@
     "americano": "= 0.3.0",
     "americano-cozy": "= 0.2.0",
     "cozy-notifications-helper": "= 0.0.2",
-    "cozy-realtime-adapter": "= 0.11.0",
+    "cozy-realtime-adapter": "= 0.12.0",
     "async": "= 0.2.9",
     "nodemailer": "= 0.3.29",
     "imap": "= 0.7.7",
@@ -34,7 +35,7 @@
     "start": "coffee server.coffee"
   },
   "cozy-permissions": {
-    "Mail": {
+    "Email": {
       "description": "Recovers and stores your mails."
     },
     "MailBox": {
